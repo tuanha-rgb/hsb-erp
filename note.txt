@@ -1,0 +1,16 @@
+Mở terminal (Ctrl+Shift+~) và chạy:
+
+npm install ( nhớ để trên ổ local và thư mục không dấu tiếng việt nha)
+npm run dev
+
+
+Truy cập địa chỉ in ra (ví dụ http://localhost:5173/) → giao diện ERP của bạn sẽ hiển thị.
+
+
+khi chạy lệnh run dev nó ra : VITE v5.4.20  ready in 481 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help 
+
+  Là thành công 
