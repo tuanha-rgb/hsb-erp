@@ -589,6 +589,120 @@ const FinanceOverview = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('current');
   const [selectedView, setSelectedView] = useState('summary');
 
+  interface MetricValue {
+  current: number;
+  previous: number;
+  target: number;
+}
+
+interface MetricCardProps {
+  title: string;
+  value: MetricValue;
+  icon: React.ElementType;
+  format?: 'currency' | 'percentage';
+}
+
+const FinanceMetricCards: React.FC = () => {
+  const financialMetrics: Record<string, MetricValue> = {
+    totalRevenue: { current: 87395000, previous: 75840000, target: 92000000 },
+    totalExpenses: { current: 68245000, previous: 62100000, target: 70000000 },
+    netIncome: { current: 19150000, previous: 13740000, target: 22000000 },
+    operatingMargin: { current: 21.9, previous: 18.1, target: 23.9 }
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatPercent = (value: number): string => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+  };
+
+  const calculateChange = (current: number, previous: number): number => {
+    return ((current - previous) / previous) * 100;
+  };
+
+  const MetricCard: React.FC<MetricCardProps> = ({ title, value, icon: Icon, format = 'currency' }) => {
+    const changeValue = calculateChange(value.current, value.previous);
+    const targetProgress = (value.current / value.target) * 100;
+    const isPositive = changeValue > 0;
+
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div className="flex items-start justify-between mb-4">
+          <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+            isPositive ? 'bg-green-50' : 'bg-red-50'
+          }`}>
+            <Icon className={`w-7 h-7 ${isPositive ? 'text-green-600' : 'text-red-600'}`} />
+          </div>
+          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+            isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          }`}>
+            {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+            {formatPercent(changeValue)}
+          </div>
+        </div>
+
+        <h3 className="text-sm text-gray-600 mb-2">{title}</h3>
+        <p className="text-3xl font-bold text-gray-900 mb-3">
+          {format === 'currency' ? formatCurrency(value.current) : `${value.current.toFixed(1)}%`}
+        </p>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-gray-600">
+            <span>Target: {format === 'currency' ? formatCurrency(value.target) : `${value.target.toFixed(1)}%`}</span>
+            <span className={targetProgress >= 95 ? 'text-green-600 font-semibold' : 'text-orange-600 font-semibold'}>
+              {targetProgress.toFixed(1)}%
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className={`h-2 rounded-full ${targetProgress >= 95 ? 'bg-green-500' : 'bg-orange-500'}`}
+              style={{ width: `${Math.min(targetProgress, 100)}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-500">
+            vs Previous: {format === 'currency' ? formatCurrency(value.previous) : `${value.previous.toFixed(1)}%`}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="grid grid-cols-4 gap-6">
+        <MetricCard 
+          title="Total Revenue" 
+          value={financialMetrics.totalRevenue}
+          icon={DollarSign}
+        />
+        <MetricCard 
+          title="Total Expenses" 
+          value={financialMetrics.totalExpenses}
+          icon={TrendingDown}
+        />
+        <MetricCard 
+          title="Net Income" 
+          value={financialMetrics.netIncome}
+          icon={TrendingUp}
+        />
+        <MetricCard 
+          title="Operating Margin" 
+          value={financialMetrics.operatingMargin}
+          icon={PieChart}
+          format="percentage"
+        />
+      </div>
+    </div>
+  );
+};
+
   const financialMetrics = {
     totalRevenue: { current: 87395000, previous: 75840000, target: 92000000 },
     totalExpenses: { current: 68245000, previous: 62100000, target: 70000000 },
@@ -785,30 +899,6 @@ const FinanceOverview = () => {
         )}
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
-        <MetricCard 
-          title="Total Revenue" 
-          value={financialMetrics.totalRevenue}
-          icon={DollarSign}
-        />
-        <MetricCard 
-          title="Total Expenses" 
-          value={financialMetrics.totalExpenses}
-          icon={TrendingDown}
-        />
-        <MetricCard 
-          title="Net Income" 
-          value={financialMetrics.netIncome}
-          icon={TrendingUp}
-        />
-        <MetricCard 
-          title="Operating Margin" 
-          value={financialMetrics.operatingMargin}
-          icon={PieChart}
-          format="percentage"
-        />
-      </div>
 
       {/* Revenue & Expenses Overview */}
       <div className="grid grid-cols-2 gap-6 mb-8">
