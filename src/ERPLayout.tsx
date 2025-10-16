@@ -37,6 +37,7 @@ const ERPLayout = () => {
       {
         id: 'students', label: 'Students', icon: GraduationCap,
         submenu: [
+          { id: 'student-services', label: 'Student Services Overview' },
           { id: 'student-profile', label: 'Student Profile' },
           { id: 'tuition-fees', label: 'Tuition Fees' },
           { id: 'gpa', label: 'GPA' },
@@ -48,7 +49,7 @@ const ERPLayout = () => {
           { id: 'party-union-clubs', label: 'Party/Union/Clubs' },
           { id: 'achievements', label: 'Achievements' },
           { id: 'discipline', label: 'Discipline' },
-          { id: 'student-services', label: 'Student Services Overview' }
+          
         ]
       },
       {
@@ -96,7 +97,7 @@ const ERPLayout = () => {
       {
         id: 'timetable', label: 'Timetable', icon: Clock,
         submenu: [
-          { id: 'timetable-overview', label: 'Overview' },
+          { id: 'timetable-overview', label: 'Timetable Overview' },
           { id: 'room-schedule', label: 'Room Schedule' },
           { id: 'course-schedule', label: 'Course Schedule' },
           { id: 'exam-schedule', label: 'Exam Schedule' }
@@ -3099,6 +3100,400 @@ const LibraryDashboard = () => (
     );
   };
 
+const TimetableOverview = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date(2025, 9, 15));
+
+  const occupancyData = [
+    { time: '08:00', rooms: 45, capacity: 80, rate: 56 },
+    { time: '09:00', rooms: 68, capacity: 80, rate: 85 },
+    { time: '10:00', rooms: 72, capacity: 80, rate: 90 },
+    { time: '11:00', rooms: 65, capacity: 80, rate: 81 },
+    { time: '12:00', rooms: 32, capacity: 80, rate: 40 },
+    { time: '13:00', rooms: 58, capacity: 80, rate: 73 },
+    { time: '14:00', rooms: 70, capacity: 80, rate: 88 },
+    { time: '15:00', rooms: 62, capacity: 80, rate: 78 },
+    { time: '16:00', rooms: 48, capacity: 80, rate: 60 },
+    { time: '17:00', rooms: 28, capacity: 80, rate: 35 }
+  ];
+
+  const upcomingHolidays = [
+    { name: 'National Day', date: 'Oct 20, 2025', type: 'Public Holiday', daysAway: 4 },
+    { name: 'Mid-semester Break', date: 'Oct 28-30, 2025', type: 'Academic Break', daysAway: 12 },
+    { name: 'Founder\'s Day', date: 'Nov 5, 2025', type: 'University Holiday', daysAway: 20 }
+  ];
+
+  const pendingChanges = [
+    { id: 1, type: 'Room Change', course: 'CS301 - Data Structures', from: 'A101', to: 'A205', requestedBy: 'Dr. Nguyen', status: 'Pending', priority: 'High' },
+    { id: 2, type: 'Time Change', course: 'BA201 - Marketing', from: '10:00-11:30', to: '14:00-15:30', requestedBy: 'Dr. Le', status: 'Pending', priority: 'Medium' },
+    { id: 3, type: 'Makeup Class', course: 'CS401 - AI Fundamentals', date: 'Oct 22, 2025', time: '15:00-16:30', requestedBy: 'Dr. Pham', status: 'Approved', priority: 'Low' },
+    { id: 4, type: 'Room Change', course: 'CS502 - Deep Learning', from: 'A202', to: 'A301', requestedBy: 'Dr. Nguyen', status: 'Pending', priority: 'High' },
+    { id: 5, type: 'Class Cancellation', course: 'BA301 - Strategic Mgmt', date: 'Oct 18, 2025', reason: 'Conference', requestedBy: 'Dr. Vo', status: 'Pending', priority: 'Medium' }
+  ];
+
+  const roomUtilization = [
+    { building: 'Building A', total: 30, occupied: 27, available: 3, rate: 90 },
+    { building: 'Building B', total: 25, occupied: 21, available: 4, rate: 84 },
+    { building: 'Building C', total: 15, occupied: 12, available: 3, rate: 80 },
+    { building: 'Labs', total: 10, occupied: 9, available: 1, rate: 90 }
+  ];
+
+  const conflicts = [
+    { type: 'Double Booking', room: 'A101', time: 'Mon 10:00-11:30', courses: 'CS301 & BA202', severity: 'Critical' },
+    { type: 'Capacity Issue', room: 'B205', enrolled: 85, capacity: 80, course: 'BA301', severity: 'High' },
+    { type: 'Instructor Conflict', instructor: 'Dr. Le', time: 'Wed 14:00-15:30', courses: 'BA201 & BA302', severity: 'Critical' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Timetable Overview</h1>
+          <p className="text-sm text-gray-500 mt-1">Real-time schedule monitoring and management</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+            Export Report
+          </button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+            Manage Schedule
+          </button>
+        </div>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-5 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Building className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Rooms</p>
+          <p className="text-3xl font-bold text-gray-900">80</p>
+          <p className="text-xs text-gray-600 mt-2">Across 4 buildings</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Avg Occupancy</p>
+          <p className="text-3xl font-bold text-gray-900">87%</p>
+          <p className="text-xs text-green-600 mt-2">↑ 3% vs last week</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Active Classes</p>
+          <p className="text-3xl font-bold text-gray-900">68</p>
+          <p className="text-xs text-gray-600 mt-2">Current time slot</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-orange-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Pending Changes</p>
+          <p className="text-3xl font-bold text-gray-900">5</p>
+          <p className="text-xs text-orange-600 mt-2">3 high priority</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Conflicts</p>
+          <p className="text-3xl font-bold text-red-600">3</p>
+          <p className="text-xs text-red-600 mt-2">Requires attention</p>
+        </div>
+      </div>
+
+      {/* Conflicts Alert */}
+      {conflicts.length > 0 && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-900 mb-2">Schedule Conflicts Detected</h3>
+              <div className="space-y-2">
+                {conflicts.map((conflict, i) => (
+                  <div key={i} className="text-sm text-red-800">
+                    <span className="font-semibold">{conflict.type}:</span> {
+                      conflict.type === 'Double Booking' ? `${conflict.room} at ${conflict.time} (${conflict.courses})` :
+                      conflict.type === 'Capacity Issue' ? `${conflict.room} - ${conflict.course} (${conflict.enrolled}/${conflict.capacity} students)` :
+                      `${conflict.instructor} at ${conflict.time} (${conflict.courses})`
+                    }
+                  </div>
+                ))}
+              </div>
+              <button className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                Resolve Conflicts
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-3 gap-6">
+        {/* Room Occupancy Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Occupancy by Time Slot</h3>
+          <div className="h-80 flex items-end justify-between gap-2">
+            {occupancyData.map((slot, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <div className="w-full relative" style={{height: '280px'}}>
+                  <div 
+                    className={`w-full absolute bottom-0 rounded-t-lg transition-all hover:opacity-80 cursor-pointer ${
+                      slot.rate >= 85 ? 'bg-red-500' :
+                      slot.rate >= 70 ? 'bg-orange-500' :
+                      slot.rate >= 50 ? 'bg-blue-500' :
+                      'bg-green-500'
+                    }`}
+                    style={{height: `${(slot.rate / 100) * 280}px`}}
+                    title={`${slot.rooms}/${slot.capacity} rooms (${slot.rate}%)`}
+                  >
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-700">
+                      {slot.rate}%
+                    </div>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-600 mt-2">{slot.time}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500 rounded"></div>
+              <span className="text-xs text-gray-600">&lt;50% Low</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+              <span className="text-xs text-gray-600">50-70% Moderate</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-orange-500 rounded"></div>
+              <span className="text-xs text-gray-600">70-85% High</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-500 rounded"></div>
+              <span className="text-xs text-gray-600">&gt;85% Critical</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Room Utilization by Building */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Utilization by Building</h3>
+          <div className="space-y-4">
+            {roomUtilization.map((building, i) => (
+              <div key={i} className="p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900">{building.building}</h4>
+                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                    building.rate >= 85 ? 'bg-red-100 text-red-700' :
+                    building.rate >= 70 ? 'bg-orange-100 text-orange-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {building.rate}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-sm mb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Total</p>
+                    <p className="font-bold text-gray-900">{building.total}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Occupied</p>
+                    <p className="font-bold text-blue-600">{building.occupied}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Available</p>
+                    <p className="font-bold text-green-600">{building.available}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      building.rate >= 85 ? 'bg-red-500' :
+                      building.rate >= 70 ? 'bg-orange-500' :
+                      'bg-blue-500'
+                    }`}
+                    style={{width: `${building.rate}%`}}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        {/* Pending Changes */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Pending Schedule Changes</h3>
+            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
+              {pendingChanges.filter(c => c.status === 'Pending').length} pending
+            </span>
+          </div>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {pendingChanges.map((change) => (
+              <div key={change.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                        change.type === 'Room Change' ? 'bg-blue-100 text-blue-700' :
+                        change.type === 'Time Change' ? 'bg-purple-100 text-purple-700' :
+                        change.type === 'Makeup Class' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {change.type}
+                      </span>
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                        change.priority === 'High' ? 'bg-red-100 text-red-700' :
+                        change.priority === 'Medium' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {change.priority}
+                      </span>
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                        change.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {change.status}
+                      </span>
+                    </div>
+                    <p className="font-semibold text-gray-900 text-sm">{change.course}</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {change.from && change.to ? (
+                        <>From: <span className="font-semibold">{change.from}</span> → To: <span className="font-semibold">{change.to}</span></>
+                      ) : change.date ? (
+                        <>Date: <span className="font-semibold">{change.date}</span> {change.time && `at ${change.time}`}</>
+                      ) : (
+                        <span className="font-semibold">{change.reason}</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Requested by: {change.requestedBy}</p>
+                  </div>
+                </div>
+                {change.status === 'Pending' && (
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                    <button className="flex-1 px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700">
+                      Approve
+                    </button>
+                    <button className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-xs font-medium hover:bg-gray-50">
+                      Review
+                    </button>
+                    <button className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700">
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Holidays */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Upcoming Holidays & Breaks</h3>
+          <div className="space-y-4">
+            {upcomingHolidays.map((holiday, i) => (
+              <div key={i} className="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">{holiday.name}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{holiday.date}</p>
+                    <span className="inline-block mt-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                      {holiday.type}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">{holiday.daysAway}</p>
+                    <p className="text-xs text-gray-500">days away</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+              <Calendar size={16} />
+              Schedule Impact
+            </h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• 3 classes affected by National Day</li>
+              <li>• 48 classes rescheduled for mid-semester break</li>
+              <li>• 12 makeup classes scheduled</li>
+            </ul>
+          </div>
+
+          <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+            <h4 className="font-semibold text-green-900 mb-2">Quick Stats</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-green-700">Teaching Days Left</p>
+                <p className="text-2xl font-bold text-green-900">42</p>
+              </div>
+              <div>
+                <p className="text-green-700">Exam Period</p>
+                <p className="text-2xl font-bold text-green-900">Dec 15</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-4 gap-4">
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+              <Plus className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Add Class</p>
+            <p className="text-xs text-gray-500 mt-1">Schedule new class</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-left">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+              <Search className="w-5 h-5 text-green-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Find Room</p>
+            <p className="text-xs text-gray-500 mt-1">Check availability</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Analytics</p>
+            <p className="text-xs text-gray-500 mt-1">View detailed reports</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all text-left">
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+              <Settings className="w-5 h-5 text-orange-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Settings</p>
+            <p className="text-xs text-gray-500 mt-1">Configure schedules</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
   const StudentServicesOverview = () => {
     const [selectedService, setSelectedService] = useState(null);
 
@@ -3370,7 +3765,245 @@ const LibraryDashboard = () => (
       </div>
     );
   };
+  const ViewRankings = () => {
+  const [filterFaculty, setFilterFaculty] = useState('all');
+  const [filterLevel, setFilterLevel] = useState('all');
+  const [sortBy, setSortBy] = useState('overall');
 
+  const facultyData = [
+    { rank: 1, name: 'Dr. Nguyen Van Minh', department: 'Computer Science', faculty: 'FONS', courses: 3, students: 206, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 234, badge: 'gold' },
+    { rank: 2, name: 'Dr. Bui Thi Ngoc', department: 'Digital Media', faculty: 'FOMAC', courses: 4, students: 267, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 228, badge: 'silver' },
+    { rank: 3, name: 'Dr. Pham Thi Mai', department: 'Data Science', faculty: 'FONS', courses: 3, students: 145, overall: 4.7, teaching: 4.8, knowledge: 4.9, communication: 4.6, support: 4.7, responses: 142, badge: 'bronze' },
+    { rank: 4, name: 'Dr. Tran Thi Lan', department: 'Business Administration', faculty: 'FOM', courses: 5, students: 280, overall: 4.7, teaching: 4.8, knowledge: 4.7, communication: 4.6, support: 4.8, responses: 272, badge: null },
+    { rank: 5, name: 'Dr. Hoang Van Tuan', department: 'Computer Science', faculty: 'FONS', courses: 3, students: 165, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 189, badge: null },
+    { rank: 6, name: 'Dr. Nguyen Duc Anh', department: 'Marketing', faculty: 'FOM', courses: 3, students: 156, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 150, badge: null },
+    { rank: 7, name: 'Dr. Dao Van Hai', department: 'Journalism', faculty: 'FOMAC', courses: 2, students: 144, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 138, badge: null },
+    { rank: 8, name: 'Dr. Le Thi Hoa', department: 'Economics', faculty: 'FONS', courses: 4, students: 198, overall: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 192, badge: null },
+    { rank: 9, name: 'Dr. Le Van Cuong', department: 'Finance', faculty: 'FOM', courses: 4, students: 215, overall: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 208, badge: null },
+    { rank: 10, name: 'Dr. Tran Van Long', department: 'Physics', faculty: 'FONS', courses: 2, students: 89, overall: 4.4, teaching: 4.5, knowledge: 4.6, communication: 4.3, support: 4.4, responses: 85, badge: null },
+  ];
+
+  const topPerformers = facultyData.slice(0, 3);
+
+  const getFacultyColor = (faculty) => {
+    switch(faculty) {
+      case 'FONS': return 'bg-blue-100 text-blue-700';
+      case 'FOMAC': return 'bg-purple-100 text-purple-700';
+      case 'FOM': return 'bg-green-100 text-green-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getBadgeColor = (badge) => {
+    switch(badge) {
+      case 'gold': return 'bg-yellow-400';
+      case 'silver': return 'bg-gray-300';
+      case 'bronze': return 'bg-orange-400';
+      default: return '';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Faculty Rankings</h1>
+            <p className="text-sm text-gray-500 mt-1">Based on student feedback and teaching evaluations</p>
+          </div>
+          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+            Export Report
+          </button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Faculty</p>
+            <p className="text-3xl font-bold text-gray-900">10</p>
+            <p className="text-xs text-gray-600 mt-2">Evaluated this semester</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <Award className="w-5 h-5 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Avg Overall Rating</p>
+            <p className="text-3xl font-bold text-gray-900">4.62<span className="text-lg text-gray-500">/5.0</span></p>
+            <p className="text-xs text-gray-600 mt-2">↑ 0.2 vs last semester</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Responses</p>
+            <p className="text-3xl font-bold text-gray-900">1808</p>
+            <p className="text-xs text-gray-600 mt-2">From 1984 students</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Response Rate</p>
+            <p className="text-3xl font-bold text-gray-900">97%</p>
+            <p className="text-xs text-gray-600 mt-2">↑ 5% vs last semester</p>
+          </div>
+        </div>
+
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
+          <div className="flex items-start gap-3">
+            <Award className="w-6 h-6 text-yellow-600 mt-1" />
+            <div className="flex-1">
+              <h3 className="font-bold text-gray-900 mb-4">Top Performers This Semester</h3>
+              <div className="grid grid-cols-3 gap-6">
+                {topPerformers.map((lecturer) => (
+                  <div key={lecturer.rank} className="bg-white p-6 rounded-xl shadow-sm border-2 border-yellow-200 relative">
+                    {lecturer.badge && (
+                      <div className={`absolute -top-3 -right-3 w-12 h-12 ${getBadgeColor(lecturer.badge)} rounded-full flex items-center justify-center shadow-lg`}>
+                        <span className="text-white font-bold text-lg">{lecturer.rank}</span>
+                      </div>
+                    )}
+                    <div className="flex flex-col items-center mb-4">
+                      <div className="w-20 h-20 bg-gray-300 rounded-full mb-3"></div>
+                      <h4 className="font-bold text-gray-900 text-center">{lecturer.name}</h4>
+                      <p className="text-xs text-gray-500">{lecturer.department}</p>
+                      <span className={`mt-2 px-2 py-1 rounded-full text-xs font-medium ${getFacultyColor(lecturer.faculty)}`}>
+                        {lecturer.faculty}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mb-4 pb-4 border-b border-gray-200">
+                      <Award className="w-5 h-5 text-yellow-500" />
+                      <span className="text-2xl font-bold text-gray-900">{lecturer.overall}</span>
+                      <span className="text-gray-500">/5.0</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-center">
+                      <div>
+                        <p className="text-xs text-gray-500">Teaching</p>
+                        <p className="font-bold text-gray-900">{lecturer.teaching}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Knowledge</p>
+                        <p className="font-bold text-gray-900">{lecturer.knowledge}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Support</p>
+                        <p className="font-bold text-gray-900">{lecturer.support}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Responses</p>
+                        <p className="font-bold text-gray-900">{lecturer.responses}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-4">
+              <select 
+                value={filterFaculty}
+                onChange={(e) => setFilterFaculty(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Faculties</option>
+                <option value="fons">FONS</option>
+                <option value="fomac">FOMAC</option>
+                <option value="fom">FOM</option>
+              </select>
+              <select 
+                value={filterLevel}
+                onChange={(e) => setFilterLevel(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Levels</option>
+                <option value="professor">Professor</option>
+                <option value="associate">Associate Professor</option>
+                <option value="lecturer">Lecturer</option>
+              </select>
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="overall">Sort by Overall Rating</option>
+                <option value="teaching">Sort by Teaching</option>
+                <option value="knowledge">Sort by Knowledge</option>
+                <option value="responses">Sort by Responses</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rank</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Lecturer</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Overall</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Teaching</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Knowledge</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Communication</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Support</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Responses</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {facultyData.map((lecturer) => (
+                  <tr key={lecturer.rank} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <span className="text-sm font-bold text-gray-900">{lecturer.rank}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <p className="font-semibold text-gray-900">{lecturer.name}</p>
+                        <p className="text-xs text-gray-500">{lecturer.department}</p>
+                        <p className="text-xs text-gray-400">{lecturer.courses} courses • {lecturer.students} students</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getFacultyColor(lecturer.faculty)}`}>
+                        {lecturer.faculty}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="inline-flex items-center justify-center px-3 py-1 bg-green-100 rounded-full">
+                        <span className="text-lg font-bold text-green-700">{lecturer.overall}</span>
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.teaching}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.knowledge}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.communication}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.support}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.responses}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
   const LecturersOverview = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [filterDepartment, setFilterDepartment] = useState('all');
@@ -3794,8 +4427,14 @@ const LibraryDashboard = () => (
     if (activeTab === 'finance-overview') {
       return <FinanceOverview />;
     }
+    if (activeTab === 'view-rankings') { 
+      return <ViewRankings />;
+    } 
+    if (activeTab === 'timetable-overview') {
+      return <TimetableOverview />;
+    }
 
-    if (activeTab === 'timetable' || activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
+    if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
       return <TimetableCalendar />;
     }
     return (
