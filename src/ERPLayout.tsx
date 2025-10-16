@@ -8,7 +8,15 @@ import {
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   CheckCircle, XCircle 
 } from 'lucide-react';
-
+function renderValue(v: unknown): React.ReactNode {
+  if (v == null) return null;
+  if (React.isValidElement(v)) return v;
+  const t = typeof v;
+  if (t === 'string' || t === 'number' || t === 'boolean') return String(v);
+  if (Array.isArray(v)) return v.map((x, i) => <span key={i}>{renderValue(x)}</span>);
+  // fallback: stringify objects (or refine this for specific shapes)
+  try { return typeof v === 'object' ? JSON.stringify(v) : String(v); } catch { return String(v); }
+}
 const ERPLayout = () => {
   const [userType, setUserType] = useState('admin');
   const [expandedMenus, setExpandedMenus] = useState({});
@@ -1166,7 +1174,7 @@ const FinanceMetricCards: React.FC = () => {
                   {((budgetUtilization.reduce((sum, d) => sum + d.spent, 0) / 
                      budgetUtilization.reduce((sum, d) => sum + d.budget, 0)) * 100).toFixed(1)}%
                 </td>
-                <td colSpan="2" className="px-6 py-4"></td>
+                <td colSpan={2} className="px-6 py-4"></td>
               </tr>
             </tfoot>
           </table>
@@ -3314,7 +3322,7 @@ const LibraryDashboard = () => (
                   {Object.entries(selectedService.stats).map(([key, value]) => (
                     <div key={key} className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-xs text-gray-500 uppercase font-semibold mb-1">{key}</p>
-                      <p className="text-3xl font-bold text-gray-900">{value}</p>
+                      <p className="text-3xl font-bold text-gray-900">{renderValue(value)}</p>
                     </div>
                   ))}
                 </div>
@@ -3330,7 +3338,7 @@ const LibraryDashboard = () => (
                             <div className="flex gap-4 mt-2 text-sm text-gray-600">
                               {Object.entries(item).filter(([key]) => key !== 'name').map(([key, value]) => (
                                 <span key={key}>
-                                  <span className="text-gray-500 capitalize">{key}:</span> <span className="font-semibold">{value}</span>
+                                  <span className="text-gray-500 capitalize">{key}:</span> <span className="font-semibold">{value as React.ReactNode}</span>
                                 </span>
                               ))}
                             </div>
@@ -3677,7 +3685,7 @@ const LibraryDashboard = () => (
                       <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </p>
-                      <p className="text-2xl font-bold text-gray-900">{value}</p>
+                      <p className="text-2xl font-bold text-gray-900">{value as React.ReactNode}</p>
                     </div>
                   ))}
                 </div>
@@ -3717,17 +3725,17 @@ const LibraryDashboard = () => (
                                       value === 'Optimal' ? 'bg-green-100 text-green-700' :
                                       'bg-yellow-100 text-yellow-700'
                                     }`}>
-                                      {value}
+                                      {value as React.ReactNode}
                                     </span>
                                   ) : key === 'engagement' || key === 'impact' ? (
                                     <span className={`px-2 py-1 text-xs rounded-full ${
                                       value === 'High' ? 'bg-green-100 text-green-700' :
                                       'bg-blue-100 text-blue-700'
                                     }`}>
-                                      {value}
+                                      {value as React.ReactNode}
                                     </span>
                                   ) : (
-                                    <span className="font-semibold">{value}</span>
+                                    <span className="font-semibold">{value as React.ReactNode}</span>
                                   )}
                                 </td>
                               ))}
