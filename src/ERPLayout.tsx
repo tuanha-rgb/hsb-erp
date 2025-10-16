@@ -5,7 +5,7 @@ import {
   DollarSign, FileText, Award, Clock, Building, Globe, Briefcase, 
   MessageSquare, Settings, BarChart3, TrendingUp, UserCheck, Home, 
   Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
-  AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
+  AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, Target, MapPin,  Star,
   CheckCircle, XCircle 
 } from 'lucide-react';
 function renderValue(v: unknown): React.ReactNode {
@@ -55,8 +55,8 @@ const ERPLayout = () => {
       {
         id: 'lecturers', label: 'Lecturers/Faculty', icon: Users,
         submenu: [
-          { id: 'lecturer-profile', label: 'Lecturer Profile' },
           { id: 'lecturers-overview', label: 'Lecturers Overview' },
+          { id: 'lecturer-profile', label: 'Lecturer Profile' },
           { id: 'grade-management', label: 'Grade Management' },
           { id: 'student-management', label: 'Student Management' },
           { id: 'view-rankings', label: 'View Rankings' },
@@ -79,6 +79,7 @@ const ERPLayout = () => {
       {
         id: 'classes', label: 'Classes', icon: BookOpen,
         submenu: [
+          { id: 'class-overview', label: 'Class Overview' },
           { id: 'course-management', label: 'Course Management' },
           { id: 'activity-management', label: 'Activity Management' },
           { id: 'room-management', label: 'Room Management' }
@@ -142,6 +143,7 @@ const ERPLayout = () => {
       {
         id: 'alumni', label: 'Alumni', icon: Award,
         submenu: [
+          { id: 'alumni-overview', label: 'Alumni Overview' },
           { id: 'alumni-info', label: 'Alumni Information' },
           { id: 'executive-board', label: 'Executive Board' },
           { id: 'employment-stats', label: 'Employment Statistics' },
@@ -253,137 +255,508 @@ const ERPLayout = () => {
     </div>
   );
 
-  const AdminDashboard = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">October 15, 2025</p>
+ 
+const AdminDashboard = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('last-year');
+  const [selectedEarningsPeriod, setSelectedEarningsPeriod] = useState('last-semester');
+
+  // Key Metrics
+  const keyMetrics = {
+    students: { current: 5699, change: 8.5, label: 'Students' },
+    lecturers: { current: 297, change: 4.2, label: 'Lecturers' },
+    publications: { current: 1248, change: 12.3, label: 'Publications' },
+    revenue: { current: 87395000, change: 15.7, label: 'Revenue' }
+  };
+
+  // Academic Performance Data (Last 4 Years)
+  const academicPerformance = [
+    { year: '2021', value: 78, label: 'Y1' },
+    { year: '2022', value: 82, label: 'Y2' },
+    { year: '2023', value: 88, label: 'Y3' },
+    { year: '2024', value: 75, label: 'Y4' },
+    { year: '2024', value: 85, label: 'Y5' },
+    { year: '2024', value: 90, label: 'Y6' },
+    { year: '2024', value: 95, label: 'Y7' },
+    { year: '2024', value: 92, label: 'Y8' }
+  ];
+
+  // Earnings Data (Last Semester)
+  const earningsData = [
+    { month: 'Jan', amount: 8200000 },
+    { month: 'Feb', amount: 7800000 },
+    { month: 'Mar', amount: 8500000 },
+    { month: 'Apr', amount: 9100000 },
+    { month: 'May', amount: 8900000 },
+    { month: 'Jun', amount: 9300000 }
+  ];
+
+  // Messages
+  const messages = [
+    { name: 'Susan Grey', message: 'Department meeting this...', time: '2:00 PM', avatar: 'SG' },
+    { name: 'Jordan Kim', message: 'Found another accessing...', time: '11:30 AM', avatar: 'JK' },
+    { name: 'Dean Richard Neal', message: 'Please join us in...', time: '10:00 AM', avatar: 'DR' }
+  ];
+
+  // Students Distribution
+  const studentDistribution = {
+    total: 5100,
+    undergraduate: 3400,
+    graduate: 1200,
+    doctoral: 500
+  };
+
+  // Student Activities
+  const studentActivities = [
+    { name: 'Math Olympiad', status: 'Gold Medal', icon: '🏆', color: 'bg-yellow-100' },
+    { name: 'Project Showcase', status: 'Best Award', icon: '🚀', color: 'bg-blue-100' },
+    { name: 'Volunteer Day', status: 'Lead Organizer', icon: '❤️', color: 'bg-red-100' }
+  ];
+
+  // Department Performance
+  const departmentPerformance = [
+    { name: 'Computer Science', students: 892, budget: 12500000, utilization: 78, performance: 92 },
+    { name: 'Engineering', students: 1245, budget: 15800000, utilization: 85, performance: 88 },
+    { name: 'Business Admin', students: 756, budget: 9800000, utilization: 72, performance: 90 },
+    { name: 'Sciences', students: 1089, budget: 11200000, utilization: 81, performance: 87 },
+    { name: 'Arts & Humanities', students: 623, budget: 6400000, utilization: 68, performance: 85 }
+  ];
+
+  // Faculty Stats
+  const facultyStats = {
+    totalFaculty: 297,
+    fullTime: 245,
+    partTime: 52,
+    withPhD: 223,
+    avgExperience: 12.5
+  };
+
+  // Research Metrics
+  const researchMetrics = {
+    activeProjects: 156,
+    totalGrants: 18920000,
+    publications: 1248,
+    citations: 8945
+  };
+
+  const formatCurrency = (amount) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`;
+    }
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatNumber = (num) => {
+    return new Intl.NumberFormat('en-US').format(num);
+  };
+
+  const MetricCard = ({ icon: Icon, label, value, change, color }) => {
+    const isPositive = change > 0;
+    
+    return (
+      <div className="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+        <div className="flex items-start justify-between mb-4">
+          <div className={`w-12 h-12 rounded-lg ${color} flex items-center justify-center`}>
+            <Icon className="w-6 h-6 text-gray-700" />
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        
+        <p className="text-sm text-gray-600 mb-1">{label}</p>
+        <p className="text-3xl font-bold text-gray-900 mb-2">
+          {label === 'Revenue' ? formatCurrency(value) : formatNumber(value)}
+        </p>
+        
+        <div className={`flex items-center gap-1 text-sm font-semibold ${
+          isPositive ? 'text-green-600' : 'text-red-600'
+        }`}>
+          {isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+          <span>{isPositive ? '+' : ''}{change}% vs last year</span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-1">HSB Dashboard</h1>
+          <p className="text-gray-600">October 15, 2025</p>
+        </div>
+        
+        <div className="flex items-center gap-4">
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <Search className="w-5 h-5 text-gray-600" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <MessageSquare className="w-5 h-5 text-gray-600" />
+            <span className="w-5 h-5 text-gray-600" />
           </button>
-          <button className="p-2 hover:bg-gray-100 rounded-lg relative transition-colors">
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
             <Bell className="w-5 h-5 text-gray-600" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
-        <StatCard title="Students" value="5,699" change="↑ 8.5% vs last year" icon={GraduationCap} bgColor="bg-blue-100" iconColor="text-blue-600" />
-        <StatCard title="Lecturers" value="297" change="↑ 4.2% vs last year" icon={Users} bgColor="bg-green-100" iconColor="text-green-600" />
-        <StatCard title="Publications" value="1,248" change="↑ 12.3% vs last year" icon={FileText} bgColor="bg-purple-100" iconColor="text-purple-600" />
-        <StatCard title="Revenue" value="$87,395" change="↑ 15.7% vs last year" icon={DollarSign} bgColor="bg-orange-100" iconColor="text-orange-600" />
+      {/* Key Metrics */}
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <MetricCard 
+          icon={Users}
+          label="Students"
+          value={keyMetrics.students.current}
+          change={keyMetrics.students.change}
+          color="bg-blue-100"
+        />
+        <MetricCard 
+          icon={GraduationCap}
+          label="Lecturers"
+          value={keyMetrics.lecturers.current}
+          change={keyMetrics.lecturers.change}
+          color="bg-purple-100"
+        />
+        <MetricCard 
+          icon={BookOpen}
+          label="Publications"
+          value={keyMetrics.publications.current}
+          change={keyMetrics.publications.change}
+          color="bg-green-100"
+        />
+        <MetricCard 
+          icon={DollarSign}
+          label="Revenue"
+          value={keyMetrics.revenue.current}
+          change={keyMetrics.revenue.change}
+          color="bg-orange-100"
+        />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+      {/* Academic Performance & Earnings */}
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        {/* Academic Performance */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Academic Performance</h3>
-            <select className="text-sm border border-gray-300 rounded-lg px-3 py-1.5">
-              <option>Last 4 Year</option>
+            <h2 className="text-xl font-bold text-gray-900">Academic Performance</h2>
+            <select 
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="last-year">Last 4 Year</option>
+              <option value="this-year">This Year</option>
+              <option value="all-time">All Time</option>
             </select>
           </div>
-          <div className="h-64 flex items-end justify-between gap-4">
-            {[65, 70, 85, 60, 75, 80, 90, 85].map((height, i) => (
-              <div key={i} className="flex-1 bg-gradient-to-t from-green-200 to-green-400 rounded-t-lg" style={{height: `${height}%`}}></div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Earnings</h3>
-            <select className="text-sm border border-gray-300 rounded-lg px-3 py-1.5">
-              <option>Last Semester</option>
-            </select>
-          </div>
+          
           <div className="h-64 flex items-end justify-between gap-3">
-            {[
-              {earnings: 60, expenses: 85},
-              {earnings: 70, expenses: 55},
-              {earnings: 50, expenses: 65},
-              {earnings: 65, expenses: 50},
-              {earnings: 75, expenses: 70},
-              {earnings: 90, expenses: 85}
-            ].map((data, i) => (
-              <div key={i} className="flex-1 flex gap-1">
-                <div className="flex-1 bg-blue-500 rounded-t" style={{height: `${data.earnings}%`}}></div>
-                <div className="flex-1 bg-green-500 rounded-t" style={{height: `${data.expenses}%`}}></div>
+            {academicPerformance.map((item, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full relative" style={{ height: '220px' }}>
+                  <div 
+                    className="w-full absolute bottom-0 bg-gradient-to-t from-green-400 to-green-300 rounded-t-lg hover:from-green-500 hover:to-green-400 cursor-pointer transition-all"
+                    style={{ height: `${(item.value / 100) * 220}px` }}
+                    title={`Performance: ${item.value}%`}
+                  ></div>
+                </div>
+                <span className="text-xs font-medium text-gray-600">{item.label}</span>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Earnings */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Earnings</h2>
+            <select 
+              value={selectedEarningsPeriod}
+              onChange={(e) => setSelectedEarningsPeriod(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="last-semester">Last Semester</option>
+              <option value="this-semester">This Semester</option>
+              <option value="this-year">This Year</option>
+            </select>
+          </div>
+
+          <div className="space-y-4">
+            {earningsData.map((item, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">{item.month}</span>
+                <div className="flex items-center gap-3 flex-1 mx-4">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-400 to-green-400 h-2 rounded-full"
+                      style={{ width: `${(item.amount / 10000000) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{formatCurrency(item.amount)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Total Semester</span>
+              <span className="text-xl font-bold text-green-600">
+                {formatCurrency(earningsData.reduce((sum, item) => sum + item.amount, 0))}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Messages</h3>
+      {/* Messages, Students, Student Activity */}
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        {/* Messages */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Messages</h2>
+            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              View All
+            </button>
+          </div>
+
           <div className="space-y-4">
-            {[
-              {name: 'Susan Grey', time: '2:00 PM', message: 'Department meeting this...'},
-              {name: 'Jordan Kim', time: '11:30 AM', message: 'Found another accessing...'},
-              {name: 'Dean Richard Neal', time: '10:00 AM', message: 'Please join us in...'}
-            ].map((msg, i) => (
-              <div key={i} className="flex gap-3 pb-4 border-b last:border-0">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <p className="font-semibold text-sm">{msg.name}</p>
-                    <span className="text-xs text-gray-500">{msg.time}</span>
-                  </div>
+            {messages.map((msg, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                  {msg.avatar}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{msg.name}</p>
                   <p className="text-sm text-gray-600 truncate">{msg.message}</p>
                 </div>
+                <span className="text-xs text-gray-500 whitespace-nowrap">{msg.time}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Students</h3>
-          <div className="flex items-center justify-center py-8">
+        {/* Students Distribution */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Students</h2>
+          </div>
+
+          <div className="flex items-center justify-center mb-6">
             <div className="relative w-48 h-48">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle cx="96" cy="96" r="80" fill="none" stroke="#e5e7eb" strokeWidth="16"/>
-                <circle cx="96" cy="96" r="80" fill="none" stroke="#3b82f6" strokeWidth="16" strokeDasharray="502" strokeDashoffset="125"/>
-                <circle cx="96" cy="96" r="80" fill="none" stroke="#10b981" strokeWidth="16" strokeDasharray="502" strokeDashoffset="251"/>
+              {/* Donut Chart */}
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                {/* Undergraduate - Blue */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="35"
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="15"
+                  strokeDasharray={`${(studentDistribution.undergraduate / studentDistribution.total) * 220} 220`}
+                  strokeDashoffset="0"
+                />
+                {/* Graduate - Green */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="35"
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="15"
+                  strokeDasharray={`${(studentDistribution.graduate / studentDistribution.total) * 220} 220`}
+                  strokeDashoffset={`-${(studentDistribution.undergraduate / studentDistribution.total) * 220}`}
+                />
+                {/* Doctoral - Purple */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="35"
+                  fill="none"
+                  stroke="#8b5cf6"
+                  strokeWidth="15"
+                  strokeDasharray={`${(studentDistribution.doctoral / studentDistribution.total) * 220} 220`}
+                  strokeDashoffset={`-${((studentDistribution.undergraduate + studentDistribution.graduate) / studentDistribution.total) * 220}`}
+                />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold">5,100</div>
-                  <div className="text-sm text-gray-500">Total</div>
-                </div>
+              
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <p className="text-3xl font-bold text-gray-900">{formatNumber(studentDistribution.total)}</p>
+                <p className="text-sm text-gray-600">Total</p>
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span className="text-sm text-gray-700">Undergraduate</span>
+              </div>
+              <span className="text-sm font-semibold text-gray-900">{formatNumber(studentDistribution.undergraduate)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-700">Graduate</span>
+              </div>
+              <span className="text-sm font-semibold text-gray-900">{formatNumber(studentDistribution.graduate)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <span className="text-sm text-gray-700">Doctoral</span>
+              </div>
+              <span className="text-sm font-semibold text-gray-900">{formatNumber(studentDistribution.doctoral)}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Student Activity</h3>
+        {/* Student Activity */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Student Activity</h2>
+          </div>
+
           <div className="space-y-4">
-            {[
-              {title: 'Math Olympiad', subtitle: 'Gold Medal', icon: '👑'},
-              {title: 'Project Showcase', subtitle: 'Best Award', icon: '🚗'},
-              {title: 'Volunteer Day', subtitle: 'Lead Organizer', icon: '❤️'}
-            ].map((activity, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-xl">{activity.icon}</div>
-                <div>
-                  <p className="font-semibold text-sm">{activity.title}</p>
-                  <p className="text-xs text-gray-600">{activity.subtitle}</p>
+            {studentActivities.map((activity, i) => (
+              <div key={i} className={`p-4 ${activity.color} rounded-lg border border-gray-200`}>
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{activity.icon}</div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">{activity.name}</p>
+                    <p className="text-sm text-gray-600">{activity.status}</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400" />
                 </div>
               </div>
             ))}
+          </div>
+
+          <button className="w-full mt-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            View All Activities
+          </button>
+        </div>
+      </div>
+
+      {/* Department Performance */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Department Performance</h2>
+          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+            View Details
+            <ChevronRight size={16} />
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
+                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Students</th>
+                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Budget</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Utilization</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Performance</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {departmentPerformance.map((dept, i) => (
+                <tr key={i} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-semibold text-gray-900">{dept.name}</td>
+                  <td className="px-6 py-4 text-right text-gray-700">{formatNumber(dept.students)}</td>
+                  <td className="px-6 py-4 text-right text-gray-700">{formatCurrency(dept.budget)}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-500 h-2 rounded-full"
+                          style={{ width: `${dept.utilization}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700 w-10 text-right">{dept.utilization}%</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full"
+                          style={{ width: `${dept.performance}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700 w-10 text-right">{dept.performance}%</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Faculty & Research Stats */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Faculty Statistics */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Faculty Statistics</h2>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-gray-600 mb-1">Total Faculty</p>
+              <p className="text-3xl font-bold text-blue-900">{formatNumber(facultyStats.totalFaculty)}</p>
+            </div>
+
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <p className="text-sm text-gray-600 mb-1">Full-Time</p>
+              <p className="text-3xl font-bold text-purple-900">{formatNumber(facultyStats.fullTime)}</p>
+            </div>
+
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <p className="text-sm text-gray-600 mb-1">With Ph.D.</p>
+              <p className="text-3xl font-bold text-green-900">{formatNumber(facultyStats.withPhD)}</p>
+            </div>
+
+            <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <p className="text-sm text-gray-600 mb-1">Avg Experience</p>
+              <p className="text-3xl font-bold text-orange-900">{facultyStats.avgExperience} yrs</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Research Metrics */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Research Metrics</h2>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+              <p className="text-sm text-gray-600 mb-1">Active Projects</p>
+              <p className="text-3xl font-bold text-indigo-900">{formatNumber(researchMetrics.activeProjects)}</p>
+            </div>
+
+            <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <p className="text-sm text-gray-600 mb-1">Total Grants</p>
+              <p className="text-3xl font-bold text-emerald-900">{formatCurrency(researchMetrics.totalGrants)}</p>
+            </div>
+
+            <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+              <p className="text-sm text-gray-600 mb-1">Publications</p>
+              <p className="text-3xl font-bold text-cyan-900">{formatNumber(researchMetrics.publications)}</p>
+            </div>
+
+            <div className="p-4 bg-rose-50 rounded-lg border border-rose-200">
+              <p className="text-sm text-gray-600 mb-1">Citations</p>
+              <p className="text-3xl font-bold text-rose-900">{formatNumber(researchMetrics.citations)}</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+};
 
   const StudentDashboard = () => (
     <div className="space-y-6">
@@ -552,6 +925,486 @@ const ERPLayout = () => {
       </div>
     </div>
   );
+
+const DepartmentOverview = () => {
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [timeRange, setTimeRange] = useState('month');
+
+  const departments = [
+    {
+      id: 'hr',
+      name: 'Human Resources',
+      head: 'Ms. Nguyen Thi Mai',
+      faculty: 12,
+      students: 0,
+      courses: 0,
+      budget: '$450,000',
+      utilization: 88,
+      satisfaction: 4.3,
+      research: 0,
+      status: 'good',
+      color: 'blue'
+    },
+    {
+      id: 'irs',
+      name: 'International Relation & Science',
+      head: 'Dr. Tran Van Minh',
+      faculty: 15,
+      students: 0,
+      courses: 0,
+      budget: '$520,000',
+      utilization: 85,
+      satisfaction: 4.4,
+      research: 45,
+      status: 'good',
+      color: 'green'
+    },
+    {
+      id: 'admin-it',
+      name: 'Admin & IT',
+      head: 'Mr. Le Duc Anh',
+      faculty: 18,
+      students: 0,
+      courses: 0,
+      budget: '$680,000',
+      utilization: 92,
+      satisfaction: 4.5,
+      research: 0,
+      status: 'excellent',
+      color: 'purple'
+    },
+    {
+      id: 'academic',
+      name: 'Academic Affairs',
+      head: 'Dr. Pham Thi Lan',
+      faculty: 22,
+      students: 0,
+      courses: 0,
+      budget: '$590,000',
+      utilization: 90,
+      satisfaction: 4.6,
+      research: 12,
+      status: 'excellent',
+      color: 'orange'
+    },
+    {
+      id: 'finance',
+      name: 'Finance & Accounting',
+      head: 'Mr. Hoang Van Tuan',
+      faculty: 16,
+      students: 0,
+      courses: 0,
+      budget: '$540,000',
+      utilization: 87,
+      satisfaction: 4.2,
+      research: 0,
+      status: 'good',
+      color: 'pink'
+    },
+    {
+      id: 'fom',
+      name: 'FOM',
+      head: 'Dr. Nguyen Van Hung',
+      faculty: 38,
+      students: 980,
+      courses: 42,
+      budget: '$1,120,000',
+      utilization: 89,
+      satisfaction: 4.4,
+      research: 98,
+      status: 'good',
+      color: 'blue'
+    },
+    {
+      id: 'fomac',
+      name: 'FOMAC',
+      head: 'Dr. Bui Thi Ngoc',
+      faculty: 35,
+      students: 850,
+      courses: 38,
+      budget: '$1,050,000',
+      utilization: 86,
+      satisfaction: 4.3,
+      research: 87,
+      status: 'good',
+      color: 'green'
+    },
+    {
+      id: 'fons',
+      name: 'FONS',
+      head: 'Dr. Le Van Cuong',
+      faculty: 45,
+      students: 1200,
+      courses: 48,
+      budget: '$1,280,000',
+      utilization: 93,
+      satisfaction: 4.7,
+      research: 156,
+      status: 'excellent',
+      color: 'purple'
+    },
+    {
+      id: 'ins',
+      name: 'INS',
+      head: 'Dr. Dao Van Hai',
+      faculty: 28,
+      students: 720,
+      courses: 32,
+      budget: '$890,000',
+      utilization: 84,
+      satisfaction: 4.2,
+      research: 72,
+      status: 'good',
+      color: 'orange'
+    },
+    {
+      id: 'itm',
+      name: 'ITM',
+      head: 'Dr. Tran Thi Hoa',
+      faculty: 32,
+      students: 820,
+      courses: 36,
+      budget: '$980,000',
+      utilization: 88,
+      satisfaction: 4.5,
+      research: 94,
+      status: 'good',
+      color: 'pink'
+    },
+    {
+      id: 'cei',
+      name: 'CEI',
+      head: 'Dr. Pham Van Long',
+      faculty: 25,
+      students: 640,
+      courses: 28,
+      budget: '$820,000',
+      utilization: 82,
+      satisfaction: 4.1,
+      research: 58,
+      status: 'good',
+      color: 'blue'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'excellent': return 'bg-green-100 text-green-700 border-green-300';
+      case 'good': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'warning': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+      case 'critical': return 'bg-red-100 text-red-700 border-red-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
+
+  const getDepartmentColor = (color) => {
+    switch(color) {
+      case 'blue': return 'from-blue-400 to-blue-600';
+      case 'green': return 'from-green-400 to-green-600';
+      case 'purple': return 'from-purple-400 to-purple-600';
+      case 'orange': return 'from-orange-400 to-orange-600';
+      case 'pink': return 'from-pink-400 to-pink-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  const totalFaculty = departments.reduce((sum, dept) => sum + dept.faculty, 0);
+  const totalStudents = departments.reduce((sum, dept) => sum + dept.students, 0);
+  const totalCourses = departments.reduce((sum, dept) => sum + dept.courses, 0);
+  const avgSatisfaction = (departments.reduce((sum, dept) => sum + dept.satisfaction, 0) / departments.length).toFixed(1);
+
+  const filteredDepartments = selectedDepartment === 'all' 
+    ? departments 
+    : departments.filter(d => d.id === selectedDepartment);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Department Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and performance metrics across all departments</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">All Departments</option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>{dept.name}</option>
+              ))}
+            </select>
+            <select 
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="quarter">This Quarter</option>
+              <option value="year">This Year</option>
+            </select>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Building className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Departments</p>
+            <p className="text-3xl font-bold text-gray-900">11</p>
+            <p className="text-xs text-green-600 mt-2">All active</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Personnels</p>
+            <p className="text-3xl font-bold text-gray-900">120</p>
+            <p className="text-xs text-gray-600 mt-2">Faculty and staff</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Students</p>
+            <p className="text-3xl font-bold text-gray-900">2,600</p>
+            <div className="mt-2 space-y-0.5">
+              <p className="text-xs text-gray-600">Full-time: 2,300</p>
+              <p className="text-xs text-gray-600">Part-time: 300</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Avg Satisfaction</p>
+            <p className="text-3xl font-bold text-gray-900">{avgSatisfaction}<span className="text-lg text-gray-500">/5.0</span></p>
+            <p className="text-xs text-green-600 mt-2">↑ 0.3 vs last period</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Department Performance</h3>
+              <BarChart3 className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {departments.slice(0, 5).map((dept) => (
+                <div key={dept.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{dept.name}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
+                      {dept.status}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                      style={{width: `${dept.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{dept.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Key Metrics Overview</h3>
+              <span className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Total Courses</span>
+                  <span className="text-2xl font-bold text-gray-900">{totalCourses}</span>
+                </div>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Research Projects</span>
+                  <span className="text-2xl font-bold text-gray-900">587</span>
+                </div>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Faculty-Student Ratio</span>
+                  <span className="text-2xl font-bold text-gray-900">1:{Math.round(totalStudents/totalFaculty)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Faculties and Centers</h3>
+              <Building className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {departments.filter(d => ['fom', 'fomac', 'fons', 'ins', 'itm'].includes(d.id)).map((dept) => (
+                <div key={dept.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{dept.name}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
+                      {dept.status}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                      style={{width: `${dept.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{dept.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-900">Department Details</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department Head</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Students</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Courses</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Budget</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Research</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredDepartments.map((dept) => (
+                  <tr key={dept.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 bg-gradient-to-br ${getDepartmentColor(dept.color)} rounded-lg flex items-center justify-center`}>
+                          <Building className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{dept.name}</p>
+                          <p className="text-xs text-gray-500">{dept.utilization}% utilization</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <p className="text-sm text-gray-900">{dept.head}</p>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.faculty}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.students}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.courses}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.budget}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.research}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Award className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm font-semibold text-gray-900">{dept.satisfaction}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
+                        {dept.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Budget Distribution</h3>
+            <div className="space-y-4">
+              {departments.map((dept, i) => {
+                const budgetAmount = parseInt(dept.budget.replace(/[^0-9]/g, ''));
+                const maxBudget = 1300000;
+                const percentage = (budgetAmount / maxBudget) * 100;
+                return (
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">{dept.name}</span>
+                      <span className="text-sm font-bold text-gray-900">{dept.budget}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                        style={{width: `${Math.min(percentage, 100)}%`}}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Research Output Comparison</h3>
+            <div className="space-y-4">
+              {departments.filter(d => ['fons', 'fom', 'fomac', 'ins'].includes(d.id)).map((dept, i) => {
+                const maxResearch = 160;
+                const percentage = (dept.research / maxResearch) * 100;
+                return (
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">{dept.name}</span>
+                      <span className="text-sm font-bold text-gray-900">{dept.research}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className={`h-2.5 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                        style={{width: `${percentage}%`}}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
   const DepartmentDashboard = () => (
     <div className="space-y-6">
@@ -3494,7 +4347,434 @@ const TimetableOverview = () => {
   );
 };
 
-  const StudentServicesOverview = () => {
+
+const ClassOverview = () => {
+  const [selectedSemester, setSelectedSemester] = useState('current');
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [viewMode, setViewMode] = useState('overview');
+
+  const classData = {
+    totalClasses: 186,
+    activeClasses: 178,
+    completedClasses: 8,
+    avgClassSize: 32,
+    totalEnrollment: 5952,
+    utilizationRate: 87,
+    satisfactionRate: 4.3
+  };
+
+  const facultyClasses = [
+    {
+      id: 'fons',
+      name: 'FONS',
+      classes: 48,
+      students: 1536,
+      avgSize: 32,
+      utilization: 92,
+      color: 'purple'
+    },
+    {
+      id: 'fom',
+      name: 'FOM',
+      classes: 42,
+      students: 1344,
+      avgSize: 32,
+      utilization: 88,
+      color: 'blue'
+    },
+    {
+      id: 'fomac',
+      name: 'FOMAC',
+      classes: 38,
+      students: 1216,
+      avgSize: 32,
+      utilization: 85,
+      color: 'green'
+    },
+    {
+      id: 'ins',
+      name: 'INS',
+      classes: 32,
+      students: 1024,
+      avgSize: 32,
+      utilization: 83,
+      color: 'orange'
+    },
+    {
+      id: 'itm',
+      name: 'ITM',
+      classes: 26,
+      students: 832,
+      avgSize: 32,
+      utilization: 79,
+      color: 'pink'
+    }
+  ];
+
+  const classTypes = [
+    {
+      type: 'Theory',
+      count: 98,
+      percentage: 53,
+      icon: BookOpen,
+      color: 'blue'
+    },
+    {
+      type: 'Practical/Lab',
+      count: 56,
+      percentage: 30,
+      icon: Target,
+      color: 'green'
+    },
+    {
+      type: 'Seminar',
+      count: 22,
+      percentage: 12,
+      icon: Users,
+      color: 'purple'
+    },
+    {
+      type: 'Online',
+      count: 10,
+      percentage: 5,
+      icon: Clock,
+      color: 'orange'
+    }
+  ];
+
+  const timeSlots = [
+    { slot: '7:00 - 9:00', classes: 42, utilization: 95 },
+    { slot: '9:00 - 11:00', classes: 48, utilization: 98 },
+    { slot: '11:00 - 13:00', classes: 38, utilization: 87 },
+    { slot: '13:00 - 15:00', classes: 35, utilization: 82 },
+    { slot: '15:00 - 17:00', classes: 23, utilization: 68 }
+  ];
+
+  const recentActivities = [
+    { class: 'CS301 - Data Structures', action: 'Class started', time: '30 min ago', type: 'success' },
+    { class: 'BA205 - Marketing Strategy', action: 'Assignment due today', time: '2 hours ago', type: 'warning' },
+    { class: 'DS402 - Machine Learning', action: 'Midterm scheduled', time: '5 hours ago', type: 'info' },
+    { class: 'SE301 - Software Engineering', action: 'Project submission', time: '1 day ago', type: 'info' }
+  ];
+
+  const getFacultyColor = (color) => {
+    switch(color) {
+      case 'blue': return 'from-blue-400 to-blue-600';
+      case 'green': return 'from-green-400 to-green-600';
+      case 'purple': return 'from-purple-400 to-purple-600';
+      case 'orange': return 'from-orange-400 to-orange-600';
+      case 'pink': return 'from-pink-400 to-pink-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  const getIconColor = (color) => {
+    switch(color) {
+      case 'blue': return 'bg-blue-100 text-blue-600';
+      case 'green': return 'bg-green-100 text-green-600';
+      case 'purple': return 'bg-purple-100 text-purple-600';
+      case 'orange': return 'bg-orange-100 text-orange-600';
+      case 'pink': return 'bg-pink-100 text-pink-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Classes Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive view of all classes, schedules, and performance metrics</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="current">Current Semester</option>
+              <option value="fall2024">Fall 2024</option>
+              <option value="spring2024">Spring 2024</option>
+              <option value="fall2023">Fall 2023</option>
+            </select>
+            <select 
+              value={selectedFaculty}
+              onChange={(e) => setSelectedFaculty(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">All Faculties</option>
+              <option value="fons">FONS</option>
+              <option value="fom">FOM</option>
+              <option value="fomac">FOMAC</option>
+              <option value="ins">INS</option>
+              <option value="itm">ITM</option>
+            </select>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Classes</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.totalClasses}</p>
+            <p className="text-xs text-green-600 mt-2">↑ 12 vs last semester</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Active Classes</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.activeClasses}</p>
+            <p className="text-xs text-gray-600 mt-2">{classData.completedClasses} completed</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Enrollment</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.totalEnrollment.toLocaleString()}</p>
+            <p className="text-xs text-gray-600 mt-2">Avg: {classData.avgClassSize} per class</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Utilization Rate</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.utilizationRate}%</p>
+            <p className="text-xs text-green-600 mt-2">↑ 3% vs last semester</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Classes by Faculty</h3>
+              <Building className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {facultyClasses.map((faculty) => (
+                <div key={faculty.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{faculty.name}</span>
+                    <span className="text-sm font-bold text-gray-900">{faculty.classes} classes</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getFacultyColor(faculty.color)}`}
+                      style={{width: `${faculty.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{faculty.students} students • {faculty.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Class Types</h3>
+              <Target className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-3">
+              {classTypes.map((type, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 ${getIconColor(type.color)} rounded-lg flex items-center justify-center`}>
+                      <type.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{type.type}</p>
+                      <p className="text-xs text-gray-500">{type.count} classes</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">{type.percentage}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Recent Activities</h3>
+              <Calendar className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {recentActivities.map((activity, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                    activity.type === 'success' ? 'bg-green-500' :
+                    activity.type === 'warning' ? 'bg-yellow-500' :
+                    'bg-blue-500'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
+                    <p className="text-xs text-gray-600">{activity.class}</p>
+                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Time Slot Distribution</h3>
+            <div className="space-y-4">
+              {timeSlots.map((slot, i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">{slot.slot}</span>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">{slot.classes} classes</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                      style={{width: `${slot.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{slot.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Class Performance Metrics</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Average Attendance Rate</span>
+                  <span className="text-2xl font-bold text-gray-900">92%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{width: '92%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Student Satisfaction</span>
+                  <span className="text-2xl font-bold text-gray-900">4.3/5.0</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[1,2,3,4,5].map((star) => (
+                    <Award key={star} className={`w-5 h-5 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Assignment Completion</span>
+                  <span className="text-2xl font-bold text-gray-900">88%</span>
+                </div>
+                <div className="w-full bg-purple-200 rounded-full h-2">
+                  <div className="bg-purple-600 h-2 rounded-full" style={{width: '88%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Pass Rate</span>
+                  <span className="text-2xl font-bold text-gray-900">91%</span>
+                </div>
+                <div className="w-full bg-orange-200 rounded-full h-2">
+                  <div className="bg-orange-600 h-2 rounded-full" style={{width: '91%'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-900">Top Performing Classes</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Class Code</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Class Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Enrolled</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Attendance</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {[
+                  { code: 'CS401', name: 'Artificial Intelligence', faculty: 'FONS', enrolled: 45, attendance: 96, satisfaction: 4.8, passRate: 94, status: 'Active' },
+                  { code: 'BA305', name: 'Strategic Management', faculty: 'FOM', enrolled: 38, attendance: 94, satisfaction: 4.7, passRate: 92, status: 'Active' },
+                  { code: 'DS402', name: 'Machine Learning', faculty: 'FONS', enrolled: 42, attendance: 95, satisfaction: 4.6, passRate: 91, status: 'Active' },
+                  { code: 'MC301', name: 'Digital Marketing', faculty: 'FOMAC', enrolled: 35, attendance: 93, satisfaction: 4.5, passRate: 90, status: 'Active' },
+                  { code: 'IT305', name: 'Cloud Computing', faculty: 'ITM', enrolled: 40, attendance: 92, satisfaction: 4.5, passRate: 89, status: 'Active' }
+                ].map((classItem, i) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="font-semibold text-blue-600">{classItem.code}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">{classItem.name}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600">{classItem.faculty}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{classItem.enrolled}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{classItem.attendance}%</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Award className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm font-semibold text-gray-900">{classItem.satisfaction}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{classItem.passRate}%</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-300">
+                        {classItem.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+   const StudentServicesOverview = () => {
     const [selectedService, setSelectedService] = useState(null);
 
     const services = [
@@ -4398,6 +5678,370 @@ const TimetableOverview = () => {
     );
   };
 
+
+const AlumniOverview = () => {
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+
+  const alumniStats = {
+    totalAlumni: 12450,
+    employed: 11208,
+    employmentRate: 90,
+    avgSalary: '$45,000',
+    pursuing: 892,
+    entrepreneurs: 350
+  };
+
+  const employmentByIndustry = [
+    { industry: 'Technology', count: 3362, percentage: 30, color: 'blue' },
+    { industry: 'Finance & Banking', count: 2242, percentage: 20, color: 'green' },
+    { industry: 'Consulting', count: 1794, percentage: 16, color: 'purple' },
+    { industry: 'Manufacturing', count: 1346, percentage: 12, color: 'orange' },
+    { industry: 'Education', count: 1121, percentage: 10, color: 'pink' },
+    { industry: 'Healthcare', count: 897, percentage: 8, color: 'red' },
+    { industry: 'Others', count: 448, percentage: 4, color: 'gray' }
+  ];
+
+  const topCompanies = [
+    { name: 'Viettel Group', alumni: 245, logo: '🏢', tier: 'Fortune 500' },
+    { name: 'VinGroup', alumni: 198, logo: '🏢', tier: 'Top Employer' },
+    { name: 'FPT Corporation', alumni: 187, logo: '💻', tier: 'Tech Leader' },
+    { name: 'Vietnam Airlines', alumni: 156, logo: '✈️', tier: 'National Carrier' },
+    { name: 'BIDV', alumni: 142, logo: '🏦', tier: 'Top Bank' },
+    { name: 'Masan Group', alumni: 134, logo: '🏭', tier: 'Conglomerate' }
+  ];
+
+  const geographicDistribution = [
+    { location: 'Ho Chi Minh City', count: 4356, percentage: 35 },
+    { location: 'Hanoi', count: 3735, percentage: 30 },
+    { location: 'Da Nang', count: 1245, percentage: 10 },
+    { location: 'Other Vietnam', count: 1868, percentage: 15 },
+    { location: 'International', count: 1246, percentage: 10 }
+  ];
+
+  const salaryRanges = [
+    { range: 'Under $20,000', count: 1121, percentage: 10 },
+    { range: '$20,000 - $35,000', count: 3362, percentage: 30 },
+    { range: '$35,000 - $50,000', count: 3362, percentage: 30 },
+    { range: '$50,000 - $75,000', count: 2242, percentage: 20 },
+    { range: 'Above $75,000', count: 1121, percentage: 10 }
+  ];
+
+  const notableAlumni = [
+    { name: 'Nguyen Van A', year: '2015', position: 'CEO', company: 'Tech Startup', achievement: 'Forbes 30 Under 30', photo: '👨‍💼' },
+    { name: 'Tran Thi B', year: '2012', position: 'Director', company: 'Banking Corp', achievement: 'Industry Leader Award', photo: '👩‍💼' },
+    { name: 'Le Van C', year: '2018', position: 'Founder', company: 'E-commerce Platform', achievement: 'Startup of the Year', photo: '👨‍💼' },
+    { name: 'Pham Thi D', year: '2014', position: 'VP Research', company: 'AI Company', achievement: 'Innovation Award', photo: '👩‍💼' }
+  ];
+
+  const facultyBreakdown = [
+    { faculty: 'FONS', alumni: 3735, employed: 3362, rate: 90 },
+    { faculty: 'FOM', alumni: 3238, employed: 2914, rate: 90 },
+    { faculty: 'FOMAC', alumni: 2242, employed: 1994, rate: 89 },
+    { faculty: 'INS', alumni: 1868, employed: 1645, rate: 88 },
+    { faculty: 'ITM', alumni: 1367, employed: 1230, rate: 90 }
+  ];
+
+  const yearlyGraduation = [
+    { year: '2020', graduates: 2145 },
+    { year: '2021', graduates: 2298 },
+    { year: '2022', graduates: 2456 },
+    { year: '2023', graduates: 2634 },
+    { year: '2024', graduates: 2917 }
+  ];
+
+  const getColorClass = (color) => {
+    switch(color) {
+      case 'blue': return 'from-blue-400 to-blue-600';
+      case 'green': return 'from-green-400 to-green-600';
+      case 'purple': return 'from-purple-400 to-purple-600';
+      case 'orange': return 'from-orange-400 to-orange-600';
+      case 'pink': return 'from-pink-400 to-pink-600';
+      case 'red': return 'from-red-400 to-red-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Alumni Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">Track and analyze alumni career progression and achievements</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">All Years</option>
+              <option value="2024">Class of 2024</option>
+              <option value="2023">Class of 2023</option>
+              <option value="2022">Class of 2022</option>
+              <option value="2021">Class of 2021</option>
+            </select>
+            <select 
+              value={selectedFaculty}
+              onChange={(e) => setSelectedFaculty(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">All Faculties</option>
+              <option value="fons">FONS</option>
+              <option value="fom">FOM</option>
+              <option value="fomac">FOMAC</option>
+              <option value="ins">INS</option>
+              <option value="itm">ITM</option>
+            </select>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Alumni</p>
+            <p className="text-3xl font-bold text-gray-900">{alumniStats.totalAlumni.toLocaleString()}</p>
+            <p className="text-xs text-green-600 mt-2">Growing network</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Briefcase className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Employment Rate</p>
+            <p className="text-3xl font-bold text-gray-900">{alumniStats.employmentRate}%</p>
+            <p className="text-xs text-gray-600 mt-2">{alumniStats.employed.toLocaleString()} employed</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Avg Starting Salary</p>
+            <p className="text-3xl font-bold text-gray-900">{alumniStats.avgSalary}</p>
+            <p className="text-xs text-green-600 mt-2">↑ 8% vs last year</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Target className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Entrepreneurs</p>
+            <p className="text-3xl font-bold text-gray-900">{alumniStats.entrepreneurs}</p>
+            <p className="text-xs text-gray-600 mt-2">Own businesses</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Employment by Industry</h3>
+              <BarChart3 className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {employmentByIndustry.map((item, i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{item.industry}</span>
+                    <span className="text-sm font-bold text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getColorClass(item.color)}`}
+                      style={{width: `${item.percentage}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{item.percentage}% of employed alumni</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Top Employers</h3>
+              <Building className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-3">
+              {topCompanies.map((company, i) => (
+                <div key={i} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{company.logo}</span>
+                      <div>
+                        <p className="font-semibold text-sm text-gray-900">{company.name}</p>
+                        <p className="text-xs text-gray-500">{company.tier}</p>
+                      </div>
+                    </div>
+                    <span className="text-lg font-bold text-blue-600">{company.alumni}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Geographic Distribution</h3>
+              <Globe className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {geographicDistribution.map((location, i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">{location.location}</span>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">{location.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                      style={{width: `${location.percentage}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{location.percentage}%</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Salary Distribution</h3>
+            <div className="space-y-4">
+              {salaryRanges.map((range, i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{range.range}</span>
+                    <span className="text-sm font-bold text-gray-900">{range.count} alumni</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="h-2.5 rounded-full bg-gradient-to-r from-green-400 to-green-600"
+                      style={{width: `${range.percentage}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{range.percentage}%</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Graduation Trends</h3>
+            <div className="h-64 flex items-end justify-between gap-4">
+              {yearlyGraduation.map((data, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                  <div 
+                    className="w-full bg-gradient-to-t from-blue-400 to-blue-600 rounded-t-lg"
+                    style={{height: `${(data.graduates / 3000) * 100}%`}}
+                  ></div>
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-gray-900">{data.graduates}</p>
+                    <p className="text-xs text-gray-500">{data.year}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                <Star className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-white text-lg">Notable Alumni</h3>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {notableAlumni.map((alumni, i) => (
+              <div key={i} className="bg-white bg-opacity-10 backdrop-blur-sm p-4 rounded-lg border border-white border-opacity-20">
+                <div className="flex flex-col items-center text-center mb-3">
+                  <span className="text-4xl mb-2">{alumni.photo}</span>
+                  <h4 className="font-bold text-white">{alumni.name}</h4>
+                  <p className="text-xs text-white text-opacity-80">Class of {alumni.year}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-white font-semibold">{alumni.position}</p>
+                  <p className="text-xs text-white text-opacity-90">{alumni.company}</p>
+                  <div className="pt-2 mt-2 border-t border-white border-opacity-20">
+                    <p className="text-xs text-white text-opacity-80">🏆 {alumni.achievement}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-900">Employment Rate by Faculty</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Total Alumni</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Employed</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Employment Rate</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Progress</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {facultyBreakdown.map((faculty, i) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="font-semibold text-gray-900">{faculty.faculty}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{faculty.alumni.toLocaleString()}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{faculty.employed.toLocaleString()}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-lg font-bold text-green-600">{faculty.rate}%</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="h-2.5 rounded-full bg-gradient-to-r from-green-400 to-green-600"
+                          style={{width: `${faculty.rate}%`}}
+                        ></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
   const renderContent = () => {
     if (activeTab === 'dashboard') {
       if (userType === 'admin') return <AdminDashboard />;
@@ -4433,7 +6077,15 @@ const TimetableOverview = () => {
     if (activeTab === 'timetable-overview') {
       return <TimetableOverview />;
     }
-
+    if (activeTab === 'departments-overview') {
+      return <DepartmentOverview />;
+    }
+    if (activeTab === 'class-overview') {
+      return <ClassOverview />;
+    }
+    if (activeTab === 'alumni-overview') {
+      return <AlumniOverview />;
+    } 
     if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
       return <TimetableCalendar />;
     }
