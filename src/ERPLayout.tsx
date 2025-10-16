@@ -6640,8 +6640,8 @@ const AlumniOverview = () => {
   ];
 
   const geographicDistribution = [
-    { location: 'Ho Chi Minh City', count: 4356, percentage: 35 },
-    { location: 'Hanoi', count: 3735, percentage: 30 },
+    { location: 'Hanoi', count: 4356, percentage: 35 },
+    { location: 'HCMC', count: 3735, percentage: 30 },
     { location: 'Da Nang', count: 1245, percentage: 10 },
     { location: 'Other Vietnam', count: 1868, percentage: 15 },
     { location: 'International', count: 1246, percentage: 10 }
@@ -6663,19 +6663,19 @@ const AlumniOverview = () => {
   ];
 
   const facultyBreakdown = [
-    { faculty: 'FONS', alumni: 3735, employed: 3362, rate: 90 },
-    { faculty: 'FOM', alumni: 3238, employed: 2914, rate: 90 },
-    { faculty: 'FOMAC', alumni: 2242, employed: 1994, rate: 89 },
-    { faculty: 'INS', alumni: 1868, employed: 1645, rate: 88 },
-    { faculty: 'ITM', alumni: 1367, employed: 1230, rate: 90 }
+    { faculty: 'Undergraduate', alumni: 3735, employed: 3362, rate: 90 },
+    { faculty: 'Master', alumni: 3238, employed: 2914, rate: 90 },
+    { faculty: 'PhD', alumni: 2242, employed: 1994, rate: 89 },
+    { faculty: 'Short-term INS', alumni: 1868, employed: 1645, rate: 88 },
+    { faculty: 'Short-term ITM', alumni: 1367, employed: 1230, rate: 90 }
   ];
 
   const yearlyGraduation = [
-    { year: '2020', graduates: 2145 },
-    { year: '2021', graduates: 2298 },
-    { year: '2022', graduates: 2456 },
-    { year: '2023', graduates: 2634 },
-    { year: '2024', graduates: 2917 }
+    { year: '2020', graduates: 214 },
+    { year: '2021', graduates: 229 },
+    { year: '2022', graduates: 245 },
+    { year: '2023', graduates: 263 },
+    { year: '2024', graduates: 291 }
   ];
 
   const getColorClass = (color) => {
