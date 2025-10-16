@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 import { 
-  ChevronDown, ChevronRight, Users, GraduationCap, BookOpen, Calendar, 
-  DollarSign, FileText, Award, Clock, Building, Globe, Briefcase, 
-  MessageSquare, Settings, BarChart3, TrendingUp, UserCheck, Home, 
-  Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
-  AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, Target, MapPin,  Star,
-  CheckCircle, XCircle 
+  ChevronDown, ChevronRight, Users, GraduationCap, BookOpen, Calendar,
+DollarSign, FileText, Award, Clock, Building, Globe, Briefcase,
+MessageSquare, Settings, BarChart3, TrendingUp, UserCheck, Home,
+Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown,
+AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight,
+Target, MapPin, Star, CheckCircle, XCircle, Upload, Eye, Edit, Check, X, User
 } from 'lucide-react';
 function renderValue(v: unknown): React.ReactNode {
   if (v == null) return null;
@@ -37,11 +37,11 @@ const ERPLayout = () => {
       {
         id: 'students', label: 'Students', icon: GraduationCap,
         submenu: [
-          { id: 'student-services', label: 'Student Services Overview' },
+          { id: 'student-services', label: 'Student Overview' },
           { id: 'student-profile', label: 'Student Profile' },
           { id: 'tuition-fees', label: 'Tuition Fees' },
           { id: 'gpa', label: 'GPA' },
-          { id: 'training-score', label: 'Training Score' },
+          { id: 'training-score', label: 'Extra C. Score' },
           { id: 'scholarships', label: 'Scholarships' },
           { id: 'feedback', label: 'Feedback' },
           { id: 'attendance', label: 'Attendance' },
@@ -60,7 +60,7 @@ const ERPLayout = () => {
           { id: 'grade-management', label: 'Grade Management' },
           { id: 'student-management', label: 'Student Management' },
           { id: 'view-rankings', label: 'View Rankings' },
-          { id: 'syllabus-management', label: 'Syllabus Management' },
+          { id: 'curriculum-management', label: 'Curriculum Management' },
           { id: 'schedule-management', label: 'Schedule Management' },
           { id: 'community-hours', label: 'Community Hours' }
         ]
@@ -270,14 +270,11 @@ const AdminDashboard = () => {
 
   // Academic Performance Data (Last 4 Years)
   const academicPerformance = [
-    { year: '2021', value: 78, label: 'Y1' },
-    { year: '2022', value: 82, label: 'Y2' },
-    { year: '2023', value: 88, label: 'Y3' },
-    { year: '2024', value: 75, label: 'Y4' },
-    { year: '2024', value: 85, label: 'Y5' },
-    { year: '2024', value: 90, label: 'Y6' },
-    { year: '2024', value: 95, label: 'Y7' },
-    { year: '2024', value: 92, label: 'Y8' }
+    { year: '2021', value: 78, label: '2021' },
+    { year: '2022', value: 82, label: '2022' },
+    { year: '2023', value: 88, label: '2023' },
+    { year: '2024', value: 75, label: '2024' },
+    { year: '2025', value: 85, label: '2025' }
   ];
 
   // Earnings Data (Last Semester)
@@ -299,10 +296,10 @@ const AdminDashboard = () => {
 
   // Students Distribution
   const studentDistribution = {
-    total: 5100,
-    undergraduate: 3400,
-    graduate: 1200,
-    doctoral: 500
+    total: 2500,
+    undergraduate: 2000,
+    graduate: 250,
+    doctoral: 50
   };
 
   // Student Activities
@@ -314,11 +311,11 @@ const AdminDashboard = () => {
 
   // Department Performance
   const departmentPerformance = [
-    { name: 'Computer Science', students: 892, budget: 12500000, utilization: 78, performance: 92 },
-    { name: 'Engineering', students: 1245, budget: 15800000, utilization: 85, performance: 88 },
-    { name: 'Business Admin', students: 756, budget: 9800000, utilization: 72, performance: 90 },
-    { name: 'Sciences', students: 1089, budget: 11200000, utilization: 81, performance: 87 },
-    { name: 'Arts & Humanities', students: 623, budget: 6400000, utilization: 68, performance: 85 }
+    { name: 'FOM', students: 892, budget: 12500000, utilization: 78, performance: 92 },
+    { name: 'FOMAC', students: 1245, budget: 15800000, utilization: 85, performance: 88 },
+    { name: 'FONS', students: 756, budget: 9800000, utilization: 72, performance: 90 },
+    { name: 'INS', students: 1089, budget: 11200000, utilization: 81, performance: 87 },
+    { name: 'ITM', students: 623, budget: 6400000, utilization: 68, performance: 85 }
   ];
 
   // Faculty Stats
@@ -2907,106 +2904,286 @@ const LibraryDashboard = () => (
   };
 
   const LecturerProfileAdmin = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterDepartment, setFilterDepartment] = useState('all');
-    const [filterPosition, setFilterPosition] = useState('all');
-    const [selectedLecturer, setSelectedLecturer] = useState(null);
+  const [selectedTab, setSelectedTab] = useState('overview');
+  const [selectedLecturer, setSelectedLecturer] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
-    const sampleLecturers = [
-      { id: 'L001234', name: 'Dr. Nguyen Van Minh', department: 'Computer Science', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '24', status: 'Active' },
-      { id: 'L001235', name: 'Dr. Tran Thi Lan', department: 'Business Administration', position: 'Professor', degree: 'PhD', teachingHours: '520h', publications: '38', status: 'Active' },
-      { id: 'L001236', name: 'Dr. Le Van Hieu', department: 'Software Engineering', position: 'Lecturer', degree: 'PhD', teachingHours: '420h', publications: '12', status: 'Active' },
-      { id: 'L001237', name: 'Dr. Pham Thi Mai', department: 'Data Science', position: 'Associate Professor', degree: 'PhD', teachingHours: '460h', publications: '31', status: 'Active' },
-      { id: 'L001238', name: 'Dr. Hoang Van Tuan', department: 'Computer Science', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '440h', publications: '18', status: 'Active' },
-    ];
+  const overviewStats = {
+    totalLecturers: 297,
+    activeContracts: 285,
+    contractsExpiring: 12,
+    onLeave: 8,
+    avgKPI: 4.2,
+    budgetUtilization: 87
+  };
 
-    return (
-      <div className="space-y-6">
+  const lecturers = [
+    {
+      id: 'L001234',
+      name: 'Dr. Nguyen Van Minh',
+      department: 'Computer Science',
+      position: 'Associate Professor',
+      degree: 'PhD',
+      contractType: 'Full-time',
+      contractStart: '2020-09-01',
+      contractEnd: '2025-08-31',
+      salary: '$65,000',
+      teachingHours: 480,
+      publications: 24,
+      kpiScore: 4.5,
+      leaveBalance: 15,
+      conferences: 5,
+      status: 'Active',
+      lastReview: '2024-06-15'
+    },
+    {
+      id: 'L001235',
+      name: 'Dr. Tran Thi Lan',
+      department: 'Business Administration',
+      position: 'Professor',
+      degree: 'PhD',
+      contractType: 'Full-time',
+      contractStart: '2018-01-15',
+      contractEnd: '2025-01-14',
+      salary: '$75,000',
+      teachingHours: 520,
+      publications: 38,
+      kpiScore: 4.7,
+      leaveBalance: 20,
+      conferences: 8,
+      status: 'Active',
+      lastReview: '2024-05-20'
+    },
+    {
+      id: 'L001236',
+      name: 'Dr. Le Van Hieu',
+      department: 'Software Engineering',
+      position: 'Lecturer',
+      degree: 'PhD',
+      contractType: 'Full-time',
+      contractStart: '2021-03-01',
+      contractEnd: '2024-12-31',
+      salary: '$58,000',
+      teachingHours: 420,
+      publications: 12,
+      kpiScore: 4.0,
+      leaveBalance: 12,
+      conferences: 3,
+      status: 'Contract Expiring',
+      lastReview: '2024-07-10'
+    },
+    {
+      id: 'L001237',
+      name: 'Dr. Pham Thi Mai',
+      department: 'Data Science',
+      position: 'Associate Professor',
+      degree: 'PhD',
+      contractType: 'Full-time',
+      contractStart: '2019-08-01',
+      contractEnd: '2026-07-31',
+      salary: '$68,000',
+      teachingHours: 460,
+      publications: 31,
+      kpiScore: 4.6,
+      leaveBalance: 18,
+      conferences: 6,
+      status: 'Active',
+      lastReview: '2024-04-25'
+    },
+    {
+      id: 'L001238',
+      name: 'Dr. Hoang Van Tuan',
+      department: 'Computer Science',
+      position: 'Senior Lecturer',
+      degree: 'PhD',
+      contractType: 'Part-time',
+      contractStart: '2022-01-10',
+      contractEnd: '2025-01-09',
+      salary: '$45,000',
+      teachingHours: 240,
+      publications: 18,
+      kpiScore: 4.3,
+      leaveBalance: 10,
+      conferences: 4,
+      status: 'On Leave',
+      lastReview: '2024-08-01'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Active': return 'bg-green-100 text-green-700 border-green-300';
+      case 'Contract Expiring': return 'bg-orange-100 text-orange-700 border-orange-300';
+      case 'On Leave': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'Inactive': return 'bg-gray-100 text-gray-700 border-gray-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
+
+  const getKPIColor = (score) => {
+    if (score >= 4.5) return 'text-green-600';
+    if (score >= 4.0) return 'text-blue-600';
+    if (score >= 3.5) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Lecturer Profile Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive faculty data and analytics</p>
+            <h1 className="text-2xl font-bold text-gray-900">Faculty Management Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">Dean's comprehensive view of faculty performance, contracts, and KPIs</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <Plus size={18} />
-            Add New Lecturer
-          </button>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+              <Download className="w-4 h-4" />
+              Export Report
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              <Plus className="w-4 h-4" />
+              Add New Lecturer
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="grid grid-cols-6 gap-4">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-blue-600" />
+              </div>
+            </div>
             <p className="text-xs text-gray-500 mb-1">Total Lecturers</p>
-            <p className="text-2xl font-bold text-gray-900">297</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Professors: 45 (15%)</p>
-              <p className="text-xs text-gray-600">Associate: 102 (34%)</p>
-              <p className="text-xs text-gray-600">Lecturers: 150 (51%)</p>
-            </div>
+            <p className="text-2xl font-bold text-gray-900">{overviewStats.totalLecturers}</p>
+            <p className="text-xs text-gray-600 mt-1">Across all departments</p>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Teaching Hours</p>
-            <p className="text-2xl font-bold text-gray-900">132,480h</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Avg: 446h per lecturer</p>
-              <p className="text-xs text-gray-600">This academic year</p>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <FileText className="w-5 h-5 text-green-600" />
+              </div>
             </div>
+            <p className="text-xs text-gray-500 mb-1">Active Contracts</p>
+            <p className="text-2xl font-bold text-gray-900">{overviewStats.activeContracts}</p>
+            <p className="text-xs text-green-600 mt-1">96% of total</p>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Publications</p>
-            <p className="text-2xl font-bold text-gray-900">1,248</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Papers: 892</p>
-              <p className="text-xs text-gray-600">Patents: 356</p>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-orange-600" />
+              </div>
             </div>
+            <p className="text-xs text-gray-500 mb-1">Expiring Soon</p>
+            <p className="text-2xl font-bold text-gray-900">{overviewStats.contractsExpiring}</p>
+            <p className="text-xs text-orange-600 mt-1">Within 6 months</p>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Avg Workload</p>
-            <p className="text-2xl font-bold text-gray-900">14.8h/week</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Within standard range</p>
-              <p className="text-xs text-gray-600">12-16h recommended</p>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-purple-600" />
+              </div>
             </div>
+            <p className="text-xs text-gray-500 mb-1">On Leave</p>
+            <p className="text-2xl font-bold text-gray-900">{overviewStats.onLeave}</p>
+            <p className="text-xs text-gray-600 mt-1">Currently absent</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                <Target className="w-5 h-5 text-pink-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Avg KPI Score</p>
+            <p className="text-2xl font-bold text-gray-900">{overviewStats.avgKPI}<span className="text-lg text-gray-500">/5.0</span></p>
+            <p className="text-xs text-green-600 mt-1">Above target</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-yellow-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Budget Used</p>
+            <p className="text-2xl font-bold text-gray-900">{overviewStats.budgetUtilization}%</p>
+            <p className="text-xs text-gray-600 mt-1">Salary allocation</p>
           </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search by lecturer ID, name, email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSelectedTab('overview')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'overview' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setSelectedTab('contracts')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'contracts' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Contracts
+                </button>
+                <button
+                  onClick={() => setSelectedTab('kpi')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'kpi' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  KPI & Performance
+                </button>
+                <button
+                  onClick={() => setSelectedTab('leave')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'leave' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Leave Management
+                </button>
               </div>
-              <select 
-                value={filterDepartment}
-                onChange={(e) => setFilterDepartment(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Departments</option>
-                <option value="cs">Computer Science</option>
-                <option value="ba">Business Administration</option>
-                <option value="se">Software Engineering</option>
-                <option value="ds">Data Science</option>
-              </select>
-              <select 
-                value={filterPosition}
-                onChange={(e) => setFilterPosition(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Positions</option>
-                <option value="professor">Professor</option>
-                <option value="associate">Associate Professor</option>
-                <option value="senior">Senior Lecturer</option>
-                <option value="lecturer">Lecturer</option>
-              </select>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search lecturers..."
+                    className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-64"
+                  />
+                </div>
+                <select 
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Departments</option>
+                  <option value="cs">Computer Science</option>
+                  <option value="ba">Business Admin</option>
+                  <option value="se">Software Engineering</option>
+                  <option value="ds">Data Science</option>
+                </select>
+                <select 
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="expiring">Contract Expiring</option>
+                  <option value="leave">On Leave</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -3014,45 +3191,67 @@ const LibraryDashboard = () => (
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Lecturer ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Full Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Position</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Degree</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Teaching Hours</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Publications</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Lecturer</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Contract</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">KPI Score</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Teaching</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Publications</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Leave</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sampleLecturers.map((lecturer) => (
-                  <tr key={lecturer.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{lecturer.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lecturer.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{lecturer.department}</td>
+                {lecturers.map((lecturer) => (
+                  <tr key={lecturer.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        lecturer.position === 'Professor' ? 'bg-purple-100 text-purple-700' :
-                        lecturer.position === 'Associate Professor' ? 'bg-blue-100 text-blue-700' :
-                        lecturer.position === 'Senior Lecturer' ? 'bg-green-100 text-green-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {lecturer.position}
+                      <span className="font-medium text-blue-600">{lecturer.id}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <p className="font-semibold text-gray-900">{lecturer.name}</p>
+                        <p className="text-xs text-gray-500">{lecturer.position}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600">{lecturer.department}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="text-xs">
+                        <p className="font-semibold text-gray-900">{lecturer.contractType}</p>
+                        <p className="text-gray-500">Until {lecturer.contractEnd}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Target className="w-4 h-4 text-yellow-500" />
+                        <span className={`text-lg font-bold ${getKPIColor(lecturer.kpiScore)}`}>
+                          {lecturer.kpiScore}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{lecturer.teachingHours}h</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{lecturer.publications}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm text-gray-600">{lecturer.leaveBalance} days</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(lecturer.status)}`}>
+                        {lecturer.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{lecturer.degree}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{lecturer.teachingHours}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{lecturer.publications}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">{lecturer.status}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
                       <button 
                         onClick={() => setSelectedLecturer(lecturer)}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                       >
-                        View Details
+                        View Profile
                       </button>
                     </td>
                   </tr>
@@ -3074,105 +3273,220 @@ const LibraryDashboard = () => (
         </div>
 
         {selectedLecturer && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Lecturer Profile Details</h2>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedLecturer(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                    <Users className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <div className="text-white">
+                    <h2 className="text-2xl font-bold">{selectedLecturer.name}</h2>
+                    <p className="text-sm opacity-90">{selectedLecturer.position} • {selectedLecturer.department}</p>
+                  </div>
+                </div>
                 <button 
                   onClick={() => setSelectedLecturer(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
                 >
                   ✕
                 </button>
               </div>
+
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-3 gap-6">
-                  <div className="col-span-1 flex flex-col items-center">
-                    <div className="w-32 h-32 bg-gray-300 rounded-full mb-4"></div>
-                    <h3 className="text-xl font-bold text-gray-900">{selectedLecturer.name}</h3>
-                    <p className="text-sm text-gray-500">{selectedLecturer.id}</p>
-                    <p className="text-sm text-blue-600 mt-1">{selectedLecturer.position}</p>
-                  </div>
-                  <div className="col-span-2 grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Department</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.department}</p>
+                  <div className="col-span-2 space-y-6">
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                        Contract Information
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Contract Type</p>
+                          <p className="font-semibold text-gray-900">{selectedLecturer.contractType}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Start Date</p>
+                          <p className="font-semibold text-gray-900">{selectedLecturer.contractStart}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">End Date</p>
+                          <p className="font-semibold text-gray-900">{selectedLecturer.contractEnd}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Annual Salary</p>
+                          <p className="font-semibold text-gray-900">{selectedLecturer.salary}</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                          Renew Contract
+                        </button>
+                      </div>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Degree</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.degree}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Teaching Hours</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.teachingHours}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Publications</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.publications}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Status</p>
-                      <p className="font-semibold text-green-600">{selectedLecturer.status}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Email</p>
-                      <p className="font-semibold text-gray-900 text-sm">{selectedLecturer.id.toLowerCase()}@hsb.edu.vn</p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Teaching Performance</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Active Courses</span>
-                        <span className="font-semibold">6</span>
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Target className="w-5 h-5 text-purple-600" />
+                        KPI & Performance Metrics
+                      </h3>
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="p-4 bg-purple-50 rounded-lg">
+                          <p className="text-sm text-gray-600 mb-1">Overall KPI</p>
+                          <p className={`text-3xl font-bold ${getKPIColor(selectedLecturer.kpiScore)}`}>
+                            {selectedLecturer.kpiScore}/5.0
+                          </p>
+                        </div>
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-gray-600 mb-1">Teaching Hours</p>
+                          <p className="text-3xl font-bold text-gray-900">{selectedLecturer.teachingHours}h</p>
+                        </div>
+                        <div className="p-4 bg-green-50 rounded-lg">
+                          <p className="text-sm text-gray-600 mb-1">Publications</p>
+                          <p className="text-3xl font-bold text-gray-900">{selectedLecturer.publications}</p>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Student Rating</span>
-                        <span className="font-semibold">4.7/5.0</span>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Teaching Quality</span>
+                            <span className="font-semibold">4.7/5.0</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{width: '94%'}}></div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Research Output</span>
+                            <span className="font-semibold">4.5/5.0</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{width: '90%'}}></div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Service & Admin</span>
+                            <span className="font-semibold">4.0/5.0</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-purple-500 h-2 rounded-full" style={{width: '80%'}}></div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Workload (weekly)</span>
-                        <span className="font-semibold">16h</span>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-green-600" />
+                        Academic Activities
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-2">Conferences Attended</p>
+                          <div className="space-y-2">
+                            <div className="p-2 bg-gray-50 rounded text-xs">
+                              <p className="font-semibold">AI & ML Conference 2024</p>
+                              <p className="text-gray-600">Singapore • June 2024</p>
+                            </div>
+                            <div className="p-2 bg-gray-50 rounded text-xs">
+                              <p className="font-semibold">IEEE Computer Science</p>
+                              <p className="text-gray-600">Japan • March 2024</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-2">Recent Publications</p>
+                          <div className="space-y-2">
+                            <div className="p-2 bg-gray-50 rounded text-xs">
+                              <p className="font-semibold">Deep Learning in Healthcare</p>
+                              <p className="text-gray-600">Q1 Journal • 2024</p>
+                            </div>
+                            <div className="p-2 bg-gray-50 rounded text-xs">
+                              <p className="font-semibold">AI Ethics Framework</p>
+                              <p className="text-gray-600">Conference Paper • 2024</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Research & Activities</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Research Projects</span>
-                        <span className="font-semibold">5 active</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Community Hours</span>
-                        <span className="font-semibold">120h this year</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Conference Attendance</span>
-                        <span className="font-semibold">8 events</span>
+                  <div className="space-y-6">
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-orange-600" />
+                        Leave Management
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-gray-600 mb-1">Leave Balance</p>
+                          <p className="text-2xl font-bold text-gray-900">{selectedLecturer.leaveBalance} days</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 mb-2">Recent Leave</p>
+                          <div className="space-y-2">
+                            <div className="p-2 bg-gray-50 rounded text-xs">
+                              <p className="font-semibold">Annual Leave</p>
+                              <p className="text-gray-600">Aug 1-5, 2024 (5 days)</p>
+                            </div>
+                            <div className="p-2 bg-gray-50 rounded text-xs">
+                              <p className="font-semibold">Conference</p>
+                              <p className="text-gray-600">Jun 15-20, 2024 (6 days)</p>
+                            </div>
+                          </div>
+                        </div>
+                        <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          View Full Leave History
+                        </button>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Recent Publications</h4>
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <p className="font-semibold text-gray-900">Machine Learning Applications in Healthcare</p>
-                      <p className="text-xs text-gray-600">Journal of AI Research, 2025</p>
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Briefcase className="w-5 h-5 text-pink-600" />
+                        Quick Stats
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                          <span className="text-sm text-gray-600">Degree</span>
+                          <span className="text-sm font-semibold text-gray-900">{selectedLecturer.degree}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                          <span className="text-sm text-gray-600">Last Review</span>
+                          <span className="text-sm font-semibold text-gray-900">{selectedLecturer.lastReview}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                          <span className="text-sm text-gray-600">Conferences</span>
+                          <span className="text-sm font-semibold text-gray-900">{selectedLecturer.conferences} attended</span>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <span className="text-sm text-gray-600">Status</span>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getStatusColor(selectedLecturer.status)}`}>
+                            {selectedLecturer.status}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <p className="font-semibold text-gray-900">Deep Learning for Natural Language Processing</p>
-                      <p className="text-xs text-gray-600">International Conference on AI, 2024</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="font-semibold text-gray-900">Neural Networks and Pattern Recognition</p>
-                      <p className="text-xs text-gray-600">IEEE Transactions, 2024</p>
+
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                      <h3 className="font-bold text-gray-900 mb-4">Actions</h3>
+                      <div className="space-y-2">
+                        <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                          Schedule Review
+                        </button>
+                        <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
+                          Adjust Salary
+                        </button>
+                        <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          Send Message
+                        </button>
+                        <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          Export Profile
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3181,8 +3495,9 @@ const LibraryDashboard = () => (
           </div>
         )}
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   const StudentProfileAdmin = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -4874,7 +5189,7 @@ const ClassOverview = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Student Life Overview</h1>
             <p className="text-sm text-gray-500 mt-1">Comprehensive management of all student support services</p>
           </div>
         </div>
@@ -5045,41 +5360,70 @@ const ClassOverview = () => {
       </div>
     );
   };
-  const ViewRankings = () => {
-  const [filterFaculty, setFilterFaculty] = useState('all');
-  const [filterLevel, setFilterLevel] = useState('all');
+ const ViewRankings = () => {
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [selectedLevel, setSelectedLevel] = useState('all');
   const [sortBy, setSortBy] = useState('overall');
 
-  const facultyData = [
-    { rank: 1, name: 'Dr. Nguyen Van Minh', department: 'Computer Science', faculty: 'FONS', courses: 3, students: 206, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 234, badge: 'gold' },
-    { rank: 2, name: 'Dr. Bui Thi Ngoc', department: 'Digital Media', faculty: 'FOMAC', courses: 4, students: 267, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 228, badge: 'silver' },
-    { rank: 3, name: 'Dr. Pham Thi Mai', department: 'Data Science', faculty: 'FONS', courses: 3, students: 145, overall: 4.7, teaching: 4.8, knowledge: 4.9, communication: 4.6, support: 4.7, responses: 142, badge: 'bronze' },
-    { rank: 4, name: 'Dr. Tran Thi Lan', department: 'Business Administration', faculty: 'FOM', courses: 5, students: 280, overall: 4.7, teaching: 4.8, knowledge: 4.7, communication: 4.6, support: 4.8, responses: 272, badge: null },
-    { rank: 5, name: 'Dr. Hoang Van Tuan', department: 'Computer Science', faculty: 'FONS', courses: 3, students: 165, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 189, badge: null },
-    { rank: 6, name: 'Dr. Nguyen Duc Anh', department: 'Marketing', faculty: 'FOM', courses: 3, students: 156, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 150, badge: null },
-    { rank: 7, name: 'Dr. Dao Van Hai', department: 'Journalism', faculty: 'FOMAC', courses: 2, students: 144, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 138, badge: null },
-    { rank: 8, name: 'Dr. Le Thi Hoa', department: 'Economics', faculty: 'FONS', courses: 4, students: 198, overall: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 192, badge: null },
-    { rank: 9, name: 'Dr. Le Van Cuong', department: 'Finance', faculty: 'FOM', courses: 4, students: 215, overall: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 208, badge: null },
-    { rank: 10, name: 'Dr. Tran Van Long', department: 'Physics', faculty: 'FONS', courses: 2, students: 89, overall: 4.4, teaching: 4.5, knowledge: 4.6, communication: 4.3, support: 4.4, responses: 85, badge: null },
+  const faculties = [
+    { id: 'fons', name: 'FONS', fullName: 'Faculty of Nontraditional Security', courses: 52 },
+    { id: 'fom', name: 'FOM', fullName: 'Faculty of Management', courses: 48 },
+    { id: 'fomac', name: 'FOMAC', fullName: 'Faculty of Marketing & Communication', courses: 51 }
   ];
 
-  const topPerformers = facultyData.slice(0, 3);
+  const rankingsData = [
+    { id: 1, name: 'Dr. Nguyen Van Minh', faculty: 'fons', department: 'Computer Science', level: 'undergrad', courses: 4, students: 240, overallRating: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 234 },
+    { id: 2, name: 'Dr. Pham Thi Mai', faculty: 'fons', department: 'Data Science', level: 'postgrad', courses: 3, students: 145, overallRating: 4.7, teaching: 4.8, knowledge: 4.9, communication: 4.6, support: 4.7, responses: 142 },
+    { id: 3, name: 'Dr. Bui Thi Ngoc', faculty: 'fomac', department: 'Digital Media', level: 'undergrad', courses: 4, students: 234, overallRating: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 228 },
+    { id: 4, name: 'Dr. Tran Thi Lan', faculty: 'fom', department: 'Business Administration', level: 'undergrad', courses: 5, students: 280, overallRating: 4.7, teaching: 4.8, knowledge: 4.7, communication: 4.6, support: 4.8, responses: 272 },
+    { id: 5, name: 'Dr. Hoang Van Tuan', faculty: 'fons', department: 'Computer Science', level: 'undergrad', courses: 3, students: 165, overallRating: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 159 },
+    { id: 6, name: 'Dr. Nguyen Duc Anh', faculty: 'fom', department: 'Marketing', level: 'postgrad', courses: 3, students: 156, overallRating: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 150 },
+    { id: 7, name: 'Dr. Dao Van Hai', faculty: 'fomac', department: 'Journalism', level: 'postgrad', courses: 3, students: 142, overallRating: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 138 },
+    { id: 8, name: 'Dr. Le Thi Hoa', faculty: 'fons', department: 'Mathematics', level: 'undergrad', courses: 4, students: 198, overallRating: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 192 },
+    { id: 9, name: 'Dr. Le Van Cuong', faculty: 'fom', department: 'Finance', level: 'undergrad', courses: 4, students: 215, overallRating: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 208 },
+    { id: 10, name: 'Dr. Ngo Thi Lan', faculty: 'fomac', department: 'Public Relations', level: 'undergrad', courses: 4, students: 198, overallRating: 4.5, teaching: 4.6, knowledge: 4.5, communication: 4.4, support: 4.5, responses: 192 },
+    { id: 11, name: 'Dr. Tran Van Long', faculty: 'fons', department: 'Physics', level: 'postgrad', courses: 2, students: 89, overallRating: 4.4, teaching: 4.5, knowledge: 4.6, communication: 4.3, support: 4.4, responses: 85 },
+    { id: 12, name: 'Dr. Pham Thi Huong', faculty: 'fom', department: 'Human Resources', level: 'postgrad', courses: 2, students: 124, overallRating: 4.4, teaching: 4.5, knowledge: 4.5, communication: 4.3, support: 4.4, responses: 119 },
+    { id: 13, name: 'Dr. Truong Van Thanh', faculty: 'fomac', department: 'Film & Video', level: 'postgrad', courses: 2, students: 97, overallRating: 4.4, teaching: 4.5, knowledge: 4.6, communication: 4.3, support: 4.4, responses: 94 },
+    { id: 14, name: 'Dr. Vo Thanh Nam', faculty: 'fom', department: 'International Business', level: 'undergrad', courses: 3, students: 189, overallRating: 4.3, teaching: 4.4, knowledge: 4.5, communication: 4.2, support: 4.3, responses: 182 },
+    { id: 15, name: 'Dr. Dinh Thi Ha', faculty: 'fomac', department: 'Graphic Design', level: 'undergrad', courses: 3, students: 176, overallRating: 4.3, teaching: 4.4, knowledge: 4.4, communication: 4.2, support: 4.3, responses: 171 }
+  ];
+
+  const filteredData = rankingsData.filter(item => {
+    if (selectedFaculty !== 'all' && item.faculty !== selectedFaculty) return false;
+    if (selectedLevel !== 'all' && item.level !== selectedLevel) return false;
+    return true;
+  });
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    switch(sortBy) {
+      case 'overall': return b.overallRating - a.overallRating;
+      case 'teaching': return b.teaching - a.teaching;
+      case 'knowledge': return b.knowledge - a.knowledge;
+      case 'communication': return b.communication - a.communication;
+      case 'support': return b.support - a.support;
+      default: return b.overallRating - a.overallRating;
+    }
+  });
+
+  const topPerformers = sortedData.slice(0, 3);
+  const avgOverallRating = (filteredData.reduce((sum, item) => sum + item.overallRating, 0) / filteredData.length).toFixed(2);
+  const totalResponses = filteredData.reduce((sum, item) => sum + item.responses, 0);
+  const totalStudents = filteredData.reduce((sum, item) => sum + item.students, 0);
+
+  const getRatingColor = (rating) => {
+    if (rating >= 4.7) return 'text-green-600 bg-green-100';
+    if (rating >= 4.4) return 'text-blue-600 bg-blue-100';
+    if (rating >= 4.0) return 'text-yellow-600 bg-yellow-100';
+    return 'text-orange-600 bg-orange-100';
+  };
 
   const getFacultyColor = (faculty) => {
     switch(faculty) {
-      case 'FONS': return 'bg-blue-100 text-blue-700';
-      case 'FOMAC': return 'bg-purple-100 text-purple-700';
-      case 'FOM': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getBadgeColor = (badge) => {
-    switch(badge) {
-      case 'gold': return 'bg-yellow-400';
-      case 'silver': return 'bg-gray-300';
-      case 'bronze': return 'bg-orange-400';
-      default: return '';
+      case 'fons': return 'blue';
+      case 'fom': return 'green';
+      case 'fomac': return 'purple';
+      default: return 'gray';
     }
   };
 
@@ -5088,108 +5432,100 @@ const ClassOverview = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Faculty Rankings</h1>
-            <p className="text-sm text-gray-500 mt-1">Based on student feedback and teaching evaluations</p>
+            <h1 className="text-3xl font-bold text-gray-900">Faculty Rankings</h1>
+            <p className="text-sm text-gray-500 mt-1">Based on student feedback - Semester 2, 2024</p>
           </div>
           <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
             Export Report
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+              <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <p className="text-xs text-gray-500 mb-1">Total Faculty</p>
-            <p className="text-3xl font-bold text-gray-900">10</p>
+            <p className="text-sm text-gray-500 mb-1">Total Faculty</p>
+            <p className="text-3xl font-bold text-gray-900">{filteredData.length}</p>
             <p className="text-xs text-gray-600 mt-2">Evaluated this semester</p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Award className="w-5 h-5 text-green-600" />
-              </div>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+              <Award className="w-6 h-6 text-green-600" />
             </div>
-            <p className="text-xs text-gray-500 mb-1">Avg Overall Rating</p>
-            <p className="text-3xl font-bold text-gray-900">4.62<span className="text-lg text-gray-500">/5.0</span></p>
-            <p className="text-xs text-gray-600 mt-2">↑ 0.2 vs last semester</p>
+            <p className="text-sm text-gray-500 mb-1">Avg Rating</p>
+            <p className="text-3xl font-bold text-gray-900">{avgOverallRating}/5.0</p>
+            <p className="text-xs text-green-600 mt-2">↑ 0.2 vs last semester</p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 text-purple-600" />
-              </div>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+              <MessageSquare className="w-6 h-6 text-purple-600" />
             </div>
-            <p className="text-xs text-gray-500 mb-1">Total Responses</p>
-            <p className="text-3xl font-bold text-gray-900">1808</p>
-            <p className="text-xs text-gray-600 mt-2">From 1984 students</p>
+            <p className="text-sm text-gray-500 mb-1">Responses</p>
+            <p className="text-3xl font-bold text-gray-900">{totalResponses}</p>
+            <p className="text-xs text-gray-600 mt-2">From {totalStudents} students</p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-orange-600" />
-              </div>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+              <TrendingUp className="w-6 h-6 text-orange-600" />
             </div>
-            <p className="text-xs text-gray-500 mb-1">Response Rate</p>
-            <p className="text-3xl font-bold text-gray-900">97%</p>
-            <p className="text-xs text-gray-600 mt-2">↑ 5% vs last semester</p>
+            <p className="text-sm text-gray-500 mb-1">Response Rate</p>
+            <p className="text-3xl font-bold text-gray-900">{((totalResponses/totalStudents)*100).toFixed(0)}%</p>
+            <p className="text-xs text-green-600 mt-2">Excellent engagement</p>
           </div>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
-          <div className="flex items-start gap-3">
-            <Award className="w-6 h-6 text-yellow-600 mt-1" />
-            <div className="flex-1">
-              <h3 className="font-bold text-gray-900 mb-4">Top Performers This Semester</h3>
-              <div className="grid grid-cols-3 gap-6">
-                {topPerformers.map((lecturer) => (
-                  <div key={lecturer.rank} className="bg-white p-6 rounded-xl shadow-sm border-2 border-yellow-200 relative">
-                    {lecturer.badge && (
-                      <div className={`absolute -top-3 -right-3 w-12 h-12 ${getBadgeColor(lecturer.badge)} rounded-full flex items-center justify-center shadow-lg`}>
-                        <span className="text-white font-bold text-lg">{lecturer.rank}</span>
-                      </div>
-                    )}
-                    <div className="flex flex-col items-center mb-4">
-                      <div className="w-20 h-20 bg-gray-300 rounded-full mb-3"></div>
-                      <h4 className="font-bold text-gray-900 text-center">{lecturer.name}</h4>
-                      <p className="text-xs text-gray-500">{lecturer.department}</p>
-                      <span className={`mt-2 px-2 py-1 rounded-full text-xs font-medium ${getFacultyColor(lecturer.faculty)}`}>
-                        {lecturer.faculty}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-4 pb-4 border-b border-gray-200">
-                      <Award className="w-5 h-5 text-yellow-500" />
-                      <span className="text-2xl font-bold text-gray-900">{lecturer.overall}</span>
-                      <span className="text-gray-500">/5.0</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-center">
-                      <div>
-                        <p className="text-xs text-gray-500">Teaching</p>
-                        <p className="font-bold text-gray-900">{lecturer.teaching}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Knowledge</p>
-                        <p className="font-bold text-gray-900">{lecturer.knowledge}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Support</p>
-                        <p className="font-bold text-gray-900">{lecturer.support}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Responses</p>
-                        <p className="font-bold text-gray-900">{lecturer.responses}</p>
-                      </div>
-                    </div>
+        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-xl border border-yellow-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <Award className="w-7 h-7 text-yellow-600" />
+            Top 3 Performers
+          </h2>
+          <div className="grid grid-cols-3 gap-6">
+            {topPerformers.map((lecturer, index) => (
+              <div key={lecturer.id} className="bg-white p-6 rounded-xl shadow-sm border-2 border-yellow-300 relative overflow-hidden">
+                <div className={`absolute top-0 right-0 w-16 h-16 transform rotate-45 translate-x-6 -translate-y-6 ${
+                  index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
+                  index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500' :
+                  'bg-gradient-to-br from-orange-400 to-orange-600'
+                }`}></div>
+                <div className="absolute top-3 right-3 text-white font-bold text-lg">#{index + 1}</div>
+                
+                <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                <h3 className="text-center font-bold text-gray-900 text-lg mb-1">{lecturer.name}</h3>
+                <p className="text-center text-sm text-gray-600 mb-1">{lecturer.department}</p>
+                <p className="text-center text-xs text-gray-500 mb-4">
+                  {faculties.find(f => f.id === lecturer.faculty)?.name}
+                </p>
+                
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Award className="w-5 h-5 text-yellow-600" />
+                  <span className="text-3xl font-bold text-gray-900">{lecturer.overallRating}</span>
+                  <span className="text-gray-500">/5.0</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-2 bg-gray-50 rounded">
+                    <p className="text-gray-500">Teaching</p>
+                    <p className="font-bold text-gray-900">{lecturer.teaching}</p>
                   </div>
-                ))}
+                  <div className="p-2 bg-gray-50 rounded">
+                    <p className="text-gray-500">Knowledge</p>
+                    <p className="font-bold text-gray-900">{lecturer.knowledge}</p>
+                  </div>
+                  <div className="p-2 bg-gray-50 rounded">
+                    <p className="text-gray-500">Support</p>
+                    <p className="font-bold text-gray-900">{lecturer.support}</p>
+                  </div>
+                  <div className="p-2 bg-gray-50 rounded">
+                    <p className="text-gray-500">Responses</p>
+                    <p className="font-bold text-gray-900">{lecturer.responses}</p>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -5197,34 +5533,36 @@ const ClassOverview = () => {
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-4">
               <select 
-                value={filterFaculty}
-                onChange={(e) => setFilterFaculty(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                value={selectedFaculty}
+                onChange={(e) => setSelectedFaculty(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Faculties</option>
-                <option value="fons">FONS</option>
-                <option value="fomac">FOMAC</option>
-                <option value="fom">FOM</option>
+                {faculties.map(f => (
+                  <option key={f.id} value={f.id}>{f.name} - {f.fullName}</option>
+                ))}
               </select>
+              
               <select 
-                value={filterLevel}
-                onChange={(e) => setFilterLevel(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                value={selectedLevel}
+                onChange={(e) => setSelectedLevel(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Levels</option>
-                <option value="professor">Professor</option>
-                <option value="associate">Associate Professor</option>
-                <option value="lecturer">Lecturer</option>
+                <option value="undergrad">Undergraduate</option>
+                <option value="postgrad">Postgraduate</option>
               </select>
+
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="overall">Sort by Overall Rating</option>
-                <option value="teaching">Sort by Teaching</option>
-                <option value="knowledge">Sort by Knowledge</option>
-                <option value="responses">Sort by Responses</option>
+                <option value="teaching">Sort by Teaching Quality</option>
+                <option value="knowledge">Sort by Subject Knowledge</option>
+                <option value="communication">Sort by Communication</option>
+                <option value="support">Sort by Student Support</option>
               </select>
             </div>
           </div>
@@ -5245,40 +5583,81 @@ const ClassOverview = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {facultyData.map((lecturer) => (
-                  <tr key={lecturer.rank} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-bold text-gray-900">{lecturer.rank}</span>
-                      </div>
+                {sortedData.map((lecturer, index) => (
+                  <tr key={lecturer.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${
+                        index < 3 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {index + 1}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div>
                         <p className="font-semibold text-gray-900">{lecturer.name}</p>
                         <p className="text-xs text-gray-500">{lecturer.department}</p>
                         <p className="text-xs text-gray-400">{lecturer.courses} courses • {lecturer.students} students</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getFacultyColor(lecturer.faculty)}`}>
-                        {lecturer.faculty}
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getFacultyColor(lecturer.faculty)}-100 text-${getFacultyColor(lecturer.faculty)}-700`}>
+                        {faculties.find(f => f.id === lecturer.faculty)?.name}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="inline-flex items-center justify-center px-3 py-1 bg-green-100 rounded-full">
-                        <span className="text-lg font-bold text-green-700">{lecturer.overall}</span>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-3 py-1 rounded-full text-sm font-bold ${getRatingColor(lecturer.overallRating)}`}>
+                        {lecturer.overallRating}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.teaching}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.knowledge}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.communication}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.support}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">{lecturer.responses}</td>
+                    <td className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{lecturer.teaching}</td>
+                    <td className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{lecturer.knowledge}</td>
+                    <td className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{lecturer.communication}</td>
+                    <td className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{lecturer.support}</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600">{lecturer.responses}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          {faculties.map((faculty) => {
+            const facultyData = rankingsData.filter(l => l.faculty === faculty.id);
+            const avgRating = (facultyData.reduce((sum, l) => sum + l.overallRating, 0) / facultyData.length).toFixed(2);
+            const topRated = [...facultyData].sort((a, b) => b.overallRating - a.overallRating).slice(0, 3);
+            
+            return (
+              <div key={faculty.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{faculty.name}</h3>
+                <p className="text-sm text-gray-600 mb-4">{faculty.fullName}</p>
+                
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500">Average Rating</span>
+                    <span className="text-2xl font-bold text-gray-900">{avgRating}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-600">
+                    <span>{facultyData.length} faculty</span>
+                    <span>{faculty.courses} courses</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Top Rated</p>
+                  {topRated.map((lecturer, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-500">{i + 1}.</span>
+                        <span className="text-gray-900 font-medium text-xs">{lecturer.name.split(' ').slice(-2).join(' ')}</span>
+                      </div>
+                      <span className="font-bold text-green-600">{lecturer.overallRating}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -5678,7 +6057,556 @@ const ClassOverview = () => {
     );
   };
 
+const CurriculumManagement = () => {
+  const [activeTab, setActiveTab] = useState('pending');
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [selectedCurriculum, setSelectedCurriculum] = useState(null);
 
+  const curriculumStats = {
+    totalCurricula: 42,
+    pending: 8,
+    approved: 28,
+    rejected: 6,
+    activeReviews: 12
+  };
+
+  const facultyData = [
+    { faculty: 'FONS', curricula: 12, pending: 3, approved: 8, rejected: 1 },
+    { faculty: 'FOM', curricula: 10, pending: 2, approved: 7, rejected: 1 },
+    { faculty: 'FOMAC', curricula: 8, pending: 1, approved: 6, rejected: 1 },
+    { faculty: 'INS', curricula: 7, pending: 1, approved: 5, rejected: 1 },
+    { faculty: 'ITM', curricula: 5, pending: 1, approved: 2, rejected: 2 }
+  ];
+
+  const pendingCurricula = [
+    {
+      id: 'CUR001',
+      title: 'Bachelor of Computer Science - 2025',
+      faculty: 'FONS',
+      submittedBy: 'Dr. Nguyen Van Minh',
+      submittedDate: '2025-10-10',
+      type: 'Major Revision',
+      status: 'Pending Review',
+      priority: 'High',
+      changes: 'Added 3 new AI courses, removed 2 outdated courses',
+      reviewers: ['Dr. Tran Thi Lan', 'Dr. Le Van Hieu']
+    },
+    {
+      id: 'CUR002',
+      title: 'MBA Program Curriculum Update',
+      faculty: 'FOM',
+      submittedBy: 'Dr. Pham Thi Mai',
+      submittedDate: '2025-10-12',
+      type: 'Minor Update',
+      status: 'Under Review',
+      priority: 'Medium',
+      changes: 'Updated course descriptions and prerequisites',
+      reviewers: ['Dr. Hoang Van Tuan']
+    },
+    {
+      id: 'CUR003',
+      title: 'Digital Media Arts - New Program',
+      faculty: 'FOMAC',
+      submittedBy: 'Dr. Bui Thi Ngoc',
+      submittedDate: '2025-10-14',
+      type: 'New Program',
+      status: 'Pending Review',
+      priority: 'High',
+      changes: 'Complete new program proposal with 120 credits',
+      reviewers: ['Dr. Dao Van Hai', 'Dr. Le Thi Hoa']
+    },
+    {
+      id: 'CUR004',
+      title: 'Data Science Specialization',
+      faculty: 'FONS',
+      submittedBy: 'Dr. Le Van Cuong',
+      submittedDate: '2025-10-15',
+      type: 'New Specialization',
+      status: 'Pending Review',
+      priority: 'Medium',
+      changes: 'New specialization track with 6 core courses',
+      reviewers: ['Dr. Tran Van Long']
+    }
+  ];
+
+  const approvedCurricula = [
+    {
+      id: 'CUR005',
+      title: 'Bachelor of Business Administration - 2025',
+      faculty: 'FOM',
+      approvedBy: 'Academic Committee',
+      approvedDate: '2025-09-28',
+      effectiveDate: '2026-01-01',
+      type: 'Major Revision'
+    },
+    {
+      id: 'CUR006',
+      title: 'Information Systems Program Update',
+      faculty: 'INS',
+      approvedBy: 'Curriculum Board',
+      approvedDate: '2025-09-25',
+      effectiveDate: '2025-11-01',
+      type: 'Minor Update'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch(status.toLowerCase()) {
+      case 'pending review': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+      case 'under review': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'approved': return 'bg-green-100 text-green-700 border-green-300';
+      case 'rejected': return 'bg-red-100 text-red-700 border-red-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch(priority.toLowerCase()) {
+      case 'high': return 'text-red-600';
+      case 'medium': return 'text-orange-600';
+      case 'low': return 'text-gray-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Curriculum Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Review, approve, and manage curriculum changes across all faculties</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              <Upload className="w-4 h-4" />
+              Submit New
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-6 gap-6">
+          {/* Left Side - Data Representation (1/6) */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3">
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mb-1 text-center">Total Curricula</p>
+                <p className="text-3xl font-bold text-gray-900 text-center">{curriculumStats.totalCurricula}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-yellow-600" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mb-1 text-center">Pending Approval</p>
+                <p className="text-3xl font-bold text-gray-900 text-center">{curriculumStats.pending}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mb-1 text-center">Approved</p>
+                <p className="text-3xl font-bold text-gray-900 text-center">{curriculumStats.approved}</p>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mb-1 text-center">Active Reviews</p>
+                <p className="text-3xl font-bold text-gray-900 text-center">{curriculumStats.activeReviews}</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-gray-900 mb-3 text-sm">By Faculty</h3>
+              <div className="space-y-3">
+                {facultyData.map((faculty, i) => (
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-600">{faculty.faculty}</span>
+                      <span className="text-sm font-bold text-gray-900">{faculty.curricula}</span>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      <span className="text-yellow-600">⏳ {faculty.pending}</span>
+                      <span className="text-green-600">✓ {faculty.approved}</span>
+                      <span className="text-red-600">✗ {faculty.rejected}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-gray-900 mb-3 text-sm">Recent Activity</h3>
+              <div className="space-y-2">
+                {[
+                  { action: 'Approved', item: 'BBA Curriculum 2025', time: '2 hours ago', type: 'success' },
+                  { action: 'Submitted', item: 'New CS Program', time: '5 hours ago', type: 'info' }
+                ].map((activity, i) => (
+                  <div key={i} className="flex items-start gap-2 pb-2 border-b last:border-b-0">
+                    <div className={`w-2 h-2 rounded-full mt-1 ${
+                      activity.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                    }`}></div>
+                    <div className="flex-1">
+                      <p className="text-xs font-semibold text-gray-900">{activity.action}</p>
+                      <p className="text-xs text-gray-600">{activity.item}</p>
+                      <p className="text-xs text-gray-400">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Functionality (5/6) */}
+          <div className="col-span-5 space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setActiveTab('pending')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        activeTab === 'pending' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      Pending ({pendingCurricula.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('approved')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        activeTab === 'approved' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      Approved ({approvedCurricula.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('rejected')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        activeTab === 'rejected' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      Rejected (6)
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Search curricula..."
+                        className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-64"
+                      />
+                    </div>
+                    <select 
+                      value={selectedFaculty}
+                      onChange={(e) => setSelectedFaculty(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option value="all">All Faculties</option>
+                      <option value="fons">FONS</option>
+                      <option value="fom">FOM</option>
+                      <option value="fomac">FOMAC</option>
+                      <option value="ins">INS</option>
+                      <option value="itm">ITM</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {activeTab === 'pending' && (
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {pendingCurricula.map((curriculum) => (
+                      <div key={curriculum.id} className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-bold text-gray-900">{curriculum.title}</h3>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(curriculum.status)}`}>
+                                {curriculum.status}
+                              </span>
+                              <span className={`text-xs font-semibold ${getPriorityColor(curriculum.priority)}`}>
+                                {curriculum.priority} Priority
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-4 h-4" />
+                                {curriculum.faculty}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                {curriculum.submittedBy}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <FileText className="w-4 h-4" />
+                                {curriculum.type}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-3">
+                              <span className="font-semibold">Changes:</span> {curriculum.changes}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>Submitted: {curriculum.submittedDate}</span>
+                              <span>•</span>
+                              <span>Reviewers: {curriculum.reviewers.join(', ')}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
+                          <button 
+                            onClick={() => setSelectedCurriculum(curriculum)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Review
+                          </button>
+                          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
+                            <Check className="w-4 h-4" />
+                            Approve
+                          </button>
+                          <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
+                            <X className="w-4 h-4" />
+                            Reject
+                          </button>
+                          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                            <MessageSquare className="w-4 h-4" />
+                            Request Changes
+                          </button>
+                          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium ml-auto">
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'approved' && (
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {approvedCurricula.map((curriculum) => (
+                      <div key={curriculum.id} className="border border-green-200 bg-green-50 rounded-lg p-5">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-bold text-gray-900">{curriculum.title}</h3>
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-300">
+                                Approved
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-4 h-4" />
+                                {curriculum.faculty}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <CheckCircle className="w-4 h-4" />
+                                {curriculum.approvedBy}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <FileText className="w-4 h-4" />
+                                {curriculum.type}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>Approved: {curriculum.approvedDate}</span>
+                              <span>•</span>
+                              <span>Effective: {curriculum.effectiveDate}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-4 border-t border-green-200">
+                          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                            <Eye className="w-4 h-4" />
+                            View Details
+                          </button>
+                          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm font-medium">
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 text-sm font-medium">
+                            <Edit className="w-4 h-4" />
+                            Revise
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {selectedCurriculum && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedCurriculum(null)}>
+            <div className="bg-white rounded-xl shadow-xl w-full h-[90vh] flex" onClick={(e) => e.stopPropagation()}>
+              {/* Left Side - PDF Viewer with Highlights */}
+              <div className="w-2/3 border-r border-gray-200 flex flex-col">
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                  <h3 className="font-semibold text-gray-900">Curriculum Document</h3>
+                  <p className="text-sm text-gray-600">{selectedCurriculum.title}</p>
+                </div>
+                <div className="flex-1 overflow-auto p-6 bg-gray-100">
+                  {/* PDF Viewer Simulation */}
+                  <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto">
+                    <div className="space-y-6">
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedCurriculum.title}</h2>
+                        <p className="text-sm text-gray-600">Faculty: {selectedCurriculum.faculty}</p>
+                        <p className="text-sm text-gray-600">Version: 2025.1</p>
+                      </div>
+
+                      <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4 rounded">
+                        <p className="text-sm font-semibold text-gray-900 mb-2">📝 Highlighted Changes</p>
+                        <p className="text-sm text-gray-700">{selectedCurriculum.changes}</p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">Course Structure</h3>
+                        <div className="space-y-2">
+                          <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                            <p className="font-semibold text-sm">Semester 1 - Core Courses</p>
+                            <p className="text-xs text-gray-600">Total Credits: 18</p>
+                          </div>
+                          <div className="p-3 bg-green-50 rounded border-l-4 border-green-500">
+                            <p className="font-semibold text-sm text-green-900">✨ NEW: CS401 - Artificial Intelligence Fundamentals</p>
+                            <p className="text-xs text-green-700">3 Credits | Added in this revision</p>
+                          </div>
+                          <div className="p-3 bg-green-50 rounded border-l-4 border-green-500">
+                            <p className="font-semibold text-sm text-green-900">✨ NEW: CS402 - Machine Learning Basics</p>
+                            <p className="text-xs text-green-700">3 Credits | Added in this revision</p>
+                          </div>
+                          <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                            <p className="font-semibold text-sm">CS301 - Data Structures</p>
+                            <p className="text-xs text-gray-600">3 Credits | No changes</p>
+                          </div>
+                          <div className="p-3 bg-red-50 rounded border-l-4 border-red-500 line-through opacity-50">
+                            <p className="font-semibold text-sm text-red-900">❌ REMOVED: CS205 - Assembly Language</p>
+                            <p className="text-xs text-red-700">3 Credits | Removed in this revision</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-l-4 border-blue-400 bg-blue-50 p-4 rounded">
+                        <p className="text-sm font-semibold text-gray-900 mb-2">📊 Summary of Changes</p>
+                        <ul className="text-sm text-gray-700 space-y-1">
+                          <li>• Added: 3 new courses (9 credits)</li>
+                          <li>• Removed: 2 outdated courses (6 credits)</li>
+                          <li>• Modified: 1 course prerequisite</li>
+                          <li>• Net change: +3 credits</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side - Review Panel */}
+              <div className="w-1/3 flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900">Review Panel</h2>
+                  <button 
+                    onClick={() => setSelectedCurriculum(null)}
+                    className="p-2 hover:bg-gray-100 rounded-lg"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="flex-1 overflow-auto p-6 space-y-6">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Submitted By</p>
+                      <p className="font-semibold text-gray-900">{selectedCurriculum.submittedBy}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Submission Date</p>
+                      <p className="font-semibold text-gray-900">{selectedCurriculum.submittedDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Type</p>
+                      <p className="font-semibold text-gray-900">{selectedCurriculum.type}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Priority</p>
+                      <p className={`font-semibold ${getPriorityColor(selectedCurriculum.priority)}`}>{selectedCurriculum.priority}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Status</p>
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(selectedCurriculum.status)}`}>
+                        {selectedCurriculum.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">Assigned Reviewers</p>
+                    <div className="space-y-2">
+                      {selectedCurriculum.reviewers.map((reviewer, i) => (
+                        <div key={i} className="flex items-center gap-2 p-2 bg-blue-50 rounded">
+                          <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-700">
+                            {reviewer.charAt(0)}
+                          </div>
+                          <span className="text-sm text-blue-900">{reviewer}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-900 mb-2">Review Comments</p>
+                    <textarea
+                      className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                      rows={6}
+                      placeholder="Add your review comments here..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="p-4 border-t border-gray-200 space-y-2">
+                  <button className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4" />
+                    Approve Curriculum
+                  </button>
+                  <button className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium flex items-center justify-center gap-2">
+                    <Edit className="w-4 h-4" />
+                    Request Changes
+                  </button>
+                  <button className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center justify-center gap-2">
+                    <X className="w-4 h-4" />
+                    Reject Curriculum
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 const AlumniOverview = () => {
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedFaculty, setSelectedFaculty] = useState('all');
@@ -6041,6 +6969,570 @@ const AlumniOverview = () => {
   );
 };
 
+ 
+const OneStopService = () => {
+  const [selectedTab, setSelectedTab] = useState('all');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedProgram, setSelectedProgram] = useState('all');
+  const [actionMenuOpen, setActionMenuOpen] = useState({});
+
+  const toggleActionMenu = (requestId) => {
+    setActionMenuOpen(prev => ({
+      ...prev,
+      [requestId]: !prev[requestId]
+    }));
+  };
+
+  const closeActionMenu = (requestId) => {
+    setActionMenuOpen(prev => ({
+      ...prev,
+      [requestId]: false
+    }));
+  };
+
+  const requestStats = {
+    totalRequests: 6,
+    pending: 3,
+    approved: 1,
+    rejected: 0,
+    processing: 2
+  };
+
+  const programStats = {
+    undergraduate: {
+      BNS: 0, HAS: 1, MET: 4, MAC: 0, HAT: 1, MAS: 0
+    },
+    postgraduate: {
+      MNS: 0, MOTE: 0, 'HSB-MBA': 0, DMS: 0
+    }
+  };
+
+  const requestTypes = [
+    { id: 'verification', name: 'Student Verification', count: 3, icon: User },
+    { id: 'transcript', name: 'Official Transcript', count: 2, icon: FileText },
+    { id: 'regrading', name: 'Grade Review/Regrading', count: 1, icon: BookOpen },
+    { id: 'extension', name: 'Deadline Extension', count: 0, icon: Calendar },
+    { id: 'room', name: 'Room Booking', count: 0, icon: Home },
+    { id: 'certificate', name: 'Certificate Request', count: 0, icon: GraduationCap },
+    { id: 'leave', name: 'Leave of Absence', count: 0, icon: Clock },
+    { id: 'other', name: 'Other Requests', count: 0, icon: AlertCircle }
+  ];
+
+  const requests = [
+    {
+      id: 'REQ001',
+      type: 'Student Verification Request',
+      submittedDate: '15/10/2025',
+      studentName: 'NGUYỄN VIỆT HÙNG',
+      studentId: '24080161',
+      class: 'MAC.QH-2024-D',
+      program: 'MAC',
+      level: 'Undergraduate',
+      status: 'Approved',
+      priority: 'Normal',
+      description: 'Verification letter for scholarship application',
+      documents: ['ID Card', 'Enrollment Proof'],
+      assignedTo: 'Academic Affairs'
+    },
+    {
+      id: 'REQ002',
+      type: 'Student Verification Request',
+      submittedDate: '14/10/2025',
+      studentName: 'LÊ NGUYỄN NAM PHƯƠNG',
+      studentId: '25080567',
+      class: 'HAS.QH-2025-D',
+      program: 'HAS',
+      level: 'Undergraduate',
+      status: 'Submitted',
+      priority: 'Normal',
+      description: 'Verification for internship application',
+      documents: ['Student ID', 'Current Enrollment'],
+      assignedTo: 'Academic Affairs'
+    },
+    {
+      id: 'REQ003',
+      type: 'Student Verification Request',
+      submittedDate: '14/10/2025',
+      studentName: 'VŨ ANH ĐỨC',
+      studentId: '19080029',
+      class: 'MET.QH-2019-D',
+      program: 'MET',
+      level: 'Undergraduate',
+      status: 'Submitted',
+      priority: 'Urgent',
+      description: 'Verification for visa application',
+      documents: ['Passport', 'Enrollment Certificate'],
+      assignedTo: 'International Office'
+    },
+    {
+      id: 'REQ004',
+      type: 'Official Transcript Request',
+      submittedDate: '13/10/2025',
+      studentName: 'TRẦN THỊ MAI',
+      studentId: '23080145',
+      class: 'MET.QH-2023-D',
+      program: 'MET',
+      level: 'Undergraduate',
+      status: 'Processing',
+      priority: 'Normal',
+      description: 'Official transcript for graduate school application',
+      documents: ['Transcript Request Form'],
+      assignedTo: 'Registrar Office'
+    },
+    {
+      id: 'REQ005',
+      type: 'Official Transcript Request',
+      submittedDate: '12/10/2025',
+      studentName: 'PHẠM VĂN NAM',
+      studentId: '22080234',
+      class: 'HAT.QH-2022-D',
+      program: 'HAT',
+      level: 'Undergraduate',
+      status: 'Processing',
+      priority: 'Normal',
+      description: 'Transcript for job application',
+      documents: ['Application Letter'],
+      assignedTo: 'Registrar Office'
+    },
+    {
+      id: 'REQ006',
+      type: 'Grade Review Request',
+      submittedDate: '11/10/2025',
+      studentName: 'HOÀNG THỊ LAN',
+      studentId: '23080456',
+      class: 'MET.QH-2023-D',
+      program: 'MET',
+      level: 'Undergraduate',
+      status: 'Submitted',
+      priority: 'High',
+      description: 'Request for regrading final exam - CS301',
+      documents: ['Exam Paper Copy', 'Appeal Form'],
+      assignedTo: 'Academic Committee'
+    },
+    {
+      id: 'REQ007',
+      type: 'Student Verification Request',
+      submittedDate: '10/10/2025',
+      studentName: 'ĐẶNG VĂN LONG',
+      studentId: '24080789',
+      class: 'MET.QH-2024-D',
+      program: 'MET',
+      level: 'Undergraduate',
+      status: 'Processing',
+      priority: 'Normal',
+      description: 'Enrollment verification for bank loan',
+      documents: ['Bank Request Form', 'Student ID'],
+      assignedTo: 'Student Affairs'
+    },
+    {
+      id: 'REQ008',
+      type: 'Official Transcript Request',
+      submittedDate: '10/10/2025',
+      studentName: 'NGUYỄN THỊ HƯƠNG',
+      studentId: '23080912',
+      class: 'HAS.QH-2023-D',
+      program: 'HAS',
+      level: 'Undergraduate',
+      status: 'Submitted',
+      priority: 'High',
+      description: 'Urgent transcript for scholarship deadline',
+      documents: ['Scholarship Form'],
+      assignedTo: 'Registrar Office'
+    },
+    {
+      id: 'REQ009',
+      type: 'Grade Review Request',
+      submittedDate: '09/10/2025',
+      studentName: 'TRẦN VĂN BÌNH',
+      studentId: '22080345',
+      class: 'MET.QH-2022-D',
+      program: 'MET',
+      level: 'Undergraduate',
+      status: 'Processing',
+      priority: 'Normal',
+      description: 'Request for grade review - BA202',
+      documents: ['Grade Appeal Form'],
+      assignedTo: 'Academic Committee'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch(status.toLowerCase()) {
+      case 'approved': return 'bg-green-100 text-green-700 border-green-300';
+      case 'submitted': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+      case 'processing': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'rejected': return 'bg-red-100 text-red-700 border-red-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch(priority.toLowerCase()) {
+      case 'urgent': return 'text-red-600';
+      case 'high': return 'text-orange-600';
+      case 'normal': return 'text-blue-600';
+      case 'low': return 'text-gray-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const filteredRequests = requests.filter(req => {
+    if (selectedTab === 'all') return true;
+    if (selectedTab === 'undergraduate') return req.level === 'Undergraduate';
+    if (selectedTab === 'postgraduate') return req.level === 'Postgraduate';
+    if (selectedTab === 'pending') return req.status === 'Submitted';
+    if (selectedTab === 'approved') return req.status === 'Approved';
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">One-Stop Service Center</h1>
+            <p className="text-sm text-gray-500 mt-1">Student requests and service management portal</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+              <Download className="w-4 h-4" />
+              Export Report
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              <Plus className="w-4 h-4" />
+              Add New Request
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900 text-sm">📚 UNDERGRADUATE PROGRAMS</h3>
+            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+              TOTAL: {Object.values(programStats.undergraduate).reduce((a, b) => a + b, 0)} REQUESTS
+            </span>
+          </div>
+          <div className="grid grid-cols-6 gap-3">
+            {Object.entries(programStats.undergraduate).map(([program, count]) => (
+              <div key={program} className="bg-gray-50 p-2 rounded text-center">
+                <p className="text-xs text-gray-600 mb-1">{program}</p>
+                <p className={`text-2xl font-bold ${count > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
+                  {count}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900 text-sm">🎓 POSTGRADUATE PROGRAMS</h3>
+            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+              TOTAL: {Object.values(programStats.postgraduate).reduce((a, b) => a + b, 0)} REQUESTS
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {Object.entries(programStats.postgraduate).map(([program, count]) => (
+              <div key={program} className="bg-gray-50 p-2 rounded text-center">
+                <p className="text-xs text-gray-600 mb-1">{program}</p>
+                <p className={`text-2xl font-bold ${count > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
+                  {count}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-between">
+          <p className="text-sm text-gray-700">
+            <span className="font-bold text-red-600">{requestStats.pending}</span> requests pending approval | Last updated: 15/10/2025
+          </p>
+        </div>
+
+        <div className="grid grid-cols-8 gap-3">
+          {requestTypes.map((type) => (
+            <div key={type.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-100 text-center">
+              <p className="text-xs font-medium text-gray-700 mb-2 h-8 flex items-center justify-center" title={type.name}>
+                {type.name}
+              </p>
+              <p className="text-3xl font-bold text-gray-900">{type.count}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedTab('all')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  All (6)
+                </button>
+                <button
+                  onClick={() => setSelectedTab('undergraduate')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'undergraduate' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Undergraduate (6)
+                </button>
+                <button
+                  onClick={() => setSelectedTab('postgraduate')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'postgraduate' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Postgraduate (0)
+                </button>
+                <button
+                  onClick={() => setSelectedTab('pending')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Pending (3)
+                </button>
+                <button
+                  onClick={() => setSelectedTab('approved')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Approved (1)
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
+                  <CheckCircle className="w-4 h-4" />
+                  Bulk Approve
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-700 text-white">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase">
+                    <input type="checkbox" className="rounded" />
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase">Request Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase">Date Submitted</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase">Full Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase">Student ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase">Class</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold uppercase">Status</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredRequests.map((request) => (
+                  <tr key={request.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4">
+                      <input type="checkbox" className="rounded" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">{request.type}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600">{request.submittedDate}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-gray-900">{request.studentName}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">{request.studentId}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-blue-600">{request.class}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
+                        {request.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => setSelectedRequest(request)}
+                          className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        
+                        {request.status === 'Submitted' ? (
+                          <div className="relative">
+                            <button 
+                              className="px-3 py-1 bg-gray-300 text-gray-500 rounded cursor-not-allowed text-xs font-medium flex items-center gap-1"
+                              disabled
+                              title="Review required before taking action"
+                            >
+                              Actions
+                              <ChevronDown className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : request.status === 'Processing' ? (
+                          <div className="relative">
+                            <button 
+                              onClick={() => toggleActionMenu(request.id)}
+                              className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs font-medium flex items-center gap-1"
+                            >
+                              Actions
+                              <ChevronDown className="w-3 h-3" />
+                            </button>
+                            {actionMenuOpen[request.id] && (
+                              <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                                <button 
+                                  onClick={() => {
+                                    closeActionMenu(request.id);
+                                    // Handle approve action
+                                  }}
+                                  className="w-full px-4 py-2 text-left text-sm text-green-700 hover:bg-green-50 flex items-center gap-2 rounded-t-lg"
+                                >
+                                  <Check className="w-4 h-4" />
+                                  Approve
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    closeActionMenu(request.id);
+                                    // Handle disapprove action
+                                  }}
+                                  className="w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50 flex items-center gap-2 rounded-b-lg"
+                                >
+                                  <X className="w-4 h-4" />
+                                  Disapprove
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : request.status === 'Approved' ? (
+                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Approved
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+            <p className="text-sm text-gray-600">Showing 1-9 of 9 requests</p>
+            <div className="flex gap-2">
+              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Previous</button>
+              <button className="px-3 py-1 bg-blue-600 text-white rounded">1</button>
+              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Next</button>
+            </div>
+          </div>
+        </div>
+
+        {selectedRequest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedRequest(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600">
+                <div className="text-white">
+                  <h2 className="text-2xl font-bold">Request Details</h2>
+                  <p className="text-sm opacity-90">{selectedRequest.type}</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedRequest(null)}
+                  className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Request ID</p>
+                    <p className="font-semibold text-gray-900">{selectedRequest.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Submitted Date</p>
+                    <p className="font-semibold text-gray-900">{selectedRequest.submittedDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Student Name</p>
+                    <p className="font-semibold text-gray-900">{selectedRequest.studentName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Student ID</p>
+                    <p className="font-semibold text-gray-900">{selectedRequest.studentId}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Class</p>
+                    <p className="font-semibold text-blue-600">{selectedRequest.class}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Program</p>
+                    <p className="font-semibold text-gray-900">{selectedRequest.program} - {selectedRequest.level}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Priority</p>
+                    <p className={`font-semibold ${getPriorityColor(selectedRequest.priority)}`}>{selectedRequest.priority}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Assigned To</p>
+                    <p className="font-semibold text-gray-900">{selectedRequest.assignedTo}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Description</p>
+                  <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">{selectedRequest.description}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Attached Documents</p>
+                  <div className="flex gap-2">
+                    {selectedRequest.documents.map((doc, i) => (
+                      <span key={i} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                        📄 {doc}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 mb-3">Review Comments</p>
+                  <textarea
+                    className="w-full p-4 border border-gray-300 rounded-lg text-sm"
+                    rows={4}
+                    placeholder="Add your comments here..."
+                  ></textarea>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4" />
+                    Approve Request
+                  </button>
+                  <button className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center justify-center gap-2">
+                    <X className="w-4 h-4" />
+                    Reject Request
+                  </button>
+                  <button className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Request More Info
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
   const renderContent = () => {
     if (activeTab === 'dashboard') {
@@ -6088,6 +7580,13 @@ const AlumniOverview = () => {
     } 
     if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
       return <TimetableCalendar />;
+    }
+    if (activeTab == 'curriculum-management'){
+      return <CurriculumManagement/>;
+    }
+   
+    if (activeTab == 'one-stop-service'){
+      return <OneStopService/>;
     }
     return (
       <div className="bg-white p-6 rounded-lg shadow">
