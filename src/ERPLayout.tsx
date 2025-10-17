@@ -6429,8 +6429,7 @@ const OneStopService = () => {
    
    if (activeTab === "dashboard") {
   if (userType === "admin") return <AdminDashboard />;
-  if (userType === "student") return <StudentDashboard />;  // stays inside shell
-  if (userType === "lecturer") return <LecturerDashboard />; 
+
   if (userType === "faculty") return <FacultyDashboard />;
   if (userType === "department") return <DepartmentDashboard />;
 }
