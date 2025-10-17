@@ -42,24 +42,27 @@ const ERPLayout: React.FC = () => {
   const [sidebarLocked, setSidebarLocked] = useState<boolean>(true);
 
   // ✅ compute navigation AFTER userType is declared
-  const currentNav: MenuItem[] = navigationConfig[userType] ?? navigationConfig.admin;
+ const currentNav: MenuItem[] = useMemo(
+  () => navigationConfig[userType] ?? navigationConfig.admin,
+  [userType]
+);
+
 useEffect(() => {
-  // collapse any open submenus
   setExpandedMenus({});
-  // select the first item of the new role (prefer a leaf; fallback to first)
-  const first = currentNav[0]?.id;
-  if (first) setActiveTab(first);
-  // optional: also reset collapse/lock if you want a clean slate per role
-  // setSidebarCollapsed(false);
-  // setSidebarLocked(true);
-}, [userType]); // <-- fires whenever the role changes
+  setActiveTab(currentNav[0]?.id ?? "dashboard");
+}, [userType, currentNav]);
+
 <aside key={userType} className="...">
   {/* your header + dropdown + nav */}
 </aside>
   const toggleMenu = (menuId: string) =>
     setExpandedMenus((prev) => ({ ...prev, [menuId]: !prev[menuId] }));
 
-
+const roleHasOwnSidebar = userType === "student" || userType === "lecturer";
+if (roleHasOwnSidebar) {
+  // Render their full apps (with their own left panels)
+  return userType === "student" ? <Student /> : <Lecturer />;
+}
 
   // navigationConfig stays same — but now TS will validate icons and submenu shape
 
@@ -6424,16 +6427,14 @@ const OneStopService = () => {
 };
   const renderContent = () => {
    
-    if (activeTab === 'dashboard') {
-      if (userType === 'admin') return <AdminDashboard />;
-      if (userType === 'student') return <StudentDashboard />;
-      if (userType === 'lecturer') return <LecturerDashboard />;
-      if (userType === 'faculty') return <FacultyDashboard />;
-      if (userType === 'department') return <DepartmentDashboard />;
-    }
+   if (activeTab === "dashboard") {
+  if (userType === "admin") return <AdminDashboard />;
+  if (userType === "student") return <StudentDashboard />;  // stays inside shell
+  if (userType === "lecturer") return <LecturerDashboard />; 
+  if (userType === "faculty") return <FacultyDashboard />;
+  if (userType === "department") return <DepartmentDashboard />;
+}
 
-     if (userType === "student") return <Student />;
-    if (userType === "lecturer") return <Lecturer />;
     if (activeTab === 'student-profile') {
       return <StudentProfileAdmin />;
     }
