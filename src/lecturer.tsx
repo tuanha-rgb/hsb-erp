@@ -4,7 +4,8 @@ import {
   AlertCircle, Award, MessageSquare, Bell, ChevronRight,
   Home, User as UserIcon, BookText, Globe, Lock, ChevronLeft,
   Mail, Phone, Building2, Edit, GraduationCap,
-  Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare
+  Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare, DollarSign, Search, Filter, Eye, MoreVertical,
+  User,Upload, Book, ClipboardList,BarChart3,Download, Send
 } from 'lucide-react';
 
 // ————————————————————————————————————————
@@ -909,6 +910,1254 @@ const ScheduleView: React.FC = () => {
 };
 
 // ————————————————————————————————————————
+// Teaching view (integrated subtab - no sidebar/nav)
+// ————————————————————————————————————————
+const LecturerTeaching: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'courses' | 'assignments' | 'students' | 'schedule'>('courses');
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+
+  const courses = [
+    {
+      id: 'CS401',
+      name: 'Introduction to AI',
+      code: 'CS401',
+      semester: 'Fall 2024',
+      students: 65,
+      schedule: 'Mon, Wed 2:00-3:30 PM',
+      room: 'Room 301',
+      status: 'Active',
+      progress: 65,
+      totalClasses: 40,
+      completedClasses: 26,
+      upcomingClass: 'Today 2:00 PM',
+      assignments: 8,
+      pendingGrades: 12,
+      avgGrade: 78,
+      attendanceRate: 92,
+    },
+    {
+      id: 'CS501',
+      name: 'Machine Learning',
+      code: 'CS501',
+      semester: 'Fall 2024',
+      students: 58,
+      schedule: 'Tue, Thu 10:00-11:30 AM',
+      room: 'Lab 102',
+      status: 'Active',
+      progress: 58,
+      totalClasses: 40,
+      completedClasses: 23,
+      upcomingClass: 'Tomorrow 10:00 AM',
+      assignments: 10,
+      pendingGrades: 8,
+      avgGrade: 82,
+      attendanceRate: 88,
+    },
+    {
+      id: 'CS601',
+      name: 'Deep Learning',
+      code: 'CS601',
+      semester: 'Fall 2024',
+      students: 42,
+      schedule: 'Fri 3:00-5:30 PM',
+      room: 'Room 205',
+      status: 'Active',
+      progress: 42,
+      totalClasses: 40,
+      completedClasses: 17,
+      upcomingClass: 'Oct 18, 3:00 PM',
+      assignments: 6,
+      pendingGrades: 5,
+      avgGrade: 75,
+      attendanceRate: 85,
+    },
+  ];
+
+  const assignments = [
+    {
+      id: 'A001',
+      course: 'CS401',
+      title: 'Neural Network Implementation',
+      type: 'Programming',
+      dueDate: 'Oct 20, 2024',
+      submitted: 52,
+      total: 65,
+      graded: 40,
+      avgScore: 85,
+      status: 'Active',
+    },
+    {
+      id: 'A002',
+      course: 'CS501',
+      title: 'ML Model Evaluation',
+      type: 'Report',
+      dueDate: 'Oct 22, 2024',
+      submitted: 45,
+      total: 58,
+      graded: 38,
+      avgScore: 88,
+      status: 'Active',
+    },
+    {
+      id: 'A003',
+      course: 'CS601',
+      title: 'CNN Architecture Design',
+      type: 'Project',
+      dueDate: 'Oct 25, 2024',
+      submitted: 30,
+      total: 42,
+      graded: 25,
+      avgScore: 78,
+      status: 'Active',
+    },
+    {
+      id: 'A004',
+      course: 'CS401',
+      title: 'Midterm Exam',
+      type: 'Exam',
+      dueDate: 'Oct 15, 2024',
+      submitted: 65,
+      total: 65,
+      graded: 53,
+      avgScore: 76,
+      status: 'Grading',
+    },
+  ];
+
+  const students = [
+    {
+      id: 'S001',
+      name: 'John Smith',
+      studentId: '2020001',
+      courses: ['CS401', 'CS501'],
+      avgGrade: 85,
+      attendance: 95,
+      assignments: { submitted: 15, total: 18 },
+      status: 'Excellent',
+    },
+    {
+      id: 'S002',
+      name: 'Emily Chen',
+      studentId: '2020002',
+      courses: ['CS401', 'CS601'],
+      avgGrade: 92,
+      attendance: 98,
+      assignments: { submitted: 14, total: 14 },
+      status: 'Excellent',
+    },
+    {
+      id: 'S003',
+      name: 'Michael Brown',
+      studentId: '2020003',
+      courses: ['CS501'],
+      avgGrade: 78,
+      attendance: 88,
+      assignments: { submitted: 8, total: 10 },
+      status: 'Good',
+    },
+    {
+      id: 'S004',
+      name: 'Sarah Johnson',
+      studentId: '2020004',
+      courses: ['CS401'],
+      avgGrade: 65,
+      attendance: 75,
+      assignments: { submitted: 5, total: 8 },
+      status: 'Need Attention',
+    },
+  ];
+
+  const teachingSchedule = [
+    { day: 'Monday', time: '2:00 PM - 3:30 PM', course: 'CS401', type: 'Lecture', room: 'Room 301' },
+    { day: 'Tuesday', time: '10:00 AM - 11:30 AM', course: 'CS501', type: 'Lecture', room: 'Lab 102' },
+    { day: 'Wednesday', time: '2:00 PM - 3:30 PM', course: 'CS401', type: 'Lecture', room: 'Room 301' },
+    { day: 'Thursday', time: '10:00 AM - 11:30 AM', course: 'CS501', type: 'Lab Session', room: 'Lab 102' },
+    { day: 'Friday', time: '3:00 PM - 5:30 PM', course: 'CS601', type: 'Lecture', room: 'Room 205' },
+  ];
+
+  const teachingStats = {
+    totalCourses: 3,
+    totalStudents: 165,
+    pendingGrades: 25,
+    avgClassRating: 4.6,
+    teachingHours: '12h/week',
+    completionRate: 94,
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      Active: 'bg-green-50 text-green-700 border-green-200',
+      Completed: 'bg-blue-50 text-blue-700 border-blue-200',
+      Grading: 'bg-orange-50 text-orange-700 border-orange-200',
+      Excellent: 'bg-green-50 text-green-700',
+      Good: 'bg-blue-50 text-blue-700',
+      'Need Attention': 'bg-red-50 text-red-700',
+    };
+    return colors[status] || 'bg-gray-50 text-gray-700 border-gray-200';
+  };
+
+  return (
+    <div className="flex-1 overflow-auto">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-8 py-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Teaching Management</h1>
+            <p className="text-gray-500 mt-1">Manage your courses, students, and assignments</p>
+          </div>
+          <div className="flex gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+              <Upload className="w-5 h-5" />
+              Upload Materials
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <Plus className="w-5 h-5" />
+              Create New
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-8">
+        {/* Teaching Stats */}
+        <div className="grid grid-cols-6 gap-6 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Book className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Courses</p>
+                <p className="text-2xl font-bold text-gray-900">{teachingStats.totalCourses}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <Users className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Students</p>
+                <p className="text-2xl font-bold text-gray-900">{teachingStats.totalStudents}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <ClipboardList className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Pending</p>
+                <p className="text-2xl font-bold text-gray-900">{teachingStats.pendingGrades}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <Award className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Rating</p>
+                <p className="text-2xl font-bold text-gray-900">{teachingStats.avgClassRating}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-indigo-50 rounded-lg">
+                <Clock className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Hours/Week</p>
+                <p className="text-2xl font-bold text-gray-900">{teachingStats.teachingHours}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-teal-50 rounded-lg">
+                <BarChart3 className="w-5 h-5 text-teal-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Completion</p>
+                <p className="text-2xl font-bold text-gray-900">{teachingStats.completionRate}%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-200">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('courses')}
+                className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'courses'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                My Courses
+              </button>
+              <button
+                onClick={() => setActiveTab('assignments')}
+                className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'assignments'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Assignments & Grading
+              </button>
+              <button
+                onClick={() => setActiveTab('students')}
+                className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'students'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Students
+              </button>
+              <button
+                onClick={() => setActiveTab('schedule')}
+                className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'schedule'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Schedule
+              </button>
+            </div>
+          </div>
+
+          {/* Courses Tab */}
+          {activeTab === 'courses' && (
+            <div className="p-6">
+              <div className="space-y-6">
+                {courses.map((course) => (
+                  <div key={course.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded">
+                            {course.code}
+                          </span>
+                          <span className={`px-3 py-1 text-sm font-semibold rounded border ${getStatusColor(course.status)}`}>
+                            {course.status}
+                          </span>
+                          <span className="text-sm text-gray-600">{course.semester}</span>
+                        </div>
+
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">{course.name}</h3>
+
+                        <div className="grid grid-cols-4 gap-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">{course.students} Students</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">{course.schedule}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">{course.room}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-orange-600 font-medium">{course.upcomingClass}</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Classes Progress</p>
+                            <p className="text-lg font-bold text-gray-900">
+                              {course.completedClasses}/{course.totalClasses}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Assignments</p>
+                            <p className="text-lg font-bold text-gray-900">{course.assignments}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Pending Grades</p>
+                            <p className="text-lg font-bold text-orange-600">{course.pendingGrades}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Avg Grade</p>
+                            <p className="text-lg font-bold text-gray-900">{course.avgGrade}%</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Course Progress</span>
+                            <span className="font-semibold text-gray-900">{course.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${course.progress}%` }} />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 ml-4">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                          Manage Course
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Assignments Tab */}
+          {activeTab === 'assignments' && (
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-3">
+                  <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>All Courses</option>
+                    <option>CS401</option>
+                    <option>CS501</option>
+                    <option>CS601</option>
+                  </select>
+                  <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Grading</option>
+                    <option>Completed</option>
+                  </select>
+                </div>
+                <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <Search className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {assignments.map((assignment) => (
+                  <div key={assignment.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded">
+                            {assignment.course}
+                          </span>
+                          <span className={`px-2 py-1 text-xs font-semibold rounded border ${getStatusColor(assignment.status)}`}>
+                            {assignment.status}
+                          </span>
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded">
+                            {assignment.type}
+                          </span>
+                        </div>
+
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">{assignment.title}</h3>
+
+                        <div className="grid grid-cols-4 gap-4 mb-3">
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Due Date</p>
+                            <p className="text-sm font-semibold text-gray-900">{assignment.dueDate}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Submitted</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {assignment.submitted}/{assignment.total}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Graded</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {assignment.graded}/{assignment.submitted}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Avg Score</p>
+                            <p className="text-sm font-semibold text-green-600">{assignment.avgScore}%</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-600">Submission Progress</span>
+                              <span className="font-semibold">
+                                {Math.round((assignment.submitted / assignment.total) * 100)}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full transition-all"
+                                style={{ width: `${(assignment.submitted / assignment.total) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-600">Grading Progress</span>
+                              <span className="font-semibold">
+                                {Math.round((assignment.graded / assignment.submitted) * 100)}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-green-600 h-2 rounded-full transition-all"
+                                style={{ width: `${(assignment.graded / assignment.submitted) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 ml-4">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                          <CheckSquare className="w-4 h-4" />
+                          Grade
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Download className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Students Tab */}
+          {activeTab === 'students' && (
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-3">
+                  <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>All Courses</option>
+                    <option>CS401</option>
+                    <option>CS501</option>
+                    <option>CS601</option>
+                  </select>
+                  <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>All Performance</option>
+                    <option>Excellent</option>
+                    <option>Good</option>
+                    <option>Need Attention</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Search className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Download className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Student</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Courses</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Avg Grade</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Attendance</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Assignments</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {students.map((student) => (
+                      <tr key={student.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-semibold text-gray-900">{student.name}</p>
+                            <p className="text-sm text-gray-600">{student.studentId}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-1">
+                            {student.courses.map((course, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded">
+                                {course}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-gray-900">{student.avgGrade}%</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-600 h-2 rounded-full" style={{ width: `${student.attendance}%` }} />
+                            </div>
+                            <span className="text-sm text-gray-900">{student.attendance}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm text-gray-900">
+                            {student.assignments.submitted}/{student.assignments.total}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 text-xs font-semibold rounded ${getStatusColor(student.status)}`}>
+                            {student.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button className="p-1.5 hover:bg-gray-100 rounded transition-colors">
+                              <Eye className="w-4 h-4 text-gray-600" />
+                            </button>
+                            <button className="p-1.5 hover:bg-gray-100 rounded transition-colors">
+                              <Send className="w-4 h-4 text-gray-600" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Schedule Tab */}
+          {activeTab === 'schedule' && (
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold text-gray-900">Weekly Teaching Schedule</h3>
+                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                  <Download className="w-4 h-4" />
+                  Export Schedule
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {teachingSchedule.map((schedule, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <div className="text-center min-w-24">
+                          <p className="text-sm font-semibold text-gray-900">{schedule.day}</p>
+                          <p className="text-xs text-gray-600 mt-1">{schedule.time}</p>
+                        </div>
+
+                        <div className="h-12 w-px bg-gray-200" />
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded">
+                              {schedule.course}
+                            </span>
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded">
+                              {schedule.type}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Building2 className="w-4 h-4" />
+                            <span>{schedule.room}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                          Start Class
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 grid grid-cols-2 gap-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-gray-900 mb-4">Office Hours</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-700">Monday</span>
+                      <span className="text-sm font-medium text-gray-900">4:00 PM - 6:00 PM</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-700">Wednesday</span>
+                      <span className="text-sm font-medium text-gray-900">4:00 PM - 6:00 PM</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-700">Friday</span>
+                      <span className="text-sm font-medium text-gray-900">By Appointment</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-gray-900 mb-4">Upcoming Events</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Calendar className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Midterm Exam - CS401</p>
+                        <p className="text-xs text-gray-600">Oct 25, 2024 • 2:00 PM</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Calendar className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Guest Lecture</p>
+                        <p className="text-xs text-gray-600">Oct 28, 2024 • 3:00 PM</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Calendar className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Faculty Meeting</p>
+                        <p className="text-xs text-gray-600">Nov 1, 2024 • 10:00 AM</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+// ————————————————————————————————————————
+// Research view (integrated subtab)
+// ————————————————————————————————————————
+const ResearchView: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'projects' | 'publications'>('projects');
+  const [projectFilter, setProjectFilter] = useState<'all' | 'private' | 'government'>('all');
+
+  const privateProjects = [
+    {
+      id: 'PVT-001',
+      title: 'AI-Powered Healthcare Diagnostics',
+      type: 'Private/Corporate',
+      status: 'Active',
+      progress: 75,
+      startDate: 'Jan 2024',
+      endDate: 'Dec 2024',
+      funding: '$150,000',
+      partner: 'MediTech Corp',
+      team: ['Dr. Smith', '3 Researchers'],
+      description: 'Developing AI models for early disease detection',
+    },
+    {
+      id: 'PVT-002',
+      title: 'Smart City Infrastructure',
+      type: 'Private/Corporate',
+      status: 'Active',
+      progress: 60,
+      startDate: 'Mar 2024',
+      endDate: 'Feb 2025',
+      funding: '$200,000',
+      partner: 'Urban Solutions Inc',
+      team: ['Dr. Smith', '5 Researchers'],
+      description: 'IoT-based smart city management system',
+    },
+    {
+      id: 'PVT-003',
+      title: 'Natural Language Processing for Legal Documents',
+      type: 'Private/Corporate',
+      status: 'Completed',
+      progress: 100,
+      startDate: 'Jun 2023',
+      endDate: 'Dec 2023',
+      funding: '$120,000',
+      partner: 'LegalTech Solutions',
+      team: ['Dr. Smith', '4 Researchers'],
+      description: 'NLP system for automated legal document analysis',
+    },
+  ];
+
+  const governmentProjects = [
+    {
+      id: 'GOV-001',
+      title: 'National AI Research Initiative',
+      type: 'Government',
+      status: 'Active',
+      progress: 45,
+      startDate: 'Jan 2024',
+      endDate: 'Dec 2026',
+      funding: '$500,000',
+      agency: 'Ministry of Science & Technology',
+      grantNumber: 'NSF-2024-AI-001',
+      team: ['Dr. Smith', '8 Researchers', '2 PhD Students'],
+      description: 'Large-scale AI research for national infrastructure',
+    },
+    {
+      id: 'GOV-002',
+      title: 'Educational Technology Enhancement',
+      type: 'Government',
+      status: 'Active',
+      progress: 30,
+      startDate: 'Sep 2024',
+      endDate: 'Aug 2025',
+      funding: '$80,000',
+      agency: 'Ministry of Education',
+      grantNumber: 'MOE-2024-EDU-045',
+      team: ['Dr. Smith', '3 Researchers'],
+      description: 'AI-powered educational tools for rural schools',
+    },
+  ];
+
+  const publications = [
+    {
+      id: 'PUB-001',
+      title: 'Advanced Neural Networks for Image Recognition',
+      authors: ['Nguyen Van A', 'John Smith', 'Jane Doe'],
+      journal: 'IEEE Transactions on Artificial Intelligence',
+      year: 2024,
+      volume: '15',
+      issue: '3',
+      pages: '245-260',
+      doi: '10.1109/TAI.2024.001',
+      citations: 45,
+      status: 'Published',
+      type: 'Journal Article',
+      quartile: 'Q1',
+    },
+    {
+      id: 'PUB-002',
+      title: 'Transformer Models in NLP Applications',
+      authors: ['Nguyen Van A', 'Emily Chen'],
+      journal: 'ACM Computing Surveys',
+      year: 2023,
+      volume: '56',
+      issue: '2',
+      pages: '1-35',
+      doi: '10.1145/3589001',
+      citations: 78,
+      status: 'Published',
+      type: 'Journal Article',
+      quartile: 'Q1',
+    },
+    {
+      id: 'PUB-003',
+      title: 'Ethical Considerations in AI Development',
+      authors: ['Nguyen Van A', 'Michael Brown', 'Sarah Johnson'],
+      journal: 'Nature Machine Intelligence',
+      year: 2023,
+      volume: '5',
+      issue: '8',
+      pages: '890-905',
+      doi: '10.1038/s42256-023-00001',
+      citations: 62,
+      status: 'Published',
+      type: 'Journal Article',
+      quartile: 'Q1',
+    },
+    {
+      id: 'PUB-004',
+      title: 'Deep Learning Approaches for Healthcare',
+      authors: ['Nguyen Van A', 'Lisa Wang'],
+      journal: 'Medical AI Journal',
+      year: 2024,
+      status: 'Under Review',
+      type: 'Journal Article',
+      submittedDate: 'Oct 2024',
+    },
+  ];
+
+  const researchStats = {
+    totalProjects: 5,
+    activeProjects: 4,
+    completedProjects: 1,
+    totalFunding: '$1,050,000',
+    publications: 8,
+    citations: 245,
+    hIndex: 12,
+  };
+
+  const allProjects = [...privateProjects, ...governmentProjects];
+
+  const filteredProjects =
+    projectFilter === 'all'
+      ? allProjects
+      : projectFilter === 'private'
+      ? privateProjects
+      : governmentProjects;
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      Active: 'bg-green-50 text-green-700 border-green-200',
+      Completed: 'bg-blue-50 text-blue-700 border-blue-200',
+      'On Hold': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+      Published: 'bg-green-50 text-green-700 border-green-200',
+      'Under Review': 'bg-orange-50 text-orange-700 border-orange-200',
+    };
+    return colors[status] || 'bg-gray-50 text-gray-700 border-gray-200';
+  };
+
+  return (
+    <div className="flex-1 overflow-auto">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-8 py-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
+            <p className="text-gray-500 mt-1">Manage your research projects and publications</p>
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            <Plus className="w-5 h-5" />
+            Add New
+          </button>
+        </div>
+      </div>
+
+      <div className="p-8">
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Briefcase className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Projects</p>
+                <p className="text-2xl font-bold text-gray-900">{researchStats.totalProjects}</p>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 mt-2">
+              {researchStats.activeProjects} Active • {researchStats.completedProjects} Completed
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <DollarSign className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Funding</p>
+                <p className="text-2xl font-bold text-gray-900">{researchStats.totalFunding}</p>
+              </div>
+            </div>
+            <div className="text-xs text-green-600 mt-2">Across all projects</div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <BookOpen className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Publications</p>
+                <p className="text-2xl font-bold text-gray-900">{researchStats.publications}</p>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 mt-2">{researchStats.citations} Total Citations</div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <Award className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">H-Index</p>
+                <p className="text-2xl font-bold text-gray-900">{researchStats.hIndex}</p>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 mt-2">Research impact metric</div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-200">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('projects')}
+                className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'projects'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Research Projects
+              </button>
+              <button
+                onClick={() => setActiveTab('publications')}
+                className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'publications'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Publications
+              </button>
+            </div>
+          </div>
+
+          {/* Projects Tab */}
+          {activeTab === 'projects' && (
+            <div className="p-6">
+              {/* Filters */}
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setProjectFilter('all')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      projectFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    All Projects ({allProjects.length})
+                  </button>
+                  <button
+                    onClick={() => setProjectFilter('private')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      projectFilter === 'private'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Private/Corporate ({privateProjects.length})
+                  </button>
+                  <button
+                    onClick={() => setProjectFilter('government')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      projectFilter === 'government'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Government ({governmentProjects.length})
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Search className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Filter className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Project Cards */}
+              <div className="space-y-4">
+                {filteredProjects.map((project: any) => (
+                  <div
+                    key={project.id}
+                    className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded">
+                            {project.id}
+                          </span>
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded border ${getStatusColor(project.status)}`}
+                          >
+                            {project.status}
+                          </span>
+                          {project.type === 'Private/Corporate' ? (
+                            <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded">
+                              Private/Corporate
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded">
+                              Government
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{project.title}</h3>
+                        <p className="text-sm text-gray-600 mb-4">{project.description}</p>
+
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-600">
+                              {project.startDate} - {project.endDate}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <DollarSign className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-900 font-semibold">{project.funding}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Users className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-600">{project.team.join(', ')}</span>
+                          </div>
+                        </div>
+
+                        {project.partner && (
+                          <div className="flex items-center gap-2 text-sm mb-4">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-600">Partner: {project.partner}</span>
+                          </div>
+                        )}
+
+                        {project.agency && (
+                          <div className="space-y-1 mb-4">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Building2 className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-600">Agency: {project.agency}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <FileText className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-600">Grant: {project.grantNumber}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Progress</span>
+                            <span className="font-semibold text-gray-900">{project.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 ml-4">
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Eye className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Edit className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Publications Tab */}
+          {activeTab === 'publications' && (
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-3">
+                  <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>All Years</option>
+                    <option>2024</option>
+                    <option>2023</option>
+                    <option>2022</option>
+                  </select>
+                  <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>All Types</option>
+                    <option>Journal Article</option>
+                    <option>Conference Paper</option>
+                    <option>Book Chapter</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <Search className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {publications.map((pub) => (
+                  <div key={pub.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded border ${getStatusColor(pub.status)}`}>
+                            {pub.status}
+                          </span>
+                          {pub.quartile && (
+                            <span className="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-semibold rounded border border-yellow-200">
+                              {pub.quartile}
+                            </span>
+                          )}
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded">{pub.type}</span>
+                        </div>
+
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">{pub.title}</h3>
+
+                        <p className="text-sm text-gray-600 mb-3">{pub.authors.join(', ')}</p>
+
+                        <p className="text-sm text-gray-700 font-medium mb-3">
+                          {pub.journal}
+                          {pub.volume && pub.issue && (
+                            <span className="text-gray-600 font-normal"> • Vol. {pub.volume}, Issue {pub.issue}</span>
+                          )}
+                          {pub.pages && <span className="text-gray-600 font-normal"> • pp. {pub.pages}</span>}
+                        </p>
+
+                        <div className="flex items-center gap-6 text-sm text-gray-600">
+                          <span>Year: {pub.year}</span>
+                          {pub.doi && <span>DOI: {pub.doi}</span>}
+                          {pub.citations !== undefined && (
+                            <span className="font-semibold text-blue-600">Citations: {pub.citations}</span>
+                          )}
+                          {pub.submittedDate && <span>Submitted: {pub.submittedDate}</span>}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 ml-4">
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Eye className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Edit className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <MoreVertical className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ————————————————————————————————————————
 // Root: Sidebar + conditional content routing
 // ————————————————————————————————————————
 const LecturerApp: React.FC = () => {
@@ -931,13 +2180,13 @@ const LecturerApp: React.FC = () => {
       case 'My Profile':
         return <LecturerProfile />;
       case 'Teaching':
-        return <div className="p-8">Teaching view…</div>;
+        return <LecturerTeaching />;
       case 'Schedule':
         return <ScheduleView />;
       case 'Research':
-        return <div className="p-8">Research view…</div>;
+        return <ResearchView />;
       case 'Canvas/LMS':
-        return <div className="p-8">Canvas/LMS integration…</div>;
+        return <LecturerTeaching />;
       case 'Messages':
         return <div className="p-8">Inbox / threads…</div>;
       default:

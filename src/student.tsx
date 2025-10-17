@@ -1824,6 +1824,219 @@ export default function Student() {
       </div>
     </div>
   );
+  const [selectedRequestType, setSelectedRequestType] = useState<string>('');
+
+// One-Stop: catalog of common forms
+const commonForms = [
+  { id: 'student-certificate', title: 'Student Certificate', description: 'Request an official student enrollment certificate', icon: '📋', category: 'Academic', department: 'Registrar Office', processingTime: '2-3 days' },
+  { id: 'transcript', title: 'Official Transcript', description: 'Request your official academic transcript', icon: '📊', category: 'Academic', department: 'Registrar Office', processingTime: '3-5 days' },
+  { id: 'exam-absence', title: 'Exam Absence Request', description: 'Request permission for exam absence with valid reason', icon: '📝', category: 'Academic', department: 'Academic Office', processingTime: '1-2 days' },
+  { id: 'grade-appeal', title: 'Grade Appeal', description: 'Appeal a grade or request grade review', icon: '⚖️', category: 'Academic', department: 'Academic Office', processingTime: '5-7 days' },
+  { id: 'leave-absence', title: 'Leave of Absence', description: 'Request temporary leave from studies', icon: '🏠', category: 'Student Affairs', department: 'Student Affairs', processingTime: '7-10 days' },
+  { id: 'financial-aid', title: 'Financial Aid Request', description: 'Apply for financial assistance or scholarships', icon: '💰', category: 'Finance', department: 'Financial Aid Office', processingTime: '10-14 days' },
+  { id: 'info-change', title: 'Personal Info Update', description: 'Request to update personal information', icon: '✏️', category: 'Student Affairs', department: 'Student Affairs', processingTime: '3-5 days' },
+  { id: 'class-transfer', title: 'Class Transfer', description: 'Request to transfer to a different class section', icon: '🔄', category: 'Academic', department: 'Academic Office', processingTime: '3-5 days' },
+];
+const renderOneStop = () => (
+  // One-Stop service state
+
+  <div className="space-y-6">
+    {/* Header */}
+    <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">One-Stop Service Center</h2>
+          <p className="text-blue-100">Submit requests and forms to HSB departments</p>
+        </div>
+        <div className="p-4 bg-white/20 rounded-xl">
+          <Bell size={48} />
+        </div>
+      </div>
+    </div>
+
+    {/* Request History */}
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">My Request History</h3>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full" />
+              <span className="text-sm text-gray-600">Approved: <span className="font-semibold text-gray-900">8</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full" />
+              <span className="text-sm text-gray-600">Processing: <span className="font-semibold text-gray-900">3</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-orange-500 rounded-full" />
+              <span className="text-sm text-gray-600">Pending: <span className="font-semibold text-gray-900">2</span></span>
+            </div>
+          </div>
+          <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option>All Status</option>
+            <option>Approved</option>
+            <option>Processing</option>
+            <option>Pending</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Request ID</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {[
+              { id: '#REQ-2025-1015', type: 'Student Certificate', date: '2025-10-15', dept: 'Registrar Office', status: 'Approved', badge: 'bg-emerald-100 text-emerald-700' },
+              { id: '#REQ-2025-1012', type: 'Official Transcript', date: '2025-10-12', dept: 'Registrar Office', status: 'Processing', badge: 'bg-blue-100 text-blue-700' },
+              { id: '#REQ-2025-1008', type: 'Exam Absence Request', date: '2025-10-08', dept: 'Academic Office', status: 'Pending', badge: 'bg-orange-100 text-orange-700' },
+              { id: '#REQ-2025-1005', type: 'Grade Appeal', date: '2025-10-05', dept: 'Academic Office', status: 'Processing', badge: 'bg-blue-100 text-blue-700' },
+              { id: '#REQ-2025-0928', type: 'Financial Aid Request', date: '2025-09-28', dept: 'Financial Aid Office', status: 'Approved', badge: 'bg-emerald-100 text-emerald-700' },
+            ].map(row => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.id}</td>
+                <td className="px-4 py-3 text-sm text-gray-900">{row.type}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{row.date}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{row.dept}</td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`px-3 py-1 ${row.badge} text-xs font-semibold rounded-full`}>{row.status}</span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <button className="text-blue-600 hover:underline text-sm font-medium">View</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+        <p className="text-sm text-gray-600">Showing 1 to 5 of 13 requests</p>
+        <div className="flex gap-2">
+          <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Previous</button>
+          <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+          <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">2</button>
+          <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">3</button>
+          <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Common Forms */}
+    <div className="grid grid-cols-3 gap-6">
+      <div className="col-span-2">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Common Forms & Requests</h3>
+            <button className="text-blue-600 text-sm font-medium hover:underline">View All Forms</button>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {commonForms.map(form => (
+              <div
+                key={form.id}
+                className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all cursor-pointer hover:border-blue-400 hover:bg-blue-50"
+                onClick={() => setSelectedRequestType(form.title)}
+              >
+                <h4 className="font-semibold text-gray-900 text-sm mb-2">{form.title}</h4>
+                <div className="space-y-1 mb-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-500">Dept:</span>
+                    <span className="font-medium text-gray-700 text-right">{form.department}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-500">Time:</span>
+                    <span className="font-medium text-gray-700">{form.processingTime}</span>
+                  </div>
+                </div>
+                <button className="w-full py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors">
+                  Start Request
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {selectedRequestType && (
+          <div className="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Submit Request: {selectedRequestType}</h3>
+              <button onClick={() => setSelectedRequestType('')} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Full Name</label>
+                  <input type="text" defaultValue="Nguyễn Văn A" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Student ID</label>
+                  <input type="text" defaultValue="22080000" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Email</label>
+                  <input type="email" defaultValue="met22080001@hsb.edu.vn" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">Phone Number</label>
+                  <input type="tel" defaultValue="0846238088" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Reason for Request <span className="text-red-500">*</span></label>
+                <textarea rows={4} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Please provide detailed reason for your request..." />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Supporting Documents</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                  <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
+                  <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, JPG, PNG (max. 10MB)</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => setSelectedRequestType('')} className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">Cancel</button>
+                <button className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">Submit Request</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Help Sidebar */}
+      <div className="space-y-6">
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
+          <p className="text-sm text-gray-600 mb-4">Contact our support team for assistance</p>
+          <div className="space-y-3">
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-xs font-medium text-gray-700 mb-1">Email</p>
+              <p className="text-sm text-blue-600">onestop@hsb.edu.vn</p>
+            </div>
+            <div className="bg-white rounded-lg p-3">
+              <p className="text-xs font-medium text-gray-700 mb-1">Phone</p>
+              <p className="text-sm text-blue-600">(+84) 24 3333 4444</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
   const renderDashboard = () => (
     <div>
@@ -2314,7 +2527,7 @@ export default function Student() {
            activePage === 'activities' ? renderActivities() :
            activePage === 'calendar' ? renderCalendar() :
            activePage === 'canvas' ? renderCanvas() :
-           // activePage === 'onestop' ? renderOneStop() :
+           activePage === 'onestop' ? renderOneStop() :
            renderDashboard()}
         </main>
       </div>
