@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
-import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, CreditCard, Edit3, Briefcase, Award, Globe } from 'lucide-react';
+import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
+  ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
+  CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon } from 'lucide-react';
 
 export default function Student() {
   const [activePage, setActivePage] = useState('calendar');
   const [academicSubTab, setAcademicSubTab] = useState('courses');
   const [calendarView, setCalendarView] = useState('month');
+// Sidebar collapse/lock
+const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+const [sidebarLocked, setSidebarLocked] = useState<boolean>(true);
+
+const toggleLock = () => setSidebarLocked(v => !v);
+const toggleCollapse = () => {
+  if (sidebarLocked) return;         // ignore while locked
+  setSidebarCollapsed(v => !v);
+};
+  // Optional: hover-to-expand when unlocked
 
   const upcomingActivities = [
     { 
@@ -2472,12 +2484,57 @@ const renderOneStop = () => (
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="w-64 bg-slate-800 text-white flex flex-col">
-        <div className="p-6 border-b border-slate-700">
-          <h1 className="text-2xl font-bold">HSB ERP</h1>
-          <p className="text-slate-400 text-sm mt-1">Student Portal</p>
-        </div>
+
+    
+<div className="flex h-screen bg-gray-50">
+  {/* Sidebar */}
+  <div
+    className={`${
+      sidebarCollapsed ? 'w-16' : 'w-64'
+    } relative bg-slate-800 text-white flex flex-col transition-all duration-300`}
+  >
+    {/* Controls rail that retracts with the panel */}
+    <div className="flex items-center gap-1 justify-end">
+      {/* Lock / Unlock */}
+      <button
+        onClick={toggleLock}
+        title={sidebarLocked ? 'Unlock panel' : 'Lock panel'}
+        className="p-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20"
+      >
+        {sidebarLocked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
+      </button>
+
+      {/* Collapse / Expand */}
+      <button
+        onClick={toggleCollapse}
+        title={
+          sidebarCollapsed
+            ? 'Expand panel'
+            : sidebarLocked
+            ? 'Unlock to collapse'
+            : 'Collapse panel'
+        }
+        className={`p-2 rounded-lg border ${
+          sidebarLocked
+            ? 'border-white/20 opacity-50 cursor-not-allowed'
+            : 'border-white/60 bg-slate-800 hover:bg-slate-700'
+        }`}
+      >
+        {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeftIcon size={16} />}
+      </button>
+    </div>
+
+    {/* Sidebar header */}
+    <div className="p-4 border-b border-slate-700">
+      <div className={sidebarCollapsed ?  'hidden' : 'block'}>
+    <h1 className="text-2xl font-bold leading-none">HSB ERP</h1>
+    <p className="text-slate-400 text-sm mt-1 leading-none">Student Portal</p>
+  </div>
+    </div>
+
+    {/* ...keep your <nav> here ... */}
+
+
         
         <nav className="flex-1 p-4 space-y-1">
           {[
@@ -2491,17 +2548,16 @@ const renderOneStop = () => (
             { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
           ].map(item => (
             <button
-              key={item.id}
-              onClick={() => setActivePage(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activePage === item.id 
-                  ? 'bg-slate-700 text-white' 
-                  : 'text-slate-300 hover:bg-slate-700/50'
-              }`}
-            >
-              <item.icon size={20} />
-              <span>{item.label}</span>
-            </button>
+  key={item.id}
+  onClick={() => setActivePage(item.id)}
+  title={item.label} // tooltip when collapsed
+  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start px-4 gap-3'} py-3 rounded-lg transition-colors ${
+    activePage === item.id ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-700/50'
+  }`}
+>
+  <item.icon size={20} className="flex-shrink-0" />
+  <span className={`${sidebarCollapsed ? 'sr-only' : 'inline'}`}>{item.label}</span>
+</button>
           ))}
         </nav>
 

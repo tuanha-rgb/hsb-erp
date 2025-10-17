@@ -5,7 +5,7 @@ import {
   Home, User as UserIcon, BookText, Globe, Lock, ChevronLeft,
   Mail, Phone, Building2, Edit, GraduationCap,
   Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare, DollarSign, Search, Filter, Eye, MoreVertical,
-  User,Upload, Book, ClipboardList,BarChart3,Download, Send
+  User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon
 } from 'lucide-react';
 
 // ————————————————————————————————————————
@@ -2162,7 +2162,23 @@ const ResearchView: React.FC = () => {
 // ————————————————————————————————————————
 const LecturerApp: React.FC = () => {
   const [activeNav, setActiveNav] = useState('Dashboard');
+ // Sidebar controls
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLocked, setIsLocked] = useState(true);
 
+  const toggleLock = () => setIsLocked(v => !v);
+  const toggleCollapse = () => {
+    if (isLocked) return;
+    setIsCollapsed(v => !v);
+  };
+
+  // Optional: hover-to-expand when unlocked
+  const handleEnter = () => {
+    if (!isLocked && isCollapsed) setIsCollapsed(false);
+  };
+  const handleLeave = () => {
+    if (!isLocked && !isCollapsed) setIsCollapsed(true);
+  };
   const navItems = [
     { name: 'Dashboard', icon: Home },
     { name: 'My Profile', icon: UserIcon },
@@ -2195,30 +2211,87 @@ const LecturerApp: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50">
       {/* Left Sidebar */}
-      <aside className="w-64 bg-slate-800 text-white flex flex-col">
-        {/* Header */}
+      <aside
+        className={`${isCollapsed ? 'w-16' : 'w-64'} relative bg-slate-800 text-white flex flex-col transition-all duration-300`}
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
+      >
+        {/* Header: title + controls on the same baseline */}
         <div className="p-4 border-b border-slate-700">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold">HSB ERP</h1>
-            <div className="flex items-center gap-2">
-              <button className="p-1.5 hover:bg-slate-700 rounded" aria-label="lock">
-                <Lock className="w-4 h-4" />
-              </button>
-              <button className="p-1.5 hover:bg-slate-700 rounded" aria-label="collapse">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+          <div className={`${isCollapsed ? 'hidden' : 'block'}`}>
+            {/* Row 1: Title (left) + Controls (right) aligned */}
+            <div className="flex items-baseline justify-between">
+              <h1 className="text-2xl font-bold leading-tight">HSB ERP</h1>
+
+              <div className="flex items-baseline gap-2">
+                {/* Lock / Unlock */}
+                <button
+                  onClick={toggleLock}
+                  title={isLocked ? 'Unlock panel' : 'Lock panel'}
+                  className="p-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20"
+                >
+                  {isLocked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
+                </button>
+
+                {/* Collapse / Expand */}
+                <button
+                  onClick={toggleCollapse}
+                  title={
+                    isCollapsed ? 'Expand panel' : isLocked ? 'Unlock to collapse' : 'Collapse panel'
+                  }
+                  className={`p-2 rounded-lg border ${
+                    isLocked
+                      ? 'border-white/20 opacity-50 cursor-not-allowed'
+                      : 'border-white/60 bg-slate-800 hover:bg-slate-700'
+                  }`}
+                >
+                  {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeftIcon size={16} />}
+                </button>
+              </div>
             </div>
+
+            {/* Row 2: Subtitle */}
+            <p className="text-slate-400 text-sm mt-1">Lecturer Portal</p>
           </div>
 
-          {/* Role Dropdown */}
-          <select className="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option>Lecturer</option>
-            <option>Admin</option>
-            <option>Student</option>
-          </select>
+          {/* When collapsed, show compact controls (optional) */}
+          {isCollapsed && (
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={toggleLock}
+                title={isLocked ? 'Unlock panel' : 'Lock panel'}
+                className="p-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20"
+              >
+                {isLocked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
+              </button>
+              <button
+                onClick={toggleCollapse}
+                title={
+                  isCollapsed ? 'Expand panel' : isLocked ? 'Unlock to collapse' : 'Collapse panel'
+                }
+                className={`p-2 rounded-lg border ${
+                  isLocked
+                    ? 'border-white/20 opacity-50 cursor-not-allowed'
+                    : 'border-white/60 bg-slate-800 hover:bg-slate-700'
+                }`}
+              >
+                {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeftIcon size={16} />}
+              </button>
+            </div>
+          )}
         </div>
+
+          {/* Role Dropdown (hide in collapsed) */}
+        {!isCollapsed && (
+          <div className="p-4 border-b border-slate-700">
+            <select className="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Lecturer</option>
+              
+            </select>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className="flex-1 p-4">
@@ -2230,12 +2303,19 @@ const LecturerApp: React.FC = () => {
                 <li key={item.name}>
                   <button
                     onClick={() => setActiveNav(item.name)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                    title={item.name} // helpful tooltip when collapsed
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center px-2' : 'justify-start px-4 gap-3'
+                    } py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? 'bg-slate-700 text-white'
+                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <span className={`${isCollapsed ? 'sr-only' : 'inline'} font-medium`}>
+                      {item.name}
+                    </span>
                   </button>
                 </li>
               );
@@ -2243,6 +2323,7 @@ const LecturerApp: React.FC = () => {
           </ul>
         </nav>
       </aside>
+    
 
       {/* Main Content */}
       <main className="flex-1">
