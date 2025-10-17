@@ -2314,6 +2314,7 @@ export default function Student() {
            activePage === 'activities' ? renderActivities() :
            activePage === 'calendar' ? renderCalendar() :
            activePage === 'canvas' ? renderCanvas() :
+           // activePage === 'onestop' ? renderOneStop() :
            renderDashboard()}
         </main>
       </div>
