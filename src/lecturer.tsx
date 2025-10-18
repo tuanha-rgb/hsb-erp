@@ -2157,6 +2157,446 @@ const ResearchView: React.FC = () => {
   );
 };
 
+const CanvasView: React.FC = () => {
+  const [open, setOpen] = useState<Record<string, boolean>>({
+    csir6261: false,
+    cs6262: false,
+    cs6238: false,
+  });
+
+  const toggleDiscussion = (id: keyof typeof open) => {
+    setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const navigateTo = (section: string) => {
+    window.alert(`Navigating to ${section} management...`);
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="header bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] text-white rounded-b-[24px] mb-12 shadow-[0_4px_20px_rgba(91,108,232,0.3)] p-8 md:p-8 lg:p-8" style={{ padding: "32px 48px" }}>
+        <div className="header-content max-w-[1200px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <div className="header-title text-[28px] font-bold mb-1">HSB Canvas / LMS</div>
+            <div className="header-subtitle text-sm opacity-90">Lecturer Management System</div>
+          </div>
+          <button
+            className="header-btn bg-white/20 border border-white/30 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:bg-white/30 hover:-translate-y-0.5"
+            onClick={() => navigateTo("documentation")}
+          >
+            <BookOpen className="w-[18px] h-[18px]" />
+            Documentation
+          </button>
+        </div>
+      </div>
+
+      {/* Container */}
+      <div className="container max-w-[1200px] mx-auto px-12 pb-12">
+        {/* Course Overview Stats */}
+        <div className="section mb-12">
+          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">Course Overview</h2>
+          <div className="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+            <div className="stat-card bg-white rounded-2xl p-7 border border-gray-200 text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(91,108,232,0.12)]">
+              <div className="stat-value text-[40px] font-bold bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] bg-clip-text text-transparent mb-2">
+                65
+              </div>
+              <div className="stat-label text-sm text-gray-500 font-semibold tracking-wide uppercase">Total Students</div>
+            </div>
+            <div className="stat-card bg-white rounded-2xl p-7 border border-gray-200 text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(91,108,232,0.12)]">
+              <div className="stat-value text-[40px] font-bold bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] bg-clip-text text-transparent mb-2">
+                8
+              </div>
+              <div className="stat-label text-sm text-gray-500 font-semibold tracking-wide uppercase">Active Modules</div>
+            </div>
+            <div className="stat-card bg-white rounded-2xl p-7 border border-gray-200 text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(91,108,232,0.12)]">
+              <div className="stat-value text-[40px] font-bold bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] bg-clip-text text-transparent mb-2">
+                12
+              </div>
+              <div className="stat-label text-sm text-gray-500 font-semibold tracking-wide uppercase">Assignments</div>
+            </div>
+            <div className="stat-card bg-white rounded-2xl p-7 border border-gray-200 text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(91,108,232,0.12)]">
+              <div className="stat-value text-[40px] font-bold bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] bg-clip-text text-transparent mb-2">
+                82%
+              </div>
+              <div className="stat-label text-sm text-gray-500 font-semibold tracking-wide uppercase">Avg Grade</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Features */}
+        <div className="cards-grid grid gap-6 mb-12" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
+          <div
+            className="feature-card bg-white rounded-2xl p-8 border border-gray-200 transition-all cursor-pointer relative overflow-hidden hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(91,108,232,0.15)] hover:border-[#5b6ce8]"
+            onClick={() => navigateTo("materials")}
+          >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#5b6ce8,#8b5cf6)] opacity-0 transition-opacity duration-300 pointer-events-none feature-card-bar" />
+            <div className="card-icon card-icon-blue w-14 h-14 rounded-xl flex items-center justify-center mb-5 text-2xl bg-[rgba(91,108,232,0.1)] text-[#5b6ce8]">
+              📚
+            </div>
+            <h3 className="card-title text-lg font-semibold text-gray-900 mb-2">Course Materials</h3>
+            <p className="card-description text-sm text-gray-500 leading-6">
+              Upload lectures, readings, and resources for student access
+            </p>
+          </div>
+
+          <div
+            className="feature-card bg-white rounded-2xl p-8 border border-gray-200 transition-all cursor-pointer relative overflow-hidden hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(91,108,232,0.15)] hover:border-[#5b6ce8]"
+            onClick={() => navigateTo("assignments")}
+          >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#5b6ce8,#8b5cf6)] opacity-0 transition-opacity duration-300 pointer-events-none feature-card-bar" />
+            <div className="card-icon card-icon-purple w-14 h-14 rounded-xl flex items-center justify-center mb-5 text-2xl bg-[rgba(139,92,246,0.1)] text-[#8b5cf6]">
+              📝
+            </div>
+            <h3 className="card-title text-lg font-semibold text-gray-900 mb-2">Assignments</h3>
+            <p className="card-description text-sm text-gray-500 leading-6">
+              Create, submit, and track assignment deadlines and submissions
+            </p>
+          </div>
+
+          <div
+            className="feature-card bg-white rounded-2xl p-8 border border-gray-200 transition-all cursor-pointer relative overflow-hidden hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(91,108,232,0.15)] hover:border-[#5b6ce8]"
+            onClick={() => navigateTo("grades")}
+          >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#5b6ce8,#8b5cf6)] opacity-0 transition-opacity duration-300 pointer-events-none feature-card-bar" />
+            <div className="card-icon card-icon-green w-14 h-14 rounded-xl flex items-center justify-center mb-5 text-2xl bg-[rgba(16,185,129,0.1)] text-[#10b981]">
+              📊
+            </div>
+            <h3 className="card-title text-lg font-semibold text-gray-900 mb-2">Grades & Feedback</h3>
+            <p className="card-description text-sm text-gray-500 leading-6">
+              Grade submissions and provide detailed instructor feedback
+            </p>
+          </div>
+        </div>
+
+        {/* Pending Tasks */}
+        <div className="section mb-12">
+          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">
+            Pending Tasks & Actions Required
+          </h2>
+
+          <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+            <div className="update-icon update-icon-orange w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(249,115,22,0.1)]">
+              📝
+            </div>
+            <div className="update-content flex-1">
+              <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                Grading Required
+                <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  15 Submissions
+                </span>
+              </div>
+              <div className="update-description text-sm text-gray-500 mb-1.5">
+                Assignment 3: Incident Response Plan - 15 student submissions are awaiting your grades and feedback
+              </div>
+              <div className="update-meta text-xs text-gray-400">Due: Oct 20, 2025 • CSIR-6261</div>
+            </div>
+          </div>
+
+          <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+            <div className="update-icon update-icon-orange w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(249,115,22,0.1)]">
+              📝
+            </div>
+            <div className="update-content flex-1">
+              <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                Grading Required
+                <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  8 Submissions
+                </span>
+              </div>
+              <div className="update-description text-sm text-gray-500 mb-1.5">
+                Assignment 2: Threat Modeling - 8 late submissions need to be reviewed and graded
+              </div>
+              <div className="update-meta text-xs text-gray-400">Overdue • CSIR-6261</div>
+            </div>
+          </div>
+
+          <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+            <div className="update-icon update-icon-blue w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(91,108,232,0.1)]">
+              📚
+            </div>
+            <div className="update-content flex-1">
+              <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                Course Material Update Required
+                <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  Action Needed
+                </span>
+              </div>
+              <div className="update-description text-sm text-gray-500 mb-1.5">
+                Week 6 lecture materials need to be uploaded before next class session on Monday
+              </div>
+              <div className="update-meta text-xs text-gray-400">Due: Oct 21, 2025 • CSIR-6261</div>
+            </div>
+          </div>
+
+          <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+            <div className="update-icon update-icon-purple w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(139,92,246,0.1)]">
+              📋
+            </div>
+            <div className="update-content flex-1">
+              <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                Quiz Creation Required
+                <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  Not Started
+                </span>
+              </div>
+              <div className="update-description text-sm text-gray-500 mb-1.5">
+                Quiz 5: Security Monitoring needs to be created and published for next week's assessment
+              </div>
+              <div className="update-meta text-xs text-gray-400">Scheduled: Oct 22, 2025 • CSIR-6261</div>
+            </div>
+          </div>
+
+          <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+            <div className="update-icon update-icon-green w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(16,185,129,0.1)]">
+              ✅
+            </div>
+            <div className="update-content flex-1">
+              <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">Module Review Required</div>
+              <div className="update-description text-sm text-gray-500 mb-1.5">
+                Week 3: Incident Detection Methods is in draft status and ready for your final review before publishing
+              </div>
+              <div className="update-meta text-xs text-gray-400">Ready for Review • CSIR-6261</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Course Discussion Updates */}
+        <div className="section mb-12">
+          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">
+            Course Discussion Updates
+          </h2>
+
+          {/* CSIR-6261 Discussions */}
+          <div className="mb-6">
+            <div
+              className="course-discussion-header flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all mb-3 hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]"
+              onClick={() => toggleDiscussion("csir6261")}
+            >
+              <div className="course-discussion-title flex items-center gap-3 text-[16px] font-semibold">
+                <span style={{ color: "#5b6ce8" }}>CSIR-6261 - Cybersecurity Incident Response</span>
+                <span className="course-badge badge-count inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  4 new posts
+                </span>
+              </div>
+              <svg
+                className={`dropdown-icon w-5 h-5 text-gray-500 transition-transform ${open.csir6261 ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {open.csir6261 && (
+              <div className="course-discussions block mb-6">
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-purple w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(139,92,246,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                      New Discussion Post
+                      <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                        12 Replies
+                      </span>
+                    </div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Sarah Johnson posted: &quot;Question about Week 5 Assignment - Part C clarification needed&quot;
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">3 hours ago</div>
+                  </div>
+                </div>
+
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-green w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(16,185,129,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                      Active Discussion
+                      <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                        24 Replies
+                      </span>
+                    </div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Thread: &quot;Best practices for incident response documentation&quot; - High engagement from students
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">Yesterday</div>
+                  </div>
+                </div>
+
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-orange w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(249,115,22,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                      Awaiting Response
+                      <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                        Instructor Input Needed
+                      </span>
+                    </div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Emma Wilson: &quot;Professor, could you clarify the midterm exam format and coverage areas?&quot;
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">2 days ago</div>
+                  </div>
+                </div>
+
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-blue w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(91,108,232,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">Group Discussion</div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Study group formed for final exam preparation - 8 students actively collaborating
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">2 days ago</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CS-6262 Discussions */}
+          <div className="mb-6">
+            <div
+              className="course-discussion-header flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all mb-3 hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]"
+              onClick={() => toggleDiscussion("cs6262")}
+            >
+              <div className="course-discussion-title flex items-center gap-3 text-[16px] font-semibold">
+                <span style={{ color: "#8b5cf6" }}>CS-6262 - Network Security</span>
+                <span className="course-badge badge-count inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  2 new posts
+                </span>
+              </div>
+              <svg
+                className={`dropdown-icon w-5 h-5 text-gray-500 transition-transform ${open.cs6262 ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {open.cs6262 && (
+              <div className="course-discussions block mb-6">
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-blue w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(91,108,232,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                      Student Question
+                      <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                        Unanswered
+                      </span>
+                    </div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Michael Chen asked: &quot;Can someone explain the difference between IDS and IPS in the context of our lab?&quot;
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">5 hours ago</div>
+                  </div>
+                </div>
+
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-purple w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(139,92,246,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                      Lab Discussion
+                      <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                        6 Replies
+                      </span>
+                    </div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      David Lee: &quot;Having trouble with Wireshark configuration in Lab 3, anyone else experiencing this?&quot;
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">1 day ago</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CS-6238 Discussions */}
+          <div className="mb-6">
+            <div
+              className="course-discussion-header flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all mb-3 hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]"
+              onClick={() => toggleDiscussion("cs6238")}
+            >
+              <div className="course-discussion-title flex items-center gap-3 text-[16px] font-semibold">
+                <span style={{ color: "#10b981" }}>CS-6238 - Secure Computer Systems</span>
+                <span className="course-badge badge-count inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                  2 new posts
+                </span>
+              </div>
+              <svg
+                className={`dropdown-icon w-5 h-5 text-gray-500 transition-transform ${open.cs6238 ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {open.cs6238 && (
+              <div className="course-discussions block mb-6">
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-green w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(16,185,129,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">
+                      Research Discussion
+                      <span className="update-badge badge-pending inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold ml-2 bg-[rgba(249,115,22,0.1)] text-[#f97316]">
+                        15 Replies
+                      </span>
+                    </div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Thread: &quot;Latest vulnerabilities in modern OS kernels&quot; - Students sharing research findings
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">3 days ago</div>
+                  </div>
+                </div>
+
+                <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
+                  <div className="update-icon update-icon-blue w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(91,108,232,0.1)]">
+                    💬
+                  </div>
+                  <div className="update-content flex-1">
+                    <div className="update-title text-[15px] font-semibold text-gray-900 mb-1">Assignment Clarification</div>
+                    <div className="update-description text-sm text-gray-500 mb-1.5">
+                      Lisa Wang: &quot;Is the secure coding assignment due this Friday or next Friday?&quot;
+                    </div>
+                    <div className="update-meta text-xs text-gray-400">4 days ago</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Small responsive tweak to header/container spacing */}
+      <style>{`
+        @media (max-width: 768px) {
+          .header { padding: 24px !important; }
+          .container { padding: 0 24px 24px !important; }
+        }
+        /* Show the gradient bar on hover (for the three feature cards) */
+        .feature-card:hover .feature-card-bar { opacity: 1; }
+      `}</style>
+    </div>
+  );
+};
+
 // ————————————————————————————————————————
 // Root: Sidebar + conditional content routing
 // ————————————————————————————————————————
@@ -2202,7 +2642,7 @@ const LecturerApp: React.FC = () => {
       case 'Research':
         return <ResearchView />;
       case 'Canvas/LMS':
-        return <LecturerTeaching />;
+        return <CanvasView />;
       case 'Messages':
         return <div className="p-8">Inbox / threads…</div>;
       default:

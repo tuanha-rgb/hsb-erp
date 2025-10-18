@@ -946,150 +946,134 @@ const toggleCollapse = () => {
     </div>
   );
 
-  const renderCanvas = () => (
-    <div className="space-y-6">
-      {/* Canvas Header */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">HSB Canvas / LMS</h2>
-            <p className="text-blue-100">Learning Management System</p>
-          </div>
-          <div className="p-4 bg-white/20 rounded-xl">
-            <BookOpen size={48} />
-          </div>
+ const renderCanvas = () => (
+  <div className="space-y-6">
+    {/* Canvas Header */}
+    <div className="rounded-2xl p-8 text-white shadow-[0_8px_30px_rgba(79,70,229,0.35)] bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-1 tracking-tight">HSB Canvas / LMS</h2>
+          <p className="text-white/90 text-sm">Learning Management System</p>
         </div>
-      </div>
-
-      {/* Placeholder Content */}
-      <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
-            <BookOpen size={48} className="text-gray-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">Canvas / LMS Integration</h3>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            This section will integrate with the university's Learning Management System (Canvas) to provide access to course materials, 
-            assignments, discussions, grades, and learning resources.
-          </p>
-          
-          <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-            <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <BookOpen size={24} className="text-blue-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Course Materials</h4>
-              <p className="text-sm text-gray-600">Access lectures, readings, and resources</p>
-            </div>
-            
-            <div className="p-6 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <CheckCircle size={24} className="text-purple-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Assignments</h4>
-              <p className="text-sm text-gray-600">Submit work and track deadlines</p>
-            </div>
-            
-            <div className="p-6 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <TrendingUp size={24} className="text-emerald-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Grades & Feedback</h4>
-              <p className="text-sm text-gray-600">View grades and instructor feedback</p>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-              Connect to Canvas
-            </button>
-            <button className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-              Learn More
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Feature Cards */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Coming Soon Features</h3>
-          <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900">Course Content Access</p>
-                <p className="text-sm text-gray-600">View all course materials and lectures</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900">Assignment Submission</p>
-                <p className="text-sm text-gray-600">Submit assignments directly through the platform</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900">Discussion Boards</p>
-                <p className="text-sm text-gray-600">Participate in class discussions and forums</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900">Video Lectures</p>
-                <p className="text-sm text-gray-600">Watch recorded lectures and tutorials</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Integration Benefits</h3>
-          <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">1</span>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Centralized Learning Hub</p>
-                <p className="text-sm text-gray-600">All your courses in one place</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">2</span>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Real-time Updates</p>
-                <p className="text-sm text-gray-600">Get notified of new content and announcements</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">3</span>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Mobile Access</p>
-                <p className="text-sm text-gray-600">Learn anywhere, anytime</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">4</span>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Progress Tracking</p>
-                <p className="text-sm text-gray-600">Monitor your learning progress</p>
-              </div>
-            </li>
-          </ul>
+        <div className="p-4 rounded-xl bg-white/20 ring-1 ring-white/30 backdrop-blur">
+          <BookOpen size={48} />
         </div>
       </div>
     </div>
-  );
+
+    {/* Placeholder Content */}
+    <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12">
+      <div className="text-center max-w-4xl mx-auto">
+        <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6 ring-1 ring-gray-200">
+          <BookOpen size={48} className="text-gray-400" />
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">Canvas / LMS Integration</h3>
+        <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+          This section will integrate with the university&apos;s Learning Management System (Canvas) to provide access
+          to course materials, assignments, discussions, grades, and learning resources.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto mb-8">
+          <div className="p-6 rounded-xl border bg-blue-50/60 border-blue-100 hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <BookOpen size={24} className="text-blue-600" />
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-1">Course Materials</h4>
+            <p className="text-sm text-gray-600">Access lectures, readings, and resources</p>
+          </div>
+
+          <div className="p-6 rounded-xl border bg-purple-50/60 border-purple-100 hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <CheckCircle size={24} className="text-purple-600" />
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-1">Assignments</h4>
+            <p className="text-sm text-gray-600">Submit work and track deadlines</p>
+          </div>
+
+          <div className="p-6 rounded-xl border bg-emerald-50/60 border-emerald-100 hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <TrendingUp size={24} className="text-emerald-600" />
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-1">Grades &amp; Feedback</h4>
+            <p className="text-sm text-gray-600">View grades and instructor feedback</p>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-3">
+          <button
+            className="px-6 py-3 rounded-xl text-white font-semibold shadow-md hover:shadow-lg transition-all
+                       bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-fuchsia-600"
+          >
+            Connect to Canvas
+          </button>
+          <button className="px-6 py-3 rounded-xl font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50">
+            Learn More
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Feature Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Coming Soon Features</h3>
+        <ul className="space-y-3">
+          <li className="flex items-start gap-3">
+            <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
+            <div>
+              <p className="font-medium text-gray-900">Course Content Access</p>
+              <p className="text-sm text-gray-600">View all course materials and lectures</p>
+            </div>
+          </li>
+          <li className="flex items-start gap-3">
+            <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
+            <div>
+              <p className="font-medium text-gray-900">Assignment Submission</p>
+              <p className="text-sm text-gray-600">Submit assignments directly through the platform</p>
+            </div>
+          </li>
+          <li className="flex items-start gap-3">
+            <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
+            <div>
+              <p className="font-medium text-gray-900">Discussion Boards</p>
+              <p className="text-sm text-gray-600">Participate in class discussions and forums</p>
+            </div>
+          </li>
+          <li className="flex items-start gap-3">
+            <CheckCircle size={20} className="text-emerald-600 mt-0.5" />
+            <div>
+              <p className="font-medium text-gray-900">Video Lectures</p>
+              <p className="text-sm text-gray-600">Watch recorded lectures and tutorials</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Integration Benefits</h3>
+        <ul className="space-y-3">
+          {[
+            { n: 1, t: "Centralized Learning Hub", s: "All your courses in one place" },
+            { n: 2, t: "Real-time Updates", s: "Get notified of new content and announcements" },
+            { n: 3, t: "Mobile Access", s: "Learn anywhere, anytime" },
+            { n: 4, t: "Progress Tracking", s: "Monitor your learning progress" },
+          ].map((i) => (
+            <li key={i.n} className="flex items-start gap-3">
+              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-600 text-sm font-bold">{i.n}</span>
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">{i.t}</p>
+                <p className="text-sm text-gray-600">{i.s}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+);
+
 
   const renderCalendar = () => (
     <div className="space-y-6">

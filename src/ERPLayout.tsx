@@ -13,7 +13,7 @@ import {
   MessageSquare, Settings, BarChart3, TrendingUp, UserCheck, Home, 
   Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
-  Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X 
+  Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle 
 } from "lucide-react";
 
 
@@ -126,37 +126,37 @@ const AdminDashboard = () => {
     doctoral: 500
   };
 
-  // Student Activities
-  const studentActivities = [
-    { name: 'Math Olympiad', status: 'Gold Medal', icon: '🏆', color: 'bg-yellow-100' },
-    { name: 'Project Showcase', status: 'Best Award', icon: '🚀', color: 'bg-blue-100' },
-    { name: 'Volunteer Day', status: 'Lead Organizer', icon: '❤️', color: 'bg-red-100' }
+  // Important Events
+  const upcomingEvents = [
+    { name: 'Board Meeting', date: 'Oct 18, 2025', time: '2:00 PM', icon: '📋', color: 'bg-yellow-100' },
+    { name: 'Faculty Conference', date: 'Oct 22, 2025', time: '9:00 AM', icon: '🎓', color: 'bg-blue-100' },
+    { name: 'Alumni Gala', date: 'Oct 28, 2025', time: '6:00 PM', icon: '🎉', color: 'bg-red-100' }
   ];
 
   // Department Performance
   const departmentPerformance = [
-    { name: 'Faculty of Management', students: 892, budget: 12500000, utilization: 78, performance: 92 },
-    { name: 'Faculty of Marketing & Communication', students: 1245, budget: 15800000, utilization: 85, performance: 88 },
-    { name: 'Faculty of Nontraditional Security', students: 756, budget: 9800000, utilization: 72, performance: 90 },
-    { name: 'INS', students: 1089, budget: 11200000, utilization: 81, performance: 87 },
-    { name: 'ITM', students: 623, budget: 6400000, utilization: 68, performance: 85 }
+    { name: 'Faculty of Management', students: 800, budget: 12500000, utilization: 78, performance: 92 },
+    { name: 'Faculty of Marketing & Communication', students: 800, budget: 15800000, utilization: 85, performance: 88 },
+    { name: 'Faculty of Nontraditonal Security', students: 800, budget: 9800000, utilization: 72, performance: 90 },
+    { name: 'Institute of Nontraditional Security ', students: 1089, budget: 11200000, utilization: 81, performance: 87 },
+    { name: 'Institute of Trainging & Management', students: 623, budget: 6400000, utilization: 68, performance: 85 }
   ];
 
   // Faculty Stats
   const facultyStats = {
-    totalFaculty: 120,
-    fullTime: 120,
-    partTime: 30,
-    withPhD: 85,
-    avgExperience: 7.5
+    totalFaculty: 297,
+    fullTime: 245,
+    partTime: 52,
+    withPhD: 223,
+    avgExperience: 12.5
   };
 
   // Research Metrics
   const researchMetrics = {
-    activeProjects: 15,
+    activeProjects: 156,
     totalGrants: 18920000,
-    publications: 124,
-    citations: 895
+    publications: 1248,
+    citations: 8945
   };
 
   const formatCurrency = (amount) => {
@@ -206,7 +206,7 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-1">HSB Dashboard</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-1">Dashboard</h1>
           <p className="text-gray-600">October 15, 2025</p>
         </div>
         
@@ -215,7 +215,7 @@ const AdminDashboard = () => {
             <Search className="w-5 h-5 text-gray-600" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <span className="w-5 h-5 text-gray-600" />
+            <MessageCircle className="w-5 h-5 text-gray-600" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
             <Bell className="w-5 h-5 text-gray-600" />
@@ -256,12 +256,12 @@ const AdminDashboard = () => {
         />
       </div>
 
-      {/* Academic Performance & Earnings */}
+      {/* KPI Performance & Publications/Patents */}
       <div className="grid grid-cols-3 gap-6 mb-8">
-        {/* Academic Performance */}
+        {/* KPI Performance */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Academic Performance</h2>
+            <h2 className="text-xl font-bold text-gray-900">KPI Performance</h2>
             <select 
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -273,193 +273,169 @@ const AdminDashboard = () => {
             </select>
           </div>
           
-          <div className="h-64 flex items-end justify-between gap-3">
-            {academicPerformance.map((item, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full relative" style={{ height: '220px' }}>
-                  <div 
-                    className="w-full absolute bottom-0 bg-gradient-to-t from-green-400 to-green-300 rounded-t-lg hover:from-green-500 hover:to-green-400 cursor-pointer transition-all"
-                    style={{ height: `${(item.value / 100) * 220}px` }}
-                    title={`Performance: ${item.value}%`}
-                  ></div>
-                </div>
-                <span className="text-xs font-medium text-gray-600">{item.label}</span>
+          <div className="space-y-6">
+            {/* Student Satisfaction */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Student Satisfaction</span>
+                <span className="text-sm font-bold text-gray-900">92%</span>
               </div>
-            ))}
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-blue-400 to-blue-500 h-3 rounded-full" style={{ width: '92%' }}></div>
+              </div>
+            </div>
+
+            {/* Graduation Rate */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Graduation Rate</span>
+                <span className="text-sm font-bold text-gray-900">88%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-green-400 to-green-500 h-3 rounded-full" style={{ width: '88%' }}></div>
+              </div>
+            </div>
+
+            {/* Employment Rate */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Employment Rate (6 months)</span>
+                <span className="text-sm font-bold text-gray-900">85%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-purple-400 to-purple-500 h-3 rounded-full" style={{ width: '85%' }}></div>
+              </div>
+            </div>
+
+            {/* Research Output */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Research Output Target</span>
+                <span className="text-sm font-bold text-gray-900">96%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-orange-400 to-orange-500 h-3 rounded-full" style={{ width: '96%' }}></div>
+              </div>
+            </div>
+
+            {/* Faculty Retention */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Faculty Retention</span>
+                <span className="text-sm font-bold text-gray-900">94%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-cyan-400 to-cyan-500 h-3 rounded-full" style={{ width: '94%' }}></div>
+              </div>
+            </div>
+
+            {/* Budget Utilization */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Budget Utilization</span>
+                <span className="text-sm font-bold text-gray-900">78%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-pink-400 to-pink-500 h-3 rounded-full" style={{ width: '78%' }}></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Earnings */}
+        {/* Publications & Patents */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Earnings</h2>
+            <h2 className="text-xl font-bold text-gray-900">Publications & Patents</h2>
             <select 
               value={selectedEarningsPeriod}
               onChange={(e) => setSelectedEarningsPeriod(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="last-semester">Last Semester</option>
-              <option value="this-semester">This Semester</option>
-              <option value="this-year">This Year</option>
+              <option value="last-semester">Last Year</option>
+              <option value="this-semester">This Year</option>
+              <option value="this-year">All Time</option>
             </select>
           </div>
 
-          <div className="space-y-4">
-            {earningsData.map((item, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">{item.month}</span>
-                <div className="flex items-center gap-3 flex-1 mx-4">
-                  <div className="flex-1 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-gradient-to-r from-blue-400 to-green-400 h-2 rounded-full"
-                      style={{ width: `${(item.amount / 10000000) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-gray-900">{formatCurrency(item.amount)}</span>
+          <div className="space-y-5">
+            {/* Journal Articles */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Journal Articles</span>
+                <span className="text-2xl font-bold text-blue-900">847</span>
               </div>
-            ))}
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUp className="w-3 h-3 text-green-600" />
+                <span className="text-green-600 font-semibold">+12% vs last year</span>
+              </div>
+            </div>
+
+            {/* Conference Papers */}
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Conference Papers</span>
+                <span className="text-2xl font-bold text-purple-900">312</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUp className="w-3 h-3 text-green-600" />
+                <span className="text-green-600 font-semibold">+8% vs last year</span>
+              </div>
+            </div>
+
+            {/* Patents Filed */}
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Patents Filed</span>
+                <span className="text-2xl font-bold text-green-900">54</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUp className="w-3 h-3 text-green-600" />
+                <span className="text-green-600 font-semibold">+23% vs last year</span>
+              </div>
+            </div>
+
+            {/* Patents Granted */}
+            <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Patents Granted</span>
+                <span className="text-2xl font-bold text-orange-900">35</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUp className="w-3 h-3 text-green-600" />
+                <span className="text-green-600 font-semibold">+18% vs last year</span>
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Total Semester</span>
-              <span className="text-xl font-bold text-green-600">
-                {formatCurrency(earningsData.reduce((sum, item) => sum + item.amount, 0))}
-              </span>
+              <span className="text-sm text-gray-600">Total Output</span>
+              <span className="text-xl font-bold text-blue-600">1,248</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Messages, Students, Student Activity */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        {/* Messages */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Messages</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-              View All
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
-                  {msg.avatar}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{msg.name}</p>
-                  <p className="text-sm text-gray-600 truncate">{msg.message}</p>
-                </div>
-                <span className="text-xs text-gray-500 whitespace-nowrap">{msg.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Students Distribution */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Students</h2>
-          </div>
-
-          <div className="flex items-center justify-center mb-6">
-            <div className="relative w-48 h-48">
-              {/* Donut Chart */}
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                {/* Undergraduate - Blue */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="15"
-                  strokeDasharray={`${(studentDistribution.undergraduate / studentDistribution.total) * 220} 220`}
-                  strokeDashoffset="0"
-                />
-                {/* Graduate - Green */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="15"
-                  strokeDasharray={`${(studentDistribution.graduate / studentDistribution.total) * 220} 220`}
-                  strokeDashoffset={`-${(studentDistribution.undergraduate / studentDistribution.total) * 220}`}
-                />
-                {/* Doctoral - Purple */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke="#8b5cf6"
-                  strokeWidth="15"
-                  strokeDasharray={`${(studentDistribution.doctoral / studentDistribution.total) * 220} 220`}
-                  strokeDashoffset={`-${((studentDistribution.undergraduate + studentDistribution.graduate) / studentDistribution.total) * 220}`}
-                />
-              </svg>
-              
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-3xl font-bold text-gray-900">{formatNumber(studentDistribution.total)}</p>
-                <p className="text-sm text-gray-600">Total</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Undergraduate</span>
-              </div>
-              <span className="text-sm font-semibold text-gray-900">{formatNumber(studentDistribution.undergraduate)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Graduate</span>
-              </div>
-              <span className="text-sm font-semibold text-gray-900">{formatNumber(studentDistribution.graduate)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Doctoral</span>
-              </div>
-              <span className="text-sm font-semibold text-gray-900">{formatNumber(studentDistribution.doctoral)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Student Activity */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Student Activity</h2>
-          </div>
-
-          <div className="space-y-4">
-            {studentActivities.map((activity, i) => (
-              <div key={i} className={`p-4 ${activity.color} rounded-lg border border-gray-200`}>
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl">{activity.icon}</div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{activity.name}</p>
-                    <p className="text-sm text-gray-600">{activity.status}</p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button className="w-full mt-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-            View All Activities
+      {/* Important Events */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Important Events</h2>
+          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+            View All Events
+            <ChevronRight size={16} />
           </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          {upcomingEvents.map((event, i) => (
+            <div key={i} className={`p-6 ${event.color} rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer`}>
+              <div className="flex flex-col">
+                <p className="text-xl font-bold text-gray-900 mb-2">{event.name}</p>
+                <p className="text-sm text-gray-600 mb-1">{event.date}</p>
+                <p className="text-sm font-semibold text-gray-700">{event.time}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -2280,46 +2256,51 @@ const LibraryDashboard = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 col-span-2">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Usage Trends (Last 6 Months)</h3>
-          <div className="h-64 flex items-end justify-between gap-3">
-            {[
-              {offline: 920, online: 38000},
-              {offline: 1050, online: 41000},
-              {offline: 980, online: 39500},
-              {offline: 1120, online: 43000},
-              {offline: 1180, online: 45500},
-              {offline: 1247, online: 48392}
-            ].map((data, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex gap-1">
-                  <div 
-                    className="flex-1 bg-blue-500 rounded-t hover:bg-blue-600 cursor-pointer transition-colors" 
-                    style={{height: `${(data.offline / 1500) * 200}px`}}
-                    title={`Offline: ${data.offline}`}
-                  ></div>
-                  <div 
-                    className="flex-1 bg-green-500 rounded-t hover:bg-green-600 cursor-pointer transition-colors" 
-                    style={{height: `${(data.online / 50000) * 200}px`}}
-                    title={`Online: ${data.online}`}
-                  ></div>
-                </div>
-                <span className="text-xs text-gray-500">M{i+1}</span>
-              </div>
-            ))}
+    <div className="grid grid-cols-3 gap-6">
+  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 col-span-2">
+    <h3 className="text-lg font-semibold text-gray-900 mb-6">
+      Usage Trends (Last 6 Months)
+    </h3>
+
+    <div className="h-64 flex items-end justify-between gap-3">
+      {[
+        { month: 'May', offline: 920,  online: 38000 },
+        { month: 'Jun', offline: 1050, online: 41000 },
+        { month: 'Jul', offline: 980,  online: 39500 },
+        { month: 'Aug', offline: 1120, online: 43000 },
+        { month: 'Sep', offline: 1180, online: 45500 },
+        { month: 'Oct', offline: 1247, online: 48392 },
+      ].map((data, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-2">
+          {/* Both bars share the same height context */}
+          <div className="w-full h-48 flex gap-1 items-end">
+            <div
+              className="flex-1 bg-blue-500 rounded-t hover:bg-blue-600 cursor-pointer transition-colors"
+              style={{ height: `${(data.offline / 1500) * 100}%` }}
+              title={`Offline: ${data.offline}`}
+            />
+            <div
+              className="flex-1 bg-green-500 rounded-t hover:bg-green-600 cursor-pointer transition-colors"
+              style={{ height: `${(data.online / 50000) * 100}%` }}
+              title={`Online: ${data.online}`}
+            />
           </div>
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded"></div>
-              <span className="text-sm text-gray-600">Offline Borrows</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-sm text-gray-600">Online Access</span>
-            </div>
-          </div>
+          <span className="text-xs text-gray-500">{data.month}</span>
         </div>
+      ))}
+    </div>
+
+    <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 bg-blue-500 rounded"></div>
+        <span className="text-sm text-gray-600">Offline Borrows</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 bg-green-500 rounded"></div>
+        <span className="text-sm text-gray-600">Online Access</span>
+      </div>
+    </div>
+  </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Popular Resources</h3>
