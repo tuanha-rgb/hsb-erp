@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
-  CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon } from 'lucide-react';
+  CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft } from 'lucide-react';
 
 export default function Student() {
   const [activePage, setActivePage] = useState('calendar');
@@ -945,208 +945,508 @@ const toggleCollapse = () => {
       )}
     </div>
   );
-   const [canvasTab, setCanvasTab] = useState('courses'); 
 
-const renderCanvas = () => {
+ // --- Types (keep if you haven't added them yet) ---
+type CanvasProps = {
+  canvasSidebarOpen: boolean;
+  setCanvasSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  canvasTab: 'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum';
+  setCanvasTab: React.Dispatch<
+    React.SetStateAction<'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum'>
+  >;
+  selectedCourse: any | null;
+  setSelectedCourse: React.Dispatch<React.SetStateAction<any | null>>;
+  courseSection:
+    | 'lectures'
+    | 'assignments'
+    | 'announcements'
+    | 'discussion'
+    | 'grading'
+    | 'attendance'
+    | 'media';
+  setCourseSection: React.Dispatch<
+    React.SetStateAction<
+      | 'lectures'
+      | 'assignments'
+      | 'announcements'
+      | 'discussion'
+      | 'grading'
+      | 'attendance'
+      | 'media'
+    >
+  >;
+};
+const [canvasSidebarOpen, setCanvasSidebarOpen] = useState<boolean>(false);
+const [canvasTab, setCanvasTab] = useState<'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum'>('courses');
+const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
+const [courseSection, setCourseSection] =
+  useState<'lectures' | 'assignments' | 'announcements' | 'discussion' | 'grading' | 'attendance' | 'media'>('lectures');
+// --- Render function (paste as-is) ---
+const renderCanvas = ({
+  canvasSidebarOpen,
+  setCanvasSidebarOpen,
+  canvasTab,
+  setCanvasTab,
+  selectedCourse,
+  setSelectedCourse,
+  courseSection,
+  setCourseSection,
+}: CanvasProps) => {
+  // Typed nav + section tabs (fixes union type errors)
+  const navItems: ReadonlyArray<{
+    key: CanvasProps['canvasTab'];
+    label: string;
+    icon: any;
+  }> = [
+    { key: 'courses', label: 'Courses', icon: BookOpen },
+    { key: 'groups', label: 'Groups', icon: User },
+    { key: 'todo', label: 'To-do', icon: CheckCircle },
+    { key: 'notifications', label: 'Notifications', icon: Bell },
+    { key: 'curriculum', label: 'Curriculum', icon: BookOpen },
+  ] as const;
+
+  const sectionTabs: ReadonlyArray<{
+    key: CanvasProps['courseSection'];
+    label: string;
+  }> = [
+    { key: 'lectures', label: 'Lectures' },
+    { key: 'assignments', label: 'Assignments' },
+    { key: 'announcements', label: 'Announcements' },
+    { key: 'discussion', label: 'Discussion' },
+    { key: 'grading', label: 'Grading' },
+    { key: 'attendance', label: 'Attendance' },
+    { key: 'media', label: 'Media' },
+  ] as const;
+
   const canvasData = {
-      courses: [
-        { name: 'Cybersecurity Incident Response', code: 'CSIR-6261', semester: 'Fall 2025', status: 'Active' },
-        { name: 'Network Security', code: 'CS-6262', semester: 'Fall 2025', status: 'Active' },
-        { name: 'Secure Computer Systems', code: 'CS-6238', semester: 'Summer 2025', status: 'Completed' },
-        { name: 'AI Literacy & Risk Perception', code: 'MAS-501', semester: 'Spring 2025', status: 'Completed' },
-        { name: 'Critical Infrastructure Security', code: 'CIS-701', semester: 'Spring 2026', status: 'Upcoming' },
-        { name: 'Digital Transformation & ICT', code: 'DTI-401', semester: 'Fall 2026', status: 'Upcoming' },
-      ],
-      groups: [
-        { name: 'CSIR Group 1', course: 'CSIR-6261', members: ['Alice Nguyen','Binh Tran','Charlie Le','Dung Pham','Elisa Vo','Huy Hoang','Khanh Do'] },
-        { name: 'IIS Group 10', course: 'IIS-520', members: ['Minh Anh','Nhat Quang','Oanh Vu','Phuc Nguyen','Quyen Truong','Son Le'] },
-        { name: 'CSIR Group 2', course: 'CSIR-6261', members: ['Tony Pham','Uyen Do','Vy Ha','Wen Li','Xuan Truong'] },
-      ],
-      todos: {
-        'CSIR-6261': [
-          { text: 'Finish incident response case study', done: false },
-          { text: 'Submit assignment 2', done: false },
+    courses: [
+      {
+        name: 'Cybersecurity Incident Response',
+        code: 'CSIR-6261',
+        semester: 'Fall 2025',
+        status: 'Active',
+        lectures: [
+          { id: 1, title: 'Week 1: Introduction to IR', published: true, completed: true },
+          { id: 2, title: 'Week 2: Detection & Analysis', published: true, completed: true },
+          { id: 3, title: 'Week 3: Containment Strategies', published: true, completed: false },
+          { id: 4, title: 'Week 4: Evidence Collection', published: true, completed: false },
+          { id: 5, title: 'Week 5: Recovery Procedures', published: false, completed: false },
         ],
-        'CS-6262': [
-          { text: 'Prepare slides for network attack demo', done: false },
+        assignments: [
+          { id: 1, title: 'Assignment 1: IR Plan', dueDate: '2025-10-15', status: 'submitted', grade: 'A' },
+          { id: 2, title: 'Assignment 2: Case Study Analysis', dueDate: '2025-10-20', status: 'pending', grade: null },
+          { id: 3, title: 'Assignment 3: Lab Report', dueDate: '2025-10-30', status: 'not_started', grade: null },
         ],
-        'CS-6238': [
-          { text: 'Review secure coding notes', done: true },
+        announcements: [
+          {
+            id: 1,
+            title: 'Assignment 2 deadline extended',
+            date: '2025-10-11',
+            content: 'Assignment 2 has been moved to Oct 20, 23:59.',
+          },
+          {
+            id: 2,
+            title: 'Midterm exam schedule',
+            date: '2025-10-08',
+            content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.',
+          },
         ],
       },
-      notifications: [
-        { type: 'system', title: 'Planned maintenance', detail: 'The LMS will undergo maintenance on Oct 20, 02:00–03:00 UTC.', when: '2025-10-12 09:00' },
-        { type: 'course', course: 'CSIR-6261', title: 'Assignment due date updated', detail: 'Assignment 2 moved to Oct 20, 23:59.', when: '2025-10-11 15:24' },
-        { type: 'group', group: 'CSIR Group 1', title: 'Member added', detail: 'Khanh Do joined the group.', when: '2025-10-10 18:02' },
-        { type: 'course', course: 'CS-6262', title: 'New module published', detail: 'Week 6: IDS/IPS notes & quiz available.', when: '2025-10-09 08:12' },
-      ]
-    };
+      { name: 'Network Security', code: 'CS-6262', semester: 'Fall 2025', status: 'Active' },
+      { name: 'Secure Computer Systems', code: 'CS-6238', semester: 'Summer 2025', status: 'Completed' },
+      { name: 'AI Literacy & Risk Perception', code: 'MAS-501', semester: 'Spring 2025', status: 'Completed' },
+      { name: 'Critical Infrastructure Security', code: 'CIS-701', semester: 'Spring 2026', status: 'Upcoming' },
+      { name: 'Digital Transformation & ICT', code: 'DTI-401', semester: 'Fall 2026', status: 'Upcoming' },
+    ],
+    groups: [
+      { name: 'CSIR Group 1', course: 'CSIR-6261', members: ['Alice Nguyen', 'Binh Tran', 'Charlie Le', 'Dung Pham', 'Elisa Vo', 'Huy Hoang', 'Khanh Do'] },
+      { name: 'IIS Group 10', course: 'IIS-520', members: ['Minh Anh', 'Nhat Quang', 'Oanh Vu', 'Phuc Nguyen', 'Quyen Truong', 'Son Le'] },
+      { name: 'CSIR Group 2', course: 'CSIR-6261', members: ['Tony Pham', 'Uyen Do', 'Vy Ha', 'Wen Li', 'Xuan Truong'] },
+    ],
+    todos: {
+      'CSIR-6261': [
+        { text: 'Finish incident response case study', done: false },
+        { text: 'Submit assignment 2', done: false },
+      ],
+      'CS-6262': [{ text: 'Prepare slides for network attack demo', done: false }],
+      'CS-6238': [{ text: 'Review secure coding notes', done: true }],
+    },
+    notifications: [
+      {
+        type: 'system',
+        title: 'Planned maintenance',
+        detail: 'The LMS will undergo maintenance on Oct 20, 02:00–03:00 UTC.',
+        when: '2025-10-12 09:00',
+      },
+      {
+        type: 'course',
+        course: 'CSIR-6261',
+        title: 'Assignment due date updated',
+        detail: 'Assignment 2 moved to Oct 20, 23:59.',
+        when: '2025-10-11 15:24',
+      },
+      {
+        type: 'group',
+        group: 'CSIR Group 1',
+        title: 'Member added',
+        detail: 'Khanh Do joined the group.',
+        when: '2025-10-10 18:02',
+      },
+      {
+        type: 'course',
+        course: 'CS-6262',
+        title: 'New module published',
+        detail: 'Week 6: IDS/IPS notes & quiz available.',
+        when: '2025-10-09 08:12',
+      },
+    ],
+  };
 
-    const getStatusColor = (status) => {
-      if (status === 'Active') return 'bg-green-50 text-green-700 border-green-200';
-      if (status === 'Upcoming') return 'bg-amber-50 text-amber-700 border-amber-200';
-      return 'bg-gray-100 text-gray-700 border-gray-200';
-    };
+  const getStatusColor = (status: string) => {
+    if (status === 'Active') return 'bg-green-50 text-green-700 border-green-200';
+    if (status === 'Upcoming') return 'bg-amber-50 text-amber-700 border-amber-200';
+    return 'bg-gray-100 text-gray-700 border-gray-200';
+  };
 
-    const getInitials = (name) => {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    };
+  const getInitials = (name: string) =>
+    name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
 
-    const getNotificationColor = (type) => {
-      if (type === 'system') return 'bg-slate-100 text-slate-700 border-slate-200';
-      if (type === 'course') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    };
+  const getNotificationColor = (type: string) => {
+    if (type === 'system') return 'bg-slate-100 text-slate-700 border-slate-200';
+    if (type === 'course') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  };
 
-    return (
-      <div className="flex h-full">
-        {/* Canvas Sidebar Navigation */}
-        <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
-          <div className="px-3 pt-4 pb-2">
-            <span className="text-xs font-semibold tracking-wider text-gray-500">NAVIGATION</span>
-          </div>
-          <nav className="flex-1 px-2 space-y-1">
-            {[
-              { key: 'courses', label: 'Courses', icon: BookOpen },
-              { key: 'groups', label: 'Groups', icon: User },
-              { key: 'todo', label: 'To-do', icon: CheckCircle },
-              { key: 'notifications', label: 'Notifications', icon: Bell },
-              { key: 'curriculum', label: 'Curriculum', icon: BookOpen },
-            ].map(item => (
-              <button
-                key={item.key}
-                onClick={() => setCanvasTab(item.key)}
-                className={`w-full flex items-center gap-3 rounded-2xl px-3 py-3 transition-all border ${
-                  canvasTab === item.key
-                    ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.3)]'
-                    : 'hover:bg-gray-50 border-transparent'
-                }`}
-              >
-                <item.icon size={20} className="shrink-0" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </button>
-            ))}
-          </nav>
-          <div className="px-3 pb-4 text-[10px] text-gray-400">© LMS Prototype</div>
-        </aside>
+  return (
+    <div className="flex h-full">
+      {/* Canvas Sidebar Navigation */}
+      <aside className={`${canvasSidebarOpen ? 'w-56' : 'w-16'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
+        <div className={`px-3 pt-4 pb-2 flex items-center justify-between ${!canvasSidebarOpen && 'justify-center'}`}>
+          {canvasSidebarOpen && <span className="text-xs font-semibold tracking-wider text-gray-500">NAVIGATION</span>}
+          <button
+            onClick={() => setCanvasSidebarOpen(!canvasSidebarOpen)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            title={canvasSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            {canvasSidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+          </button>
+        </div>
 
-        {/* Main Canvas Content */}
-        <main className="flex-1 overflow-auto p-6 space-y-6">
-          {/* Courses Tab */}
-          {canvasTab === 'courses' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold tracking-tight">Courses</h1>
-              </div>
-              <div className="bg-white rounded-2xl border border-gray-200">
-                <div className="p-5">
-                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="relative flex-1 max-w-md">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Search by name, code, semester, status…"
-                      />
-                    </div>
-                    <select className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                      <option value="all">All statuses</option>
-                      <option value="Active">Active</option>
-                      <option value="Upcoming">Upcoming</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="px-5 pb-5">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-gray-500 border-b">
-                          <th className="py-3 pr-4">Course Name</th>
-                          <th className="py-3 pr-4">Course Code</th>
-                          <th className="py-3 pr-4">Semester</th>
-                          <th className="py-3 pr-4">Status</th>
-                          <th className="py-3 pr-4">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {canvasData.courses.map((course, idx) => (
-                          <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
-                            <td className="py-3 pr-4 font-medium">{course.name}</td>
-                            <td className="py-3 pr-4">{course.code}</td>
-                            <td className="py-3 pr-4">{course.semester}</td>
-                            <td className="py-3 pr-4">
-                              <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>
-                                {course.status}
-                              </span>
-                            </td>
-                            <td className="py-3 pr-4">
-                              <div className="flex gap-2">
-                                <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Open</button>
-                                <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Syllabus</button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+        <nav className="flex-1 px-2 space-y-1">
+          {navItems.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setCanvasTab(item.key)}
+              className={`w-full flex items-center ${canvasSidebarOpen ? 'gap-3' : 'justify-center'} rounded-2xl px-3 py-3 transition-all border ${
+                canvasTab === item.key
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.3)]'
+                  : 'hover:bg-gray-50 border-transparent'
+              }`}
+              title={!canvasSidebarOpen ? item.label : ''}
+            >
+              <item.icon size={20} className="shrink-0" />
+              {canvasSidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
+
+        {canvasSidebarOpen && <div className="px-3 pb-4 text-[10px] text-gray-400">© LMS Prototype</div>}
+      </aside>
+
+      {/* Main Canvas Content */}
+      <main className="flex-1 overflow-auto p-8 w-full space-y-6">
+        {/* Courses Tab */}
+        {canvasTab === 'courses' && !selectedCourse && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold tracking-tight">Courses</h1>
             </div>
-          )}
 
-          {/* Groups Tab */}
-          {canvasTab === 'groups' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold tracking-tight">Groups</h1>
-              </div>
-              <div className="bg-white rounded-2xl border border-gray-200">
-                <div className="p-5">
-                  <div className="relative max-w-md">
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="p-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Search groups or course codes…"
+                      placeholder="Search by name, code, semester, status…"
                     />
                   </div>
+                  <select className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="all">All statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="Completed">Completed</option>
+                  </select>
                 </div>
-                <div className="px-5 pb-5">
+              </div>
+
+              <div className="px-5 pb-5">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b">
+                        <th className="py-3 pr-4">Course Name</th>
+                        <th className="py-3 pr-4">Course Code</th>
+                        <th className="py-3 pr-4">Semester</th>
+                        <th className="py-3 pr-4">Status</th>
+                        <th className="py-3 pr-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {canvasData.courses.map((course, idx) => (
+                        <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
+                          <td className="py-3 pr-4 font-medium">{course.name}</td>
+                          <td className="py-3 pr-4">{course.code}</td>
+                          <td className="py-3 pr-4">{course.semester}</td>
+                          <td className="py-3 pr-4">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>
+                              {course.status}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setSelectedCourse(course)}
+                                className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm"
+                              >
+                                Open
+                              </button>
+                              <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Syllabus</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Individual Course View */}
+        {canvasTab === 'courses' && selectedCourse && (
+          <div className="space-y-4">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <button onClick={() => setSelectedCourse(null)} className="hover:text-gray-900">
+                Courses
+              </button>
+              <ChevronRight size={16} />
+              <span className="text-gray-900">{selectedCourse.code}</span>
+            </div>
+
+            {/* Course Header */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-2xl font-semibold text-amber-600">{selectedCourse.code}</h1>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-xl text-gray-700">{selectedCourse.name}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <span>{selectedCourse.semester}</span>
+                    <span className="text-gray-400">•</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(selectedCourse.status)}`}>
+                      {selectedCourse.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="px-5 py-2.5 bg-amber-600 text-white rounded-xl hover:bg-amber-700 font-medium">Open</button>
+                  <button className="px-5 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 font-medium">Syllabus</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Course Navigation Tabs */}
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="flex gap-1 px-5 py-3 border-b border-gray-200 overflow-x-auto">
+                {sectionTabs.map((section) => (
+                  <button
+                    key={section.key}
+                    onClick={() => setCourseSection(section.key)}
+                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors ${
+                      courseSection === section.key ? 'bg-amber-100 text-amber-700' : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {section.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Lectures Section with Split Layout */}
+              {courseSection === 'lectures' && (
+                <div className="flex h-[calc(100vh-400px)]">
+                  {/* Left Sidebar - Modules List */}
+                  <div className="w-80 border-r border-gray-200 overflow-y-auto">
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-gray-900">MODULES</h3>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <ChevronRight size={20} />
+                        </button>
+                      </div>
+                      <div className="space-y-1">
+                        {[
+                          'Introduction to Cybersecurity',
+                          'Threat Intelligence Fundamentals',
+                          'Incident Detection Methods',
+                          'Response Planning & Strategy',
+                          'Forensics Analysis Techniques',
+                          'Security Monitoring Tools',
+                          'Advanced Threat Hunting',
+                          'Recovery & Documentation',
+                        ].map((module, idx) => (
+                          <button
+                            key={idx}
+                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                              idx === 0 ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {module}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Content - Module Details */}
+                  <div className="flex-1 overflow-y-auto p-8">
+                    <div className="max-w-4xl">
+                      <h2 className="text-3xl font-bold text-blue-600 mb-4">Introduction to Cybersecurity</h2>
+
+                      <div className="mb-6">
+                        <h3 className="font-semibold text-gray-900 mb-2">Learning Objectives:</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          In this module, you will learn about introduction to cybersecurity and its practical applications in cybersecurity incident response.
+                        </p>
+                      </div>
+
+                      <div className="mb-6">
+                        <h3 className="font-semibold text-gray-900 mb-3">Key Topics:</h3>
+                        <ul className="space-y-2 text-gray-700">
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-1">•</span>
+                            <span>Understanding core principles and frameworks</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-1">•</span>
+                            <span>Implementing best practices and techniques</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-1">•</span>
+                            <span>Analyzing case studies and examples</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="mb-8">
+                        <h3 className="font-semibold text-gray-900 mb-3">Resources:</h3>
+                        <p className="text-gray-700 leading-relaxed">
+                          Check the video lecture, complete the quiz, review the lecture notes, and participate in the poll below.
+                        </p>
+                      </div>
+
+                      {/* Resource Cards */}
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Video Lecture</h4>
+                            <p className="text-purple-100 text-sm">Click to watch</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                              </svg>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Take Quiz</h4>
+                            <p className="text-pink-100 text-sm">Test your knowledge</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                              </svg>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Further Reading</h4>
+                            <p className="text-cyan-100 text-sm">Study materials & references</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                <path d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10zm2.03 0v8.99H22c-.47-4.74-4.24-8.52-8.97-8.99zm0 11.01V22c4.74-.47 8.5-4.25 8.97-8.99h-8.97z" />
+                              </svg>
+                            </div>
+                            <h4 className="font-bold text-lg mb-2">Class Poll</h4>
+                            <p className="text-emerald-100 text-sm">Share your opinion</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Other Sections */}
+              {courseSection === 'assignments' && (
+                <div className="p-6">
                   <div className="overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
-                          <th className="py-3 pr-4">Group</th>
-                          <th className="py-3 pr-4">Course Code</th>
-                          <th className="py-3 pr-4">Members</th>
-                          <th className="py-3 pr-4">Actions</th>
+                          <th className="py-3 pr-4">Assignment</th>
+                          <th className="py-3 pr-4">Due Date</th>
+                          <th className="py-3 pr-4">Status</th>
+                          <th className="py-3 pr-4">Grade</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {canvasData.groups.map((group, idx) => (
-                          <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
-                            <td className="py-3 pr-4 font-medium">{group.name}</td>
-                            <td className="py-3 pr-4">{group.course}</td>
+                        {selectedCourse.assignments?.map((assignment: any) => (
+                          <tr key={assignment.id} className="border-b last:border-b-0 hover:bg-gray-50">
+                            <td className="py-3 pr-4 font-medium">{assignment.title}</td>
+                            <td className="py-3 pr-4">{assignment.dueDate}</td>
                             <td className="py-3 pr-4">
-                              <div className="flex items-center gap-2">
-                                {group.members.slice(0, 5).map((member, midx) => (
-                                  <div
-                                    key={midx}
-                                    title={member}
-                                    className="w-7 h-7 rounded-full border border-gray-200 grid place-items-center text-[10px] font-semibold bg-gray-100"
-                                  >
-                                    {getInitials(member)}
-                                  </div>
-                                ))}
-                                {group.members.length > 5 && (
-                                  <span className="text-xs text-gray-600">+{group.members.length - 5} more</span>
-                                )}
-                              </div>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-semibold border ${
+                                  assignment.status === 'submitted'
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                    : assignment.status === 'pending'
+                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                    : 'bg-gray-100 text-gray-700 border-gray-200'
+                                }`}
+                              >
+                                {assignment.status.replace('_', ' ')}
+                              </span>
                             </td>
                             <td className="py-3 pr-4">
-                              <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">
-                                Members
-                              </button>
+                              {assignment.grade ? (
+                                <span className="font-semibold text-green-600">{assignment.grade}</span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -1154,185 +1454,270 @@ const renderCanvas = () => {
                     </table>
                   </div>
                 </div>
+              )}
+
+              {courseSection === 'announcements' && (
+                <div className="p-6 space-y-4">
+                  {selectedCourse.announcements?.map((announcement: any) => (
+                    <div key={announcement.id} className="p-4 border border-gray-200 rounded-xl">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium text-gray-900">{announcement.title}</h3>
+                        <span className="text-xs text-gray-500">{announcement.date}</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{announcement.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {['discussion', 'grading', 'attendance', 'media'].includes(courseSection) && (
+                <div className="p-6 text-center py-12 text-gray-500">
+                  <p className="text-sm">
+                    {courseSection.charAt(0).toUpperCase() + courseSection.slice(1)} content will be displayed here
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Groups Tab */}
+        {canvasTab === 'groups' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold tracking-tight">Groups</h1>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="p-5">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Search groups or course codes…"
+                  />
+                </div>
+              </div>
+              <div className="px-5 pb-5">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b">
+                        <th className="py-3 pr-4">Group</th>
+                        <th className="py-3 pr-4">Course Code</th>
+                        <th className="py-3 pr-4">Members</th>
+                        <th className="py-3 pr-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {canvasData.groups.map((group, idx) => (
+                        <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
+                          <td className="py-3 pr-4 font-medium">{group.name}</td>
+                          <td className="py-3 pr-4">{group.course}</td>
+                          <td className="py-3 pr-4">
+                            <div className="flex items-center gap-2">
+                              {group.members.slice(0, 5).map((member, midx) => (
+                                <div
+                                  key={midx}
+                                  title={member}
+                                  className="w-7 h-7 rounded-full border border-gray-200 grid place-items-center text-[10px] font-semibold bg-gray-100"
+                                >
+                                  {getInitials(member)}
+                                </div>
+                              ))}
+                              {group.members.length > 5 && (
+                                <span className="text-xs text-gray-600">+{group.members.length - 5} more</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4">
+                            <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">
+                              Members
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* To-do Tab */}
-          {canvasTab === 'todo' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold tracking-tight">To-do List</h1>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" className="rounded border-gray-300" />
-                  Hide completed
-                </label>
-              </div>
-              {Object.entries(canvasData.todos).map(([course, items]) => (
-                <div key={course} className="bg-white rounded-2xl border border-gray-200">
-                  <div className="p-5 border-b border-gray-200">
-                    <h2 className="font-medium">{course}</h2>
-                  </div>
-                  <div className="p-5">
-                    <ul className="space-y-2">
-                      {items.map((item, idx) => (
-                        <li key={idx} className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            className="rounded border-gray-300"
-                            defaultChecked={item.done}
-                          />
-                          <span className={`text-sm ${item.done ? 'line-through text-gray-400' : ''}`}>
-                            {item.text}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-              <div className="bg-white rounded-2xl border border-gray-200">
+        {/* To-do Tab */}
+        {canvasTab === 'todo' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold tracking-tight">To-do List</h1>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" className="rounded border-gray-300" />
+                Hide completed
+              </label>
+            </div>
+
+            {Object.entries(canvasData.todos).map(([course, items]) => (
+              <div key={course} className="bg-white rounded-2xl border border-gray-200">
                 <div className="p-5 border-b border-gray-200">
-                  <h2 className="font-medium">Add To-do Item</h2>
+                  <h2 className="font-medium">{course}</h2>
                 </div>
                 <div className="p-5">
-                  <div className="flex flex-col md:flex-row gap-2">
-                    <select className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                      <option>Select Course</option>
-                      {canvasData.courses.map((c, idx) => (
-                        <option key={idx} value={c.code}>{c.code}</option>
-                      ))}
-                    </select>
-                    <input
-                      className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Enter new task..."
-                    />
-                    <button className="flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-100">
-                      <CheckCircle size={16} />
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Notifications Tab */}
-          {canvasTab === 'notifications' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold tracking-tight">Notifications</h1>
-                <div className="flex items-center gap-2 text-sm">
-                  <label className="text-gray-600">Filter</label>
-                  <select className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="all">All</option>
-                    <option value="system">System</option>
-                    <option value="course">Course</option>
-                    <option value="group">Group</option>
-                  </select>
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl border border-gray-200">
-                <div className="p-5">
-                  <ul className="divide-y divide-gray-200">
-                    {canvasData.notifications.map((notif, idx) => (
-                      <li key={idx} className="py-3 flex items-start gap-3">
-                        <Bell className="w-5 h-5 mt-0.5 text-gray-400" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${getNotificationColor(notif.type)}`}>
-                              {notif.type.charAt(0).toUpperCase() + notif.type.slice(1)}
-                            </span>
-                            {notif.course && (
-                              <span className="text-xs text-gray-600">
-                                Course: <strong>{notif.course}</strong>
-                              </span>
-                            )}
-                            {notif.group && (
-                              <span className="text-xs text-gray-600">
-                                Group: <strong>{notif.group}</strong>
-                              </span>
-                            )}
-                            <span className="ml-auto text-xs text-gray-500">{notif.when}</span>
-                          </div>
-                          <div className="mt-1 font-medium">{notif.title}</div>
-                          <div className="text-sm text-gray-600">{notif.detail}</div>
-                        </div>
+                  <ul className="space-y-2">
+                    {(items as any[]).map((item, idx) => (
+                      <li key={idx} className="flex items-center gap-3">
+                        <input type="checkbox" className="rounded border-gray-300" defaultChecked={item.done} />
+                        <span className={`text-sm ${item.done ? 'line-through text-gray-400' : ''}`}>{item.text}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
-            </div>
-          )}
+            ))}
 
-          {/* Curriculum Tab */}
-          {canvasTab === 'curriculum' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold tracking-tight">Curriculum</h1>
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="p-5 border-b border-gray-200">
+                <h2 className="font-medium">Add To-do Item</h2>
               </div>
-              <div className="bg-white rounded-2xl border border-gray-200">
-                <div className="p-5 border-b border-gray-200">
-                  <h2 className="font-medium">Current Progress</h2>
-                </div>
-                <div className="p-5 space-y-4">
-                  <p className="text-gray-700">
-                    You are currently enrolled in <strong>CSIR-6261: Cybersecurity Incident Response</strong>.
-                  </p>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-gray-600">Program Progress</span>
-                      <span className="text-sm font-medium text-indigo-600">40%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
-                      <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '40%' }}></div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Progress is calculated from completed courses plus partial credit for the current active course.
-                  </p>
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl border border-gray-200">
-                <div className="p-5 border-b border-gray-200">
-                  <h2 className="font-medium">Curriculum Overview</h2>
-                </div>
-                <div className="p-5">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-gray-500 border-b">
-                          <th className="py-3 pr-4">Course</th>
-                          <th className="py-3 pr-4">Code</th>
-                          <th className="py-3 pr-4">Semester</th>
-                          <th className="py-3 pr-4">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {canvasData.courses.map((course, idx) => (
-                          <tr key={idx} className="border-b last:border-b-0">
-                            <td className="py-3 pr-4 font-medium">{course.name}</td>
-                            <td className="py-3 pr-4">{course.code}</td>
-                            <td className="py-3 pr-4">{course.semester}</td>
-                            <td className="py-3 pr-4">
-                              <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>
-                                {course.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+              <div className="p-5">
+                <div className="flex flex-col md:flex-row gap-2">
+                  <select className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option>Select Course</option>
+                    {canvasData.courses.map((c, idx) => (
+                      <option key={idx} value={c.code}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter new task..."
+                  />
+                  <button className="flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-100">
+                    <CheckCircle size={16} />
+                    Add
+                  </button>
                 </div>
               </div>
             </div>
-          )}
-        </main>
-      </div>
-    );
-  };
+          </div>
+        )}
+
+        {/* Notifications Tab */}
+        {canvasTab === 'notifications' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold tracking-tight">Notifications</h1>
+              <div className="flex items-center gap-2 text-sm">
+                <label className="text-gray-600">Filter</label>
+                <select className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="all">All</option>
+                  <option value="system">System</option>
+                  <option value="course">Course</option>
+                  <option value="group">Group</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="p-5">
+                <ul className="divide-y divide-gray-200">
+                  {canvasData.notifications.map((notif, idx) => (
+                    <li key={idx} className="py-3 flex items-start gap-3">
+                      <Bell className="w-5 h-5 mt-0.5 text-gray-400" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${getNotificationColor(notif.type)}`}>
+                            {notif.type.charAt(0).toUpperCase() + notif.type.slice(1)}
+                          </span>
+                          {(notif as any).course && (
+                            <span className="text-xs text-gray-600">
+                              Course: <strong>{(notif as any).course}</strong>
+                            </span>
+                          )}
+                          {(notif as any).group && (
+                            <span className="text-xs text-gray-600">
+                              Group: <strong>{(notif as any).group}</strong>
+                            </span>
+                          )}
+                          <span className="ml-auto text-xs text-gray-500">{notif.when}</span>
+                        </div>
+                        <div className="mt-1 font-medium">{notif.title}</div>
+                        <div className="text-sm text-gray-600">{notif.detail}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Curriculum Tab */}
+        {canvasTab === 'curriculum' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold tracking-tight">Curriculum</h1>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="p-5 border-b border-gray-200">
+                <h2 className="font-medium">Current Progress</h2>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-gray-700">
+                  You are currently enrolled in <strong>CSIR-6261: Cybersecurity Incident Response</strong>.
+                </p>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-600">Program Progress</span>
+                    <span className="text-sm font-medium text-indigo-600">40%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '40%' }} />
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">
+                  Progress is calculated from completed courses plus partial credit for the current active course.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200">
+              <div className="p-5">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b">
+                        <th className="py-3 pr-4">Course</th>
+                        <th className="py-3 pr-4">Code</th>
+                        <th className="py-3 pr-4">Semester</th>
+                        <th className="py-3 pr-4">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {canvasData.courses.map((course, idx) => (
+                        <tr key={idx} className="border-b last:border-b-0">
+                          <td className="py-3 pr-4 font-medium">{course.name}</td>
+                          <td className="py-3 pr-4">{course.code}</td>
+                          <td className="py-3 pr-4">{course.semester}</td>
+                          <td className="py-3 pr-4">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>
+                              {course.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
 
 
   const renderCalendar = () => (
@@ -2826,7 +3211,14 @@ const renderOneStop = () => (
            activePage === 'finance' ? renderFinance() :
            activePage === 'activities' ? renderActivities() :
            activePage === 'calendar' ? renderCalendar() :
-           activePage === 'canvas' ? renderCanvas() :
+           activePage === 'canvas'
+  ? renderCanvas({
+      canvasSidebarOpen, setCanvasSidebarOpen,
+      canvasTab, setCanvasTab,
+      selectedCourse, setSelectedCourse,
+      courseSection, setCourseSection,
+    })
+  :
            activePage === 'onestop' ? renderOneStop() :
            renderDashboard()}
         </main>
