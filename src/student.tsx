@@ -2587,7 +2587,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   </div>
 )}
 
-              {courseSection === 'announcements' && (
+          {courseSection === 'announcements' && (
                 <div className="p-6 space-y-4">
                   {selectedCourse.announcements?.map((announcement: any) => (
                     <div key={announcement.id} className="p-4 border border-gray-200 rounded-xl">
@@ -2956,10 +2956,231 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
 </div>
 )}
+{courseSection === 'grading' && (
+  <div className="space-y-6">
+    <h1 className="text-2xl font-bold text-gray-900">📊 Grading Overview</h1>
+    <div className="grid grid-cols-3 gap-6">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
+        <p className="text-sm text-gray-600">Completed Assignments</p>
+        <p className="text-3xl font-bold text-emerald-700">4 / 6</p>
+      </div>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <p className="text-sm text-gray-600">Average Grade</p>
+        <p className="text-3xl font-bold text-blue-700">B+</p>
+      </div>
+      
+    </div>
 
-              {[ 'grading', 'attendance', 'media'].includes(courseSection) && (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Detailed Grades</h2>
+      <table className="w-full text-sm">
+        <thead className="text-gray-500 border-b">
+          <tr>
+            <th className="py-2 text-left">Assignment</th>
+            <th className="py-2 text-left">Status</th>
+            <th className="py-2 text-left">Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b">
+            <td className="py-2">Assignment 1: Risk Assessment</td>
+            <td className="py-2 text-emerald-600">Submitted</td>
+            <td className="py-2 font-semibold">A</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">Assignment 2: Threat Modeling</td>
+            <td className="py-2 text-blue-600">Graded</td>
+            <td className="py-2 font-semibold">B+</td>
+          </tr>
+          <tr>
+            <td className="py-2">Assignment 3: IR Plan</td>
+            <td className="py-2 text-amber-600">In Progress</td>
+            <td className="py-2">–</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+{/* Attendance Section */}
+{/* Attendance Section */}
+{courseSection === 'attendance' && (
+  <div className="space-y-6">
+    <h1 className="text-2xl font-bold text-gray-900">📅 Attendance Record</h1>
+  {/* Attendance % */}
+    <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg p-6 text-center">
+      <p className="text-lg font-semibold">Attendance Rate</p>
+      <p className="text-4xl font-bold mt-2">80%</p>
+    </div>
+    {/* Summary */}
+    <div className="grid grid-cols-3 gap-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <p className="text-sm text-gray-600">Total Sessions</p>
+        <p className="text-3xl font-bold text-blue-700">10</p>
+      </div>
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
+        <p className="text-sm text-gray-600">Attended</p>
+        <p className="text-3xl font-bold text-emerald-700">8</p>
+      </div>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p className="text-sm text-gray-600">Missed</p>
+        <p className="text-3xl font-bold text-red-700">2</p>
+      </div>
+    </div>
+
+   <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Detailed Attendance</h2>
+      <table className="w-full text-sm">
+        <thead className="text-gray-500 border-b">
+          <tr>
+            <th className="py-2 text-left">Session</th>
+            <th className="py-2 text-left">Date</th>
+            <th className="py-2 text-left">Topic</th>
+            <th className="py-2 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b">
+            <td className="py-2">1</td>
+            <td className="py-2">Oct 10, 2025</td>
+            <td className="py-2">Intro to IR</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">2</td>
+            <td className="py-2">Oct 17, 2025</td>
+            <td className="py-2">Detection & Analysis</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">3</td>
+            <td className="py-2">Oct 24, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-red-600 font-semibold">Absent</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  
+  </div>
+)}
+
+{/* Media Section */}
+{courseSection === 'media' && (
+  <div className="space-y-6">
+  {/* Header */}
+  <div>
+    <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">
+      CSIR – CYBERSECURITY INCIDENT RESPONSE
+    </p>
+    <h1 className="text-3xl font-bold text-gray-900 mb-1">Media Library</h1>
+    <p className="text-gray-600">
+      Access lecture recordings, materials, and course resources
+    </p>
+  </div>
+
+  {/* Category Pills */}
+  <div className="flex flex-wrap gap-3">
+    <div className="flex items-center gap-3 rounded-xl border px-4 py-3 bg-blue-50 border-blue-200 text-blue-700">
+      <span className="text-xl">🎞️</span>
+      <div className="text-left leading-tight">
+        <div className="text-sm font-semibold">Lecture Recordings</div>
+        <div className="text-[11px] text-gray-500">4 items</div>
+      </div>
+    </div>
+    <div className="flex items-center gap-3 rounded-xl border px-4 py-3 bg-white border-gray-200 text-gray-700">
+      <span className="text-xl">🧑‍🏫</span>
+      <div className="text-left leading-tight">
+        <div className="text-sm font-semibold">Office Hours</div>
+        <div className="text-[11px] text-gray-500">4 items</div>
+      </div>
+    </div>
+    
+    <div className="flex items-center gap-3 rounded-xl border px-4 py-3 bg-white border-gray-200 text-gray-700">
+      <span className="text-xl">🧪</span>
+      <div className="text-left leading-tight">
+        <div className="text-sm font-semibold">Lab Demos</div>
+        <div className="text-[11px] text-gray-500">4 items</div>
+      </div>
+    </div>
+    <div className="flex items-center gap-3 rounded-xl border px-4 py-3 bg-white border-gray-200 text-gray-700">
+      <span className="text-xl">📚</span>
+      <div className="text-left leading-tight">
+        <div className="text-sm font-semibold">Supplementary</div>
+        <div className="text-[11px] text-gray-500">4 items</div>
+      </div>
+    </div>
+    <div className="flex items-center gap-3 rounded-xl border px-4 py-3 bg-white border-gray-200 text-gray-700">
+      <span className="text-xl">📄</span>
+      <div className="text-left leading-tight">
+        <div className="text-sm font-semibold">Documents</div>
+        <div className="text-[11px] text-gray-500">5 items</div>
+      </div>
+    </div>
+  </div>
+
+  {/* Media List */}
+  <div className="space-y-5">
+    {/* Module 1 */}
+    <div className="bg-white border border-gray-200 rounded-xl p-5 flex gap-5 items-center">
+      <div className="w-[180px] h-[110px] rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shrink-0">
+        <div className="w-16 h-16 rounded-full bg-white/20 grid place-items-center">
+          ▶
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-bold text-gray-900 text-lg mb-1">Module 1: Introduction to Cybersecurity</h3>
+        <p className="text-gray-600 text-sm">Overview of cybersecurity principles, CIA triad, and security frameworks</p>
+        <div className="flex flex-wrap items-center gap-4 text-[13px] text-gray-600 mt-3">
+          <span>📅 September 4, 2025</span>
+          <span>⏱️ 1h 32m</span>
+          <span>👁️ 234 views</span>
+          <span>💾 450 MB</span>
+          <span>🖥️ 1080p</span>
+        </div>
+        <div className="flex flex-wrap gap-3 mt-4">
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold">▶ Watch Now</button>
+          <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-semibold">Transcript</button>
+          <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-semibold">Download</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Module 2 */}
+    <div className="bg-white border border-gray-200 rounded-xl p-5 flex gap-5 items-center">
+      <div className="w-[180px] h-[110px] rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shrink-0">
+        <div className="w-16 h-16 rounded-full bg-white/20 grid place-items-center">
+          ▶
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-bold text-gray-900 text-lg mb-1">Module 2: Threat Intelligence Fundamentals</h3>
+        <p className="text-gray-600 text-sm">Understanding threat actors, attack vectors, and intelligence gathering</p>
+        <div className="flex flex-wrap items-center gap-4 text-[13px] text-gray-600 mt-3">
+          <span>📅 September 16, 2025</span>
+          <span>⏱️ 1h 28m</span>
+          <span>👁️ 198 views</span>
+          <span>💾 420 MB</span>
+          <span>🖥️ 1080p</span>
+        </div>
+        <div className="flex flex-wrap gap-3 mt-4">
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold">▶ Watch Now</button>
+          <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-semibold">Transcript</button>
+          <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-semibold">Download</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Repeat for Module 3 & 4 (copy structure, change details) */}
+  </div>
+</div>
+
+)}
+              {[ 'attendance', 'media'].includes(courseSection) && (
                 <div className="p-6 text-center py-12 text-gray-500">
-                  <p className="text-sm">{courseSection.charAt(0).toUpperCase() + courseSection.slice(1)} content will be displayed here</p>
+                  <p className="text-sm">More {courseSection.charAt(0).toUpperCase() + courseSection.slice(1)} content later</p>
                 </div>
               )}
             </div>
