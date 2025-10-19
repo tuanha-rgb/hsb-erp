@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
   CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
@@ -1249,7 +1249,12 @@ const [courseSection, setCourseSection] =
 const [selectedModule, setSelectedModule] = useState<number>(0);
 const [activeResource, setActiveResource] = useState<'video' | 'quiz' | 'notes' | 'poll' | null>(null);
 const [modulesOpen, setModulesOpen] = useState(true);
-
+useEffect(() => {
+  if (modulesOpen) {
+    const timer = setTimeout(() => setModulesOpen(false), 2000); // auto-hide after 2s
+    return () => clearTimeout(timer);
+  }
+}, [modulesOpen]);
 // ---------- QUIZ ----------
 type QuizQ = { id: string; question: string; options: string[]; correct: number };
 const quizQuestions: QuizQ[] = [
@@ -2068,12 +2073,12 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
               {courseSection === 'lectures' && (
                 <div className="flex min-h-0">
                   {/* Left Sidebar - Modules List */}
-                 <aside className="w-80 border-r border-gray-200 overflow-y-auto">
+                 <aside className="w-56 border-r border-gray-200 overflow-y-auto transition-all duration-300">
   <div className="p-4">
     <div className="flex items-center justify-between mb-3">
       <h3 className="font-semibold text-gray-900">MODULES</h3>
       <button
-        onClick={() => setModulesOpen((v) => !v)}
+              onClick={() => setModulesOpen(false)}
         aria-expanded={modulesOpen}
         className="text-gray-400 hover:text-gray-600"
       >
@@ -2083,23 +2088,26 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
         />
       </button>
     </div>
-
+    
     {/* collapsible list */}
-    <div className={`${modulesOpen ? 'block' : 'hidden'} space-y-1`}>
-      {modules.map((module, idx) => (
-        <button
-          key={idx}
-          onClick={() => { setSelectedModule(idx); setActiveResource(null); }}
-          className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
-            selectedModule === idx
-              ? 'bg-blue-50 text-blue-700 font-medium'
-              : 'text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          {module}
-        </button>
-      ))}
-    </div>
+     <div className="space-y-1">
+            {modules.map((module, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setSelectedModule(idx);
+                  setActiveResource(null);
+                }}
+                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  selectedModule === idx
+                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {module}
+              </button>
+            ))}
+          </div>
   </div>
 </aside>
 
@@ -2974,7 +2982,10 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
         <p className="text-sm text-gray-600">Average Grade</p>
         <p className="text-3xl font-bold text-blue-700">B+</p>
       </div>
-      
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <p className="text-sm text-gray-600">Average GPA</p>
+        <p className="text-3xl font-bold text-blue-700">3.0</p>
+      </div>
     </div>
 
     <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -2990,16 +3001,31 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
         <tbody>
           <tr className="border-b">
             <td className="py-2">Assignment 1: Risk Assessment</td>
-            <td className="py-2 text-emerald-600">Submitted</td>
+            <td className="py-2 text-emerald-600">Graded</td>
             <td className="py-2 font-semibold">A</td>
           </tr>
           <tr className="border-b">
             <td className="py-2">Assignment 2: Threat Modeling</td>
-            <td className="py-2 text-blue-600">Graded</td>
+            <td className="py-2 text-emerald-600">Graded</td>
             <td className="py-2 font-semibold">B+</td>
           </tr>
           <tr>
             <td className="py-2">Assignment 3: IR Plan</td>
+            <td className="py-2 text-emerald-600">Graded</td>
+            <td className="py-2 font-semibold">B+</td>
+          </tr>
+          <tr>
+            <td className="py-2">Assignment 4: IR Plan</td>
+            <td className="py-2  text-emerald-600">Graded</td>
+            <td className="py-2 font-semibold">B+</td>
+          </tr>
+          <tr>
+            <td className="py-2">Assignment 5: IR Plan</td>
+            <td className="py-2 text-blue-600">Submitted</td>
+            <td className="py-2">–</td>
+          </tr>
+          <tr>
+            <td className="py-2">Assignment 6: IR Plan</td>
             <td className="py-2 text-amber-600">In Progress</td>
             <td className="py-2">–</td>
           </tr>
@@ -3010,9 +3036,8 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 )}
 
 {/* Attendance Section */}
-{/* Attendance Section */}
 {courseSection === 'attendance' && (
-  <div className="space-y-6">
+  <div className="space-y-1">
     <h1 className="text-2xl font-bold text-gray-900">📅 Attendance Record</h1>
   {/* Attendance % */}
     <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg p-6 text-center">
@@ -3063,8 +3088,51 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
             <td className="py-2">3</td>
             <td className="py-2">Oct 24, 2025</td>
             <td className="py-2">Containment</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">4</td>
+            <td className="py-2">Oct 25, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">5</td>
+            <td className="py-2">Oct 26, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">6</td>
+            <td className="py-2">Oct 28, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">7</td>
+            <td className="py-2">Oct 29, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">8</td>
+            <td className="py-2">Oct 30, 2025</td>
+            <td className="py-2">Containment</td>
             <td className="py-2 text-red-600 font-semibold">Absent</td>
           </tr>
+          <tr className="border-b">
+            <td className="py-2">9</td>
+            <td className="py-2">Nov 2, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-emerald-600 font-semibold">Present</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-2">10</td>
+            <td className="py-2">Nov 5, 2025</td>
+            <td className="py-2">Containment</td>
+            <td className="py-2 text-red-600 font-semibold">Absent</td>
+          </tr>
+
         </tbody>
       </table>
     </div>
