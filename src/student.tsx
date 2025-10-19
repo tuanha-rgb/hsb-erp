@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
-  CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft } from 'lucide-react';
+  CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
+FileQuestion, FileDown, PieChart, 
+FileText,
+MessageSquare} from 'lucide-react';
 
 export default function Student() {
   const [activePage, setActivePage] = useState('calendar');
@@ -976,11 +979,770 @@ type CanvasProps = {
     >
   >;
 };
+
+
+// --- Canvas - Global ---
+
 const [canvasSidebarOpen, setCanvasSidebarOpen] = useState<boolean>(false);
 const [canvasTab, setCanvasTab] = useState<'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum'>('courses');
 const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
+const [selectedAssignment, setSelectedAssignment] = useState<any | null>(null);
+
+
+type Discussion = {
+  id: number;
+  title: string;
+  author: string;
+  authorRole: 'Student' | 'Teaching Assistant' | 'Course Instructor';
+  date: string; // ISO
+  category: 'Question' | 'Technical Discussion' | 'Study Groups' | 'Career Advice' | 'Technical Help';
+  isPinned: boolean;
+  content: string;
+  views: number;
+  replies: number;
+  likes: number;
+  hasAnswer: boolean;
+  tags: string[];
+  courseCode?: string; // optional if you later scope per-course
+};
+
+const initialDiscussions: Discussion[] = [
+  {
+    id: 1,
+    title: 'Best practices for documenting incident response procedures?',
+    author: 'Emily Chen',
+    authorRole: 'Student',
+    date: '2025-10-17T14:23:00',
+    category: 'Technical Discussion',
+    isPinned: false,
+    content: `Hi everyone! I'm working on Assignment 3 and struggling with documentation format. Any tips?`,
+    views: 127,
+    replies: 3,
+    likes: 15,
+    hasAnswer: true,
+    tags: ['assignment-help', 'documentation'],
+  },
+  {
+    id: 2,
+    title: 'Confused about the difference between IDS and IPS',
+    author: 'Jake Morrison',
+    authorRole: 'Student',
+    date: '2025-10-16T10:15:00',
+    category: 'Question',
+    isPinned: false,
+    content: `Can someone explain the key differences between IDS and IPS? When would you use one vs the other?`,
+    views: 89,
+    replies: 2,
+    likes: 11,
+    hasAnswer: true,
+    tags: ['module-3', 'security-tools'],
+  },
+  {
+    id: 3,
+    title: 'Study Group for Midterm - Anyone interested?',
+    author: 'Sofia Martinez',
+    authorRole: 'Student',
+    date: '2025-10-18T09:00:00',
+    category: 'Study Groups',
+    isPinned: false,
+    content: `Organizing a study group for the November 10th midterm. Virtual meetings twice a week. Reply if interested!`,
+    views: 156,
+    replies: 12,
+    likes: 24,
+    hasAnswer: false,
+    tags: ['study-group', 'midterm'],
+  },
+  {
+    id: 4,
+    title: 'Real-world incident response war stories',
+    author: 'Mike Chen',
+    authorRole: 'Teaching Assistant',
+    date: '2025-10-15T13:30:00',
+    category: 'Technical Discussion',
+    isPinned: true,
+    content: `Share your real-world IR experiences here! What surprised you most? What would you do differently?`,
+    views: 243,
+    replies: 15,
+    likes: 47,
+    hasAnswer: false,
+    tags: ['discussion', 'real-world'],
+  },
+  {
+    id: 5,
+    title: 'Recommended certifications for incident response career?',
+    author: 'Alex Thompson',
+    authorRole: 'Student',
+    date: '2025-10-14T16:00:00',
+    category: 'Career Advice',
+    isPinned: false,
+    content: `Looking to pursue IR career after graduation. Which certifications actually matter to employers?`,
+    views: 198,
+    replies: 11,
+    likes: 19,
+    hasAnswer: true,
+    tags: ['career', 'certifications'],
+  },
+  {
+    id: 6,
+    title: 'Lab environment setup issues - need help!',
+    author: 'Jordan Lee',
+    authorRole: 'Student',
+    date: '2025-10-13T19:45:00',
+    category: 'Technical Help',
+    isPinned: false,
+    content: `VirtualBox crashing with VT-x error. Anyone know how to fix this?`,
+    views: 76,
+    replies: 5,
+    likes: 8,
+    hasAnswer: true,
+    tags: ['technical-help', 'lab-setup'],
+  },
+];
+
+
+
+// ---- DISCUSSION: UI State ----
+const [selectedDiscussion, setSelectedDiscussion] = useState(null);
+const [searchQuery, setSearchQuery] = useState('');
+const [categoryFilter, setCategoryFilter] = useState<'All' | 'Question' | 'Technical Discussion' | 'Study Groups' | 'Career Advice' | 'Technical Help'>('All');
+const [tagFilter, setTagFilter] = useState<string>('All');
+const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'unanswered'>('recent');
+const [discussions, setDiscussions] = useState<Discussion[]>(initialDiscussions);
+
+const [showNewPost, setShowNewPost] = useState(false);
+const [newPostTitle, setNewPostTitle] = useState('');
+const [newPostCategory, setNewPostCategory] = useState<'Question' | 'Technical Discussion' | 'Study Groups' | 'Career Advice' | 'Technical Help'>('Question');
+const [newPostTags, setNewPostTags] = useState<string>('');
+const [newPostContent, setNewPostContent] = useState('');
+const [newReplyText, setNewReplyText] = useState('');
+
+// If you want to scope by course, set this dynamically when the user opens a course:
+const currentCourseCode = 'CSIR-6261';
+
+// ---- DISCUSSION: Helpers ----
+const formatTimeAgo = (iso: string) => {
+  const dt = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - dt.getTime();
+  const diffH = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffH < 1) return 'Just now';
+  const diffD = Math.floor(diffH / 24);
+  if (diffH < 24) return `${diffH}h ago`;
+  if (diffD < 7) return `${diffD}d ago`;
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+// optimistic actions
+const togglePin = (id: number) => {
+  const idx = discussions.findIndex(d => d.id === id);
+  if (idx === -1) return;
+  const next = [...discussions];
+  next[idx] = { ...next[idx], isPinned: !next[idx].isPinned };
+  setSelectedDiscussion(s => (s?.id === id ? next[idx] : s));
+  // If you persist discussions in state, lift discussions to useState; else keep as const and ignore
+};
+
+const toggleSolved = (id: number) => {
+  const idx = discussions.findIndex(d => d.id === id);
+  if (idx === -1) return;
+  const next = [...discussions];
+  next[idx] = { ...next[idx], hasAnswer: !next[idx].hasAnswer };
+  setSelectedDiscussion(s => (s?.id === id ? next[idx] : s));
+};
+
+const addLike = (id: number) => {
+  const idx = discussions.findIndex(d => d.id === id);
+  if (idx === -1) return;
+  const next = [...discussions];
+  next[idx] = { ...next[idx], likes: (next[idx].likes ?? 0) + 1 };
+  setSelectedDiscussion(s => (s?.id === id ? next[idx] : s));
+};
+
+const addReply = (id: number, text: string) => {
+  if (!text.trim()) return;
+  const idx = discussions.findIndex(d => d.id === id);
+  if (idx === -1) return;
+  const next = [...discussions];
+  next[idx] = {
+    ...next[idx],
+    replies: (next[idx].replies ?? 0) + 1,
+    // If you want to store actual replies, add a `replyList` array on each discussion object.
+  };
+  setSelectedDiscussion(next[idx]);
+  setNewReplyText('');
+};
+
+const createPost = () => {
+  if (!newPostTitle.trim() || !newPostContent.trim()) return;
+  const tags = newPostTags
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean);
+
+  const newId = Math.max(...discussions.map(d => d.id)) + 1;
+  const newPost = {
+    id: newId,
+    title: newPostTitle.trim(),
+    author: 'You',
+    authorRole: 'Student',
+    date: new Date().toISOString(),
+    category: newPostCategory,
+    isPinned: false,
+    content: newPostContent.trim(),
+    views: 0,
+    replies: 0,
+    likes: 0,
+    hasAnswer: false,
+    tags
+  };
+
+  // If you want to make discussions mutable, put discussions into useState first:
+  // const [discussions, setDiscussions] = useState<YourType[]>(initialDiscussions);
+  // setDiscussions(prev => [newPost, ...prev]);
+
+  // Quick UX:
+  setShowNewPost(false);
+  setNewPostTitle('');
+  setNewPostContent('');
+  setNewPostTags('');
+  setNewPostCategory('Question');
+  setSelectedDiscussion(newPost); // open it
+};
+
+// ---- DISCUSSION: Derived list (search/filter/sort) ----
+const allTags = Array.from(
+  new Set(discussions.flatMap(d => d.tags || []))
+);
+const filteredDiscussions = discussions
+  .filter(d => {
+    const matchesSearch =
+      !searchQuery ||
+      d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === 'All' || d.category === categoryFilter;
+    const matchesTag = tagFilter === 'All' || (d.tags || []).includes(tagFilter);
+    return matchesSearch && matchesCategory && matchesTag;
+  })
+  .sort((a, b) => {
+    if (sortBy === 'recent') return +new Date(b.date) - +new Date(a.date);
+    if (sortBy === 'popular') return (b.likes ?? 0) - (a.likes ?? 0);
+    if (sortBy === 'unanswered') return (a.hasAnswer ? 1 : 0) - (b.hasAnswer ? 1 : 0);
+    return 0;
+  });
+
+
+
 const [courseSection, setCourseSection] =
   useState<'lectures' | 'assignments' | 'announcements' | 'discussion' | 'grading' | 'attendance' | 'media'>('lectures');
+
+  const modules = [
+  'Introduction to Cybersecurity',
+  'Threat Intelligence Fundamentals',
+  'Incident Detection Methods',
+  'Response Planning & Strategy',
+  'Forensics Analysis Techniques',
+  'Security Monitoring Tools',
+  'Advanced Threat Hunting',
+  'Recovery & Documentation',
+] as const;
+
+const [selectedModule, setSelectedModule] = useState<number>(0);
+const [activeResource, setActiveResource] = useState<'video' | 'quiz' | 'notes' | 'poll' | null>(null);
+
+// ---------- QUIZ ----------
+type QuizQ = { id: string; question: string; options: string[]; correct: number };
+const quizQuestions: QuizQ[] = [
+  {
+    id: 'q1',
+    question: 'Which set correctly defines the CIA triad?',
+    options: [
+      'Confidentiality, Integrity, Availability',
+      'Control, Identity, Access',
+      'Confidentiality, Identity, Audit',
+      'Cryptography, Integrity, Access',
+    ],
+    correct: 0,
+  },
+  {
+    id: 'q2',
+    question: 'Which is an example of Defense in Depth?',
+    options: [
+      'Single perimeter firewall',
+      'Multiple layered controls across physical, network, application, and data',
+      'Bi-weekly password changes only',
+      'Relying only on endpoint antivirus',
+    ],
+    correct: 1,
+  },
+  {
+    id: 'q3',
+    question: 'Which is commonly a social-engineering attack?',
+    options: ['SQL Injection', 'Phishing', 'Buffer Overflow', 'ARP Spoofing'],
+    correct: 1,
+  },
+];
+
+const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+const getQuizScore = () => {
+  let correct = 0;
+  quizQuestions.forEach((q) => {
+    if (quizAnswers[q.id] === q.correct) correct++;
+  });
+  return correct;
+};
+
+const handleQuizSubmit = () => {
+  setQuizSubmitted(true);
+};
+
+// ---------- POLL ----------
+const [pollAnswer, setPollAnswer] = useState<string | null>(null);
+
+// ===== Resource views =====
+const renderVideo = () => (
+  <div className="space-y-6">
+    <button
+      onClick={() => setActiveResource(null)}
+      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+    >
+      <ChevronLeft size={16} />
+      Back to Module
+    </button>
+
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        Video Lecture: {modules[selectedModule]}
+      </h2>
+      <p className="text-gray-600 mb-6">Duration: 45 minutes</p>
+    </div>
+
+    <div className="bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+      <div className="text-center text-white">
+        <Play size={64} className="mx-auto mb-4 opacity-70" />
+        <p className="text-lg">Video Player</p>
+        <p className="text-sm opacity-70 mt-2">Click to play lecture video</p>
+      </div>
+    </div>
+
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="font-semibold text-gray-900 mb-3">Video Description</h3>
+      <p className="text-gray-700 mb-4">
+        This comprehensive lecture covers all key aspects of {modules[selectedModule].toLowerCase()}.
+        You&apos;ll learn fundamental concepts, see practical demonstrations, and understand real-world applications.
+      </p>
+      <div className="flex gap-4 text-sm text-gray-600">
+        <span>👁️ 234 views</span>
+        <span>📅 Posted Oct 10, 2025</span>
+        <span>👨‍🏫 Dr. Sarah Johnson</span>
+      </div>
+    </div>
+  </div>
+);
+
+const renderQuiz = () => (
+  <div className="space-y-6">
+    <button
+      onClick={() => {
+        setActiveResource(null);
+        setQuizSubmitted(false);
+        setQuizAnswers({});
+      }}
+      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+    >
+      <ChevronLeft size={16} />
+      Back to Module
+    </button>
+
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        Quiz: {modules[selectedModule]}
+      </h2>
+      <p className="text-gray-600 mb-6">Test your knowledge • {quizQuestions.length} questions</p>
+    </div>
+
+    {!quizSubmitted ? (
+      <div className="space-y-6">
+        {quizQuestions.map((q, idx) => (
+          <div key={q.id} className="bg-white rounded-xl border border-gray-200 p-6">
+            <p className="font-semibold text-gray-900 mb-4">
+              {idx + 1}. {q.question}
+            </p>
+            <div className="space-y-2">
+              {q.options.map((option, optIdx) => (
+                <label
+                  key={optIdx}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`question-${q.id}`}
+                    checked={quizAnswers[q.id] === optIdx}
+                    onChange={() => setQuizAnswers({ ...quizAnswers, [q.id]: optIdx })}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-gray-700">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <button
+          onClick={handleQuizSubmit}
+          disabled={Object.keys(quizAnswers).length !== quizQuestions.length}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+        >
+          Submit Quiz
+        </button>
+      </div>
+    ) : (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-8 text-white text-center">
+          <div className="text-6xl font-bold mb-2">
+            {getQuizScore()}/{quizQuestions.length}
+          </div>
+          <p className="text-xl mb-1">
+            {getQuizScore() === quizQuestions.length
+              ? '🎉 Perfect Score!'
+              : getQuizScore() >= quizQuestions.length * 0.7
+              ? '✅ Good Job!'
+              : '📚 Keep Learning!'}
+          </p>
+          <p className="opacity-90">{Math.round((getQuizScore() / quizQuestions.length) * 100)}% correct</p>
+        </div>
+
+        {quizQuestions.map((q, idx) => (
+          <div key={q.id} className="bg-white rounded-xl border border-gray-200 p-6">
+            <p className="font-semibold text-gray-900 mb-4">
+              {idx + 1}. {q.question}
+            </p>
+            <div className="space-y-2">
+              {q.options.map((option, optIdx) => {
+                const isCorrect = optIdx === q.correct;
+                const isSelected = quizAnswers[q.id] === optIdx;
+                const showCorrect = isCorrect;
+                const showWrong = isSelected && !isCorrect;
+
+                return (
+                  <div
+                    key={optIdx}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${
+                      showCorrect
+                        ? 'border-emerald-500 bg-emerald-50'
+                        : showWrong
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <span className="text-gray-700">{option}</span>
+                    {showCorrect && <span className="ml-auto text-emerald-600 font-semibold">✓ Correct</span>}
+                    {showWrong && <span className="ml-auto text-red-600 font-semibold">✗ Wrong</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const renderNotes = () => {
+  const lessonContent =
+    selectedModule === 0
+      ? {
+          title: 'Introduction to Cybersecurity',
+          sections: [
+            {
+              title: 'Key Takeaways',
+              content: [
+                {
+                  subtitle: 'CIA Triad - The Foundation',
+                  points: [
+                    'Confidentiality, Integrity, and Availability are the three pillars of information security',
+                    'All security measures should support at least one of these principles',
+                    'Understanding the CIA Triad helps in designing comprehensive security strategies',
+                  ],
+                },
+                {
+                  subtitle: 'Defense in Depth Strategy',
+                  points: [
+                    'Multiple layers of security controls provide better protection than single solutions',
+                    'Physical, network, application, and data security must work together',
+                    'User awareness is a critical component often overlooked',
+                  ],
+                },
+                {
+                  subtitle: 'Common Threats to Remember',
+                  points: [
+                    'Malware, phishing, and social engineering remain top attack vectors',
+                    'Zero-day exploits are particularly dangerous as no patches exist',
+                    'DDoS attacks can cripple even well-defended systems',
+                    'SQL injection exploits continue to be prevalent in web applications',
+                  ],
+                },
+                {
+                  subtitle: 'Security Frameworks',
+                  points: [
+                    'NIST Cybersecurity Framework provides a comprehensive approach to risk management',
+                    'ISO/IEC 27001 is the international standard for ISMS',
+                    'CIS Controls offer prioritized, actionable security measures',
+                    'Organizations should adopt frameworks that fit their specific needs',
+                  ],
+                },
+                {
+                  subtitle: 'Lessons from Target Breach',
+                  points: [
+                    'Third-party vendor access requires strict security controls and monitoring',
+                    'Network segmentation limits the impact of successful breaches',
+                    "Security alerts must be acted upon promptly - tools alone aren't enough",
+                    'Incident response plans need regular testing and updates',
+                    'The financial and reputational costs of breaches can be devastating',
+                  ],
+                },
+              ],
+            },
+          ],
+          references: [
+            {
+              title: 'NIST Cybersecurity Framework',
+              author: 'National Institute of Standards and Technology',
+              year: '2024',
+              url: 'https://www.nist.gov/cyberframework',
+              description: 'Comprehensive framework for improving critical infrastructure cybersecurity',
+            },
+            {
+              title: 'The Target Breach, By the Numbers',
+              author: 'Krebs, B.',
+              year: '2014',
+              publication: 'KrebsOnSecurity',
+              url: 'https://krebsonsecurity.com/2014/05/the-target-breach-by-the-numbers/',
+              description: 'Detailed analysis of the Target data breach',
+            },
+            {
+              title: 'ISO/IEC 27001:2022 Information Security Management',
+              author: 'International Organization for Standardization',
+              year: '2022',
+              description: 'International standard for information security management systems',
+            },
+            {
+              title: 'Computer Security: Principles and Practice (4th Edition)',
+              author: 'Stallings, W., & Brown, L.',
+              year: '2018',
+              publication: 'Pearson',
+              description: 'Comprehensive textbook covering fundamental cybersecurity concepts',
+            },
+            {
+              title: 'The Cybersecurity Body of Knowledge',
+              author: 'CyBOK',
+              year: '2024',
+              url: 'https://www.cybok.org/',
+              description: 'Comprehensive knowledge base for cybersecurity professionals',
+            },
+            {
+              title: 'Anatomy of a Target Data Breach: Missed Opportunities and Lessons Learned',
+              author: 'Chickowski, E.',
+              year: '2014',
+              publication: 'Dark Reading',
+              description: 'Analysis of security failures in the Target breach',
+            },
+            {
+              title: 'SANS Institute Security Resources',
+              author: 'SANS Institute',
+              year: '2024',
+              url: 'https://www.sans.org/',
+              description: 'Leading cybersecurity research and training organization',
+            },
+            {
+              title: 'MITRE ATT&CK Framework',
+              author: 'MITRE Corporation',
+              year: '2024',
+              url: 'https://attack.mitre.org/',
+              description: 'Knowledge base of adversary tactics and techniques',
+            },
+          ],
+        }
+      : {
+          title: modules[selectedModule],
+          sections: [
+            {
+              title: 'Key Concepts Summary',
+              content: [
+                {
+                  subtitle: 'Important Points',
+                  points: ['Core principles and frameworks', 'Industry best practices', 'Real-world applications'],
+                },
+              ],
+            },
+          ],
+          references: [
+            {
+              title: 'NIST Cybersecurity Framework',
+              author: 'National Institute of Standards and Technology',
+              year: '2024',
+              url: 'https://www.nist.gov/cyberframework',
+            },
+          ],
+        };
+
+  return (
+    <div className="space-y-6">
+      <button
+        onClick={() => setActiveResource(null)}
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+      >
+        <ChevronLeft size={16} />
+        Back to Module
+      </button>
+
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Further Reading: {lessonContent.title}</h2>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-8 space-y-8">
+        {lessonContent.sections.map((section, idx) => (
+          <section key={idx}>
+            <h3 className="text-xl font-bold text-blue-600 mb-4">{section.title}</h3>
+            {section.content.map((sub, subIdx) => (
+              <div key={subIdx} className="mb-6">
+                {sub.subtitle && <h4 className="text-lg font-semibold text-gray-900 mb-3">{sub.subtitle}</h4>}
+                {sub.points && sub.points.length > 0 && (
+                  <ul className="space-y-3 ml-4">
+                    {sub.points.map((p, pIdx) => (
+                      <li key={pIdx} className="flex gap-3 text-gray-700">
+                        <span className="text-blue-600 font-bold">•</span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </section>
+        ))}
+
+        <section className="border-t border-gray-200 pt-6">
+          <h3 className="text-xl font-bold text-blue-600 mb-4">References &amp; Additional Resources</h3>
+          <div className="space-y-4">
+            {lessonContent.references.map((ref, idx) => (
+              <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="font-semibold text-gray-900 mb-1">
+                  {idx + 1}. {ref.title}
+                </p>
+                <p className="text-sm text-gray-600 mb-1">
+                  {ref.author} ({ref.year})
+                  {ref.publication && `. ${ref.publication}`}
+                </p>
+                {ref.description && <p className="text-sm text-gray-600 mb-2">{ref.description}</p>}
+                {ref.url && (
+                  <a href={ref.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                    {ref.url}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="flex gap-4">
+        <button className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 flex items-center justify-center gap-2">
+          <FileDown size={20} />
+          Download Study Guide
+        </button>
+        <button className="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 flex items-center justify-center gap-2">
+          
+          Print Summary
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const renderPoll = () => {
+  const pollOptions = [
+    { value: 'expert', label: '⭐⭐⭐⭐⭐ Expert - I can teach this to others', votes: 23 },
+    { value: 'good', label: '⭐⭐⭐⭐ Good - I understand most concepts', votes: 45 },
+    { value: 'average', label: '⭐⭐⭐ Average - I understand the basics', votes: 67 },
+    { value: 'beginner', label: '⭐⭐ Beginner - I need more practice', votes: 34 },
+    { value: 'new', label: '⭐ New - This is all new to me', votes: 12 },
+  ];
+  const totalVotes = pollOptions.reduce((s, o) => s + o.votes, 0);
+
+  return (
+    <div className="space-y-6">
+      <button
+        onClick={() => {
+          setActiveResource(null);
+          setPollAnswer(null);
+        }}
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+      >
+        <ChevronLeft size={16} />
+        Back to Module
+      </button>
+
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Poll: {modules[selectedModule]}</h2>
+        <p className="text-gray-600 mb-6">Share your opinion with the class</p>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+          How would you rate your current understanding of {modules[selectedModule].toLowerCase()}?
+        </h3>
+
+        <div className="space-y-3 mb-6">
+          {pollOptions.map((option) => {
+            const percentage = Math.round((option.votes / totalVotes) * 100);
+            const isSelected = pollAnswer === option.value;
+
+            return (
+              <button
+                key={option.value}
+                onClick={() => setPollAnswer(option.value)}
+                className={`w-full text-left p-4 rounded-lg border transition-all ${
+                  isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-900">{option.label}</span>
+                  {pollAnswer && (
+                    <span className="text-sm font-semibold text-gray-600">
+                      {percentage}% ({option.votes})
+                    </span>
+                  )}
+                </div>
+                {pollAnswer && (
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${isSelected ? 'bg-blue-600' : 'bg-gray-400'}`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {!pollAnswer && <p className="text-sm text-gray-500 text-center">Select an option to see poll results</p>}
+
+        {pollAnswer && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
+            <p className="text-emerald-800 font-semibold">✓ Thank you for participating! {totalVotes} students have voted.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+// --- Render function (paste as-is) ---
 // --- Render function (paste as-is) ---
 const renderCanvas = ({
   canvasSidebarOpen,
@@ -992,7 +1754,7 @@ const renderCanvas = ({
   courseSection,
   setCourseSection,
 }: CanvasProps) => {
-  // Typed nav + section tabs (fixes union type errors)
+  // Typed nav + section tabs
   const navItems: ReadonlyArray<{
     key: CanvasProps['canvasTab'];
     label: string;
@@ -1017,7 +1779,14 @@ const renderCanvas = ({
     { key: 'attendance', label: 'Attendance' },
     { key: 'media', label: 'Media' },
   ] as const;
-
+type AssignmentDetail = {
+  description?: string;
+  instructions?: string;
+  requirements?: string[];
+  links?: { label: string; href: string }[];
+  resources?: { name: string; size?: string; href?: string }[];
+  rubric?: { criteria: string; points: number }[];
+};
   const canvasData = {
     courses: [
       {
@@ -1032,24 +1801,15 @@ const renderCanvas = ({
           { id: 4, title: 'Week 4: Evidence Collection', published: true, completed: false },
           { id: 5, title: 'Week 5: Recovery Procedures', published: false, completed: false },
         ],
+        
         assignments: [
           { id: 1, title: 'Assignment 1: IR Plan', dueDate: '2025-10-15', status: 'submitted', grade: 'A' },
           { id: 2, title: 'Assignment 2: Case Study Analysis', dueDate: '2025-10-20', status: 'pending', grade: null },
           { id: 3, title: 'Assignment 3: Lab Report', dueDate: '2025-10-30', status: 'not_started', grade: null },
         ],
         announcements: [
-          {
-            id: 1,
-            title: 'Assignment 2 deadline extended',
-            date: '2025-10-11',
-            content: 'Assignment 2 has been moved to Oct 20, 23:59.',
-          },
-          {
-            id: 2,
-            title: 'Midterm exam schedule',
-            date: '2025-10-08',
-            content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.',
-          },
+          { id: 1, title: 'Assignment 2 deadline extended', date: '2025-10-11', content: 'Assignment 2 has been moved to Oct 20, 23:59.' },
+          { id: 2, title: 'Midterm exam schedule', date: '2025-10-08', content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.' },
         ],
       },
       { name: 'Network Security', code: 'CS-6262', semester: 'Fall 2025', status: 'Active' },
@@ -1072,36 +1832,78 @@ const renderCanvas = ({
       'CS-6238': [{ text: 'Review secure coding notes', done: true }],
     },
     notifications: [
-      {
-        type: 'system',
-        title: 'Planned maintenance',
-        detail: 'The LMS will undergo maintenance on Oct 20, 02:00–03:00 UTC.',
-        when: '2025-10-12 09:00',
-      },
-      {
-        type: 'course',
-        course: 'CSIR-6261',
-        title: 'Assignment due date updated',
-        detail: 'Assignment 2 moved to Oct 20, 23:59.',
-        when: '2025-10-11 15:24',
-      },
-      {
-        type: 'group',
-        group: 'CSIR Group 1',
-        title: 'Member added',
-        detail: 'Khanh Do joined the group.',
-        when: '2025-10-10 18:02',
-      },
-      {
-        type: 'course',
-        course: 'CS-6262',
-        title: 'New module published',
-        detail: 'Week 6: IDS/IPS notes & quiz available.',
-        when: '2025-10-09 08:12',
-      },
+      { type: 'system', title: 'Planned maintenance', detail: 'The LMS will undergo maintenance on Oct 20, 02:00–03:00 UTC.', when: '2025-10-12 09:00' },
+      { type: 'course', course: 'CSIR-6261', title: 'Assignment due date updated', detail: 'Assignment 2 moved to Oct 20, 23:59.', when: '2025-10-11 15:24' },
+      { type: 'group', group: 'CSIR Group 1', title: 'Member added', detail: 'Khanh Do joined the group.', when: '2025-10-10 18:02' },
+      { type: 'course', course: 'CS-6262', title: 'New module published', detail: 'Week 6: IDS/IPS notes & quiz available.', when: '2025-10-09 08:12' },
     ],
   };
-
+const assignmentDetails: Record<number, AssignmentDetail> = {
+  1: {
+    description:
+      'Create an Incident Response (IR) plan for a mid-size retailer. Focus on preparation, communication flows, and RACI.',
+    instructions:
+      'Deliver a 5–7 page IR plan (PDF) covering: Purpose & Scope, Roles & Responsibilities, Tooling, Alert Triage, Communication, and Post-Incident Review.',
+    requirements: [
+      'Follow NIST SP 800-61 structure where applicable',
+      'Include a one-page escalation flow diagram',
+      'Define external notification triggers (legal, PR, regulators)',
+      'Submit as a single PDF (max 10MB)',
+    ],
+    resources: [
+      { name: 'IR Plan Template.docx', size: '84 KB', href: '#' },
+      { name: 'Example Escalation Flow.pdf', size: '312 KB', href: '#' },
+    ],
+    links: [
+      { label: 'NIST SP 800-61r2 (Guide to IR)', href: 'https://csrc.nist.gov' },
+      { label: 'SANS Incident Handler’s Handbook', href: 'https://www.sans.org' },
+    ],
+    rubric: [
+      { criteria: 'Preparation & Scope', points: 20 },
+      { criteria: 'Roles, RACI & Communication', points: 25 },
+      { criteria: 'Detection & Triage Flow', points: 20 },
+      { criteria: 'Containment/Eradication/Recovery', points: 25 },
+      { criteria: 'Post-Incident Review & Metrics', points: 10 },
+    ],
+  },
+  2: {
+    description:
+      'Analyze a real breach and write a 2–3 page case study focusing on root cause and lessons learned.',
+    instructions:
+      'Select any public incident. Summarize timeline, ATT&CK mapping, control gaps, and 5 actionable recommendations.',
+    requirements: [
+      'Map at least 6 ATT&CK techniques',
+      'Include properly formatted references',
+      'Highlight business impact and risk',
+    ],
+    resources: [{ name: 'Case Study Outline.pdf', size: '128 KB', href: '#' }],
+    links: [{ label: 'MITRE ATT&CK', href: 'https://attack.mitre.org/' }],
+    rubric: [
+      { criteria: 'Timeline & Evidence', points: 25 },
+      { criteria: 'ATT&CK Mapping', points: 25 },
+      { criteria: 'Root Cause Analysis', points: 25 },
+      { criteria: 'Recommendations', points: 25 },
+    ],
+  },
+  3: {
+    description:
+      'Run the provided lab and submit a short report with screenshots on log collection and basic triage.',
+    instructions:
+      'Use the lab VM, trigger the sample malware, collect logs, and document containment steps.',
+    requirements: ['3–5 screenshots', 'Commands or tooling used', 'Short reflection (≤300 words)'],
+    resources: [
+      { name: 'Lab Guide.pdf', size: '980 KB', href: '#' },
+      { name: 'Sample Logs.zip', size: '2.3 MB', href: '#' },
+    ],
+    links: [{ label: 'Elastic Detection Rules', href: 'https://www.elastic.co/guide' }],
+    rubric: [
+      { criteria: 'Repro & Evidence', points: 30 },
+      { criteria: 'Analysis & Triage Notes', points: 40 },
+      { criteria: 'Containment Steps', points: 20 },
+      { criteria: 'Clarity & Organization', points: 10 },
+    ],
+  },
+};
   const getStatusColor = (status: string) => {
     if (status === 'Active') return 'bg-green-50 text-green-700 border-green-200';
     if (status === 'Upcoming') return 'bg-amber-50 text-amber-700 border-amber-200';
@@ -1217,7 +2019,7 @@ const renderCanvas = ({
                               >
                                 Open
                               </button>
-                              <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Syllabus</button>
+                              <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Curriculum</button>
                             </div>
                           </td>
                         </tr>
@@ -1242,29 +2044,7 @@ const renderCanvas = ({
               <span className="text-gray-900">{selectedCourse.code}</span>
             </div>
 
-            {/* Course Header */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-2xl font-semibold text-amber-600">{selectedCourse.code}</h1>
-                    <span className="text-gray-400">•</span>
-                    <span className="text-xl text-gray-700">{selectedCourse.name}</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>{selectedCourse.semester}</span>
-                    <span className="text-gray-400">•</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(selectedCourse.status)}`}>
-                      {selectedCourse.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button className="px-5 py-2.5 bg-amber-600 text-white rounded-xl hover:bg-amber-700 font-medium">Open</button>
-                  <button className="px-5 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 font-medium">Syllabus</button>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Course Navigation Tabs */}
             <div className="bg-white rounded-2xl border border-gray-200">
@@ -1294,117 +2074,274 @@ const renderCanvas = ({
                           <ChevronRight size={20} />
                         </button>
                       </div>
-                      <div className="space-y-1">
-                        {[
-                          'Introduction to Cybersecurity',
-                          'Threat Intelligence Fundamentals',
-                          'Incident Detection Methods',
-                          'Response Planning & Strategy',
-                          'Forensics Analysis Techniques',
-                          'Security Monitoring Tools',
-                          'Advanced Threat Hunting',
-                          'Recovery & Documentation',
-                        ].map((module, idx) => (
-                          <button
-                            key={idx}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                              idx === 0 ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            {module}
-                          </button>
-                        ))}
-                      </div>
+                     <div className="space-y-1">
+
+                      
+  {modules.map((module, idx) => (
+    <button
+      key={idx}
+      onClick={() => {
+        setSelectedModule(idx);
+        setActiveResource(null); // ← reset resource when changing module
+      }}
+      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
+        selectedModule === idx
+          ? 'bg-blue-50 text-blue-700 font-medium'
+          : 'text-gray-700 hover:bg-gray-50'
+      }`}
+    >
+      {module}
+    </button>
+  ))}
+</div>
                     </div>
                   </div>
 
                   {/* Right Content - Module Details */}
                   <div className="flex-1 overflow-y-auto p-8">
                     <div className="max-w-4xl">
-                      <h2 className="text-3xl font-bold text-blue-600 mb-4">Introduction to Cybersecurity</h2>
+                      {/* Show module overview OR a specific resource */}
+                      {!activeResource && (
+                        <>
+                          <h2 className="text-3xl font-bold text-blue-600 mb-4">{modules[selectedModule]}</h2>
 
-                      <div className="mb-6">
-                        <h3 className="font-semibold text-gray-900 mb-2">Learning Objectives:</h3>
-                        <p className="text-gray-700 leading-relaxed">
-                          In this module, you will learn about introduction to cybersecurity and its practical applications in cybersecurity incident response.
-                        </p>
-                      </div>
-
-                      <div className="mb-6">
-                        <h3 className="font-semibold text-gray-900 mb-3">Key Topics:</h3>
-                        <ul className="space-y-2 text-gray-700">
-                          <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>Understanding core principles and frameworks</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>Implementing best practices and techniques</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>Analyzing case studies and examples</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="mb-8">
-                        <h3 className="font-semibold text-gray-900 mb-3">Resources:</h3>
-                        <p className="text-gray-700 leading-relaxed">
-                          Check the video lecture, complete the quiz, review the lecture notes, and participate in the poll below.
-                        </p>
-                      </div>
-
-                      {/* Resource Cards */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
-                          <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
-                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                            <h4 className="font-bold text-lg mb-2">Video Lecture</h4>
-                            <p className="text-purple-100 text-sm">Click to watch</p>
+                          <div className="mb-6">
+                            <h3 className="font-semibold text-gray-900 mb-2">Learning Objectives:</h3>
+                            <p className="text-gray-700 leading-relaxed">
+                              In this module, you will learn about {modules[selectedModule].toLowerCase()} and its practical applications in
+                              cybersecurity incident response.
+                            </p>
                           </div>
-                        </div>
 
-                        <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
-                          <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
-                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                              </svg>
-                            </div>
-                            <h4 className="font-bold text-lg mb-2">Take Quiz</h4>
-                            <p className="text-pink-100 text-sm">Test your knowledge</p>
+                          <div className="mb-6">
+                            <h3 className="font-semibold text-gray-900 mb-3">Key Topics:</h3>
+                            <ul className="space-y-2 text-gray-700">
+                              <li className="flex items-start gap-2">
+                                <span className="text-blue-600 mt-1">•</span>
+                                <span>Understanding core principles and frameworks</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-blue-600 mt-1">•</span>
+                                <span>Implementing best practices and techniques</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-blue-600 mt-1">•</span>
+                                <span>Analyzing case studies and examples</span>
+                              </li>
+                            </ul>
                           </div>
-                        </div>
 
-                        <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
-                          <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
-                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
-                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
-                              </svg>
-                            </div>
-                            <h4 className="font-bold text-lg mb-2">Further Reading</h4>
-                            <p className="text-cyan-100 text-sm">Study materials & references</p>
+                          <div className="mb-8">
+                            <h3 className="font-semibold text-gray-900 mb-3">Resources:</h3>
+                            <p className="text-gray-700 leading-relaxed">
+                              Check the video lecture, complete the quiz, review the lecture notes, and participate in the poll below.
+                            </p>
                           </div>
-                        </div>
+                          <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Overview</h3>
+                  <p className="leading-relaxed mb-6">
+                    Cybersecurity is the practice of protecting systems, networks, and programs from digital attacks. These
+                    cyberattacks are usually aimed at accessing, changing, or destroying sensitive information, extorting money
+                    from users, or interrupting normal business processes. In today's interconnected world, cybersecurity has
+                    become a critical concern for individuals, organizations, and nations alike.
+                  </p>
 
-                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
-                          <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 mb-4 flex items-center justify-center">
-                              <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
-                                <path d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10zm2.03 0v8.99H22c-.47-4.74-4.24-8.52-8.97-8.99zm0 11.01V22c4.74-.47 8.5-4.25 8.97-8.99h-8.97z" />
-                              </svg>
-                            </div>
-                            <h4 className="font-bold text-lg mb-2">Class Poll</h4>
-                            <p className="text-emerald-100 text-sm">Share your opinion</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">1. Fundamental Concepts</h3>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">The CIA Triad</h4>
+                  <p className="leading-relaxed mb-3">
+                    The foundation of information security rests on three core principles known as the CIA Triad:
+                  </p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Confidentiality:</strong> Ensuring that information is accessible only to those authorized to access it. This involves encryption, access controls, and authentication mechanisms.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Integrity:</strong> Maintaining the accuracy and completeness of data. This includes protecting against unauthorized modification and ensuring data remains trustworthy.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Availability:</strong> Ensuring that authorized users have reliable and timely access to information and resources when needed.</span></li>
+                  </ul>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Defense in Depth</h4>
+                  <p className="leading-relaxed mb-3">
+                    A cybersecurity strategy that employs multiple layers of security controls throughout an IT system. If one
+                    defense mechanism fails, others are in place to thwart an attack. This includes:
+                  </p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Physical security measures (locks, badges, surveillance)</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Network security (firewalls, intrusion detection systems)</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Application security (secure coding practices, input validation)</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Data security (encryption, backup systems)</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>User education and awareness training</span></li>
+                  </ul>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">2. Common Threat Landscape</h3>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Types of Cyber Threats</h4>
+                  <p className="leading-relaxed mb-3">Understanding the various forms of cyber threats is essential for effective defense:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Malware:</strong> Malicious software including viruses, worms, trojans, ransomware, and spyware designed to damage or gain unauthorized access to systems.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Phishing:</strong> Social engineering attacks that trick users into revealing sensitive information through deceptive emails or websites.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Man-in-the-Middle (MitM) Attacks:</strong> Intercepting communications between two parties to eavesdrop or impersonate one of them.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Denial of Service (DoS/DDoS):</strong> Overwhelming systems with traffic to make them unavailable to legitimate users.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>SQL Injection:</strong> Exploiting vulnerabilities in database-driven applications to execute malicious SQL statements.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Zero-Day Exploits:</strong> Attacks that target previously unknown vulnerabilities before developers can create patches.</span></li>
+                  </ul>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Threat Actors</h4>
+                  <p className="leading-relaxed mb-3">Different categories of attackers with varying motivations:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Nation-State Actors:</strong> Government-sponsored groups conducting cyber espionage or sabotage</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Cybercriminals:</strong> Financially motivated individuals or groups seeking monetary gain</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Hacktivists:</strong> Activists using hacking to promote political or social causes</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Insider Threats:</strong> Current or former employees with authorized access who misuse it</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Script Kiddies:</strong> Inexperienced attackers using pre-made tools without deep technical knowledge</span></li>
+                  </ul>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">3. Security Frameworks and Standards</h3>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Industry Frameworks</h4>
+                  <p className="leading-relaxed mb-3">Organizations rely on established frameworks to structure their security programs:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>NIST Cybersecurity Framework:</strong> A voluntary framework consisting of standards, guidelines, and best practices to manage cybersecurity risks.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>ISO/IEC 27001:</strong> International standard for information security management systems (ISMS).</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>CIS Controls:</strong> A prioritized set of 18 actions to defend against common cyber attacks.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>COBIT:</strong> Framework for developing, implementing, monitoring and improving IT governance and management practices.</span></li>
+                  </ul>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">4. Case Study: Target Data Breach (2013)</h3>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Background</h4>
+                  <p className="leading-relaxed mb-6">
+                    In December 2013, retail giant Target experienced one of the largest data breaches in history, affecting
+                    approximately 40 million credit and debit card accounts and 70 million customer records.
+                  </p>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Attack Vector</h4>
+                  <p className="leading-relaxed mb-3">The breach occurred through a sophisticated multi-stage attack:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Initial Access:</strong> Attackers compromised a third-party HVAC vendor's credentials through a phishing email containing the Citadel malware.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Lateral Movement:</strong> Using the vendor's network access, attackers moved laterally within Target's network to access sensitive systems.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Point-of-Sale Compromise:</strong> Malware was installed on POS systems to capture card data as customers made purchases.</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Data Exfiltration:</strong> Stolen data was sent to staging servers within Target's network, then transferred to external servers controlled by the attackers.</span></li>
+                  </ul>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Security Failures</h4>
+                  <p className="leading-relaxed mb-3">Several security lapses contributed to the breach's severity:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Inadequate network segmentation between vendor access and critical systems</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Failure to act on security alerts from the FireEye intrusion detection system</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Weak security controls for third-party vendors</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Insufficient monitoring of privileged access and lateral movement</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Delayed incident response despite early warning signs</span></li>
+                  </ul>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Impact and Consequences</h4>
+                  <p className="leading-relaxed mb-3">The breach had far-reaching effects:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Financial:</strong> Over $200 million in costs including settlements, legal fees, and security improvements</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Reputational:</strong> Significant damage to brand trust and customer confidence</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Executive:</strong> CEO and CIO resigned following the incident</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Regulatory:</strong> Led to increased scrutiny and stricter compliance requirements for retailers</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Industry-wide:</strong> Prompted organizations across sectors to reassess third-party risk management</span></li>
+                  </ul>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Lessons Learned</h4>
+                  <p className="leading-relaxed mb-3">Key takeaways from the Target breach:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Third-party vendors represent a significant attack vector and require rigorous security vetting</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Network segmentation is critical to limit the blast radius of a breach</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Security tools are only effective if alerts are monitored and acted upon promptly</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Incident response plans must be tested and ready for immediate activation</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Security is an ongoing process requiring continuous monitoring and improvement</span></li>
+                  </ul>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">5. Best Practices for Organizations</h3>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Essential Security Measures</h4>
+                  <p className="leading-relaxed mb-3">Organizations should implement these fundamental security practices:</p>
+                  <ul className="space-y-2 ml-6 mb-6">
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Regular Security Assessments:</strong> Conduct vulnerability scans, penetration tests, and security audits</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Patch Management:</strong> Implement a systematic approach to applying security updates promptly</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Access Control:</strong> Enforce principle of least privilege and implement multi-factor authentication</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Employee Training:</strong> Provide regular security awareness training to all staff</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Incident Response Planning:</strong> Develop, document, and test incident response procedures</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Data Backup:</strong> Maintain regular, tested backups with off-site storage</span></li>
+                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Encryption:</strong> Protect sensitive data both in transit and at rest</span></li>
+                  </ul>
+                </div>
+                          
+
+                          {/* Resource Cards – Video / Quiz / Notes / Poll */}
+                          <div className="grid grid-cols-2 gap-4 mb-6">
+                            {/* Video */}
+                            <button
+                              onClick={() => setActiveResource('video')}
+                              className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-white/60"
+                            >
+                              <div className="flex flex-col items-center text-center">
+                                <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                                  <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                  </svg>
+                                </div>
+                                <h4 className="font-bold text-lg mb-2">Video Lecture</h4>
+                                <p className="text-purple-100 text-sm">Click to watch</p>
+                              </div>
+                            </button>
+
+                            {/* Quiz */}
+                            <button
+                              onClick={() => setActiveResource('quiz')}
+                              className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-white/60"
+                            >
+                              <div className="flex flex-col items-center text-center">
+                                <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                                  <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                  </svg>
+                                </div>
+                                <h4 className="font-bold text-lg mb-2">Take Quiz</h4>
+                                <p className="text-pink-100 text-sm">Test your knowledge</p>
+                              </div>
+                            </button>
+
+                            {/* Notes */}
+                            <button
+                              onClick={() => setActiveResource('notes')}
+                              className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-white/60"
+                            >
+                              <div className="flex flex-col items-center text-center">
+                                <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                                  <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                  </svg>
+                                </div>
+                                <h4 className="font-bold text-lg mb-2">Further Reading</h4>
+                                <p className="text-cyan-100 text-sm">Study materials & references</p>
+                              </div>
+                            </button>
+
+                            {/* Poll */}
+                            <button
+                              onClick={() => setActiveResource('poll')}
+                              className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-white/60"
+                            >
+                              <div className="flex flex-col items-center text-center">
+                                <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                                  <svg className="w-12 h-12" fill="white" viewBox="0 0 24 24">
+                                    <path d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10zm2.03 0v8.99H22c-.47-4.74-4.24-8.52-8.97-8.99zm0 11.01V22c4.74-.47 8.5-4.25 8.97-8.99h-8.97z" />
+                                  </svg>
+                                </div>
+                                <h4 className="font-bold text-lg mb-2">Class Poll</h4>
+                                <p className="text-emerald-100 text-sm">Share your opinion</p>
+                              </div>
+                            </button>
                           </div>
-                        </div>
-                      </div>
+                        </>
+                      )
+                      
+                      
+                      
+                      
+                      }
+
+                      {activeResource === 'video' && renderVideo()}
+{activeResource === 'quiz' && renderQuiz()}
+{activeResource === 'notes' && renderNotes()}
+{activeResource === 'poll' && renderPoll()}
+
                     </div>
                   </div>
                 </div>
@@ -1412,49 +2349,243 @@ const renderCanvas = ({
 
               {/* Other Sections */}
               {courseSection === 'assignments' && (
-                <div className="p-6">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-gray-500 border-b">
-                          <th className="py-3 pr-4">Assignment</th>
-                          <th className="py-3 pr-4">Due Date</th>
-                          <th className="py-3 pr-4">Status</th>
-                          <th className="py-3 pr-4">Grade</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedCourse.assignments?.map((assignment: any) => (
-                          <tr key={assignment.id} className="border-b last:border-b-0 hover:bg-gray-50">
-                            <td className="py-3 pr-4 font-medium">{assignment.title}</td>
-                            <td className="py-3 pr-4">{assignment.dueDate}</td>
-                            <td className="py-3 pr-4">
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-semibold border ${
-                                  assignment.status === 'submitted'
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                    : assignment.status === 'pending'
-                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                    : 'bg-gray-100 text-gray-700 border-gray-200'
-                                }`}
-                              >
-                                {assignment.status.replace('_', ' ')}
-                              </span>
-                            </td>
-                            <td className="py-3 pr-4">
-                              {assignment.grade ? (
-                                <span className="font-semibold text-green-600">{assignment.grade}</span>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+  <div className="p-6">
+    {!selectedAssignment ? (
+      // ===== List view =====
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="text-left text-gray-500 border-b">
+              <th className="py-3 pr-4">Assignment</th>
+              <th className="py-3 pr-4">Due Date</th>
+              <th className="py-3 pr-4">Status</th>
+              <th className="py-3 pr-4">Grade</th>
+              <th className="py-3 pr-4"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedCourse.assignments?.map((a: any) => (
+              <tr key={a.id} className="border-b last:border-b-0 hover:bg-gray-50">
+                <td className="py-3 pr-4 font-medium">{a.title}</td>
+                <td className="py-3 pr-4">{a.dueDate}</td>
+                <td className="py-3 pr-4">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold border ${
+                      a.status === 'submitted'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : a.status === 'pending'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-gray-100 text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    {String(a.status).replace('_', ' ')}
+                  </span>
+                </td>
+                <td className="py-3 pr-4">
+                  {a.grade ? (
+                    <span className="font-semibold text-green-600">{a.grade}</span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </td>
+                <td className="py-3 pr-4">
+                 <button
+  onClick={() => setSelectedAssignment({ ...a, ...assignmentDetails[a.id] })}
+  className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm"
+>
+  Open
+</button>
+
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      // ===== Detail view =====
+     <div className="space-y-6">
+  <button
+    onClick={() => setSelectedAssignment(null)}
+    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+  >
+    <ChevronLeft size={16} />
+    Back to Assignments
+  </button>
+
+  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+    {/* Header */}
+    <div className="flex items-start justify-between gap-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">{selectedAssignment.title}</h1>
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+          <span><span className="font-medium">Due:</span> {selectedAssignment.dueDate}</span>
+          <span className="text-gray-300">•</span>
+          <span
+            className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
+              selectedAssignment.status === 'submitted'
+                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                : selectedAssignment.status === 'pending'
+                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                : 'bg-gray-100 text-gray-700 border-gray-200'
+            }`}
+          >
+            {String(selectedAssignment.status).replace('_', ' ')}
+          </span>
+          {selectedAssignment.grade && (
+            <>
+              <span className="text-gray-300">•</span>
+              <span className="font-semibold text-green-600">Grade: {selectedAssignment.grade}</span>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="shrink-0 flex gap-2">
+        <button className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 text-sm font-medium">
+          Download Prompt
+        </button>
+        <button className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 text-sm font-medium">
+          View Rubric
+        </button>
+      </div>
+    </div>
+
+    {/* Meta cards */}
+    <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+        <p className="text-sm text-gray-600 mb-1">Total Points</p>
+        <p className="font-semibold text-gray-900">{selectedAssignment.totalPoints ?? '—'}</p>
+      </div>
+      <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+        <p className="text-sm text-gray-600 mb-1">Status</p>
+        <p className="font-semibold text-gray-900 capitalize">
+          {String(selectedAssignment.status).replace('_', ' ')}
+        </p>
+      </div>
+      <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+        <p className="text-sm text-gray-600 mb-1">Grade</p>
+        <p className="font-semibold text-gray-900">{selectedAssignment.grade ?? '—'}</p>
+      </div>
+    </div>
+
+    {/* Description */}
+    {selectedAssignment.description && (
+      <section className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Overview</h3>
+        <p className="text-gray-700 leading-relaxed">{selectedAssignment.description}</p>
+      </section>
+    )}
+
+    {/* Instructions */}
+    {selectedAssignment.instructions && (
+      <section className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Instructions</h3>
+        <p className="text-gray-700 leading-relaxed">{selectedAssignment.instructions}</p>
+      </section>
+    )}
+
+    {/* Requirements */}
+    {selectedAssignment.requirements?.length > 0 && (
+      <section className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Requirements</h3>
+        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+          {selectedAssignment.requirements.map((r: string, i: number) => (
+            <li key={i}>{r}</li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {/* Resources (downloadables) */}
+    {selectedAssignment.resources?.length > 0 && (
+      <section className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">Resources</h3>
+        <div className="space-y-2">
+          {selectedAssignment.resources.map((res: any, i: number) => (
+            <a
+              key={i}
+              href={res.href || '#'}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 border border-gray-200"
+            >
+              <div className="flex items-center gap-3">
+                <FileText size={20} className="text-blue-600" />
+                <div>
+                  <p className="font-medium text-gray-900">{res.name}</p>
+                  {res.size && <p className="text-sm text-gray-600">{res.size}</p>}
                 </div>
-              )}
+              </div>
+              <FileDown size={18} className="text-gray-400" />
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* Helpful links */}
+    {selectedAssignment.links?.length > 0 && (
+      <section className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">Helpful Links</h3>
+        <ul className="space-y-2">
+          {selectedAssignment.links.map((l: any, i: number) => (
+            <li key={i}>
+              <a href={l.href} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {/* Rubric */}
+    {selectedAssignment.rubric?.length > 0 && (
+      <section className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">Grading Rubric</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead className="bg-gray-50">
+              <tr className="text-left text-gray-600">
+                <th className="py-2 px-3">Criteria</th>
+                <th className="py-2 px-3 w-32">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedAssignment.rubric.map((row: any, i: number) => (
+                <tr key={i} className="border-t">
+                  <td className="py-2 px-3">{row.criteria}</td>
+                  <td className="py-2 px-3 font-semibold">{row.points}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    {/* Submission box (kept simple) */}
+    <section className="mt-10 bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <h3 className="text-lg font-bold text-gray-900 mb-4">Submit / Resubmit</h3>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <label className="flex-1 cursor-pointer">
+          <input type="file" className="hidden" />
+          <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+            <p className="text-gray-700 font-medium">Click to upload or drag and drop</p>
+            <p className="text-sm text-gray-500">PDF, DOC, DOCX (max 10MB)</p>
+          </div>
+        </label>
+        <button className="px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
+          Submit
+        </button>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+
+    )}
+  </div>
+)}
 
               {courseSection === 'announcements' && (
                 <div className="p-6 space-y-4">
@@ -1470,11 +2601,365 @@ const renderCanvas = ({
                 </div>
               )}
 
-              {['discussion', 'grading', 'attendance', 'media'].includes(courseSection) && (
+{courseSection === 'discussion' ? (
+  <>
+    {!selectedDiscussion ? (
+      <>
+        <div className="mb-6">
+          <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">
+            {currentCourseCode} • Discussion Forum
+          </p>
+        </div>
+
+        {/* Controls */}
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+          <div className="grid md:grid-cols-5 gap-3">
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search posts…"
+              className="md:col-span-2 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <select
+              value={categoryFilter}
+              onChange={e => setCategoryFilter(e.target.value as any)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option>All</option>
+              <option>Question</option>
+              <option>Technical Discussion</option>
+              <option>Study Groups</option>
+              <option>Career Advice</option>
+              <option>Technical Help</option>
+            </select>
+
+            <select
+              value={tagFilter}
+              onChange={e => setTagFilter(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="All">All tags</option>
+              {allTags.map(t => (
+                <option key={t} value={t}>#{t}</option>
+              ))}
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="recent">Sort: Recent</option>
+              <option value="popular">Sort: Popular</option>
+              <option value="unanswered">Sort: Unanswered</option>
+            </select>
+          </div>
+
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              onClick={() => setShowNewPost(true)}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700"
+            >
+              + New Post
+            </button>
+            <span className="text-sm text-gray-500">{filteredDiscussions.length} results</span>
+          </div>
+        </div>
+
+        {/* List */}
+        <div className="space-y-4">
+          {filteredDiscussions.map((discussion) => (
+            <div
+              key={discussion.id}
+              onClick={() => setSelectedDiscussion(discussion)}
+              className={`bg-white rounded-xl border p-6 hover:shadow-lg transition-all cursor-pointer ${
+                discussion.isPinned ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+              }`}
+            >
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg">
+                    {discussion.author.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  {discussion.hasAnswer && (
+                    <div className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">
+                      ✓ Solved
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        {discussion.isPinned && (
+                          <span className="px-2 py-0.5 bg-blue-200 text-blue-800 text-xs font-bold rounded">
+                            📌 PINNED
+                          </span>
+                        )}
+                        <span className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                          discussion.category === 'Question' ? 'bg-amber-100 text-amber-700' :
+                          discussion.category === 'Technical Discussion' ? 'bg-purple-100 text-purple-700' :
+                          discussion.category === 'Study Groups' ? 'bg-blue-100 text-blue-700' :
+                          discussion.category === 'Career Advice' ? 'bg-green-100 text-green-700' :
+                          discussion.category === 'Technical Help' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {discussion.category}
+                        </span>
+                      </div>
+                      
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        {discussion.title}
+                      </h3>
+
+                      <p className="text-sm text-gray-600 mb-3">
+                        <span className="font-medium">{discussion.author}</span>
+                        {discussion.authorRole === 'Course Instructor' && (
+                          <span className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                            Instructor
+                          </span>
+                        )}
+                        {discussion.authorRole === 'Teaching Assistant' && (
+                          <span className="ml-2 px-2 py-0.5 bg-teal-100 text-teal-700 text-xs font-semibold rounded">
+                            TA
+                          </span>
+                        )}
+                        <span className="ml-2 text-gray-400">• {formatTimeAgo(discussion.date)}</span>
+                      </p>
+
+                      <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+                        {discussion.content}
+                      </p>
+
+                      <div className="flex items-center gap-2 mb-3">
+                        {discussion.tags.map((tag, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span>💬 {discussion.replies}</span>
+                        <span>👁️ {discussion.views}</span>
+                        <span>👍 {discussion.likes}</span>
+                      </div>
+                    </div>
+                    <ChevronRight size={20} className="text-gray-400 flex-shrink-0 ml-4" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {filteredDiscussions.length === 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl p-10 text-center text-gray-500">
+              No posts match your filters.
+            </div>
+          )}
+        </div>
+
+        {/* New Post Modal (simple inline panel) */}
+        {showNewPost && (
+          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+            <div className="w-full max-w-2xl bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold">Create New Post</h3>
+                <button
+                  onClick={() => setShowNewPost(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="grid gap-4">
+                <input
+                  value={newPostTitle}
+                  onChange={e => setNewPostTitle(e.target.value)}
+                  placeholder="Post title"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <select
+                  value={newPostCategory}
+                  onChange={e => setNewPostCategory(e.target.value as any)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option>Question</option>
+                  <option>Technical Discussion</option>
+                  <option>Study Groups</option>
+                  <option>Career Advice</option>
+                  <option>Technical Help</option>
+                </select>
+                <input
+                  value={newPostTags}
+                  onChange={e => setNewPostTags(e.target.value)}
+                  placeholder="Tags (comma separated)"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <textarea
+                  value={newPostContent}
+                  onChange={e => setNewPostContent(e.target.value)}
+                  rows={6}
+                  placeholder="Write your post content…"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowNewPost(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createPost}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    ) : (
+      // THREAD VIEW
+      <div className="space-y-6">
+        <button
+          onClick={() => setSelectedDiscussion(null)}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+        >
+          <ChevronLeft size={16} />
+          Back to Discussions
+        </button>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-8">
+          <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-200">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+              {selectedDiscussion.author.split(' ').map(n => n[0]).join('')}
+            </div>
+            
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                {selectedDiscussion.isPinned && (
+                  <span className="px-3 py-1 bg-blue-200 text-blue-800 text-xs font-bold rounded-full">
+                    📌 PINNED
+                  </span>
+                )}
+                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                  selectedDiscussion.category === 'Question' ? 'bg-amber-100 text-amber-700' :
+                  selectedDiscussion.category === 'Technical Discussion' ? 'bg-purple-100 text-purple-700' :
+                  selectedDiscussion.category === 'Study Groups' ? 'bg-blue-100 text-blue-700' :
+                  selectedDiscussion.category === 'Career Advice' ? 'bg-green-100 text-green-700' :
+                  selectedDiscussion.category === 'Technical Help' ? 'bg-red-100 text-red-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {selectedDiscussion.category}
+                </span>
+                {selectedDiscussion.hasAnswer && (
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
+                    ✓ Solved
+                  </span>
+                )}
+              </div>
+              
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {selectedDiscussion.title}
+              </h1>
+              
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                <span className="font-medium">{selectedDiscussion.author}</span>
+                <span>•</span>
+                <span>{new Date(selectedDiscussion.date).toLocaleDateString('en-US', {
+                  month: 'long', day: 'numeric', year: 'numeric'
+                })}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {selectedDiscussion.tags.map((tag, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="text-gray-700 whitespace-pre-line leading-relaxed">
+              {selectedDiscussion.content}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 py-4 border-y border-gray-200 mb-6">
+            <button
+              onClick={() => addLike(selectedDiscussion.id)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+            >
+              <span className="text-lg">👍</span>
+              <span className="font-semibold">{selectedDiscussion.likes}</span>
+            </button>
+
+            {/* Example admin/TA tools — show conditionally if user is staff */}
+            <button
+              onClick={() => toggleSolved(selectedDiscussion.id)}
+              className="px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 text-sm"
+            >
+              {selectedDiscussion.hasAnswer ? 'Mark Unsovled' : 'Mark Solved'}
+            </button>
+            <button
+              onClick={() => togglePin(selectedDiscussion.id)}
+              className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 text-sm"
+            >
+              {selectedDiscussion.isPinned ? 'Unpin' : 'Pin'}
+            </button>
+
+            <div className="ml-auto text-sm text-gray-500">
+              👁️ {selectedDiscussion.views} • 💬 {selectedDiscussion.replies}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Replies</h3>
+            <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
+              <MessageSquare size={48} className="mx-auto mb-2 opacity-50" />
+              <p>Replies appear here. (Wire to your backend or reply list array.)</p>
+            </div>
+
+            <div className="mt-6">
+              <textarea
+                value={newReplyText}
+                onChange={(e) => setNewReplyText(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={4}
+                placeholder="Write your reply..."
+              />
+              <button
+                onClick={() => addReply(selectedDiscussion.id, newReplyText)}
+                className="mt-3 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              >
+                Post Reply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
+) : (
+  // ... your other tabs unchanged
+ <div className="text-center py-20">
+
+</div>
+)}
+
+              {[ 'grading', 'attendance', 'media'].includes(courseSection) && (
                 <div className="p-6 text-center py-12 text-gray-500">
-                  <p className="text-sm">
-                    {courseSection.charAt(0).toUpperCase() + courseSection.slice(1)} content will be displayed here
-                  </p>
+                  <p className="text-sm">{courseSection.charAt(0).toUpperCase() + courseSection.slice(1)} content will be displayed here</p>
                 </div>
               )}
             </div>
@@ -1491,10 +2976,7 @@ const renderCanvas = ({
               <div className="p-5">
                 <div className="relative max-w-md">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Search groups or course codes…"
-                  />
+                  <input className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Search groups or course codes…" />
                 </div>
               </div>
               <div className="px-5 pb-5">
@@ -1516,23 +2998,15 @@ const renderCanvas = ({
                           <td className="py-3 pr-4">
                             <div className="flex items-center gap-2">
                               {group.members.slice(0, 5).map((member, midx) => (
-                                <div
-                                  key={midx}
-                                  title={member}
-                                  className="w-7 h-7 rounded-full border border-gray-200 grid place-items-center text-[10px] font-semibold bg-gray-100"
-                                >
+                                <div key={midx} title={member} className="w-7 h-7 rounded-full border border-gray-200 grid place-items-center text-[10px] font-semibold bg-gray-100">
                                   {getInitials(member)}
                                 </div>
                               ))}
-                              {group.members.length > 5 && (
-                                <span className="text-xs text-gray-600">+{group.members.length - 5} more</span>
-                              )}
+                              {group.members.length > 5 && <span className="text-xs text-gray-600">+{group.members.length - 5} more</span>}
                             </div>
                           </td>
                           <td className="py-3 pr-4">
-                            <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">
-                              Members
-                            </button>
+                            <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Members</button>
                           </td>
                         </tr>
                       ))}
@@ -1587,10 +3061,7 @@ const renderCanvas = ({
                       </option>
                     ))}
                   </select>
-                  <input
-                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Enter new task..."
-                  />
+                  <input className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter new task..." />
                   <button className="flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-100">
                     <CheckCircle size={16} />
                     Add
@@ -1675,9 +3146,7 @@ const renderCanvas = ({
                     <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '40%' }} />
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Progress is calculated from completed courses plus partial credit for the current active course.
-                </p>
+                <p className="text-sm text-gray-500">Progress is calculated from completed courses plus partial credit for the current active course.</p>
               </div>
             </div>
 
@@ -1700,9 +3169,7 @@ const renderCanvas = ({
                           <td className="py-3 pr-4">{course.code}</td>
                           <td className="py-3 pr-4">{course.semester}</td>
                           <td className="py-3 pr-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>
-                              {course.status}
-                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>{course.status}</span>
                           </td>
                         </tr>
                       ))}
@@ -1717,6 +3184,7 @@ const renderCanvas = ({
     </div>
   );
 };
+
 
 
 
