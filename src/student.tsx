@@ -1248,6 +1248,7 @@ const [courseSection, setCourseSection] =
 
 const [selectedModule, setSelectedModule] = useState<number>(0);
 const [activeResource, setActiveResource] = useState<'video' | 'quiz' | 'notes' | 'poll' | null>(null);
+const [modulesOpen, setModulesOpen] = useState(true);
 
 // ---------- QUIZ ----------
 type QuizQ = { id: string; question: string; options: string[]; correct: number };
@@ -2063,43 +2064,47 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                 ))}
               </div>
 
-              {/* Lectures Section with Split Layout */}
+              {/* Lectures Section with new Layout */} 
               {courseSection === 'lectures' && (
-                <div className="flex">
+                <div className="flex min-h-0">
                   {/* Left Sidebar - Modules List */}
-                  <div className="w-80 border-r border-gray-200 overflow-y-auto">
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-gray-900">MODULES</h3>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <ChevronRight size={20} />
-                        </button>
-                      </div>
-                     <div className="space-y-1">
+                 <aside className="w-80 border-r border-gray-200 overflow-y-auto">
+  <div className="p-4">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="font-semibold text-gray-900">MODULES</h3>
+      <button
+        onClick={() => setModulesOpen((v) => !v)}
+        aria-expanded={modulesOpen}
+        className="text-gray-400 hover:text-gray-600"
+      >
+        <ChevronRight
+          size={20}
+          className={`transition-transform ${modulesOpen ? 'rotate-90' : ''}`}
+        />
+      </button>
+    </div>
 
-                      
-  {modules.map((module, idx) => (
-    <button
-      key={idx}
-      onClick={() => {
-        setSelectedModule(idx);
-        setActiveResource(null); // ← reset resource when changing module
-      }}
-      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
-        selectedModule === idx
-          ? 'bg-blue-50 text-blue-700 font-medium'
-          : 'text-gray-700 hover:bg-gray-50'
-      }`}
-    >
-      {module}
-    </button>
-  ))}
-</div>
-                    </div>
-                  </div>
+    {/* collapsible list */}
+    <div className={`${modulesOpen ? 'block' : 'hidden'} space-y-1`}>
+      {modules.map((module, idx) => (
+        <button
+          key={idx}
+          onClick={() => { setSelectedModule(idx); setActiveResource(null); }}
+          className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
+            selectedModule === idx
+              ? 'bg-blue-50 text-blue-700 font-medium'
+              : 'text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {module}
+        </button>
+      ))}
+    </div>
+  </div>
+</aside>
 
                   {/* Right Content - Module Details */}
-                  <div className="flex-1 p-6 sm:p-8">
+                  <div className="flex-1 min-h-0 overflow-y-auto p-8">
                     <div className="max-w-4xl">
                       {/* Show module overview OR a specific resource */}
                       {!activeResource && (
