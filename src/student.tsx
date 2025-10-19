@@ -1741,9 +1741,10 @@ const renderPoll = () => {
   );
 };
 
+// Canvas course modules use state
+const [modulesCollapsed, setModulesCollapsed] = useState(false);
 
-// --- Render function (paste as-is) ---
-// --- Render function (paste as-is) ---
+// --- Render function ---
 const renderCanvas = ({
   canvasSidebarOpen,
   setCanvasSidebarOpen,
@@ -1961,7 +1962,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
       </aside>
 
       {/* Main Canvas Content */}
-      <main className="flex-1 overflow-auto p-8 w-full space-y-6">
+<main className="flex-1 p-8 pb-24 sm:pb-28 w-full space-y-6 overflow-visible min-h-screen">
         {/* Courses Tab */}
         {canvasTab === 'courses' && !selectedCourse && (
           <div className="space-y-4">
@@ -2064,7 +2065,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
               {/* Lectures Section with Split Layout */}
               {courseSection === 'lectures' && (
-                <div className="flex h-[calc(100vh-400px)]">
+                <div className="flex">
                   {/* Left Sidebar - Modules List */}
                   <div className="w-80 border-r border-gray-200 overflow-y-auto">
                     <div className="p-4">
@@ -2098,7 +2099,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                   </div>
 
                   {/* Right Content - Module Details */}
-                  <div className="flex-1 overflow-y-auto p-8">
+                  <div className="flex-1 p-6 sm:p-8">
                     <div className="max-w-4xl">
                       {/* Show module overview OR a specific resource */}
                       {!activeResource && (
@@ -4804,7 +4805,7 @@ const renderOneStop = () => (
   return (
 
     
-<div className="flex h-screen bg-gray-50">
+<div className="flex min-h-screen bg-gray-50">
   {/* Sidebar */}
   <div
     className={`${
