@@ -1249,6 +1249,7 @@ const [courseSection, setCourseSection] =
 const [selectedModule, setSelectedModule] = useState<number>(0);
 const [activeResource, setActiveResource] = useState<'video' | 'quiz' | 'notes' | 'poll' | null>(null);
 const [modulesOpen, setModulesOpen] = useState(true);
+const [expandedGroup, setExpandedGroup] = useState<number | null>(null);
 
 // ---------- QUIZ ----------
 type QuizQ = { id: string; question: string; options: string[]; correct: number };
@@ -3271,56 +3272,81 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
         )}
 
         {/* Groups Tab */}
-        {canvasTab === 'groups' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold tracking-tight">Groups</h1>
-            </div>
-            <div className="bg-white rounded-2xl border border-gray-200">
-              <div className="p-5">
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Search groups or course codes…" />
-                </div>
-              </div>
-              <div className="px-5 pb-5">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-gray-500 border-b">
-                        <th className="py-3 pr-4">Group</th>
-                        <th className="py-3 pr-4">Course Code</th>
-                        <th className="py-3 pr-4">Members</th>
-                        <th className="py-3 pr-4">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {canvasData.groups.map((group, idx) => (
-                        <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
-                          <td className="py-3 pr-4 font-medium">{group.name}</td>
-                          <td className="py-3 pr-4">{group.course}</td>
-                          <td className="py-3 pr-4">
-                            <div className="flex items-center gap-2">
-                              {group.members.slice(0, 5).map((member, midx) => (
-                                <div key={midx} title={member} className="w-7 h-7 rounded-full border border-gray-200 grid place-items-center text-[10px] font-semibold bg-gray-100">
-                                  {getInitials(member)}
-                                </div>
-                              ))}
-                              {group.members.length > 5 && <span className="text-xs text-gray-600">+{group.members.length - 5} more</span>}
-                            </div>
-                          </td>
-                          <td className="py-3 pr-4">
-                            <button className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm">Members</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+       {canvasTab === 'groups' && (
+  <div className="space-y-4">
+    <div className="flex items-center justify-between">
+      <h1 className="text-2xl font-semibold tracking-tight">Groups</h1>
+    </div>
+    <div className="bg-white rounded-2xl border border-gray-200">
+      <div className="p-5">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Search groups or course codes…"
+          />
+        </div>
+      </div>
+      <div className="px-5 pb-5">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-left text-gray-500 border-b">
+                <th className="py-3 pr-4">Group</th>
+                <th className="py-3 pr-4">Course Code</th>
+                <th className="py-3 pr-4">Members</th>
+                <th className="py-3 pr-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {canvasData.groups.map((group, idx) => (
+                <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
+                  <td className="py-3 pr-4 font-medium">{group.name}</td>
+                  <td className="py-3 pr-4">{group.course}</td>
+                  <td className="py-3 pr-4">
+                    {/* Conditionally show either avatars or full list */}
+                    {expandedGroup === idx ? (
+                      <span className="text-gray-800 text-sm">
+                        {group.members.join(", ")}
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {group.members.slice(0, 5).map((member, midx) => (
+                          <div
+                            key={midx}
+                            title={member}
+                            className="w-7 h-7 rounded-full border border-gray-200 grid place-items-center text-[10px] font-semibold bg-gray-100"
+                          >
+                            {getInitials(member)}
+                          </div>
+                        ))}
+                        {group.members.length > 5 && (
+                          <span className="text-xs text-gray-600">
+                            +{group.members.length - 5} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <button
+                      onClick={() =>
+                        setExpandedGroup(expandedGroup === idx ? null : idx)
+                      }
+                      className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm"
+                    >
+                      {expandedGroup === idx ? "Hide Members" : "Show Members"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
         {/* To-do Tab */}
         {canvasTab === 'todo' && (
