@@ -953,9 +953,9 @@ const toggleCollapse = () => {
 type CanvasProps = {
   canvasSidebarOpen: boolean;
   setCanvasSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  canvasTab: 'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum';
+  canvasTab: 'courses' | 'groups' | 'todo' | 'notifications' | 'Progress';
   setCanvasTab: React.Dispatch<
-    React.SetStateAction<'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum'>
+    React.SetStateAction<'courses' | 'groups' | 'todo' | 'notifications' | 'Progress'>
   >;
   selectedCourse: any | null;
   setSelectedCourse: React.Dispatch<React.SetStateAction<any | null>>;
@@ -984,7 +984,7 @@ type CanvasProps = {
 // --- Canvas - Global ---
 
 const [canvasSidebarOpen, setCanvasSidebarOpen] = useState<boolean>(false);
-const [canvasTab, setCanvasTab] = useState<'courses' | 'groups' | 'todo' | 'notifications' | 'curriculum'>('courses');
+const [canvasTab, setCanvasTab] = useState<'courses' | 'groups' | 'todo' | 'notifications' | 'Progress'>('courses');
 const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
 const [selectedAssignment, setSelectedAssignment] = useState<any | null>(null);
 
@@ -1780,7 +1780,7 @@ const renderCanvas = ({
     { key: 'groups', label: 'Groups', icon: User },
     { key: 'todo', label: 'To-do', icon: CheckCircle },
     { key: 'notifications', label: 'Notifications', icon: Bell },
-    { key: 'curriculum', label: 'Curriculum', icon: BookOpen },
+    { key: 'Progress', label: 'Progress', icon: BookOpen },
   ] as const;
 
   const sectionTabs: ReadonlyArray<{
@@ -2022,7 +2022,15 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                     <tbody>
                       {canvasData.courses.map((course, idx) => (
                         <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
-                          <td className="py-3 pr-4 font-medium">{course.name}</td>
+                          
+                                <button
+                                  onClick={() => setSelectedCourse(course)}
+                                  className="py-3 pr-4 font-bold text-blue-600 hover:underline cursor-pointer align-middle pl-4"
+                                >
+                                  {course.name}
+                                </button>
+                      
+
                           <td className="py-3 pr-4">{course.code}</td>
                           <td className="py-3 pr-4">{course.semester}</td>
                           <td className="py-3 pr-4">
@@ -3327,6 +3335,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     <div className="flex items-center justify-between">
       <h1 className="text-2xl font-semibold tracking-tight">Groups</h1>
     </div>
+
     <div className="bg-white rounded-2xl border border-gray-200">
       <div className="p-5">
         <div className="relative max-w-md">
@@ -3337,6 +3346,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
           />
         </div>
       </div>
+
       <div className="px-5 pb-5">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -3348,18 +3358,15 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                 <th className="py-3 pr-4">Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {canvasData.groups.map((group, idx) => (
-                <tr key={idx} className="border-b last:border-b-0 hover:bg-gray-50">
-                  <td className="py-3 pr-4 font-medium">{group.name}</td>
-                  <td className="py-3 pr-4">{group.course}</td>
-                  <td className="py-3 pr-4">
-                    {/* Conditionally show either avatars or full list */}
-                    {expandedGroup === idx ? (
-                      <span className="text-gray-800 text-sm">
-                        {group.members.join(", ")}
-                      </span>
-                    ) : (
+                <React.Fragment key={idx}>
+                  {/* PRIMARY ROW (stays fixed) */}
+                  <tr className="border-b last:border-b-0 hover:bg-gray-50">
+                    <td className="py-3 pr-4 font-medium">{group.name}</td>
+                    <td className="py-3 pr-4">{group.course}</td>
+                    <td className="py-3 pr-4">
                       <div className="flex items-center gap-2">
                         {group.members.slice(0, 5).map((member, midx) => (
                           <div
@@ -3376,19 +3383,37 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                           </span>
                         )}
                       </div>
-                    )}
-                  </td>
-                  <td className="py-3 pr-4">
-                    <button
-                      onClick={() =>
-                        setExpandedGroup(expandedGroup === idx ? null : idx)
-                      }
-                      className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm"
-                    >
-                      {expandedGroup === idx ? "Hide Members" : "Show Members"}
-                    </button>
-                  </td>
-                </tr>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <button
+                        onClick={() =>
+                          setExpandedGroup(expandedGroup === idx ? null : idx)
+                        }
+                        className="px-3 py-1 rounded-xl border border-gray-200 hover:bg-gray-100 text-sm"
+                      >
+                        {expandedGroup === idx ? 'Hide' : 'Show'} Members
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* EXPANDED DETAIL ROW (full names) */}
+                  {expandedGroup === idx && (
+                    <tr className="bg-gray-50 border-b last:border-b-0">
+                      <td colSpan={4} className="py-4 px-4">
+                        <div className="flex flex-wrap gap-2">
+                          {group.members.map((name, nIdx) => (
+                            <span
+                              key={nIdx}
+                              className="inline-block px-3 py-1 rounded-full border border-gray-300 bg-white text-gray-800"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -3397,6 +3422,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     </div>
   </div>
 )}
+
 
         {/* To-do Tab */}
         {canvasTab === 'todo' && (
@@ -3502,62 +3528,210 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
           </div>
         )}
 
-        {/* Curriculum Tab */}
-        {canvasTab === 'curriculum' && (
+        {/* Progress Tab */}
+        {canvasTab === 'Progress' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold tracking-tight">Curriculum</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">Progress</h1>
             </div>
+             {/* Program Overview */}
+    <section className="bg-white rounded-2xl border border-gray-200">
+      <div className="p-5 border-b border-gray-200">
+        <h2 className="font-medium">Program Overview</h2>
+      </div>
+      <div className="p-5 grid gap-5 md:grid-cols-3">
+        <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-4">
+          <p className="text-sm text-indigo-700 mb-1">Program</p>
+          <p className="font-semibold text-indigo-900">MSc in Cybersecurity</p>
+          <p className="text-xs text-indigo-700/80 mt-1">Incident Response Track</p>
+        </div>
+        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+          <p className="text-sm text-emerald-700 mb-1">Total Credits</p>
+          <p className="font-semibold text-emerald-900">36 Credits</p>
+          <p className="text-xs text-emerald-700/80 mt-1">Core 24 • Electives 9 • Capstone 3</p>
+        </div>
+        <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
+          <p className="text-sm text-amber-700 mb-1">Expected Duration</p>
+          <p className="font-semibold text-amber-900">3 Semesters</p>
+          <p className="text-xs text-amber-700/80 mt-1">Full-time plan shown below</p>
+        </div>
+      </div>
+      <div className="px-5 pb-5">
+        <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
+          <p className="text-sm text-gray-700 leading-relaxed">
+            This curriculum focuses on enterprise-scale incident response: detection, containment, forensics,
+            recovery, and continuous improvement. You’ll work with SIEM tooling, threat intel feeds,
+            and case-based playbooks aligned with NIST/ISO frameworks.
+          </p>
+        </div>
+      </div>
+    </section>
+    
+    {/* Current Progress */}
+    <section className="bg-white rounded-2xl border border-gray-200">
+      <div className="p-5 border-b border-gray-200">
+        <h2 className="font-medium">Your Progress</h2>
+      </div>
+      <div className="p-5 space-y-4">
+        <p className="text-gray-700">
+          You are currently enrolled in <strong>CSIR-6261: Cybersecurity Incident Response</strong>.
+        </p>
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm text-gray-600">Program Progress</span>
+            <span className="text-sm font-medium text-indigo-600">40%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '40%' }} />
+          </div>
+        </div>
+        <p className="text-sm text-gray-500">
+          Progress includes completed courses plus partial credit for your active course this semester.
+        </p>
+      </div>
+    </section>
 
-            <div className="bg-white rounded-2xl border border-gray-200">
-              <div className="p-5 border-b border-gray-200">
-                <h2 className="font-medium">Current Progress</h2>
-              </div>
-              <div className="p-5 space-y-4">
-                <p className="text-gray-700">
-                  You are currently enrolled in <strong>CSIR-6261: Cybersecurity Incident Response</strong>.
-                </p>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-600">Program Progress</span>
-                    <span className="text-sm font-medium text-indigo-600">40%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '40%' }} />
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500">Progress is calculated from completed courses plus partial credit for the current active course.</p>
-              </div>
+      {/* Suggested Plan by Semester */}
+    <section className="bg-white rounded-2xl border border-gray-200">
+      <div className="p-5 border-b border-gray-200">
+        <h2 className="font-medium">Suggested Degree Plan</h2>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Semester 1 */}
+          <div className="rounded-xl border border-gray-200">
+            <div className="px-4 py-3 border-b bg-gray-50 rounded-t-xl">
+              <p className="text-sm font-semibold text-gray-800">Semester 1</p>
+              <p className="text-xs text-gray-500">Foundations & Core</p>
             </div>
+            <ul className="p-4 space-y-2 text-sm">
+              <li className="flex items-center justify-between">
+                <span>CSIR-6261 Cybersecurity Incident Response</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">Core</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>CS-6238 Secure Computer Systems</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">Core</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>CS-6262 Network Security</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">Core</span>
+              </li>
+            </ul>
+          </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200">
-              <div className="p-5">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-gray-500 border-b">
-                        <th className="py-3 pr-4">Course</th>
-                        <th className="py-3 pr-4">Code</th>
-                        <th className="py-3 pr-4">Semester</th>
-                        <th className="py-3 pr-4">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {canvasData.courses.map((course, idx) => (
-                        <tr key={idx} className="border-b last:border-b-0">
-                          <td className="py-3 pr-4 font-medium">{course.name}</td>
-                          <td className="py-3 pr-4">{course.code}</td>
-                          <td className="py-3 pr-4">{course.semester}</td>
-                          <td className="py-3 pr-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getStatusColor(course.status)}`}>{course.status}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+          {/* Semester 2 */}
+          <div className="rounded-xl border border-gray-200">
+            <div className="px-4 py-3 border-b bg-gray-50 rounded-t-xl">
+              <p className="text-sm font-semibold text-gray-800">Semester 2</p>
+              <p className="text-xs text-gray-500">Threats & Monitoring</p>
             </div>
+            <ul className="p-4 space-y-2 text-sm">
+              <li className="flex items-center justify-between">
+                <span>Threat Intelligence Fundamentals</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">Core</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Security Monitoring Tools (SIEM)</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">Core</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Elective 1 (choose 1)</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">Elective</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Semester 3 */}
+          <div className="rounded-xl border border-gray-200">
+            <div className="px-4 py-3 border-b bg-gray-50 rounded-t-xl">
+              <p className="text-sm font-semibold text-gray-800">Semester 3</p>
+              <p className="text-xs text-gray-500">Advanced Practice</p>
+            </div>
+            <ul className="p-4 space-y-2 text-sm">
+              <li className="flex items-center justify-between">
+                <span>Advanced Threat Hunting</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">Core</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Elective 2 (choose 1)</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">Elective</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Capstone / IR Playbook Project</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200">Capstone</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+          <p className="text-sm text-amber-900">
+            Tip: Plans are flexible. Talk to your advisor if you’re working part-time or want to fast-track with
+            heavier loads.
+          </p>
+        </div>
+      </div>
+    </section>
+      {/* Important Notes & Policies */}
+    <section className="bg-white rounded-2xl border border-gray-200">
+      <div className="p-5 border-b border-gray-200">
+        <h2 className="font-medium">What to Know</h2>
+      </div>
+      <div className="p-5 grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-gray-200 p-4">
+          <p className="font-semibold text-gray-900 mb-2">Milestones</p>
+          <ul className="text-sm text-gray-700 space-y-1">
+            <li>• Declare concentration by end of Semester 1</li>
+            <li>• Mid-program review in Semester 2</li>
+            <li>• Capstone proposal due Week 3 of final semester</li>
+          </ul>
+        </div>
+        <div className="rounded-xl border border-gray-200 p-4">
+          <p className="font-semibold text-gray-900 mb-2">Policies</p>
+          <ul className="text-sm text-gray-700 space-y-1">
+            <li>• Minimum GPA 3.0 to graduate</li>
+            <li>• One retake allowed for core courses</li>
+            <li>• Academic integrity policy applies to labs & reports</li>
+          </ul>
+        </div>
+        <div className="rounded-xl border border-gray-200 p-4">
+          <p className="font-semibold text-gray-900 mb-2">Advising & Support</p>
+          <ul className="text-sm text-gray-700 space-y-1">
+            <li>• Advisor: Dr. Sarah Johnson (Wed 2–4 PM)</li>
+            <li>• TA Office Hours: Tue & Thu 5–6 PM</li>
+            <li>• Career Services: Resume clinic every first Friday</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+   
+     {/* Quick Resources */}
+    <section className="bg-white rounded-2xl border border-gray-200">
+      <div className="p-5 border-b border-gray-200">
+        <h2 className="font-medium">Resources</h2>
+      </div>
+      <div className="p-5 grid gap-4 md:grid-cols-3">
+        <a className="rounded-xl p-4 border hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+           href="#" onClick={(e)=>e.preventDefault()}>
+          <p className="font-semibold text-gray-900">Program Handbook</p>
+          <p className="text-sm text-gray-600">Requirements, policies, and forms</p>
+        </a>
+        <a className="rounded-xl p-4 border hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+           href="#" onClick={(e)=>e.preventDefault()}>
+          <p className="font-semibold text-gray-900">Capstone Guide</p>
+          <p className="text-sm text-gray-600">Proposal templates & grading rubric</p>
+        </a>
+        <a className="rounded-xl p-4 border hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+           href="#" onClick={(e)=>e.preventDefault()}>
+          <p className="font-semibold text-gray-900">Advising Appointments</p>
+          <p className="text-sm text-gray-600">Book time with your advisor</p>
+        </a>
+      </div>
+    </section>
+           
+
+           
           </div>
         )}
       </main>
