@@ -1249,12 +1249,7 @@ const [courseSection, setCourseSection] =
 const [selectedModule, setSelectedModule] = useState<number>(0);
 const [activeResource, setActiveResource] = useState<'video' | 'quiz' | 'notes' | 'poll' | null>(null);
 const [modulesOpen, setModulesOpen] = useState(true);
-useEffect(() => {
-  if (modulesOpen) {
-    const timer = setTimeout(() => setModulesOpen(false), 2000); // auto-hide after 2s
-    return () => clearTimeout(timer);
-  }
-}, [modulesOpen]);
+
 // ---------- QUIZ ----------
 type QuizQ = { id: string; question: string; options: string[]; correct: number };
 const quizQuestions: QuizQ[] = [
@@ -2073,24 +2068,20 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
               {courseSection === 'lectures' && (
                 <div className="flex min-h-0">
                   {/* Left Sidebar - Modules List */}
-                 <aside className="w-56 border-r border-gray-200 overflow-y-auto transition-all duration-300">
-  <div className="p-4">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="font-semibold text-gray-900">MODULES</h3>
-      <button
+                   {modulesOpen && (
+      <aside className="w-56 border-r border-gray-200 overflow-y-auto transition-all duration-300">
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">MODULES</h3>
+            <button
               onClick={() => setModulesOpen(false)}
-        aria-expanded={modulesOpen}
-        className="text-gray-400 hover:text-gray-600"
-      >
-        <ChevronRight
-          size={20}
-          className={`transition-transform ${modulesOpen ? 'rotate-90' : ''}`}
-        />
-      </button>
-    </div>
-    
-    {/* collapsible list */}
-     <div className="space-y-1">
+              className="flex items-center gap-1 text-blue-600 font-semibold hover:text-blue-800"
+            >
+              <ChevronLeft size={20} strokeWidth={3} />
+              <span>Hide</span>
+            </button>
+          </div>
+          <div className="space-y-1">
             {modules.map((module, idx) => (
               <button
                 key={idx}
@@ -2105,16 +2096,34 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                 }`}
               >
                 {module}
-              </button>
-            ))}
+              </button>             
+
+          ))}
           </div>
-  </div>
-</aside>
+        </div>
+      </aside>
+    )}
+     
+    
 
                   {/* Right Content - Module Details */}
                   <div className="flex-1 min-h-0 overflow-y-auto p-8">
                     <div className="max-w-4xl">
-                      {/* Show module overview OR a specific resource */}
+                      <div className="mb-4 flex items-center gap-3">
+                    {!modulesOpen && (
+                      <button
+                        onClick={() => setModulesOpen(true)}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        ☰ Show all Modules
+                      </button>
+                    )}
+                  
+                  </div>
+
+
+
+                      {/* Show module content */}
                       {!activeResource && (
                         <>
                           <h2 className="text-3xl font-bold text-blue-600 mb-4">{modules[selectedModule]}</h2>
@@ -2152,128 +2161,128 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                             </p>
                           </div>
                           <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Overview</h3>
-                  <p className="leading-relaxed mb-6">
-                    Cybersecurity is the practice of protecting systems, networks, and programs from digital attacks. These
-                    cyberattacks are usually aimed at accessing, changing, or destroying sensitive information, extorting money
-                    from users, or interrupting normal business processes. In today's interconnected world, cybersecurity has
-                    become a critical concern for individuals, organizations, and nations alike.
-                  </p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Overview</h3>
+                            <p className="leading-relaxed mb-6">
+                              Cybersecurity is the practice of protecting systems, networks, and programs from digital attacks. These
+                              cyberattacks are usually aimed at accessing, changing, or destroying sensitive information, extorting money
+                              from users, or interrupting normal business processes. In today's interconnected world, cybersecurity has
+                              become a critical concern for individuals, organizations, and nations alike.
+                            </p>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">1. Fundamental Concepts</h3>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">The CIA Triad</h4>
-                  <p className="leading-relaxed mb-3">
-                    The foundation of information security rests on three core principles known as the CIA Triad:
-                  </p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Confidentiality:</strong> Ensuring that information is accessible only to those authorized to access it. This involves encryption, access controls, and authentication mechanisms.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Integrity:</strong> Maintaining the accuracy and completeness of data. This includes protecting against unauthorized modification and ensuring data remains trustworthy.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Availability:</strong> Ensuring that authorized users have reliable and timely access to information and resources when needed.</span></li>
-                  </ul>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">1. Fundamental Concepts</h3>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">The CIA Triad</h4>
+                            <p className="leading-relaxed mb-3">
+                              The foundation of information security rests on three core principles known as the CIA Triad:
+                            </p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Confidentiality:</strong> Ensuring that information is accessible only to those authorized to access it. This involves encryption, access controls, and authentication mechanisms.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Integrity:</strong> Maintaining the accuracy and completeness of data. This includes protecting against unauthorized modification and ensuring data remains trustworthy.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Availability:</strong> Ensuring that authorized users have reliable and timely access to information and resources when needed.</span></li>
+                            </ul>
 
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Defense in Depth</h4>
-                  <p className="leading-relaxed mb-3">
-                    A cybersecurity strategy that employs multiple layers of security controls throughout an IT system. If one
-                    defense mechanism fails, others are in place to thwart an attack. This includes:
-                  </p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Physical security measures (locks, badges, surveillance)</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Network security (firewalls, intrusion detection systems)</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Application security (secure coding practices, input validation)</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Data security (encryption, backup systems)</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>User education and awareness training</span></li>
-                  </ul>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Defense in Depth</h4>
+                            <p className="leading-relaxed mb-3">
+                              A cybersecurity strategy that employs multiple layers of security controls throughout an IT system. If one
+                              defense mechanism fails, others are in place to thwart an attack. This includes:
+                            </p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Physical security measures (locks, badges, surveillance)</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Network security (firewalls, intrusion detection systems)</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Application security (secure coding practices, input validation)</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Data security (encryption, backup systems)</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>User education and awareness training</span></li>
+                            </ul>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">2. Common Threat Landscape</h3>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Types of Cyber Threats</h4>
-                  <p className="leading-relaxed mb-3">Understanding the various forms of cyber threats is essential for effective defense:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Malware:</strong> Malicious software including viruses, worms, trojans, ransomware, and spyware designed to damage or gain unauthorized access to systems.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Phishing:</strong> Social engineering attacks that trick users into revealing sensitive information through deceptive emails or websites.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Man-in-the-Middle (MitM) Attacks:</strong> Intercepting communications between two parties to eavesdrop or impersonate one of them.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Denial of Service (DoS/DDoS):</strong> Overwhelming systems with traffic to make them unavailable to legitimate users.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>SQL Injection:</strong> Exploiting vulnerabilities in database-driven applications to execute malicious SQL statements.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Zero-Day Exploits:</strong> Attacks that target previously unknown vulnerabilities before developers can create patches.</span></li>
-                  </ul>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">2. Common Threat Landscape</h3>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Types of Cyber Threats</h4>
+                            <p className="leading-relaxed mb-3">Understanding the various forms of cyber threats is essential for effective defense:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Malware:</strong> Malicious software including viruses, worms, trojans, ransomware, and spyware designed to damage or gain unauthorized access to systems.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Phishing:</strong> Social engineering attacks that trick users into revealing sensitive information through deceptive emails or websites.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Man-in-the-Middle (MitM) Attacks:</strong> Intercepting communications between two parties to eavesdrop or impersonate one of them.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Denial of Service (DoS/DDoS):</strong> Overwhelming systems with traffic to make them unavailable to legitimate users.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>SQL Injection:</strong> Exploiting vulnerabilities in database-driven applications to execute malicious SQL statements.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Zero-Day Exploits:</strong> Attacks that target previously unknown vulnerabilities before developers can create patches.</span></li>
+                            </ul>
 
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Threat Actors</h4>
-                  <p className="leading-relaxed mb-3">Different categories of attackers with varying motivations:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Nation-State Actors:</strong> Government-sponsored groups conducting cyber espionage or sabotage</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Cybercriminals:</strong> Financially motivated individuals or groups seeking monetary gain</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Hacktivists:</strong> Activists using hacking to promote political or social causes</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Insider Threats:</strong> Current or former employees with authorized access who misuse it</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Script Kiddies:</strong> Inexperienced attackers using pre-made tools without deep technical knowledge</span></li>
-                  </ul>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Threat Actors</h4>
+                            <p className="leading-relaxed mb-3">Different categories of attackers with varying motivations:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Nation-State Actors:</strong> Government-sponsored groups conducting cyber espionage or sabotage</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Cybercriminals:</strong> Financially motivated individuals or groups seeking monetary gain</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Hacktivists:</strong> Activists using hacking to promote political or social causes</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Insider Threats:</strong> Current or former employees with authorized access who misuse it</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Script Kiddies:</strong> Inexperienced attackers using pre-made tools without deep technical knowledge</span></li>
+                            </ul>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">3. Security Frameworks and Standards</h3>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Industry Frameworks</h4>
-                  <p className="leading-relaxed mb-3">Organizations rely on established frameworks to structure their security programs:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>NIST Cybersecurity Framework:</strong> A voluntary framework consisting of standards, guidelines, and best practices to manage cybersecurity risks.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>ISO/IEC 27001:</strong> International standard for information security management systems (ISMS).</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>CIS Controls:</strong> A prioritized set of 18 actions to defend against common cyber attacks.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>COBIT:</strong> Framework for developing, implementing, monitoring and improving IT governance and management practices.</span></li>
-                  </ul>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">3. Security Frameworks and Standards</h3>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Industry Frameworks</h4>
+                            <p className="leading-relaxed mb-3">Organizations rely on established frameworks to structure their security programs:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>NIST Cybersecurity Framework:</strong> A voluntary framework consisting of standards, guidelines, and best practices to manage cybersecurity risks.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>ISO/IEC 27001:</strong> International standard for information security management systems (ISMS).</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>CIS Controls:</strong> A prioritized set of 18 actions to defend against common cyber attacks.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>COBIT:</strong> Framework for developing, implementing, monitoring and improving IT governance and management practices.</span></li>
+                            </ul>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">4. Case Study: Target Data Breach (2013)</h3>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Background</h4>
-                  <p className="leading-relaxed mb-6">
-                    In December 2013, retail giant Target experienced one of the largest data breaches in history, affecting
-                    approximately 40 million credit and debit card accounts and 70 million customer records.
-                  </p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">4. Case Study: Target Data Breach (2013)</h3>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Background</h4>
+                            <p className="leading-relaxed mb-6">
+                              In December 2013, retail giant Target experienced one of the largest data breaches in history, affecting
+                              approximately 40 million credit and debit card accounts and 70 million customer records.
+                            </p>
 
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Attack Vector</h4>
-                  <p className="leading-relaxed mb-3">The breach occurred through a sophisticated multi-stage attack:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Initial Access:</strong> Attackers compromised a third-party HVAC vendor's credentials through a phishing email containing the Citadel malware.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Lateral Movement:</strong> Using the vendor's network access, attackers moved laterally within Target's network to access sensitive systems.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Point-of-Sale Compromise:</strong> Malware was installed on POS systems to capture card data as customers made purchases.</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Data Exfiltration:</strong> Stolen data was sent to staging servers within Target's network, then transferred to external servers controlled by the attackers.</span></li>
-                  </ul>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Attack Vector</h4>
+                            <p className="leading-relaxed mb-3">The breach occurred through a sophisticated multi-stage attack:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Initial Access:</strong> Attackers compromised a third-party HVAC vendor's credentials through a phishing email containing the Citadel malware.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Lateral Movement:</strong> Using the vendor's network access, attackers moved laterally within Target's network to access sensitive systems.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Point-of-Sale Compromise:</strong> Malware was installed on POS systems to capture card data as customers made purchases.</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Data Exfiltration:</strong> Stolen data was sent to staging servers within Target's network, then transferred to external servers controlled by the attackers.</span></li>
+                            </ul>
 
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Security Failures</h4>
-                  <p className="leading-relaxed mb-3">Several security lapses contributed to the breach's severity:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Inadequate network segmentation between vendor access and critical systems</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Failure to act on security alerts from the FireEye intrusion detection system</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Weak security controls for third-party vendors</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Insufficient monitoring of privileged access and lateral movement</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Delayed incident response despite early warning signs</span></li>
-                  </ul>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Security Failures</h4>
+                            <p className="leading-relaxed mb-3">Several security lapses contributed to the breach's severity:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Inadequate network segmentation between vendor access and critical systems</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Failure to act on security alerts from the FireEye intrusion detection system</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Weak security controls for third-party vendors</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Insufficient monitoring of privileged access and lateral movement</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Delayed incident response despite early warning signs</span></li>
+                            </ul>
 
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Impact and Consequences</h4>
-                  <p className="leading-relaxed mb-3">The breach had far-reaching effects:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Financial:</strong> Over $200 million in costs including settlements, legal fees, and security improvements</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Reputational:</strong> Significant damage to brand trust and customer confidence</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Executive:</strong> CEO and CIO resigned following the incident</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Regulatory:</strong> Led to increased scrutiny and stricter compliance requirements for retailers</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Industry-wide:</strong> Prompted organizations across sectors to reassess third-party risk management</span></li>
-                  </ul>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Impact and Consequences</h4>
+                            <p className="leading-relaxed mb-3">The breach had far-reaching effects:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Financial:</strong> Over $200 million in costs including settlements, legal fees, and security improvements</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Reputational:</strong> Significant damage to brand trust and customer confidence</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Executive:</strong> CEO and CIO resigned following the incident</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Regulatory:</strong> Led to increased scrutiny and stricter compliance requirements for retailers</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Industry-wide:</strong> Prompted organizations across sectors to reassess third-party risk management</span></li>
+                            </ul>
 
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Lessons Learned</h4>
-                  <p className="leading-relaxed mb-3">Key takeaways from the Target breach:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Third-party vendors represent a significant attack vector and require rigorous security vetting</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Network segmentation is critical to limit the blast radius of a breach</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Security tools are only effective if alerts are monitored and acted upon promptly</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Incident response plans must be tested and ready for immediate activation</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span>Security is an ongoing process requiring continuous monitoring and improvement</span></li>
-                  </ul>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Lessons Learned</h4>
+                            <p className="leading-relaxed mb-3">Key takeaways from the Target breach:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Third-party vendors represent a significant attack vector and require rigorous security vetting</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Network segmentation is critical to limit the blast radius of a breach</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Security tools are only effective if alerts are monitored and acted upon promptly</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Incident response plans must be tested and ready for immediate activation</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span>Security is an ongoing process requiring continuous monitoring and improvement</span></li>
+                            </ul>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">5. Best Practices for Organizations</h3>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Essential Security Measures</h4>
-                  <p className="leading-relaxed mb-3">Organizations should implement these fundamental security practices:</p>
-                  <ul className="space-y-2 ml-6 mb-6">
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Regular Security Assessments:</strong> Conduct vulnerability scans, penetration tests, and security audits</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Patch Management:</strong> Implement a systematic approach to applying security updates promptly</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Access Control:</strong> Enforce principle of least privilege and implement multi-factor authentication</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Employee Training:</strong> Provide regular security awareness training to all staff</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Incident Response Planning:</strong> Develop, document, and test incident response procedures</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Data Backup:</strong> Maintain regular, tested backups with off-site storage</span></li>
-                    <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Encryption:</strong> Protect sensitive data both in transit and at rest</span></li>
-                  </ul>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">5. Best Practices for Organizations</h3>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Essential Security Measures</h4>
+                            <p className="leading-relaxed mb-3">Organizations should implement these fundamental security practices:</p>
+                            <ul className="space-y-2 ml-6 mb-6">
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Regular Security Assessments:</strong> Conduct vulnerability scans, penetration tests, and security audits</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Patch Management:</strong> Implement a systematic approach to applying security updates promptly</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Access Control:</strong> Enforce principle of least privilege and implement multi-factor authentication</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Employee Training:</strong> Provide regular security awareness training to all staff</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Incident Response Planning:</strong> Develop, document, and test incident response procedures</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Data Backup:</strong> Maintain regular, tested backups with off-site storage</span></li>
+                              <li className="flex gap-2"><span className="text-blue-600">•</span><span><strong>Encryption:</strong> Protect sensitive data both in transit and at rest</span></li>
+                            </ul>
                 </div>
                           
 
