@@ -1745,7 +1745,20 @@ const renderPoll = () => {
 
 // Canvas course modules use state
 const [modulesCollapsed, setModulesCollapsed] = useState(false);
-
+const getTagStyle = (t: string) => {
+  switch (t.toLowerCase()) {
+    case 'exam':
+      return 'bg-red-100 text-red-700 border-red-200';
+    case 'assignment':
+      return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+    case 'event':
+      return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    case 'discussion':
+      return 'bg-blue-100 text-blue-700 border-blue-200';
+    default:
+      return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+};
 // --- Render function ---
 const renderCanvas = ({
   canvasSidebarOpen,
@@ -1811,8 +1824,11 @@ type AssignmentDetail = {
           { id: 3, title: 'Assignment 3: Lab Report', dueDate: '2025-10-30', status: 'not_started', grade: null },
         ],
         announcements: [
-          { id: 1, title: 'Assignment 2 deadline extended', date: '2025-10-11', content: 'Assignment 2 has been moved to Oct 20, 23:59.' },
-          { id: 2, title: 'Midterm exam schedule', date: '2025-10-08', content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.' },
+          { id: 1, title: 'Assignment 2 deadline extended', tag: 'Assignment', date: '2025-10-11', content: 'Assignment 2 has been moved to Oct 20, 23:59.' },
+          { id: 2, title: 'Midterm exam schedule', tag: 'Exam',date: '2025-10-08', content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.' },
+          { id: 3, title: 'Midterm exam schedule', tag: 'Exam',date: '2025-10-11', content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.' },
+          { id: 4, title: 'Midterm exam schedule', tag: 'Exam',date: '2025-10-12', content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.' },
+          { id: 5, title: 'Midterm exam schedule', tag: 'Exam',date: '2025-10-20', content: 'The midterm will be held on Oct 25, 9:00 AM in Hall A.' },
         ],
       },
       { name: 'Network Security', code: 'CS-6262', semester: 'Fall 2025', status: 'Active' },
@@ -2611,29 +2627,66 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   </div>
 )}
 
-          {courseSection === 'announcements' && (
-                <div className="p-6 space-y-4">
-                  {selectedCourse.announcements?.map((announcement: any) => (
-                    <div key={announcement.id} className="p-4 border border-gray-200 rounded-xl">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-medium text-gray-900">{announcement.title}</h3>
-                        <span className="text-xs text-gray-500">{announcement.date}</span>
-                      </div>
-                      <p className="text-sm text-gray-600">{announcement.content}</p>
-                    </div>
+     {courseSection === 'announcements' && (
+  <div className="p-6 space-y-4">
+    {selectedCourse.announcements?.map((a: any) => {
+      // normalize
+      const tagList: string[] = Array.isArray(a.tags)
+        ? a.tags
+        : a.tag
+        ? [a.tag]
+        : [];
+
+      return (
+        <div
+          key={a.id}
+          className="p-5 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full bg-blue-600/90" />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  {/* tag pills */}
+                  {tagList.map((t, i) => (
+                    <span
+                      key={i}
+                      className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border ${getTagStyle(
+                        t
+                      )}`}
+                    >
+                      {t}
+                    </span>
                   ))}
                 </div>
-              )}
+
+                <h3 className="font-semibold text-gray-900">{a.title}</h3>
+                <p className="text-sm text-gray-700 mt-2">{a.content}</p>
+              </div>
+            </div>
+
+            <span className="text-xs text-gray-500">{a.date}</span>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)}
+
+
+
+              
 
 {courseSection === 'discussion' ? (
   <>
     {!selectedDiscussion ? (
-      <>
-        <div className="mb-6">
-          <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">
-            {currentCourseCode} • Discussion Forum
-          </p>
-        </div>
+      <><div className="mt-6 mb-6 px-5">
+  <div className="flex items-center justify-between">
+    <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+      {currentCourseCode} • Discussion Forum
+    </h2>
+  </div>
+</div>
 
         {/* Controls */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
@@ -2976,12 +3029,11 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   </>
 ) : (
   // ... your other tabs unchanged
- <div className="text-center py-20">
-
-</div>
+ <div className="text-center py-3"></div>
+ 
 )}
 {courseSection === 'grading' && (
-  <div className="space-y-6">
+  <div className="space-y-8">
     <h1 className="text-2xl font-bold text-gray-900">📊 Grading Overview</h1>
     <div className="grid grid-cols-3 gap-6">
       <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
@@ -3047,7 +3099,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
 {/* Attendance Section */}
 {courseSection === 'attendance' && (
-  <div className="space-y-1">
+  <div className="space-y-8">
     <h1 className="text-2xl font-bold text-gray-900">📅 Attendance Record</h1>
   {/* Attendance % */}
     <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg p-6 text-center">
@@ -3156,9 +3208,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   <div className="space-y-6">
   {/* Header */}
   <div>
-    <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">
-      CSIR – CYBERSECURITY INCIDENT RESPONSE
-    </p>
+    
     <h1 className="text-3xl font-bold text-gray-900 mb-1">Media Library</h1>
     <p className="text-gray-600">
       Access lecture recordings, materials, and course resources
