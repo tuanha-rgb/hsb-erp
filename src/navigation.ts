@@ -33,6 +33,7 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
             submenu: [
               { id: 'lecturers-overview', label: 'Lecturers Overview' },
               { id: 'lecturer-profile', label: 'Lecturer Profile' },
+              { id: 'lecturer-research', label: 'Research Management'},
               { id: 'grade-management', label: 'Grade Management' },
               { id: 'student-management', label: 'Student Management' },
               { id: 'view-rankings', label: 'View Rankings' },

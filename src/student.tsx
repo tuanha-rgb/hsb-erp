@@ -2133,7 +2133,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
                   {/* Right Content - Module Details */}
                   <div className="flex-1 min-h-0 overflow-y-auto p-8">
-                    <div className="max-w-4xl">
+                    <div className="mx-auto w-full max-w-none 2xl:max-w-[1600px]">
                       <div className="mb-4 flex items-center gap-3">
                     {!modulesOpen && (
                       <button

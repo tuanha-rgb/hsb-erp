@@ -572,7 +572,7 @@ const AdminDashboard = () => {
             {[
               {code: 'CS301', name: 'Data Structures', progress: 75},
               {code: 'CS302', name: 'Database Systems', progress: 60},
-              {code: 'CS303', name: 'Software Engineering', progress: 80}
+              {code: 'CS303', name: 'FONS', progress: 80}
             ].map((course, i) => (
               <div key={i} className="p-4 border rounded-lg">
                 <div className="flex justify-between mb-2">
@@ -1408,7 +1408,7 @@ const FinanceMetricCards: React.FC = () => {
   ];
 
   const budgetUtilization = [
-    { department: 'Computer Science', budget: 12500000, spent: 8920000, percentage: 71.4, status: 'on-track' },
+    { department: 'FONS', budget: 12500000, spent: 8920000, percentage: 71.4, status: 'on-track' },
     { department: 'Business Admin', budget: 9800000, spent: 7450000, percentage: 76.0, status: 'on-track' },
     { department: 'Engineering', budget: 11200000, spent: 9340000, percentage: 83.4, status: 'at-risk' },
     { department: 'Sciences', budget: 8600000, spent: 6780000, percentage: 78.8, status: 'on-track' },
@@ -2309,7 +2309,7 @@ const LibraryDashboard = () => (
               {title: 'Introduction to Algorithms', type: 'Textbook', accesses: 1247},
               {title: 'Machine Learning Basics', type: 'Reference', accesses: 892},
               {title: 'Deep Learning Research', type: 'Journal', accesses: 756},
-              {title: 'Data Science Fundamentals', type: 'Textbook', accesses: 643},
+              {title: 'FONS Fundamentals', type: 'Textbook', accesses: 643},
               {title: 'AI Applications in Healthcare', type: 'Thesis', accesses: 521}
             ].map((item, i) => (
               <div key={i} className="pb-3 border-b last:border-b-0 border-gray-200">
@@ -2415,7 +2415,7 @@ const LibraryDashboard = () => (
       { id: 2, code: 'CS302', name: 'Database Systems', room: 'A102', time: '10:00-11:30', day: 1, instructor: 'Dr. Tran' },
       { id: 3, code: 'BA201', name: 'Marketing', room: 'B201', time: '13:00-14:30', day: 1, instructor: 'Dr. Le' },
       { id: 4, code: 'CS401', name: 'AI Fundamentals', room: 'A101', time: '08:00-09:30', day: 2, instructor: 'Dr. Pham' },
-      { id: 5, code: 'CS303', name: 'Software Engineering', room: 'A103', time: '10:00-11:30', day: 2, instructor: 'Dr. Hoang' },
+      { id: 5, code: 'CS303', name: 'FONS', room: 'A103', time: '10:00-11:30', day: 2, instructor: 'Dr. Hoang' },
       { id: 6, code: 'BA301', name: 'Strategic Management', room: 'B202', time: '14:00-15:30', day: 2, instructor: 'Dr. Vo' },
       { id: 7, code: 'CS501', name: 'Machine Learning', room: 'A201', time: '08:00-09:30', day: 3, instructor: 'Dr. Nguyen' },
       { id: 8, code: 'CS304', name: 'Web Development', room: 'A104', time: '10:00-11:30', day: 3, instructor: 'Dr. Dinh' },
@@ -2649,7 +2649,7 @@ const LibraryDashboard = () => (
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Programs</option>
-                <option value="cs">Computer Science</option>
+                <option value="cs">FONS</option>
                 <option value="ba">Business Admin</option>
               </select>
 
@@ -2715,12 +2715,23 @@ const LibraryDashboard = () => (
     const [selectedLecturer, setSelectedLecturer] = useState(null);
 
     const sampleLecturers = [
-      { id: 'L001234', name: 'Dr. Nguyen Van Minh', department: 'Computer Science', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '24', status: 'Active' },
-      { id: 'L001235', name: 'Dr. Tran Thi Lan', department: 'Business Administration', position: 'Professor', degree: 'PhD', teachingHours: '520h', publications: '38', status: 'Active' },
-      { id: 'L001236', name: 'Dr. Le Van Hieu', department: 'Software Engineering', position: 'Lecturer', degree: 'PhD', teachingHours: '420h', publications: '12', status: 'Active' },
-      { id: 'L001237', name: 'Dr. Pham Thi Mai', department: 'Data Science', position: 'Associate Professor', degree: 'PhD', teachingHours: '460h', publications: '31', status: 'Active' },
-      { id: 'L001238', name: 'Dr. Hoang Van Tuan', department: 'Computer Science', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '440h', publications: '18', status: 'Active' },
-    ];
+    { id: 'L001239', name: 'Assoc.Prof. Vu Thi Hoa', department: 'FOM', position: 'Associate Professor', degree: 'PhD', teachingHours: '500h', publications: '29', status: 'Active' },
+{ id: 'L001240', name: 'Dr. Nguyen Quang Huy', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '410h', publications: '15', status: 'Active' },
+{ id: 'L001241', name: 'Dr. Bui Thi Huong', department: 'FOM', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '450h', publications: '21', status: 'Active' },
+{ id: 'L001242', name: 'Assoc.Prof. Tran Van Phuc', department: 'FONS', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '33', status: 'Active' },
+{ id: 'L001243', name: 'Prof. Pham Van Khoa', department: 'FOM', position: 'Professor', degree: 'PhD', teachingHours: '530h', publications: '40', status: 'Active' },
+{ id: 'L001244', name: 'Dr. Le Thi Bich', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '390h', publications: '11', status: 'Active' },
+{ id: 'L001245', name: 'Dr. Do Van Nam', department: 'FONS', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '460h', publications: '19', status: 'Active' },
+{ id: 'L001246', name: 'Assoc.Prof. Tran Thi Thu', department: 'FOM', position: 'Associate Professor', degree: 'PhD', teachingHours: '490h', publications: '27', status: 'Active' },
+{ id: 'L001247', name: 'Dr. Hoang Minh Tuan', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '400h', publications: '13', status: 'Active' },
+{ id: 'L001248', name: 'Prof. Nguyen Thi Kim', department: 'FOM', position: 'Professor', degree: 'PhD', teachingHours: '550h', publications: '42', status: 'Active' },
+{ id: 'L001249', name: 'Assoc.Prof. Dang Quang Binh', department: 'FOMAC', position: 'Associate Professor', degree: 'PhD', teachingHours: '470h', publications: '25', status: 'Active' },
+{ id: 'L001250', name: 'Dr. Nguyen Thi Thanh', department: 'FOMAC', position: 'Lecturer', degree: 'PhD', teachingHours: '420h', publications: '14', status: 'Active' },
+{ id: 'L001251', name: 'Prof. Tran Van Duong', department: 'FOMAC', position: 'Professor', degree: 'PhD', teachingHours: '540h', publications: '39', status: 'Active' },
+{ id: 'L001252', name: 'Dr. Le Thi Thu Ha', department: 'FOMAC', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '450h', publications: '20', status: 'Active' },
+{ id: 'L001253', name: 'Assoc.Prof. Pham Van Long', department: 'FOMAC', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '28', status: 'Active' },
+
+];
 
     return (
       <div className="space-y-6">
@@ -2793,10 +2804,10 @@ const LibraryDashboard = () => (
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Departments</option>
-                <option value="cs">Computer Science</option>
-                <option value="ba">Business Administration</option>
-                <option value="se">Software Engineering</option>
-                <option value="ds">Data Science</option>
+                <option value="cs">FONS</option>
+                <option value="ba">FOM</option>
+                <option value="se">FONS</option>
+                <option value="ds">FONS</option>
               </select>
               <select 
                 value={filterPosition}
@@ -2986,6 +2997,969 @@ const LibraryDashboard = () => (
     );
   };
 
+  {/*research management for lecturer*/}
+
+  const ResearchManagement = () => {
+  const [activeView, setActiveView] = useState('overview');
+  const [filterType, setFilterType] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const researchProjects = [
+    {
+      id: 'PRJ001',
+      title: 'AI-Driven Healthcare Diagnostics',
+      pi: 'Dr. Nguyen Van A',
+      coInvestigators: ['Dr. Tran Thi B', 'Dr. Le Van C'],
+      type: 'Applied Research',
+      status: 'Active',
+      startDate: '2024-01-15',
+      endDate: '2026-01-14',
+      funding: '$250,000',
+      fundingSource: 'Nafosted',
+      progress: 45,
+      publications: 3,
+      department: 'Faculty of Nontraditional Security',
+      description: 'Developing machine learning algorithms for early disease detection and diagnosis in medical imaging.'
+    },
+    {
+      id: 'PRJ002',
+      title: 'Sustainable Urban Planning Framework',
+      pi: 'Dr. Pham Thi D',
+      coInvestigators: ['Dr. Hoang Van E'],
+      type: 'Basic Research',
+      status: 'Active',
+      startDate: '2024-03-01',
+      endDate: '2025-12-31',
+      funding: '$180,000',
+      fundingSource: 'Ministry of Education',
+      progress: 62,
+      publications: 5,
+      department: 'Faculty of Management',
+      description: 'Creating data-driven frameworks for sustainable city development and resource management.'
+    },
+    {
+      id: 'PRJ003',
+      title: 'Quantum Computing Applications',
+      pi: 'Dr. Vo Thi F',
+      coInvestigators: ['Dr. Bui Van G', 'Dr. Cao Thi H'],
+      type: 'Applied Research',
+      status: 'Active',
+      startDate: '2023-09-01',
+      endDate: '2026-08-31',
+      funding: '$400,000',
+      fundingSource: 'Ministry of Science and Technology',
+      progress: 78,
+      publications: 8,
+      department: 'Faculty of Nontraditional Security',
+      description: 'Exploring practical applications of quantum computing in cryptography and optimization.'
+    },
+    {
+      id: 'PRJ004',
+      title: 'Blockchain in Supply Chain',
+      pi: 'Dr. Dinh Van I',
+      coInvestigators: ['Dr. Ly Van J'],
+      type: 'Applied Research',
+      status: 'Completed',
+      startDate: '2022-06-01',
+      endDate: '2024-05-31',
+      funding: '$150,000',
+      fundingSource: 'Industry Partnership',
+      progress: 100,
+      publications: 12,
+      department: 'Faculty of Management',
+      description: 'Implementing blockchain technology for transparent and efficient supply chain management.'
+    },
+    {
+      id: 'PRJ005',
+      title: 'Neural Network Optimization',
+      pi: 'Dr. Mai Van K',
+      coInvestigators: ['Dr. Dang Thi L'],
+      type: 'Basic Research',
+      status: 'Pending',
+      startDate: '2025-01-01',
+      endDate: '2027-12-31',
+      funding: '$320,000',
+      fundingSource: 'VNU',
+      progress: 0,
+      publications: 0,
+      department: 'Faculty of Nontraditional Security',
+      description: 'Advanced research on neural network architecture optimization and efficiency.'
+    },
+    {
+      id: 'PRJ006',
+      title: 'Digital Marketing Strategies in Social Media',
+      pi: 'Dr. Nguyen Thi M',
+      coInvestigators: ['Dr. Phan Van N'],
+      type: 'Applied Research',
+      status: 'Active',
+      startDate: '2024-02-15',
+      endDate: '2025-12-31',
+      funding: '$120,000',
+      fundingSource: 'Industry Partnership',
+      progress: 55,
+      publications: 4,
+      department: 'Faculty of Marketing and Communication',
+      description: 'Analyzing consumer behavior and developing effective digital marketing frameworks for social media platforms.'
+    }
+  ];
+
+  const publications = [
+    {
+      id: 'PUB001',
+      title: 'Deep Learning Approaches for Medical Image Analysis',
+      authors: ['Dr. Nguyen Van A', 'Dr. Tran Thi B', 'Dr. Le Van C'],
+      type: 'Journal Article',
+      journal: 'IEEE Transactions on Medical Imaging',
+      year: 2024,
+      citations: 45,
+      impactFactor: 10.6,
+      status: 'Published',
+      doi: '10.1109/TMI.2024.12345',
+      project: 'PRJ001',
+      quartile: 'Q1',
+      discipline: 'Nontraditional Security'
+    },
+    {
+      id: 'PUB002',
+      title: 'Sustainable City Development: A Data-Driven Framework',
+      authors: ['Dr. Pham Thi D', 'Dr. Hoang Van E'],
+      type: 'Conference Paper',
+      journal: 'International Conference on Urban Planning',
+      year: 2024,
+      citations: 23,
+      impactFactor: null,
+      status: 'Published',
+      doi: '10.1145/ICUP.2024.56789',
+      project: 'PRJ002',
+      quartile: 'N/A',
+      discipline: 'Sustainable Development'
+    },
+    {
+      id: 'PUB003',
+      title: 'Quantum Algorithms for Cryptographic Applications',
+      authors: ['Dr. Vo Thi F', 'Dr. Bui Van G', 'Dr. Cao Thi H'],
+      type: 'Journal Article',
+      journal: 'Nature Quantum Information',
+      year: 2024,
+      citations: 89,
+      impactFactor: 15.2,
+      status: 'Published',
+      doi: '10.1038/s41534-024-00234',
+      project: 'PRJ003',
+      quartile: 'Q1',
+      discipline: 'Engineering & IT'
+    },
+    {
+      id: 'PUB004',
+      title: 'Blockchain Technology in Supply Chain Management',
+      authors: ['Dr. Dinh Van I', 'Dr. Ly Van J'],
+      type: 'Book Chapter',
+      journal: 'Advances in Blockchain Applications',
+      year: 2024,
+      citations: 12,
+      impactFactor: null,
+      status: 'Published',
+      doi: null,
+      project: 'PRJ004',
+      quartile: 'N/A',
+      discipline: 'Finance'
+    },
+    {
+      id: 'PUB005',
+      title: 'Machine Learning in Healthcare: Current Trends',
+      authors: ['Dr. Nguyen Van A', 'Dr. Le Van C'],
+      type: 'Review Article',
+      journal: 'Journal of Healthcare Engineering',
+      year: 2025,
+      citations: 0,
+      impactFactor: 3.9,
+      status: 'Under Review',
+      doi: null,
+      project: 'PRJ001',
+      quartile: 'Q2',
+      discipline: 'Nontraditional Security'
+    },
+    {
+      id: 'PUB006',
+      title: 'Optimization Techniques for Neural Networks',
+      authors: ['Dr. Mai Van K', 'Dr. Dang Thi L'],
+      type: 'Journal Article',
+      journal: 'Neural Networks',
+      year: 2024,
+      citations: 34,
+      impactFactor: 7.8,
+      status: 'Published',
+      doi: '10.1016/j.neunet.2024.98765',
+      project: 'PRJ005',
+      quartile: 'Q1',
+      discipline: 'Engineering & IT'
+    },
+    {
+      id: 'PUB007',
+      title: 'Digital Transformation in Human Resource Management',
+      authors: ['Dr. Pham Van O', 'Dr. Tran Thi P'],
+      type: 'Journal Article',
+      journal: 'Human Resource Management Review',
+      year: 2024,
+      citations: 28,
+      impactFactor: 6.2,
+      status: 'Published',
+      doi: '10.1016/j.hrmr.2024.45678',
+      project: 'PRJ002',
+      quartile: 'Q1',
+      discipline: 'Human Resources'
+    },
+    {
+      id: 'PUB008',
+      title: 'Social Media Marketing Effectiveness in Emerging Markets',
+      authors: ['Dr. Nguyen Thi M', 'Dr. Phan Van N'],
+      type: 'Journal Article',
+      journal: 'Journal of Marketing Research',
+      year: 2024,
+      citations: 31,
+      impactFactor: 8.1,
+      status: 'Published',
+      doi: '10.1177/JMR.2024.12345',
+      project: 'PRJ006',
+      quartile: 'Q1',
+      discipline: 'Marketing'
+    },
+    {
+      id: 'PUB009',
+      title: 'Crisis Communication Strategies in the Digital Age',
+      authors: ['Dr. Le Van Q', 'Dr. Hoang Thi R'],
+      type: 'Conference Paper',
+      journal: 'International Communication Association Conference',
+      year: 2024,
+      citations: 15,
+      impactFactor: null,
+      status: 'Published',
+      doi: null,
+      project: null,
+      quartile: 'N/A',
+      discipline: 'Communication'
+    },
+    {
+      id: 'PUB010',
+      title: 'Cybercrime and Legal Frameworks in Southeast Asia',
+      authors: ['Dr. Bui Van S', 'Dr. Cao Thi T'],
+      type: 'Journal Article',
+      journal: 'International Journal of Cyber Criminology',
+      year: 2024,
+      citations: 19,
+      impactFactor: 4.5,
+      status: 'Published',
+      doi: '10.5281/ijcc.2024.98765',
+      project: null,
+      quartile: 'Q2',
+      discipline: 'Law & Criminology'
+    }
+  ];
+
+  const getDisciplineColor = (discipline) => {
+    switch (discipline) {
+      case 'Nontraditional Security': return 'bg-blue-100 text-blue-700';
+      case 'Sustainable Development': return 'bg-green-100 text-green-700';
+      case 'Engineering & IT': return 'bg-purple-100 text-purple-700';
+      case 'Human Resources': return 'bg-orange-100 text-orange-700';
+      case 'Finance': return 'bg-red-100 text-red-700';
+      case 'Marketing': return 'bg-pink-100 text-pink-700';
+      case 'Communication': return 'bg-yellow-100 text-yellow-700';
+      case 'Law & Criminology': return 'bg-indigo-100 text-indigo-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Active': return 'bg-green-100 text-green-700';
+      case 'Completed': return 'bg-blue-100 text-blue-700';
+      case 'Pending': return 'bg-yellow-100 text-yellow-700';
+      case 'Published': return 'bg-green-100 text-green-700';
+      case 'Under Review': return 'bg-orange-100 text-orange-700';
+      case 'Rejected': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const OverviewDashboard = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Briefcase className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Projects</p>
+          <p className="text-3xl font-bold text-gray-900">42</p>
+          <p className="text-xs text-green-600 mt-2">↑ 15% vs last year</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Publications</p>
+          <p className="text-3xl font-bold text-gray-900">156</p>
+          <p className="text-xs text-green-600 mt-2">↑ 22% vs last year</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Funding</p>
+          <p className="text-3xl font-bold text-gray-900">$8.5M</p>
+          <p className="text-xs text-gray-600 mt-2">Active grants</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-orange-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Avg Citations</p>
+          <p className="text-3xl font-bold text-gray-900">38.2</p>
+          <p className="text-xs text-gray-600 mt-2">Per publication</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Active Projects by Faculty</h3>
+          <div className="space-y-4">
+            {[
+              {dept: 'Faculty of Nontraditional Security', count: 18, percentage: 43},
+              {dept: 'Faculty of Management', count: 12, percentage: 29},
+              {dept: 'Faculty of Marketing and Communication', count: 8, percentage: 19},
+              {dept: 'Other Faculties', count: 4, percentage: 9}
+            ].map((item, i) => (
+              <div key={i}>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">{item.dept}</span>
+                  <span className="text-sm font-semibold text-gray-900">{item.count} projects</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="h-2 rounded-full bg-blue-500" style={{width: `${item.percentage}%`}}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Publication Types</h3>
+          <div className="space-y-4">
+            {[
+              {type: 'Journal Articles', count: 92, percentage: 59},
+              {type: 'Conference Papers', count: 38, percentage: 24},
+              {type: 'Book Chapters', count: 18, percentage: 12},
+              {type: 'Patents', count: 8, percentage: 5}
+            ].map((item, i) => (
+              <div key={i}>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">{item.type}</span>
+                  <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="h-2 rounded-full bg-green-500" style={{width: `${item.percentage}%`}}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Researchers</h3>
+          <div className="space-y-4">
+            {[
+              {name: 'Dr. Nguyen Van A', publications: 24, citations: 892},
+              {name: 'Dr. Vo Thi F', publications: 18, citations: 756},
+              {name: 'Dr. Pham Thi D', publications: 16, citations: 634}
+            ].map((researcher, i) => (
+              <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                  {i + 1}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 text-sm">{researcher.name}</p>
+                  <div className="flex gap-3 mt-1">
+                    <span className="text-xs text-gray-600">{researcher.publications} pubs</span>
+                    <span className="text-xs text-gray-600">{researcher.citations} citations</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Funding Sources</h3>
+          <div className="space-y-3">
+            {[
+              {source: 'Nafosted', amount: '$3.2M', percentage: 38},
+              {source: 'Ministry of Education', amount: '$2.8M', percentage: 33},
+              {source: 'Ministry of Science and Technology', amount: '$1.5M', percentage: 18},
+              {source: 'VNU', amount: '$1.0M', percentage: 11}
+            ].map((item, i) => (
+              <div key={i} className="p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700">{item.source}</span>
+                  <span className="text-sm font-bold text-gray-900">{item.amount}</span>
+                </div>
+                <div className="w-full bg-gray-300 rounded-full h-1.5">
+                  <div className="h-1.5 rounded-full bg-blue-600" style={{width: `${item.percentage}%`}}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Publications by Discipline</h3>
+          <div className="space-y-3">
+            {[
+              {discipline: 'Nontraditional Security', count: 42, color: 'blue'},
+              {discipline: 'Sustainable Development', count: 28, color: 'green'},
+              {discipline: 'Engineering & IT', count: 24, color: 'purple'},
+              {discipline: 'Human Resources', count: 18, color: 'orange'},
+              {discipline: 'Finance', count: 16, color: 'red'},
+              {discipline: 'Marketing', count: 14, color: 'pink'},
+              {discipline: 'Communication', count: 10, color: 'yellow'},
+              {discipline: 'Law & Criminology', count: 4, color: 'indigo'}
+            ].map((item, i) => (
+              <div key={i} className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full bg-${item.color}-500`}></div>
+                  <span className="text-xs text-gray-700">{item.discipline}</span>
+                </div>
+                <span className="text-xs font-bold text-gray-900">{item.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ProjectsView = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search projects..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <select 
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Types</option>
+                <option value="applied">Applied Research</option>
+                <option value="basic">Basic Research</option>
+              </select>
+              <select 
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Plus size={18} />
+              New Project
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 gap-4">
+          {researchProjects.map((project) => (
+            <div key={project.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-lg font-bold text-gray-900">{project.title}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
+                        {project.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{project.description}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1.5">
+                        <Users size={16} />
+                        PI: {project.pi}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Building size={16} />
+                        {project.department}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Calendar size={16} />
+                        {new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4 mb-4">
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Funding</p>
+                    <p className="text-lg font-bold text-gray-900">{project.funding}</p>
+                    <p className="text-xs text-gray-500">{project.fundingSource}</p>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Progress</p>
+                    <p className="text-lg font-bold text-gray-900">{project.progress}%</p>
+                    <div className="w-full bg-gray-300 rounded-full h-1.5 mt-2">
+                      <div className="h-1.5 rounded-full bg-green-600" style={{width: `${project.progress}%`}}></div>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Publications</p>
+                    <p className="text-lg font-bold text-gray-900">{project.publications}</p>
+                    <p className="text-xs text-gray-500">Published</p>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Team Size</p>
+                    <p className="text-lg font-bold text-gray-900">{project.coInvestigators.length + 1}</p>
+                    <p className="text-xs text-gray-500">Researchers</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => setSelectedItem({type: 'project', data: project})}
+                    className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium"
+                  >
+                    View Details
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                    Edit
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                    Generate Report
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const PublicationsView = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search publications..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <select 
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Types</option>
+                <option value="journal">Journal Article</option>
+                <option value="conference">Conference Paper</option>
+                <option value="book">Book Chapter</option>
+              </select>
+              <select 
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="review">Under Review</option>
+              </select>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Plus size={18} />
+              Add Publication
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Authors</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Journal/Venue</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Discipline</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Year</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Citations</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Impact</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {publications.map((pub) => (
+                <tr key={pub.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <p className="font-semibold text-sm text-gray-900 max-w-xs">{pub.title}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
+                      {pub.authors.slice(0, 2).join(', ')}
+                      {pub.authors.length > 2 && ` +${pub.authors.length - 2}`}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                      {pub.type}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{pub.journal}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDisciplineColor(pub.discipline)}`}>
+                      {pub.discipline}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">{pub.year}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">{pub.citations}</td>
+                  <td className="px-6 py-4">
+                    {pub.impactFactor ? (
+                      <div className="text-sm">
+                        <p className="font-semibold text-gray-900">{pub.impactFactor}</p>
+                        <p className="text-xs text-gray-500">{pub.quartile}</p>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400">N/A</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(pub.status)}`}>
+                      {pub.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button 
+                      onClick={() => setSelectedItem({type: 'publication', data: pub})}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage faculty projects, publications, and research output</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="border-b border-gray-200">
+            <div className="flex gap-1 p-2">
+              <button
+                onClick={() => setActiveView('overview')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveView('projects')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'projects' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Projects
+              </button>
+              <button
+                onClick={() => setActiveView('publications')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'publications' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Publications
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {activeView === 'overview' && <OverviewDashboard />}
+        {activeView === 'projects' && <ProjectsView />}
+        {activeView === 'publications' && <PublicationsView />}
+
+        {selectedItem && selectedItem.type === 'project' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedItem(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="h-32 bg-gradient-to-br from-blue-400 to-blue-600 p-6 flex flex-col justify-between">
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20 text-white">
+                      {selectedItem.data.type}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedItem.data.status)}`}>
+                      {selectedItem.data.status}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedItem(null)}
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">{selectedItem.data.title}</h2>
+                  <p className="text-white text-opacity-90 text-sm mt-1">{selectedItem.data.pi}</p>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Project Description</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">{selectedItem.data.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Calendar size={18} />
+                      <span className="text-xs font-semibold uppercase">Duration</span>
+                    </div>
+                    <p className="font-semibold text-gray-900 text-sm">
+                      {new Date(selectedItem.data.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {new Date(selectedItem.data.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <DollarSign size={18} />
+                      <span className="text-xs font-semibold uppercase">Funding</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedItem.data.funding}</p>
+                    <p className="text-xs text-gray-600 mt-1">{selectedItem.data.fundingSource}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Building size={18} />
+                      <span className="text-xs font-semibold uppercase">Department</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedItem.data.department}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Users size={18} />
+                      <span className="text-xs font-semibold uppercase">Team Size</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedItem.data.coInvestigators.length + 1} researchers</p>
+                  </div>
+                </div>
+
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">Project Progress</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Overall Completion</span>
+                    <span className="text-lg font-bold text-gray-900">{selectedItem.data.progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div 
+                      className="h-3 rounded-full bg-blue-500"
+                      style={{width: `${selectedItem.data.progress}%`}}
+                    ></div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Research Team</h4>
+                  <div className="space-y-2">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm font-semibold text-gray-900">{selectedItem.data.pi}</p>
+                      <p className="text-xs text-gray-600">Principal Investigator</p>
+                    </div>
+                    {selectedItem.data.coInvestigators.map((investigator, i) => (
+                      <div key={i} className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-semibold text-gray-900">{investigator}</p>
+                        <p className="text-xs text-gray-600">Co-Investigator</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    Edit Project
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    View Publications
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Generate Report
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedItem && selectedItem.type === 'publication' && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedItem(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="h-32 bg-gradient-to-br from-green-400 to-green-600 p-6 flex flex-col justify-between">
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20 text-white">
+                      {selectedItem.data.type}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedItem.data.status)}`}>
+                      {selectedItem.data.status}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedItem(null)}
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">{selectedItem.data.title}</h2>
+                  <p className="text-white text-opacity-90 text-sm mt-1">{selectedItem.data.year}</p>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Authors</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedItem.data.authors.map((author, i) => (
+                      <span key={i} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                        {author}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                  <p className="text-xs font-semibold text-gray-600 mb-1">Discipline</p>
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getDisciplineColor(selectedItem.data.discipline)}`}>
+                    {selectedItem.data.discipline}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <FileText size={18} />
+                      <span className="text-xs font-semibold uppercase">Journal/Venue</span>
+                    </div>
+                    <p className="font-semibold text-gray-900 text-sm">{selectedItem.data.journal}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Calendar size={18} />
+                      <span className="text-xs font-semibold uppercase">Publication Year</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedItem.data.year}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <TrendingUp size={18} />
+                      <span className="text-xs font-semibold uppercase">Citations</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedItem.data.citations}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Award size={18} />
+                      <span className="text-xs font-semibold uppercase">Impact Factor</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">
+                      {selectedItem.data.impactFactor || 'N/A'}
+                      {selectedItem.data.quartile && selectedItem.data.quartile !== 'N/A' && (
+                        <span className="text-xs text-gray-600 ml-2">({selectedItem.data.quartile})</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedItem.data.doi && (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs font-semibold text-gray-600 mb-1">DOI</p>
+                    <p className="text-sm font-mono text-blue-600">{selectedItem.data.doi}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                    Edit Publication
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    View Full Text
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Export Citation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
   const StudentProfileAdmin = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterProgram, setFilterProgram] = useState('all');
@@ -2993,11 +3967,11 @@ const LibraryDashboard = () => (
     const [selectedStudent, setSelectedStudent] = useState(null);
 
     const sampleStudents = [
-      { id: 'S001234', name: 'Nguyen Van An', program: 'Computer Science', level: 'Bachelor', year: '3', gpa: '3.45', status: 'Active' },
-      { id: 'S001235', name: 'Tran Thi Binh', program: 'Business Administration', level: 'Bachelor', year: '2', gpa: '3.72', status: 'Active' },
-      { id: 'S001236', name: 'Le Van Cuong', program: 'Software Engineering', level: 'Master', year: '1', gpa: '3.88', status: 'Active' },
-      { id: 'S001237', name: 'Pham Thi Dung', program: 'Data Science', level: 'Master', year: '2', gpa: '3.91', status: 'Active' },
-      { id: 'S001238', name: 'Hoang Van Em', program: 'Computer Science', level: 'PhD', year: '3', gpa: '3.95', status: 'Active' },
+      { id: 'S001234', name: 'Nguyen Van An', program: 'FONS', level: 'Bachelor', year: '3', gpa: '3.45', status: 'Active' },
+      { id: 'S001235', name: 'Tran Thi Binh', program: 'FOM', level: 'Bachelor', year: '2', gpa: '3.72', status: 'Active' },
+      { id: 'S001236', name: 'Le Van Cuong', program: 'FONS', level: 'Master', year: '1', gpa: '3.88', status: 'Active' },
+      { id: 'S001237', name: 'Pham Thi Dung', program: 'FONS', level: 'Master', year: '2', gpa: '3.91', status: 'Active' },
+      { id: 'S001238', name: 'Hoang Van Em', program: 'FONS', level: 'PhD', year: '3', gpa: '3.95', status: 'Active' },
     ];
 
     return (
@@ -3081,10 +4055,10 @@ const LibraryDashboard = () => (
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Programs</option>
-                <option value="cs">Computer Science</option>
-                <option value="ba">Business Administration</option>
-                <option value="se">Software Engineering</option>
-                <option value="ds">Data Science</option>
+                <option value="cs">FONS</option>
+                <option value="ba">FOM</option>
+                <option value="se">FONS</option>
+                <option value="ds">FONS</option>
               </select>
             </div>
           </div>
@@ -4256,7 +5230,7 @@ const ClassOverview = () => {
     { class: 'CS301 - Data Structures', action: 'Class started', time: '30 min ago', type: 'success' },
     { class: 'BA205 - Marketing Strategy', action: 'Assignment due today', time: '2 hours ago', type: 'warning' },
     { class: 'DS402 - Machine Learning', action: 'Midterm scheduled', time: '5 hours ago', type: 'info' },
-    { class: 'SE301 - Software Engineering', action: 'Project submission', time: '1 day ago', type: 'info' }
+    { class: 'SE301 - FONS', action: 'Project submission', time: '1 day ago', type: 'info' }
   ];
 
   const getFacultyColor = (color) => {
@@ -4853,11 +5827,11 @@ const ClassOverview = () => {
   const [sortBy, setSortBy] = useState('overall');
 
   const facultyData = [
-    { rank: 1, name: 'Dr. Nguyen Van Minh', department: 'Computer Science', faculty: 'FONS', courses: 3, students: 206, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 234, badge: 'gold' },
+    { rank: 1, name: 'Dr. Nguyen Van Minh', department: 'FONS', faculty: 'FONS', courses: 3, students: 206, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 234, badge: 'gold' },
     { rank: 2, name: 'Dr. Bui Thi Ngoc', department: 'Digital Media', faculty: 'FOMAC', courses: 4, students: 267, overall: 4.8, teaching: 4.9, knowledge: 4.8, communication: 4.7, support: 4.8, responses: 228, badge: 'silver' },
-    { rank: 3, name: 'Dr. Pham Thi Mai', department: 'Data Science', faculty: 'FONS', courses: 3, students: 145, overall: 4.7, teaching: 4.8, knowledge: 4.9, communication: 4.6, support: 4.7, responses: 142, badge: 'bronze' },
-    { rank: 4, name: 'Dr. Tran Thi Lan', department: 'Business Administration', faculty: 'FOM', courses: 5, students: 280, overall: 4.7, teaching: 4.8, knowledge: 4.7, communication: 4.6, support: 4.8, responses: 272, badge: null },
-    { rank: 5, name: 'Dr. Hoang Van Tuan', department: 'Computer Science', faculty: 'FONS', courses: 3, students: 165, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 189, badge: null },
+    { rank: 3, name: 'Dr. Pham Thi Mai', department: 'FONS', faculty: 'FONS', courses: 3, students: 145, overall: 4.7, teaching: 4.8, knowledge: 4.9, communication: 4.6, support: 4.7, responses: 142, badge: 'bronze' },
+    { rank: 4, name: 'Dr. Tran Thi Lan', department: 'FOM', faculty: 'FOM', courses: 5, students: 280, overall: 4.7, teaching: 4.8, knowledge: 4.7, communication: 4.6, support: 4.8, responses: 272, badge: null },
+    { rank: 5, name: 'Dr. Hoang Van Tuan', department: 'FONS', faculty: 'FONS', courses: 3, students: 165, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 189, badge: null },
     { rank: 6, name: 'Dr. Nguyen Duc Anh', department: 'Marketing', faculty: 'FOM', courses: 3, students: 156, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 150, badge: null },
     { rank: 7, name: 'Dr. Dao Van Hai', department: 'Journalism', faculty: 'FOMAC', courses: 2, students: 144, overall: 4.6, teaching: 4.7, knowledge: 4.6, communication: 4.5, support: 4.6, responses: 138, badge: null },
     { rank: 8, name: 'Dr. Le Thi Hoa', department: 'Economics', faculty: 'FONS', courses: 4, students: 198, overall: 4.5, teaching: 4.6, knowledge: 4.7, communication: 4.4, support: 4.5, responses: 192, badge: null },
@@ -5099,11 +6073,11 @@ const ClassOverview = () => {
         stats: { avgHours: '14.8h', maxLoad: '20h', minLoad: '8h' },
         description: 'Track teaching hours, course load, and workload balance across faculty.',
         data: [
-          { name: 'Dr. Nguyen Van Minh', dept: 'Computer Science', hours: 16, courses: 4, students: 240, status: 'Optimal' },
+          { name: 'Dr. Nguyen Van Minh', dept: 'FONS', hours: 16, courses: 4, students: 240, status: 'Optimal' },
           { name: 'Dr. Tran Thi Lan', dept: 'Business Admin', hours: 18, courses: 5, students: 280, status: 'High' },
-          { name: 'Dr. Le Van Hieu', dept: 'Software Engineering', hours: 14, courses: 3, students: 180, status: 'Optimal' },
-          { name: 'Dr. Pham Thi Mai', dept: 'Data Science', hours: 15, courses: 4, students: 220, status: 'Optimal' },
-          { name: 'Dr. Hoang Van Tuan', dept: 'Computer Science', hours: 12, courses: 3, students: 165, status: 'Low' }
+          { name: 'Dr. Le Van Hieu', dept: 'FONS', hours: 14, courses: 3, students: 180, status: 'Optimal' },
+          { name: 'Dr. Pham Thi Mai', dept: 'FONS', hours: 15, courses: 4, students: 220, status: 'Optimal' },
+          { name: 'Dr. Hoang Van Tuan', dept: 'FONS', hours: 12, courses: 3, students: 165, status: 'Low' }
         ]
       },
       {
@@ -5184,10 +6158,10 @@ const ClassOverview = () => {
     ];
 
     const departments = [
-      { name: 'Computer Science', faculty: 45, avgAge: 42, phd: '100%' },
-      { name: 'Business Administration', faculty: 38, avgAge: 45, phd: '95%' },
-      { name: 'Software Engineering', faculty: 32, avgAge: 39, phd: '97%' },
-      { name: 'Data Science', faculty: 28, avgAge: 38, phd: '100%' },
+      { name: 'FONS', faculty: 45, avgAge: 42, phd: '100%' },
+      { name: 'FOM', faculty: 38, avgAge: 45, phd: '95%' },
+      { name: 'FONS', faculty: 32, avgAge: 39, phd: '97%' },
+      { name: 'FONS', faculty: 28, avgAge: 38, phd: '100%' },
       { name: 'Information Systems', faculty: 24, avgAge: 41, phd: '92%' }
     ];
 
@@ -5204,10 +6178,10 @@ const ClassOverview = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Departments</option>
-            <option value="cs">Computer Science</option>
-            <option value="ba">Business Administration</option>
-            <option value="se">Software Engineering</option>
-            <option value="ds">Data Science</option>
+            <option value="cs">FONS</option>
+            <option value="ba">FOM</option>
+            <option value="se">FONS</option>
+            <option value="ds">FONS</option>
             <option value="is">Information Systems</option>
           </select>
         </div>
@@ -6423,6 +7397,9 @@ const OneStopService = () => {
     }
     if (activeTab === 'lecturers-overview') {
       return <LecturersOverview />;
+    }
+    if (activeTab === 'lecturer-research'){
+      return <ResearchManagement/>;
     }
     if (activeTab === 'library-dashboard') {
       return <LibraryDashboard />;
