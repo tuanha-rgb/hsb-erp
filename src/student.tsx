@@ -554,7 +554,7 @@ const toggleCollapse = () => {
     }
   };
 
-  const renderAcademic = () => (
+  const Academic = () => (
     <div className="space-y-6">
       {/* Sub Navigation Tabs */}
       <div className="bg-white rounded-xl border border-gray-200 p-2">
@@ -1760,7 +1760,7 @@ const getTagStyle = (t: string) => {
   }
 };
 // --- Render function ---
-const renderCanvas = ({
+const Canvas = ({
   canvasSidebarOpen,
   setCanvasSidebarOpen,
   canvasTab,
@@ -3742,7 +3742,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
 
 
-  const renderCalendar = () => (
+  const Calendars = () => (
     <div className="space-y-6">
       {/* Calendar Header */}
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 text-white">
@@ -3974,7 +3974,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     </div>
   );
 
-  const renderActivities = () => (
+  const Activities = () => (
     <div className="space-y-6">
       {/* Activities Overview */}
       <div className="grid grid-cols-4 gap-6">
@@ -4234,7 +4234,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     </div>
   );
 
-  const renderFinance = () => (
+  const Finance = () => (
     <div className="space-y-6">
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-4 gap-6">
@@ -4500,7 +4500,9 @@ const commonForms = [
   { id: 'info-change', title: 'Personal Info Update', description: 'Request to update personal information', icon: '✏️', category: 'Student Affairs', department: 'Student Affairs', processingTime: '3-5 days' },
   { id: 'class-transfer', title: 'Class Transfer', description: 'Request to transfer to a different class section', icon: '🔄', category: 'Academic', department: 'Academic Office', processingTime: '3-5 days' },
 ];
-const renderOneStop = () => (
+
+
+const OneStop = () => (
   // One-Stop service state
 
   <div className="space-y-6">
@@ -4701,7 +4703,7 @@ const renderOneStop = () => (
   </div>
 );
 
-  const renderDashboard = () => (
+  const Dashboard = () => (
     <div>
       <div className="grid grid-cols-4 gap-6 mb-8">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
@@ -4878,7 +4880,7 @@ const renderOneStop = () => (
     </div>
   );
 
-  const renderProfile = () => (
+  const Profile = () => (
     <div className="space-y-6">
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
         <div className="flex items-start justify-between mb-6">
@@ -5134,6 +5136,498 @@ const renderOneStop = () => (
     </div>
   );
 
+
+
+
+
+const Documents = () => {
+  // Local state for preview/download modal
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
+
+  // ---- Helpers ----
+  const getTypeColor = (type: string) => {
+    if (type === "PDF") return "bg-red-100 text-red-700 border-red-200";
+    if (type === "Video") return "bg-purple-100 text-purple-700 border-purple-200";
+    return "bg-blue-100 text-blue-700 border-blue-200";
+  };
+
+  const getTypeIcon = (type: string) => {
+    if (type === "PDF") return "📄";
+    if (type === "Video") return "🎥";
+    return "📋";
+  };
+
+  const handleViewDocument = (doc: any, category: any) => {
+    // enrich the document with category meta for the modal header
+    setSelectedDocument({
+      ...doc,
+      category: category.category,
+      categoryIcon: category.icon,
+    });
+    setShowDocumentModal(true);
+  };
+
+  // ---- Data ----
+  const documentCategories = [
+    {
+      category: "App Tutorials & Guides",
+     
+      color: "from-blue-500 to-blue-600",
+      documents: [
+        {
+          title: "HSB ERP Portal User Guide",
+          type: "PDF",
+          size: "2.5 MB",
+          date: "2025-09-15",
+          description: "Complete guide to using the HSB ERP student portal",
+          abstract:
+            "This comprehensive guide covers all aspects of the HSB ERP Portal, including navigation, profile management, course registration, grade viewing, financial transactions, and accessing student services. The guide includes step-by-step instructions with screenshots for each major function.",
+          content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit...`,
+        },
+        {
+          title: "Canvas LMS Quick Start Guide",
+          type: "PDF",
+          size: "1.8 MB",
+          date: "2025-09-10",
+          description: "Get started with Canvas learning management system",
+          abstract:
+            "Learn how to navigate Canvas LMS effectively. This guide covers accessing courses, submitting assignments, participating in discussions, checking grades, and communicating with instructors. Includes tips for mobile app usage and notifications setup.",
+        },
+        {
+          title: "One-Stop Service Tutorial",
+          type: "Video",
+          size: "45 MB",
+          date: "2025-09-05",
+          description: "Step-by-step tutorial for submitting requests",
+          abstract:
+            "Video tutorial demonstrating the complete process of submitting various requests through the One-Stop Service portal. Covers student verification, transcripts, grade reviews, and other common requests with real-time demonstrations.",
+        },
+        {
+          title: "Mobile App Installation Guide",
+          type: "PDF",
+          size: "1.2 MB",
+          date: "2025-08-20",
+          description: "How to install and use HSB mobile app",
+          abstract:
+            "Installation instructions for iOS and Android devices. Learn how to download, install, and configure the HSB mobile app for on-the-go access to courses, grades, schedules, and notifications.",
+        },
+      ],
+    },
+    {
+      category: "Student Handbook",
+      
+      color: "from-emerald-500 to-emerald-600",
+      documents: [
+        {
+          title: "HSB Student Handbook 2024-2025",
+          type: "PDF",
+          size: "8.5 MB",
+          date: "2024-08-01",
+          description: "Official student handbook covering all policies and procedures",
+          abstract:
+            "The official HSB Student Handbook contains essential information about academic policies, student rights and responsibilities, campus resources, student services, health and safety regulations, and guidelines for student conduct.",
+        },
+        {
+          title: "Academic Calendar 2024-2025",
+          type: "PDF",
+          size: "850 KB",
+          date: "2024-07-15",
+          description: "Important dates, deadlines, and academic schedule",
+          abstract:
+            "Complete academic calendar including semester start/end dates, registration periods, add/drop deadlines, examination schedules, holidays, and other important academic milestones.",
+        },
+        {
+          title: "Campus Life Guide",
+          type: "PDF",
+          size: "3.2 MB",
+          date: "2024-08-10",
+          description: "Student services, facilities, and campus resources",
+          abstract:
+            "Comprehensive guide to campus facilities including libraries, computer labs, sports facilities, dining options, student clubs, counseling services, and career center.",
+        },
+        {
+          title: "International Student Guide",
+          type: "PDF",
+          size: "2.1 MB",
+          date: "2024-07-20",
+          description: "Essential information for international students",
+          abstract:
+            "Special guide for international students covering visa requirements, immigration procedures, health insurance, accommodation options, cultural adaptation, and financial matters.",
+        },
+      ],
+    },
+    {
+      category: "HSB Rules & Regulations",
+      
+      color: "from-purple-500 to-purple-600",
+      documents: [
+        {
+          title: "HSB Code of Conduct",
+          type: "PDF",
+          size: "1.5 MB",
+          date: "2024-06-01",
+          description: "Expected behaviors and disciplinary procedures",
+          abstract:
+            "Standards of behavior expected from all HSB students: academic integrity, respect for others, appropriate use of facilities, disciplinary procedures, and appeals process.",
+        },
+        {
+          title: "Academic Integrity Policy",
+          type: "PDF",
+          size: "980 KB",
+          date: "2024-06-01",
+          description: "Plagiarism, cheating, and academic honesty guidelines",
+          abstract:
+            "Definitions of plagiarism, cheating, fabrication; consequences; and guidance on proper citation and collaboration.",
+        },
+        {
+          title: "Examination Regulations",
+          type: "PDF",
+          size: "1.2 MB",
+          date: "2024-05-15",
+          description: "Rules and procedures for examinations and assessments",
+          abstract:
+            "Covers exam schedules, registration, conduct, permitted materials, accommodations, makeups, appeals, and penalties.",
+        },
+        {
+          title: "Grading and Assessment Policy",
+          type: "PDF",
+          size: "750 KB",
+          date: "2024-05-20",
+          description: "Grading system, GPA calculation, and grade appeals",
+          abstract:
+            "Grade scales, GPA methods, point values, incomplete grades, grade changes, transcript policies, and review process.",
+        },
+        {
+          title: "Attendance and Leave Policy",
+          type: "PDF",
+          size: "680 KB",
+          date: "2024-05-25",
+          description: "Attendance requirements and leave procedures",
+          abstract:
+            "Minimum attendance, procedures for leave of absence, medical leave, documentation, and academic impact of absences.",
+        },
+      ],
+    },
+    {
+      category: "VNU Regulations",
+      
+      color: "from-amber-500 to-amber-600",
+      documents: [
+        {
+          title: "VNU Higher Education Framework",
+          type: "PDF",
+          size: "4.2 MB",
+          date: "2024-03-01",
+          description: "Vietnam National University educational standards",
+          abstract:
+            "Educational philosophy, quality standards, curriculum design, teaching approaches, and assessment standards.",
+        },
+        {
+          title: "VNU Credit Transfer Guidelines",
+          type: "PDF",
+          size: "1.8 MB",
+          date: "2024-02-15",
+          description: "Regulations for credit transfer within VNU system",
+          abstract:
+            "Eligibility, application procedures, equivalency evaluations, documentation, and timelines for approvals.",
+        },
+        {
+          title: "VNU Degree Requirements",
+          type: "PDF",
+          size: "2.5 MB",
+          date: "2024-03-10",
+          description: "Graduation requirements and degree conferment",
+          abstract:
+            "Minimum credits, core curriculum, capstones, GPA requirements, and graduation ceremony procedures.",
+        },
+        {
+          title: "VNU Quality Assurance Standards",
+          type: "PDF",
+          size: "3.1 MB",
+          date: "2024-02-20",
+          description: "Educational quality standards and accreditation",
+          abstract:
+            "Standards for program design, teaching quality, outcomes assessment, faculty qualifications, and effectiveness.",
+        },
+      ],
+    },
+    {
+      category: "Government Regulations",
+    
+      color: "from-red-500 to-red-600",
+      documents: [
+        {
+          title: "Higher Education Law of Vietnam",
+          type: "PDF",
+          size: "6.5 MB",
+          date: "2023-01-01",
+          description: "National law governing higher education in Vietnam",
+          abstract:
+            "Legal framework for higher education: governance, operations, autonomy, quality assurance, and stakeholder rights.",
+        },
+        {
+          title: "Student Rights and Responsibilities",
+          type: "PDF",
+          size: "2.8 MB",
+          date: "2023-06-15",
+          description: "Legal rights and obligations of university students",
+          abstract:
+            "Rights to education, fair treatment, privacy, expression, and appeals; responsibilities on integrity and conduct.",
+        },
+        {
+          title: "MOET Circular on University Education",
+          type: "PDF",
+          size: "4.2 MB",
+          date: "2023-09-01",
+          description: "Ministry of Education and Training regulations",
+          abstract:
+            "Curriculum standards, examination procedures, degree issuance, and quality assurance requirements.",
+        },
+        {
+          title: "Visa and Immigration Guidelines",
+          type: "PDF",
+          size: "1.9 MB",
+          date: "2024-01-10",
+          description: "Regulations for international students in Vietnam",
+          abstract:
+            "Visa types, applications, extensions, work permits, TRC, and immigration compliance.",
+        },
+      ],
+    },
+  ];
+
+  // ---- UI ----
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Documents & Resources</h2>
+          <p className="text-gray-600 mt-1">
+            Access important documents, handbooks, and regulations
+          </p>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search documents by title, category, or keyword..."
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
+      {/* Categories */}
+      {documentCategories.map((category, idx) => (
+        <div
+          key={idx}
+          className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+        >
+          {/* Category Header */}
+          <div className={`bg-gradient-to-r ${category.color} p-6 text-white`}>
+            <div className="flex items-center gap-3">
+              <span className="text-4xl"></span>
+              <div>
+                <h3 className="text-2xl font-bold">{category.category}</h3>
+                <p className="text-white/90 text-sm mt-1">
+                  {category.documents.length} documents available
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Documents List */}
+          <div className="p-6">
+            <div className="grid gap-4">
+              {category.documents.map((doc, docIdx) => (
+                <div
+                  key={docIdx}
+                  className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow hover:border-blue-300"
+                >
+                  
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-900 mb-1">{doc.title}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{doc.description}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span
+                        className={`px-2 py-1 rounded-full font-semibold border ${getTypeColor(
+                          doc.type
+                        )}`}
+                      >
+                        {doc.type}
+                      </span>
+                      <span>📦 {doc.size}</span>
+                      <span>📅 {doc.date}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleViewDocument(doc, category)}
+                      className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <span>👁️</span> Preview
+                    </button>
+                    <button
+                      onClick={() => handleViewDocument(doc, category)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <span>📥</span> View
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* Help Section */}
+      <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-8 text-white">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold mb-2">Need Help Finding Documents?</h3>
+            <p className="text-indigo-100 mb-4">
+              Can't find what you're looking for? Contact the student services office or use the search feature above.
+            </p>
+            <div className="flex gap-3">
+              <button className="px-6 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-colors">
+                Contact Support
+              </button>
+              <button className="px-6 py-3 bg-indigo-600/50 text-white rounded-lg font-semibold hover:bg-indigo-600/70 transition-colors border border-white/30">
+                Request Document
+              </button>
+            </div>
+          </div>
+          <div className="text-6xl ml-4">📚</div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showDocumentModal && selectedDocument && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4 flex-1">
+                  <span className="text-4xl">{selectedDocument.categoryIcon}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full">
+                        {selectedDocument.category}
+                      </span>
+                      <span className="px-3 py-1 bg-white text-blue-700 text-xs font-semibold rounded-full">
+                        {selectedDocument.type}
+                      </span>
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">{selectedDocument.title}</h2>
+                    <div className="flex items-center gap-4 text-sm text-white/90">
+                      <span>📦 {selectedDocument.size}</span>
+                      <span>📅 {selectedDocument.date}</span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDocumentModal(false)}
+                  className="ml-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {/* Description */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+                <p className="text-gray-700 leading-relaxed">{selectedDocument.description}</p>
+              </div>
+
+              {/* Abstract */}
+              {selectedDocument.abstract && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Abstract</h3>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <p className="text-gray-700 leading-relaxed">{selectedDocument.abstract}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Placeholder */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Document Preview</h3>
+                <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg p-12 text-center border-2 border-dashed border-gray-300">
+                  <div className="text-6xl mb-4">{getTypeIcon(selectedDocument.type)}</div>
+                  <p className="text-gray-600 font-medium mb-2">Document Preview</p>
+                  <p className="text-sm text-gray-500">
+                    {selectedDocument.type === "PDF"
+                      ? "PDF document preview would be displayed here"
+                      : "Video player would be embedded here"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">Document Information</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-blue-700 font-medium">File Type:</span>
+                    <span className="text-gray-700 ml-2">{selectedDocument.type}</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">File Size:</span>
+                    <span className="text-gray-700 ml-2">{selectedDocument.size}</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">Upload Date:</span>
+                    <span className="text-gray-700 ml-2">{selectedDocument.date}</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 font-medium">Category:</span>
+                    <span className="text-gray-700 ml-2">{selectedDocument.category}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-gray-200 p-6 bg-gray-50">
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowDocumentModal(false)}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Close
+                </button>
+                <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                  <span>📥</span> Download Document
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// export default RenderDocuments;
+
+
+
   return (
 
     
@@ -5197,6 +5691,7 @@ const renderOneStop = () => (
             { id: 'calendar', icon: Calendar, label: 'Calendar' },
             { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
             { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
+            { id: 'documents', icon: Bell, label: 'Documents' },
           ].map(item => (
             <button
   key={item.id}
@@ -5227,23 +5722,28 @@ const renderOneStop = () => (
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-auto p-8">
-          {activePage === 'dashboard' ? renderDashboard() : 
-           activePage === 'profile' ? renderProfile() : 
-           activePage === 'academic' ? renderAcademic() :
-           activePage === 'finance' ? renderFinance() :
-           activePage === 'activities' ? renderActivities() :
-           activePage === 'calendar' ? renderCalendar() :
-           activePage === 'canvas'
-  ? renderCanvas({
-      canvasSidebarOpen, setCanvasSidebarOpen,
-      canvasTab, setCanvasTab,
-      selectedCourse, setSelectedCourse,
-      courseSection, setCourseSection,
-    })
-  :
-           activePage === 'onestop' ? renderOneStop() :
-           renderDashboard()}
-        </main>
+  {activePage === 'dashboard' && <Dashboard />}
+  {activePage === 'profile' && <Profile />}
+  {activePage === 'academic' && <Academic />}
+  {activePage === 'finance' && <Finance />}
+  {activePage === 'activities' && <Activities />}
+  {activePage === 'calendar' && <Calendars />}
+  {activePage === 'canvas' && (
+    <Canvas
+      canvasSidebarOpen={canvasSidebarOpen}
+      setCanvasSidebarOpen={setCanvasSidebarOpen}
+      canvasTab={canvasTab}
+      setCanvasTab={setCanvasTab}
+      selectedCourse={selectedCourse}
+      setSelectedCourse={setSelectedCourse}
+      courseSection={courseSection}
+      setCourseSection={setCourseSection}
+    />
+  )}
+  {activePage === 'onestop' && <OneStop />}
+  {/* If your component is named RenderDocuments, use that */}
+  {activePage === 'documents' && <Documents />}
+</main>
       </div>
     </div>
   );

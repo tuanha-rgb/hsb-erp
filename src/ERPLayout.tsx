@@ -13,7 +13,8 @@ import {
   MessageSquare, Settings, BarChart3, TrendingUp, UserCheck, Home, 
   Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
-  Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle 
+  Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
+  Edit, Save 
 } from "lucide-react";
 
 
@@ -7910,6 +7911,559 @@ const OneStopService = () => {
     </div>
   );
 };
+
+
+const GradeManagement = () => {
+  const [activeView, setActiveView] = useState('overview');
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [selectedProgram, setSelectedProgram] = useState('all');
+  const [selectedSemester, setSelectedSemester] = useState('fall-2024');
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+
+  const faculties = [
+    { code: 'FOM', name: 'Faculty of Management' },
+    { code: 'FOMAC', name: 'Faculty of Marketing and Communication' },
+    { code: 'FONS', name: 'Faculty of Nontraditional Security' }
+  ];
+
+  const programs = {
+    bachelor: [
+      { code: 'MET', name: 'Management Economics and Technology', faculty: 'FOM' },
+      { code: 'MAC', name: 'Marketing and Communication', faculty: 'FOMAC' },
+      { code: 'HAT', name: 'Hospitality and Tourism', faculty: 'FOM' },
+      { code: 'MAS', name: 'Management and Sustainability', faculty: 'FOM' },
+      { code: 'BNS', name: 'Business and Nontraditional Security', faculty: 'FONS' },
+      { code: 'HAS', name: 'Health Administration and Security', faculty: 'FONS' }
+    ],
+    master: [
+      { code: 'HSB-MBA', name: 'Master of Business Administration', faculty: 'FOM' },
+      { code: 'MOTE', name: 'Master of Technology and Entrepreneurship', faculty: 'FONS' },
+      { code: 'MNS', name: 'Master of Nontraditional Security', faculty: 'FONS' }
+    ],
+    phd: [
+      { code: 'DMS', name: 'Doctor of Management Science', faculty: 'FOM' }
+    ]
+  };
+
+  const bachelorProgramStats = [
+    { code: 'MET', students: 380, passRate: 64.2, stdDev: 0.52 },
+    { code: 'MAC', students: 320, passRate: 83.5, stdDev: 0.58 },
+    { code: 'HAT', students: 290, passRate: 82.8, stdDev: 0.61 },
+    { code: 'MAS', students: 310, passRate: 75.1, stdDev: 0.48 },
+    { code: 'BNS', students: 340, passRate: 86.3, stdDev: 0.45 },
+    { code: 'HAS', students: 210, passRate: 84.8, stdDev: 0.50 }
+  ];
+
+  const facultyMetrics = [
+    { code: 'FOM', name: 'Faculty of Management', timelyDelivery: 89.5, stdDev: 0.54, skewness: -0.32, kurtosis: 2.85 },
+    { code: 'FOMAC', name: 'Faculty of Marketing and Communication', timelyDelivery: 92.3, stdDev: 0.58, skewness: -0.28, kurtosis: 2.92 },
+    { code: 'FONS', name: 'Faculty of Nontraditional Security', timelyDelivery: 94.1, stdDev: 0.47, skewness: -0.35, kurtosis: 3.12 }
+  ];
+
+  const courseData = [
+    { id: 'HSB1001', name: 'Quản trị học / Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Nguyen Van A', students: 45, avgGrade: 3.45, passRate: 95.6 },
+    { id: 'HSB1002', name: 'Kinh tế học / Economics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Tran Thi B', students: 52, avgGrade: 3.28, passRate: 92.3 },
+    { id: 'HSB1003', name: 'Phân tích dữ liệu / Data Analysis', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Le Van C', students: 38, avgGrade: 3.52, passRate: 97.4 },
+    { id: 'HSB1004', name: 'Luật Kinh doanh và đạo đức kinh doanh / Business Law and Ethics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Pham Thi D', students: 48, avgGrade: 3.38, passRate: 93.8 },
+    { id: 'HSB1005', name: 'Nguyên lý kế toán / Principle of Accounting', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Hoang Van E', students: 44, avgGrade: 3.15, passRate: 90.9 },
+    { id: 'HSB1006', name: 'Quản trị tài chính doanh nghiệp / Management of Corporate Finance', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Vo Thi F', students: 42, avgGrade: 3.42, passRate: 94.5 },
+    { id: 'HSB2014', name: 'Quản trị công ty / Corporate Governance', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Bui Van G', students: 36, avgGrade: 3.58, passRate: 96.2 },
+    { id: 'HSB1033', name: 'Quản trị nguồn nhân lực và nhân tài / Management of Human Resource & Talents', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Dinh Thi H', students: 50, avgGrade: 3.35, passRate: 93.5 },
+    { id: 'HSB2001E', name: 'Tư duy chiến lược và quản trị chiến lược / Strategic Thinking and Strategic Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Ly Van I', students: 40, avgGrade: 3.48, passRate: 95.0 },
+    { id: 'HSB2003E', name: 'Kinh doanh toàn cầu / Global Business', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Mai Van J', students: 35, avgGrade: 3.62, passRate: 97.1 },
+    { id: 'HSB2004E', name: 'Quản trị thương hiệu và tài sản trí tuệ / Management of Branding and Intellectual Property', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Dang Thi K', students: 38, avgGrade: 3.55, passRate: 96.8 },
+    { id: 'HSB3119', name: 'Tổng quan về Khoa học dữ liệu / Introduction to Data Science', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Cao Van L', students: 32, avgGrade: 3.68, passRate: 98.1 },
+    { id: 'HSB2023', name: 'Toán ứng dụng / Applied Mathematics', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Phan Thi M', students: 46, avgGrade: 3.22, passRate: 91.3 },
+    { id: 'HSB2011', name: 'Nguyên lý Marketing và truyền thông / Principles of Marketing & Communication', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Truong Van N', students: 55, avgGrade: 3.45, passRate: 94.5 },
+    { id: 'MNS401', name: 'Cybersecurity Management', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Ta Van Canh', students: 38, avgGrade: 3.52, passRate: 97.4 },
+    { id: 'MBA501', name: 'Corporate Strategy', program: 'HSB-MBA', faculty: 'FOM', level: 'Master', instructor: 'Dr. Le Van P', students: 28, avgGrade: 3.68, passRate: 100 },
+    { id: 'MNS601', name: 'Advanced Security Analysis', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Tran Thi Q', students: 22, avgGrade: 3.71, passRate: 100 }
+  ];
+
+  const studentGrades = [
+    { studentId: '25080001', name: 'Do Thi Hoa', midterm: 8.2, final: 8.7, assignments: 8.5, participation: 9.0, overall: 8.60, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080002', name: 'Nguyen Van Phuc', midterm: 7.0, final: 7.5, assignments: 7.8, participation: 7.6, overall: 7.48, letterGrade: 'C', gpa: 2.5 },
+{ studentId: '25080003', name: 'Tran Thi Lan', midterm: 9.3, final: 9.0, assignments: 9.1, participation: 9.2, overall: 9.15, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080004', name: 'Bui Van Tien', midterm: 6.8, final: 6.5, assignments: 6.9, participation: 7.0, overall: 6.80, letterGrade: 'C', gpa: 2.0 },
+{ studentId: '25080005', name: 'Le Thi Mai', midterm: 8.5, final: 8.3, assignments: 8.4, participation: 8.6, overall: 8.45, letterGrade: 'B', gpa: 3.5 },
+{ studentId: '25080006', name: 'Pham Van Kien', midterm: 7.2, final: 7.0, assignments: 7.4, participation: 7.5, overall: 7.28, letterGrade: 'C', gpa: 2.5 },
+{ studentId: '25080007', name: 'Hoang Thi Thu', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.5, overall: 9.13, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080008', name: 'Nguyen Van Minh', midterm: 8.0, final: 8.2, assignments: 8.1, participation: 8.4, overall: 8.18, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080009', name: 'Tran Thi Quynh', midterm: 7.5, final: 8.0, assignments: 7.8, participation: 8.1, overall: 7.85, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080010', name: 'Le Van Hung', midterm: 6.2, final: 6.5, assignments: 6.8, participation: 6.9, overall: 6.60, letterGrade: 'D', gpa: 2.0 },
+{ studentId: '25080011', name: 'Nguyen Thi Huong', midterm: 8.7, final: 9.0, assignments: 8.9, participation: 9.2, overall: 8.95, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080012', name: 'Tran Van Hoang', midterm: 7.3, final: 7.0, assignments: 7.2, participation: 7.5, overall: 7.25, letterGrade: 'C', gpa: 2.5 },
+{ studentId: '25080013', name: 'Pham Thi Lien', midterm: 9.2, final: 9.3, assignments: 9.0, participation: 9.4, overall: 9.23, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080014', name: 'Bui Van Nam', midterm: 6.9, final: 7.2, assignments: 7.0, participation: 6.8, overall: 6.98, letterGrade: 'C', gpa: 2.0 },
+{ studentId: '25080015', name: 'Hoang Thi Yen', midterm: 8.4, final: 8.7, assignments: 8.6, participation: 8.8, overall: 8.63, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080016', name: 'Le Van Hai', midterm: 7.8, final: 8.0, assignments: 7.9, participation: 8.2, overall: 7.98, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080017', name: 'Nguyen Thi Thao', midterm: 6.5, final: 6.8, assignments: 6.7, participation: 7.0, overall: 6.75, letterGrade: 'D', gpa: 2.0 },
+{ studentId: '25080018', name: 'Tran Van Phong', midterm: 8.1, final: 8.3, assignments: 8.0, participation: 8.4, overall: 8.20, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080019', name: 'Pham Thi Van', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.1, overall: 9.03, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080020', name: 'Le Van Long', midterm: 7.0, final: 7.3, assignments: 7.2, participation: 7.1, overall: 7.15, letterGrade: 'C', gpa: 2.5 }
+
+  
+  
+  ];
+
+  const OverviewDashboard = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+            <Users className="w-6 h-6 text-blue-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Students</p>
+          <p className="text-3xl font-bold text-gray-900">2,000</p>
+          <p className="text-xs text-green-600 mt-2">↑ 8.5% vs last year</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+            <Award className="w-6 h-6 text-green-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Average GPA</p>
+          <p className="text-3xl font-bold text-gray-900">2.88</p>
+          <p className="text-xs text-green-600 mt-2">↑ 0.12 vs last semester</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+            <TrendingUp className="w-6 h-6 text-purple-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Pass Rate</p>
+          <p className="text-3xl font-bold text-gray-900">84.8%</p>
+          <p className="text-xs text-green-600 mt-2">↑ 1.2% vs last semester</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+            <AlertCircle className="w-6 h-6 text-orange-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">At-Risk Students</p>
+          <p className="text-3xl font-bold text-gray-900">86</p>
+          <p className="text-xs text-green-600 mt-2">↓ 12 vs last semester</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance by Level</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Bachelor Programs</span>
+                <span className="text-lg font-bold text-blue-600">1850</span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Avg GPA: 3.35</p>
+                <p>Pass Rate: 64.2%</p>
+              </div>
+            </div>
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Master Programs</span>
+                <span className="text-lg font-bold text-purple-600">120</span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Avg GPA: 3.68</p>
+                <p>Pass Rate: 78.5%</p>
+              </div>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">PhD Program</span>
+                <span className="text-lg font-bold text-green-600">30</span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Avg GPA: 3.82</p>
+                <p>Pass Rate: 90%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Faculty Metrics</h3>
+          <div className="space-y-4">
+            {facultyMetrics.map((faculty, i) => (
+              <div key={i} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="font-semibold text-gray-900">{faculty.code}</p>
+                    <p className="text-xs text-gray-600 mt-1">{faculty.name}</p>
+                  </div>
+                  <span className="text-sm font-bold text-blue-600">{faculty.timelyDelivery}%</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-xs">
+                    <span className="text-gray-600">Timely Delivery:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.timelyDelivery}%</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-600">S.D:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.stdDev}</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-600">Skewness:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.skewness}</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-600">Kurtosis:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.kurtosis}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Bachelor Programs</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {bachelorProgramStats.map((prog, i) => (
+              <div key={i} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-xl font-bold text-gray-900">{prog.code}</h4>
+                  <span className="text-sm text-gray-500">{prog.students}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">Pass Rate</p>
+                    <p className="text-xl font-bold text-green-600">{prog.passRate}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">S.D Score</p>
+                    <p className="text-xl font-bold text-blue-600">{prog.stdDev}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const CourseAnalysis = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <select 
+                value={selectedFaculty}
+                onChange={(e) => setSelectedFaculty(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Faculties</option>
+                {faculties.map(f => (
+                  <option key={f.code} value={f.code}>{f.code} - {f.name}</option>
+                ))}
+              </select>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Download size={18} />
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Code</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Name</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Program</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Instructor</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Students</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Avg Grade</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {courseData.map((course) => (
+                <tr key={course.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-blue-600">{course.id}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-gray-900">{course.name}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm font-medium text-gray-900">{course.program}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      course.faculty === 'FOM' ? 'bg-blue-100 text-blue-700' :
+                      course.faculty === 'FOMAC' ? 'bg-purple-100 text-purple-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {course.faculty}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      course.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
+                      course.level === 'Master' ? 'bg-purple-100 text-purple-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {course.level}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{course.instructor}</td>
+                  <td className="px-6 py-4 text-sm font-semibold">{course.students}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      course.avgGrade >= 3.5 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {course.avgGrade}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      course.passRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {course.passRate}%
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button 
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setActiveView('grading');
+                      }}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Manage Grades
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const GradeInsertion = () => {
+    if (!selectedCourse) {
+      return (
+        <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
+          <div className="max-w-md mx-auto">
+            <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Course Selected</h3>
+            <p className="text-gray-600 mb-6">Please select a course from the Course Analysis tab.</p>
+            <button 
+              onClick={() => setActiveView('courses')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Go to Course Analysis
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedCourse.id} - {selectedCourse.name}</h2>
+                <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                  <span>Program: {selectedCourse.program}</span>
+                  <span>•</span>
+                  <span>Instructor: {selectedCourse.instructor}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedCourse(null)}
+                className="p-2 hover:bg-white rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Student Grades</h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setEditMode(!editMode)}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  {editMode ? <X size={18} /> : <Edit size={18} />}
+                  {editMode ? 'Cancel' : 'Edit Grades'}
+                </button>
+                {editMode && (
+                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <Save size={18} />
+                    Save Changes
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Student ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Midterm (30%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Final (40%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Assignments (20%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Participation (10%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Overall</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Letter Grade</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">GPA</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {studentGrades.map((student) => (
+                    <tr key={student.studentId} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-blue-600">{student.studentId}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{student.name}</td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.midterm}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.midterm}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.final}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.final}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.assignments}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.assignments}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.participation}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.participation}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-sm font-bold text-gray-900">{student.overall}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          student.letterGrade === 'A' ? 'bg-green-100 text-green-700' :
+                          student.letterGrade === 'B' ? 'bg-blue-100 text-blue-700' :
+                          student.letterGrade === 'C' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {student.letterGrade}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-sm font-bold text-gray-900">{student.gpa}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+      <div className="mx-auto w-full max-w-[1600px] space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Grade Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Monitor and manage student performance</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="border-b border-gray-200">
+            <div className="flex gap-1 p-2">
+              <button
+                onClick={() => { setActiveView('overview'); setSelectedCourse(null); }}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${
+                  activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => { setActiveView('courses'); setSelectedCourse(null); }}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${
+                  activeView === 'courses' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                }`}
+              >
+                Course Analysis
+              </button>
+              <button
+                onClick={() => setActiveView('grading')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${
+                  activeView === 'grading' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                }`}
+              >
+                Grade Insertion
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {activeView === 'overview' && <OverviewDashboard />}
+        {activeView === 'courses' && <CourseAnalysis />}
+        {activeView === 'grading' && <GradeInsertion />}
+      </div>
+    </div>
+  );
+};
   const renderContent = () => {
    
    if (activeTab === "dashboard") {
@@ -7930,6 +8484,9 @@ const OneStopService = () => {
     }
     if (activeTab === 'lecturer-research'){
       return <ResearchManagement/>;
+    }
+    if (activeTab == 'grade-management'){
+      return <GradeManagement/>;
     }
     if (activeTab === 'library-dashboard') {
       return <LibraryDashboard />;
