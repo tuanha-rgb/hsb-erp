@@ -2999,12 +2999,145 @@ const LibraryDashboard = () => (
 
   {/*research management for lecturer*/}
 
-  const ResearchManagement = () => {
+ 
+
+const ResearchManagement = () => {
   const [activeView, setActiveView] = useState('overview');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const patentData = [
+    {
+      id: 'PAT001',
+      title: 'AI-Based Medical Diagnostic System Using Deep Learning',
+      inventors: ['Dr. Nguyen Van A', 'Dr. Tran Thi B', 'Dr. Le Van C'],
+      applicationNumber: 'VN2024001234',
+      applicationDate: '2024-01-15',
+      status: 'Granted',
+      grantDate: '2024-08-20',
+      patentNumber: 'VN123456',
+      type: 'Invention Patent',
+      faculty: 'Faculty of Nontraditional Security',
+      discipline: 'Nontraditional Security',
+      abstract: 'A novel AI-based system for automated medical diagnosis using advanced deep learning algorithms for pattern recognition in medical imaging.',
+      country: 'Vietnam',
+      ipOffice: 'National Office of Intellectual Property (NOIP)'
+    },
+    {
+      id: 'PAT002',
+      title: 'Blockchain-Based Supply Chain Tracking Method',
+      inventors: ['Dr. Pham Thi D', 'Dr. Hoang Van E'],
+      applicationNumber: 'VN2024002345',
+      applicationDate: '2024-03-10',
+      status: 'Pending',
+      grantDate: null,
+      patentNumber: null,
+      type: 'Invention Patent',
+      faculty: 'Faculty of Management',
+      discipline: 'Finance',
+      abstract: 'A decentralized blockchain method for transparent and secure supply chain tracking with real-time verification capabilities.',
+      country: 'Vietnam',
+      ipOffice: 'National Office of Intellectual Property (NOIP)'
+    },
+    {
+      id: 'PAT003',
+      title: 'Quantum Encryption Algorithm for Secure Communications',
+      inventors: ['Dr. Vo Thi F', 'Dr. Bui Van G', 'Dr. Cao Thi H'],
+      applicationNumber: 'US2024098765',
+      applicationDate: '2024-02-20',
+      status: 'Granted',
+      grantDate: '2024-09-15',
+      patentNumber: 'US11,234,567',
+      type: 'Invention Patent',
+      faculty: 'Faculty of Nontraditional Security',
+      discipline: 'Engineering & IT',
+      abstract: 'A quantum-based encryption algorithm providing enhanced security for digital communications using quantum key distribution.',
+      country: 'United States',
+      ipOffice: 'United States Patent and Trademark Office (USPTO)'
+    },
+    {
+      id: 'PAT004',
+      title: 'IoT-Based Smart Agriculture Monitoring System',
+      inventors: ['Dr. Mai Van K', 'Dr. Dang Thi L'],
+      applicationNumber: 'VN2024003456',
+      applicationDate: '2024-05-08',
+      status: 'Under Examination',
+      grantDate: null,
+      patentNumber: null,
+      type: 'Utility Model',
+      faculty: 'Faculty of Nontraditional Security',
+      discipline: 'Sustainable Development',
+      abstract: 'An IoT-based system for real-time monitoring and optimization of agricultural processes using sensor networks and AI analytics.',
+      country: 'Vietnam',
+      ipOffice: 'National Office of Intellectual Property (NOIP)'
+    },
+    {
+      id: 'PAT005',
+      title: 'Digital Marketing Analytics Platform with AI',
+      inventors: ['Dr. Nguyen Thi M', 'Dr. Phan Van N'],
+      applicationNumber: 'VN2024004567',
+      applicationDate: '2024-06-15',
+      status: 'Pending',
+      grantDate: null,
+      patentNumber: null,
+      type: 'Invention Patent',
+      faculty: 'Faculty of Marketing and Communication',
+      discipline: 'Marketing',
+      abstract: 'An AI-powered platform for comprehensive digital marketing analytics with predictive consumer behavior modeling.',
+      country: 'Vietnam',
+      ipOffice: 'National Office of Intellectual Property (NOIP)'
+    },
+    {
+      id: 'PAT006',
+      title: 'Cybersecurity Threat Detection System',
+      inventors: ['Dr. Le Van Q', 'Dr. Hoang Thi R'],
+      applicationNumber: 'PCT/VN2024/00123',
+      applicationDate: '2024-04-25',
+      status: 'International Filing',
+      grantDate: null,
+      patentNumber: null,
+      type: 'Invention Patent',
+      faculty: 'Faculty of Nontraditional Security',
+      discipline: 'Law & Criminology',
+      abstract: 'An advanced system for real-time detection and prevention of cybersecurity threats using machine learning and behavioral analysis.',
+      country: 'International (PCT)',
+      ipOffice: 'World Intellectual Property Organization (WIPO)'
+    },
+    {
+      id: 'PAT007',
+      title: 'Sustainable Energy Management System for Smart Buildings',
+      inventors: ['Dr. Bui Van S', 'Dr. Cao Thi T'],
+      applicationNumber: 'VN2023005678',
+      applicationDate: '2023-11-10',
+      status: 'Granted',
+      grantDate: '2024-07-05',
+      patentNumber: 'VN123789',
+      type: 'Invention Patent',
+      faculty: 'Faculty of Nontraditional Security',
+      discipline: 'Sustainable Development',
+      abstract: 'An intelligent energy management system optimizing power consumption in smart buildings using renewable energy sources.',
+      country: 'Vietnam',
+      ipOffice: 'National Office of Intellectual Property (NOIP)'
+    },
+    {
+      id: 'PAT008',
+      title: 'Human Resource Performance Prediction Model',
+      inventors: ['Dr. Dinh Van I', 'Dr. Ly Van J'],
+      applicationNumber: 'VN2024006789',
+      applicationDate: '2024-07-20',
+      status: 'Pending',
+      grantDate: null,
+      patentNumber: null,
+      type: 'Invention Patent',
+      faculty: 'Faculty of Management',
+      discipline: 'Human Resources',
+      abstract: 'A predictive model for employee performance assessment using AI and big data analytics for HR optimization.',
+      country: 'Vietnam',
+      ipOffice: 'National Office of Intellectual Property (NOIP)'
+    }
+  ];
 
   const researchProjects = [
     {
@@ -3329,6 +3462,76 @@ const LibraryDashboard = () => (
           <p className="text-sm text-gray-500 mb-1">Avg Citations</p>
           <p className="text-3xl font-bold text-gray-900">38.2</p>
           <p className="text-xs text-gray-600 mt-2">Per publication</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">Scopus</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Scopus Indexed</p>
+          <p className="text-3xl font-bold text-gray-900">92</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">59% of total publications</p>
+            <p className="text-xs text-green-600 mt-1">↑ 18 vs last year</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Award className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">WoS</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Web of Science</p>
+          <p className="text-3xl font-bold text-gray-900">68</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">44% of total publications</p>
+            <p className="text-xs text-green-600 mt-1">↑ 14 vs last year</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-purple-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">DOI</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">With DOI</p>
+          <p className="text-3xl font-bold text-gray-900">142</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">91% of total publications</p>
+            <p className="text-xs text-blue-600 mt-1">Well documented</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-orange-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">No DOI</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Without DOI</p>
+          <p className="text-3xl font-bold text-gray-900">14</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">9% of total publications</p>
+            <p className="text-xs text-orange-600 mt-1">Action needed</p>
+          </div>
         </div>
       </div>
 
@@ -3688,6 +3891,252 @@ const LibraryDashboard = () => (
     </div>
   );
 
+  
+  const filteredPatents = patentData.filter(patent => {
+    const matchesSearch = patent.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || patent.status === filterStatus;
+    const matchesType = filterType === 'all' || patent.type === filterType;
+    return matchesSearch && matchesStatus && matchesType;
+  });
+  const PatentsView = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+            <Award className="w-6 h-6 text-blue-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Patents</p>
+          <p className="text-3xl font-bold text-gray-900">8</p>
+          <p className="text-xs text-green-600 mt-2">↑ 3 vs last year</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+            <Award className="w-6 h-6 text-green-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Granted Patents</p>
+          <p className="text-3xl font-bold text-gray-900">3</p>
+          <p className="text-xs text-green-600 mt-2">37.5% success rate</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-3">
+            <FileText className="w-6 h-6 text-yellow-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Pending/Under Review</p>
+          <p className="text-3xl font-bold text-gray-900">4</p>
+          <p className="text-xs text-yellow-600 mt-2">Awaiting decision</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+            <TrendingUp className="w-6 h-6 text-purple-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">International Patents</p>
+          <p className="text-3xl font-bold text-gray-900">2</p>
+          <p className="text-xs text-purple-600 mt-2">PCT & US</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder="Search patents by title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <select 
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Status</option>
+              <option value="Granted">Granted</option>
+              <option value="Pending">Pending</option>
+              <option value="Under Examination">Under Examination</option>
+              <option value="International">International</option>
+            </select>
+
+            <select 
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Types</option>
+              <option value="Invention Patent">Invention Patent</option>
+              <option value="Utility Model">Utility Model</option>
+            </select>
+
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
+              <Plus size={18} />
+              New Patent
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {filteredPatents.map((patent) => (
+            <div key={patent.id} className={`border-2 rounded-xl p-6 hover:shadow-lg transition-shadow ${getStatusColor(patent.status)}`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-bold text-gray-900">{patent.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(patent.status)}`}>
+                      {patent.status}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDisciplineColor(patent.discipline)}`}>
+                      {patent.discipline}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">{patent.abstract}</p>
+                  <div className="flex gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1.5">
+                      <Users size={16} />
+                      {patent.inventors.length} inventors
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Building size={16} />
+                      {patent.faculty}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Calendar size={16} />
+                      {new Date(patent.applicationDate).toLocaleDateString()}
+                    </span>
+                    <span className="font-medium">
+                      {patent.country}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Type</p>
+                  <p className="text-sm font-bold text-gray-900">{patent.type}</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Country</p>
+                  <p className="text-sm font-bold text-gray-900">{patent.country}</p>
+                </div>
+                <div className="p-3 bg-orange-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Application No.</p>
+                  <p className="text-sm font-mono text-gray-900">{patent.applicationNumber}</p>
+                </div>
+                {patent.patentNumber ? (
+                  <div className="p-3 bg-green-100 rounded-lg border border-green-300">
+                    <p className="text-xs text-gray-600 mb-1">Patent No.</p>
+                    <p className="text-sm font-mono font-bold text-green-700">{patent.patentNumber}</p>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Patent No.</p>
+                    <p className="text-sm text-gray-400">Pending</p>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={() => setSelectedItem({type: 'patent', data: patent})}
+                className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium"
+              >
+                View Details
+              </button>
+            </div>
+          ))}
+          {filteredPatents.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No patents found matching your criteria
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Patents by Faculty</h3>
+          <div className="space-y-4">
+            {[
+              { name: 'Nontraditional Security', count: 4, percent: 50 },
+              { name: 'Management', count: 2, percent: 25 },
+              { name: 'Marketing & Communication', count: 1, percent: 12.5 },
+              { name: 'Others', count: 1, percent: 12.5 }
+            ].map((item, i) => (
+              <div key={i}>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">{item.name}</span>
+                  <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="h-2 rounded-full bg-blue-500" style={{width: `${item.percent}%`}}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Patents by Discipline</h3>
+          <div className="space-y-3">
+            {[
+              { discipline: 'Nontraditional Security', count: 2, color: 'blue' },
+              { discipline: 'Engineering & IT', count: 1, color: 'purple' },
+              { discipline: 'Sustainable Development', count: 2, color: 'green' },
+              { discipline: 'Finance', count: 1, color: 'red' },
+              { discipline: 'Marketing', count: 1, color: 'pink' },
+              { discipline: 'Human Resources', count: 1, color: 'orange' }
+            ].map((item, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full bg-${item.color}-500`}></div>
+                  <span className="text-sm text-gray-700">{item.discipline}</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{item.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Patent Status Overview</h3>
+          <div className="space-y-3">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">Granted</span>
+                <span className="text-2xl font-bold text-green-700">3</span>
+              </div>
+            </div>
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">Pending</span>
+                <span className="text-2xl font-bold text-yellow-700">3</span>
+              </div>
+            </div>
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">Under Examination</span>
+                <span className="text-2xl font-bold text-orange-700">1</span>
+              </div>
+            </div>
+            <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">International</span>
+                <span className="text-2xl font-bold text-purple-700">1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -3725,6 +4174,14 @@ const LibraryDashboard = () => (
               >
                 Publications
               </button>
+              <button
+                onClick={() => setActiveView('patents')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'patents' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Patents
+              </button>
             </div>
           </div>
         </div>
@@ -3732,6 +4189,7 @@ const LibraryDashboard = () => (
         {activeView === 'overview' && <OverviewDashboard />}
         {activeView === 'projects' && <ProjectsView />}
         {activeView === 'publications' && <PublicationsView />}
+        {activeView === 'patents' && <PatentsView />}
 
         {selectedItem && selectedItem.type === 'project' && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedItem(null)}>
@@ -3958,6 +4416,7 @@ const LibraryDashboard = () => (
     </div>
   );
 };
+
 
 
   const StudentProfileAdmin = () => {
