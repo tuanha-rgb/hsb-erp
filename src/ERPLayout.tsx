@@ -916,7 +916,7 @@ const DepartmentOverview = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1920px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Department Overview</h1>
@@ -3273,8 +3273,10 @@ const ResearchManagement = () => {
       id: 'PUB003',
       title: 'Quantum Algorithms for Cryptographic Applications',
       authors: ['Dr. Vo Thi F', 'Dr. Bui Van G', 'Dr. Cao Thi H'],
-      type: 'Journal Article',
+      type: 'Book Chapter',
       journal: 'Nature Quantum Information',
+            publisher: 'IEEE',
+
       year: 2024,
       citations: 89,
       impactFactor: 15.2,
@@ -3288,8 +3290,9 @@ const ResearchManagement = () => {
       id: 'PUB004',
       title: 'Blockchain Technology in Supply Chain Management',
       authors: ['Dr. Dinh Van I', 'Dr. Ly Van J'],
-      type: 'Book Chapter',
-      journal: 'Advances in Blockchain Applications',
+      type: 'Book',
+      journal: 'Series in Computer Science and Engineering',
+      publisher: 'Springer',
       year: 2024,
       citations: 12,
       impactFactor: null,
@@ -3305,6 +3308,8 @@ const ResearchManagement = () => {
       authors: ['Dr. Nguyen Van A', 'Dr. Le Van C'],
       type: 'Review Article',
       journal: 'Journal of Healthcare Engineering',
+                  publisher: 'IEEE',
+
       year: 2025,
       citations: 0,
       impactFactor: 3.9,
@@ -3335,6 +3340,8 @@ const ResearchManagement = () => {
       authors: ['Dr. Pham Van O', 'Dr. Tran Thi P'],
       type: 'Journal Article',
       journal: 'Human Resource Management Review',
+                  publisher: 'Taylor & Francis',
+
       year: 2024,
       citations: 28,
       impactFactor: 6.2,
@@ -3378,8 +3385,10 @@ const ResearchManagement = () => {
       id: 'PUB010',
       title: 'Cybercrime and Legal Frameworks in Southeast Asia',
       authors: ['Dr. Bui Van S', 'Dr. Cao Thi T'],
-      type: 'Journal Article',
+      type: 'Book Chapter',
       journal: 'International Journal of Cyber Criminology',
+                  publisher: 'Taylor & Francis',
+
       year: 2024,
       citations: 19,
       impactFactor: 4.5,
@@ -3396,11 +3405,11 @@ const ResearchManagement = () => {
       case 'Nontraditional Security': return 'bg-blue-100 text-blue-700';
       case 'Sustainable Development': return 'bg-green-100 text-green-700';
       case 'Engineering & IT': return 'bg-purple-100 text-purple-700';
-      case 'Human Resources': return 'bg-orange-100 text-orange-700';
-      case 'Finance': return 'bg-red-100 text-red-700';
-      case 'Marketing': return 'bg-pink-100 text-pink-700';
-      case 'Communication': return 'bg-yellow-100 text-yellow-700';
-      case 'Law & Criminology': return 'bg-indigo-100 text-indigo-700';
+      case 'Human Resources': return 'bg-green-100 text-green-700';
+      case 'Finance': return 'bg-green-100 text-green-700';
+      case 'Marketing': return 'bg-green-100 text-green-700';
+      case 'Communication': return 'bg-green-100 text-green-700';
+      case 'Law & Criminology': return 'bg-blue-100 text-blue-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -3465,75 +3474,7 @@ const ResearchManagement = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">Scopus</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Scopus Indexed</p>
-          <p className="text-3xl font-bold text-gray-900">92</p>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">59% of total publications</p>
-            <p className="text-xs text-green-600 mt-1">↑ 18 vs last year</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Award className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">WoS</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Web of Science</p>
-          <p className="text-3xl font-bold text-gray-900">68</p>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">44% of total publications</p>
-            <p className="text-xs text-green-600 mt-1">↑ 14 vs last year</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-purple-600" />
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">DOI</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">With DOI</p>
-          <p className="text-3xl font-bold text-gray-900">142</p>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">91% of total publications</p>
-            <p className="text-xs text-blue-600 mt-1">Well documented</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-orange-600" />
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">No DOI</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Without DOI</p>
-          <p className="text-3xl font-bold text-gray-900">14</p>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">9% of total publications</p>
-            <p className="text-xs text-orange-600 mt-1">Action needed</p>
-          </div>
-        </div>
-      </div>
+    
 
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -3635,11 +3576,11 @@ const ResearchManagement = () => {
               {discipline: 'Nontraditional Security', count: 42, color: 'blue'},
               {discipline: 'Sustainable Development', count: 28, color: 'green'},
               {discipline: 'Engineering & IT', count: 24, color: 'purple'},
-              {discipline: 'Human Resources', count: 18, color: 'orange'},
-              {discipline: 'Finance', count: 16, color: 'red'},
-              {discipline: 'Marketing', count: 14, color: 'pink'},
-              {discipline: 'Communication', count: 10, color: 'yellow'},
-              {discipline: 'Law & Criminology', count: 4, color: 'indigo'}
+              {discipline: 'Human Resources', count: 18, color: 'green'},
+              {discipline: 'Finance', count: 16, color: 'green'},
+              {discipline: 'Marketing', count: 14, color: 'green'},
+              {discipline: 'Communication', count: 10, color: 'green'},
+              {discipline: 'Law & Criminology', count: 4, color: 'blue'}
             ].map((item, i) => (
               <div key={i} className="flex items-center justify-between py-1">
                 <div className="flex items-center gap-2">
@@ -3697,7 +3638,67 @@ const ResearchManagement = () => {
             </button>
           </div>
         </div>
+          <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            
+            <div className="text-right">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">International</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Erasmus, EU, International grant</p>
+          <p className="text-3xl font-bold text-gray-900">6</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">20% of total projects</p>
+            <p className="text-xs text-green-600 mt-1">↑ 10% vs last year</p>
+          </div>
+        </div>
 
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            
+            <div className="text-right">
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">National level</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Ministry, Nafosted, National Funding</p>
+          <p className="text-3xl font-bold text-gray-900">6</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">20% of total projects</p>
+            <p className="text-xs text-green-600 mt-1">↑ 10% vs last year</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+           
+            <div className="text-right">
+              <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">VNU</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">VNU projects, grants</p>
+          <p className="text-3xl font-bold text-gray-900">12</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">40% of total projects</p>
+            <p className="text-xs text-blue-600 mt-1">↑ 5% vs last year</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            
+            <div className="text-right">
+              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">HSB</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">HSB Projects / Company sponsored</p>
+          <p className="text-3xl font-bold text-gray-900">3</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">20% of total projects</p>
+            <p className="text-xs text-orange-600 mt-1">Action needed</p>
+          </div>
+        </div>
+      </div>
         <div className="p-6 grid grid-cols-1 gap-4">
           {researchProjects.map((project) => (
             <div key={project.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
@@ -3800,6 +3801,8 @@ const ResearchManagement = () => {
                 <option value="journal">Journal Article</option>
                 <option value="conference">Conference Paper</option>
                 <option value="book">Book Chapter</option>
+                <option value="book">Book</option>
+
               </select>
               <select 
                 value={filterStatus}
@@ -3817,7 +3820,75 @@ const ResearchManagement = () => {
             </button>
           </div>
         </div>
+        <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">Scopus</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Scopus Indexed</p>
+          <p className="text-3xl font-bold text-gray-900">92</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">59% of total publications</p>
+            <p className="text-xs text-green-600 mt-1">↑ 18 vs last year</p>
+          </div>
+        </div>
 
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Award className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">WoS</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Web of Science</p>
+          <p className="text-3xl font-bold text-gray-900">68</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">44% of total publications</p>
+            <p className="text-xs text-green-600 mt-1">↑ 14 vs last year</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-purple-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">DOI</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">With DOI</p>
+          <p className="text-3xl font-bold text-gray-900">142</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">91% of total publications</p>
+            <p className="text-xs text-blue-600 mt-1">Well documented</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-orange-600" />
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">No DOI</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Without DOI</p>
+          <p className="text-3xl font-bold text-gray-900">14</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">9% of total publications</p>
+            <p className="text-xs text-orange-600 mt-1">Action needed</p>
+          </div>
+        </div>
+      </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -4139,7 +4210,7 @@ const ResearchManagement = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1920px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
@@ -5716,7 +5787,7 @@ const ClassOverview = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1920px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Classes Overview</h1>
@@ -6320,7 +6391,7 @@ const ClassOverview = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1920px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Faculty Rankings</h1>
@@ -6999,7 +7070,7 @@ const AlumniOverview = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1920px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Alumni Dashboard</h1>
@@ -7493,7 +7564,7 @@ const OneStopService = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1920px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">One-Stop Service Center</h1>
