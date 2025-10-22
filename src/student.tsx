@@ -1,4 +1,8 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
+import * as QRCode from "qrcode";
+
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
   CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
@@ -4234,6 +4238,100 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     </div>
   );
 
+  const Matriculations = () => {
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+
+useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const url = await QRCode.toDataURL("22080000", {
+          width: 112,
+          margin: 1,
+          errorCorrectionLevel: "H",
+        });
+        if (mounted) setQrCodeUrl(url);
+      } catch (err) {
+        console.error("QR generation failed:", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+    return (
+      <div className="min-h-full flex items-center justify-center p-8 bg-gray-100">
+        <div className="w-full max-w-sm">
+          {/* Student Card */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+            {/* Card Header */}
+            <div className="bg-blue-600 px-6 py-8 text-white text-center">
+              <h2 className="text-xl font-bold leading-tight mb-2">Hanoi School of Business and Management, VNU</h2>
+              <p className="text-blue-100 text-sm font-medium">Student Identification Card</p>
+            </div>
+
+            {/* Card Body */}
+            <div className="px-8 py-6">
+              {/* Student Photo */}
+              <div className="flex justify-center mb-6">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white shadow-lg">
+                  <span className="text-5xl font-bold">NA</span>
+                </div>
+              </div>
+
+              {/* Student Information */}
+              <div className="space-y-4 text-gray-800">
+                <div className="border-b border-gray-200 pb-3">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Full Name</p>
+                  <p className="text-base font-bold text-gray-900">Nguyễn Văn A</p>
+                </div>
+
+                <div className="border-b border-gray-200 pb-3">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Student ID</p>
+                  <p className="text-base font-bold text-gray-900">22080000</p>
+                </div>
+
+                <div className="border-b border-gray-200 pb-3">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Program</p>
+                  <p className="text-sm font-semibold text-gray-900 leading-snug">Management of Entrepreneurship and Technology</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Cohort</p>
+                    <p className="text-base font-bold text-gray-900">QH2025</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Status</p>
+                    <p className="text-base font-bold text-emerald-600">Active</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 items-start">
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Valid Until</p>
+                    <p className="text-base font-bold text-gray-900">31/08/2026</p>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <div className="w-28 h-28 bg-white rounded-xl border border-gray-200 flex items-center justify-center p-2 shadow-sm">
+      {qrCodeUrl ? (
+        <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+      ) : (
+        <span className="text-xs text-gray-400">Generating…</span>
+      )}
+    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
   const Finance = () => (
     <div className="space-y-6">
       {/* Financial Overview Cards */}
@@ -5397,6 +5495,8 @@ const Documents = () => {
     },
   ];
 
+
+
   // ---- UI ----
   return (
     <div className="space-y-6">
@@ -5470,12 +5570,7 @@ const Documents = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleViewDocument(doc, category)}
-                      className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2"
-                    >
-                      <span>👁️</span> Preview
-                    </button>
+                   
                     <button
                       onClick={() => handleViewDocument(doc, category)}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
@@ -5641,32 +5736,35 @@ const Documents = () => {
     {/* Controls rail that retracts with the panel */}
     <div className="flex items-center gap-1 justify-end">
       {/* Lock / Unlock */}
-      <button
-        onClick={toggleLock}
-        title={sidebarLocked ? 'Unlock panel' : 'Lock panel'}
-        className="p-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20"
-      >
-        {sidebarLocked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
-      </button>
+     <button
+      onClick={() => setSidebarLocked(!sidebarLocked)}
+      className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+      title={sidebarLocked ? 'Unlock sidebar' : 'Lock sidebar'}
+    >
+      {sidebarLocked ? (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+        </svg>
+      )}
+    </button>
 
-      {/* Collapse / Expand */}
-      <button
-        onClick={toggleCollapse}
-        title={
-          sidebarCollapsed
-            ? 'Expand panel'
-            : sidebarLocked
-            ? 'Unlock to collapse'
-            : 'Collapse panel'
-        }
-        className={`p-2 rounded-lg border ${
-          sidebarLocked
-            ? 'border-white/20 opacity-50 cursor-not-allowed'
-            : 'border-white/60 bg-slate-800 hover:bg-slate-700'
-        }`}
-      >
-        {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeftIcon size={16} />}
-      </button>
+    {/* Collapse / Expand */}
+    <button
+      onClick={() => {
+        setSidebarCollapsed(!sidebarCollapsed);
+        if (!sidebarCollapsed && !sidebarLocked) setSidebarLocked(true);
+      }}
+      className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+      title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+    >
+      <ChevronRight size={16} className={sidebarCollapsed ? '' : 'rotate-180'} />
+    </button>
     </div>
 
     {/* Sidebar header */}
@@ -5691,7 +5789,8 @@ const Documents = () => {
             { id: 'calendar', icon: Calendar, label: 'Calendar' },
             { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
             { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
-            { id: 'documents', icon: Bell, label: 'Documents' },
+            { id: 'documents', icon: BookOpen, label: 'Documents' },
+            { id: 'matriculation', icon: User, label: 'Matriculation' },
           ].map(item => (
             <button
   key={item.id}
@@ -5743,6 +5842,7 @@ const Documents = () => {
   {activePage === 'onestop' && <OneStop />}
   {/* If your component is named RenderDocuments, use that */}
   {activePage === 'documents' && <Documents />}
+  {activePage === 'matriculation' && <Matriculations />}
 </main>
       </div>
     </div>
