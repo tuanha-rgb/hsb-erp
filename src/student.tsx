@@ -4265,7 +4265,7 @@ useEffect(() => {
           {/* Student Card */}
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
             {/* Card Header */}
-            <div className="bg-blue-600 px-6 py-8 text-white text-center">
+            <div className="bg-blue-600 px-6 py-3 text-white text-center">
               <h2 className="text-xl font-bold leading-tight mb-2">Hanoi School of Business and Management, VNU</h2>
               <p className="text-blue-100 text-sm font-medium">Student Identification Card</p>
             </div>
@@ -4274,9 +4274,11 @@ useEffect(() => {
             <div className="px-8 py-6">
               {/* Student Photo */}
               <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white shadow-lg">
-                  <span className="text-5xl font-bold">NA</span>
-                </div>
+                <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+      alt="Student Photo"
+      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+    />
               </div>
 
               {/* Student Information */}
@@ -4983,9 +4985,13 @@ const OneStop = () => (
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl font-bold border-4 border-white/30">
-              NA
-            </div>
+            <div className="flex justify-center mb-6">
+                <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+      alt="Student Photo"
+      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+    />
+              </div>
             <div>
               <div className="flex items-center gap-4 mb-2">
                 <h2 className="text-3xl font-bold">Nguyễn Văn A</h2>
@@ -5733,118 +5739,166 @@ const Documents = () => {
       sidebarCollapsed ? 'w-16' : 'w-64'
     } relative bg-slate-800 text-white flex flex-col transition-all duration-300`}
   >
-    {/* Controls rail that retracts with the panel */}
-    <div className="flex items-center gap-1 justify-end">
+    {/* 1. Controls rail for COLLAPSED view (Appears only when sidebarCollapsed is true) */}
+    <div className={`flex flex-col items-center gap-2 p-2 ${sidebarCollapsed ? 'block' : 'hidden'}`}>
       {/* Lock / Unlock */}
-     <button
-      onClick={() => setSidebarLocked(!sidebarLocked)}
-      className="p-1.5 hover:bg-slate-700 rounded transition-colors"
-      title={sidebarLocked ? 'Unlock sidebar' : 'Lock sidebar'}
-    >
-      {sidebarLocked ? (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      ) : (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-        </svg>
-      )}
-    </button>
+      <button
+        onClick={() => setSidebarLocked(!sidebarLocked)}
+        className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+        title={sidebarLocked ? 'Unlock sidebar' : 'Lock sidebar'}
+      >
+        {sidebarLocked ? (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+          </svg>
+        )}
+      </button>
 
-    {/* Collapse / Expand */}
-    <button
-      onClick={() => {
-        setSidebarCollapsed(!sidebarCollapsed);
-        if (!sidebarCollapsed && !sidebarLocked) setSidebarLocked(true);
-      }}
-      className="p-1.5 hover:bg-slate-700 rounded transition-colors"
-      title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-    >
-      <ChevronRight size={16} className={sidebarCollapsed ? '' : 'rotate-180'} />
-    </button>
+      {/* Collapse / Expand (Pointing right when collapsed) */}
+      <button
+        onClick={() => {
+          setSidebarCollapsed(!sidebarCollapsed);
+          if (!sidebarCollapsed && !sidebarLocked) setSidebarLocked(true);
+        }}
+        className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+        title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        <ChevronRight size={16} className={''} /> 
+      </button>
     </div>
 
-    {/* Sidebar header */}
-    <div className="p-4 border-b border-slate-700">
-      <div className={sidebarCollapsed ?  'hidden' : 'block'}>
-    <h1 className="text-2xl font-bold leading-none">HSB ERP</h1>
-    <p className="text-slate-400 text-sm mt-1 leading-none">Student Portal</p>
+    {/* 2. Sidebar header (Expanded View - Appears only when sidebarCollapsed is false) */}
+    <div className={`p-4 border-b border-slate-700 ${!sidebarCollapsed ? 'flex items-start justify-between' : 'hidden'}`}>
+      {/* Text Content */}
+      <div>
+        <h1 className="text-2xl font-bold leading-none">HSB ERP</h1>
+        <p className="text-slate-400 text-sm mt-1 leading-none">Student Portal</p>
+      </div>
+
+      {/* Control Buttons (Aligned with HSB ERP text) */}
+      <div className="flex items-center gap-1 ml-4"> 
+        {/* Lock / Unlock */}
+        <button
+          onClick={() => setSidebarLocked(!sidebarLocked)}
+          className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+          title={sidebarLocked ? 'Unlock sidebar' : 'Lock sidebar'}
+        >
+          {sidebarLocked ? (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+            </svg>
+          )}
+        </button>
+
+        {/* Collapse / Expand (Pointing left when expanded) */}
+        <button
+          onClick={() => {
+            setSidebarCollapsed(!sidebarCollapsed);
+            if (!sidebarCollapsed && !sidebarLocked) setSidebarLocked(true);
+          }}
+          className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+          title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <ChevronRight size={16} className={'rotate-180'} />
+        </button>
+      </div>
+    </div>
+    
+    {/* Navigation Links */}
+    <nav className="flex-1 p-4 space-y-1">
+      {[
+        { id: 'dashboard', icon: Home, label: 'Dashboard' },
+        { id: 'profile', icon: User, label: 'My Profile' },
+        { id: 'academic', icon: BookOpen, label: 'Academic' },
+        { id: 'finance', icon: DollarSign, label: 'Finance' },
+        { id: 'activities', icon: Activity, label: 'Activities' },
+        { id: 'calendar', icon: Calendar, label: 'Calendar' },
+        { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
+        { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
+        { id: 'documents', icon: BookOpen, label: 'Documents' },
+        { id: 'matriculation', icon: User, label: 'Matriculation' },
+      ].map(item => (
+        <button
+          key={item.id}
+          onClick={() => setActivePage(item.id)}
+          title={item.label} 
+          className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start px-4 gap-3'} py-3 rounded-lg transition-colors ${
+            activePage === item.id ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-700/50'
+          }`}
+        >
+          <item.icon size={20} className="flex-shrink-0" />
+          <span className={`${sidebarCollapsed ? 'sr-only' : 'inline'}`}>{item.label}</span>
+        </button>
+      ))}
+    </nav>
+
+    {/* User Profile Footer */}
+    {/* User Profile Footer */}
+<div className="p-4 border-t border-slate-700">
+  <div
+    className={`flex items-center px-4 py-3 overflow-hidden
+      ${sidebarCollapsed ? 'justify-center gap-0' : 'justify-start gap-3'}`}
+  >
+    {/* Avatar: do not allow shrinking */}
+    <div className="w-12 h-12 rounded-full  flex items-center justify-center font-semibold shrink-0">
+   <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+      alt="Student Photo"
+      className="w-12 h-12 rounded-full border-4 border-white shadow-md object-cover"
+    />    </div>
+
+    {/* Text: collapse width when sidebarCollapsed */}
+    <div
+      className={`transition-all duration-200 overflow-hidden whitespace-nowrap
+        ${sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none select-none' : 'w-auto opacity-100'}`}
+    >
+      <p className="font-medium text-sm">Nguyễn Văn A</p>
+      <p className="text-slate-400 text-xs">ID: 22080000</p>
+    </div>
   </div>
-    </div>
+</div>
 
-    {/* ...keep your <nav> here ... */}
+  </div>
 
-
-        
-        <nav className="flex-1 p-4 space-y-1">
-          {[
-            { id: 'dashboard', icon: Home, label: 'Dashboard' },
-            { id: 'profile', icon: User, label: 'My Profile' },
-            { id: 'academic', icon: BookOpen, label: 'Academic' },
-            { id: 'finance', icon: DollarSign, label: 'Finance' },
-            { id: 'activities', icon: Activity, label: 'Activities' },
-            { id: 'calendar', icon: Calendar, label: 'Calendar' },
-            { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
-            { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
-            { id: 'documents', icon: BookOpen, label: 'Documents' },
-            { id: 'matriculation', icon: User, label: 'Matriculation' },
-          ].map(item => (
-            <button
-  key={item.id}
-  onClick={() => setActivePage(item.id)}
-  title={item.label} // tooltip when collapsed
-  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start px-4 gap-3'} py-3 rounded-lg transition-colors ${
-    activePage === item.id ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-700/50'
-  }`}
->
-  <item.icon size={20} className="flex-shrink-0" />
-  <span className={`${sidebarCollapsed ? 'sr-only' : 'inline'}`}>{item.label}</span>
-</button>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-slate-700">
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center font-semibold">
-              NA
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-sm">Nguyễn Văn A</p>
-              <p className="text-slate-400 text-xs">ID: 22080000</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-auto p-8">
-  {activePage === 'dashboard' && <Dashboard />}
-  {activePage === 'profile' && <Profile />}
-  {activePage === 'academic' && <Academic />}
-  {activePage === 'finance' && <Finance />}
-  {activePage === 'activities' && <Activities />}
-  {activePage === 'calendar' && <Calendars />}
-  {activePage === 'canvas' && (
-    <Canvas
-      canvasSidebarOpen={canvasSidebarOpen}
-      setCanvasSidebarOpen={setCanvasSidebarOpen}
-      canvasTab={canvasTab}
-      setCanvasTab={setCanvasTab}
-      selectedCourse={selectedCourse}
-      setSelectedCourse={setSelectedCourse}
-      courseSection={courseSection}
-      setCourseSection={setCourseSection}
-    />
-  )}
-  {activePage === 'onestop' && <OneStop />}
-  {/* If your component is named RenderDocuments, use that */}
-  {activePage === 'documents' && <Documents />}
-  {activePage === 'matriculation' && <Matriculations />}
-</main>
-      </div>
-    </div>
+  {/* Main Content Area */}
+  <div className="flex-1 flex flex-col overflow-hidden">
+    <main className="flex-1 overflow-auto p-8">
+      {/* ... Content rendering based on activePage ... */}
+      {activePage === 'dashboard' && <Dashboard />}
+      {activePage === 'profile' && <Profile />}
+      {activePage === 'academic' && <Academic />}
+      {activePage === 'finance' && <Finance />}
+      {activePage === 'activities' && <Activities />}
+      {activePage === 'calendar' && <Calendars />}
+      {activePage === 'canvas' && (
+        <Canvas
+          canvasSidebarOpen={canvasSidebarOpen}
+          setCanvasSidebarOpen={setCanvasSidebarOpen}
+          canvasTab={canvasTab}
+          setCanvasTab={setCanvasTab}
+          selectedCourse={selectedCourse}
+          setSelectedCourse={setSelectedCourse}
+          courseSection={courseSection}
+          setCourseSection={setCourseSection}
+        />
+      )}
+      {activePage === 'onestop' && <OneStop />}
+      {activePage === 'documents' && <Documents />}
+      {activePage === 'matriculation' && <Matriculations />}
+    </main>
+  </div>
+</div>
   );
 }

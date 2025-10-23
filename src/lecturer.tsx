@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import {
   Clock, FileText, Users, TrendingUp, BookOpen, Calendar,
   AlertCircle, Award, MessageSquare, Bell, ChevronRight,
@@ -7,6 +9,8 @@ import {
   Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare, DollarSign, Search, Filter, Eye, MoreVertical,
   User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon
 } from 'lucide-react';
+import * as QRCode from "qrcode";
+
 
 // ————————————————————————————————————————
 // Profile view (re-usable component)
@@ -85,8 +89,13 @@ const LecturerProfile: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-start">
             <div className="flex items-start gap-6">
-              <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-3xl font-bold border-4 border-white/30">
-                NA
+              {/* Profile pic */}
+              <div className="flex justify-center mb-6">
+                <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+      alt="Student Photo"
+      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+    />
               </div>
               <div>
                 <h1 className="text-3xl font-bold mb-2">{lecturerInfo.name}</h1>
@@ -2597,6 +2606,104 @@ const CanvasView: React.FC = () => {
   );
 };
 
+const Identification = () => {
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+
+useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const url = await QRCode.toDataURL("22080000", {
+          width: 112,
+          margin: 1,
+          errorCorrectionLevel: "H",
+        });
+        if (mounted) setQrCodeUrl(url);
+      } catch (err) {
+        console.error("QR generation failed:", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+    return (
+      <div className="min-h-full flex items-center justify-center p-8 bg-gray-100">
+        <div className="w-full max-w-sm">
+          {/* Student Card */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+            {/* Card Header */}
+            <div className="bg-blue-600 px-6 py-3 text-white text-center">
+              <h2 className="text-xl font-bold leading-tight mb-2">Hanoi School of Business and Management, VNU</h2>
+              <p className="text-blue-100 text-sm font-medium">Staff Identification Card</p>
+            </div>
+
+            {/* Card Body */}
+            <div className="px-8 py-6">
+              {/* Student Photo */}
+              <div className="flex justify-center mb-6">
+                <div className="flex justify-center mb-6">
+                <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+      alt="Student Photo"
+      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+    />
+              </div>
+              </div>
+
+              {/* Student Information */}
+              <div className="space-y-4 text-gray-800">
+                <div className="border-b border-gray-200 pb-3">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Full Name</p>
+                  <p className="text-base font-bold text-gray-900">Nguyễn Văn A</p>
+                </div>
+
+                <div className="border-b border-gray-200 pb-3">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Staff ID</p>
+                  <p className="text-base font-bold text-gray-900">22080</p>
+                </div>
+
+                <div className="border-b border-gray-200 pb-3">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Department</p>
+                  <p className="text-sm font-semibold text-gray-900 leading-snug">Faculty of Management</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Type</p>
+                    <p className="text-base font-bold text-gray-900">Lecturer</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Status</p>
+                    <p className="text-base font-bold text-emerald-600">Active</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 items-start">
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Valid Until</p>
+                    <p className="text-base font-bold text-gray-900">31/08/2029</p>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <div className="w-28 h-28 bg-white rounded-xl border border-gray-200 flex items-center justify-center p-2 shadow-sm">
+      {qrCodeUrl ? (
+        <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+      ) : (
+        <span className="text-xs text-gray-400">Generating…</span>
+      )}
+    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
 // ————————————————————————————————————————
 // Root: Sidebar + conditional content routing
 // ————————————————————————————————————————
@@ -2626,7 +2733,7 @@ const LecturerApp: React.FC = () => {
     { name: 'Schedule', icon: Clock },
     { name: 'Research', icon: TrendingUp },
     { name: 'Canvas/LMS', icon: Globe },
-    { name: 'Messages', icon: MessageSquare },
+    { name: 'Identification', icon: UserIcon },
   ];
 
   const renderContent = () => {
@@ -2643,8 +2750,8 @@ const LecturerApp: React.FC = () => {
         return <ResearchView />;
       case 'Canvas/LMS':
         return <CanvasView />;
-      case 'Messages':
-        return <div className="p-8">Inbox / threads…</div>;
+      case 'Identification':
+        return <Identification />;
       default:
         return <DashboardContent />;
     }
@@ -2693,7 +2800,7 @@ const LecturerApp: React.FC = () => {
             </div>
 
             {/* Row 2: Subtitle */}
-            <p className="text-slate-400 text-sm mt-1">Lecturer Portal</p>
+            <p className="text-slate-400 text-sm mt-1">Staff Portal</p>
           </div>
 
           {/* When collapsed, show compact controls (optional) */}
@@ -2722,17 +2829,8 @@ const LecturerApp: React.FC = () => {
             </div>
           )}
         </div>
-
-          {/* Role Dropdown (hide in collapsed) */}
-        {!isCollapsed && (
-          <div className="p-4 border-b border-slate-700">
-            <select className="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>Lecturer</option>
-              
-            </select>
-          </div>
-        )}
-
+         
+          
         {/* Navigation */}
         <nav className="flex-1 p-4">
           <ul className="space-y-1">
@@ -2762,6 +2860,30 @@ const LecturerApp: React.FC = () => {
             })}
           </ul>
         </nav>
+         {/* User Profile Footer */}
+<div className="p-4 border-t border-slate-700">
+  <div
+    className={`flex items-center px-4 py-3 overflow-hidden
+      ${isCollapsed ? 'justify-center gap-0' : 'justify-start gap-3'}`}
+  >
+    {/* Avatar: do not allow shrinking */}
+    <div className="w-12 h-12 rounded-full  flex items-center justify-center font-semibold shrink-0">
+   <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+      alt="Student Photo"
+      className="w-12 h-12 rounded-full border-4 border-white shadow-md object-cover"
+    />    </div>
+
+    {/* Text: collapse width when sidebarCollapsed */}
+    <div
+      className={`transition-all duration-200 overflow-hidden whitespace-nowrap
+        ${isCollapsed ? 'w-0 opacity-0 pointer-events-none select-none' : 'w-auto opacity-100'}`}
+    >
+      <p className="font-medium text-sm">Nguyễn Văn A</p>
+      <p className="text-slate-400 text-xs">ID: 22080</p>
+    </div>
+  </div>
+</div>   
       </aside>
     
 
