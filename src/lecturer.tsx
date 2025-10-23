@@ -2628,38 +2628,41 @@ const CanvasView: React.FC = () => {
 
   return (
     <div className="min-h-full flex items-center justify-center p-6 bg-gray-100">
-      <div className="w-full max-w-ws">
+      <div className="w-full max-w-[420px] sm:max-w-[360px] mx-auto">
         {/* Student Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
           {/* Card Header */}
           
 {/* Card Header (compact + aligned) */}
-<div className="bg-blue-600 px-4 py-3 text-white rounded-t-2xl">
+<div className="bg-blue-600 px-4 py-2 text-white rounded-t-2xl">
   <div className="flex items-center gap-3">
+    {/* Logo */}
     <img
-      src="https://i.postimg.cc/B68RPZHZ/logo-HSB-no-slogan.jpg"
+      src="https://i.postimg.cc/Th8cNfKB/HSB-logo-white-singular-no-slogan.png"
       alt="HSB Logo"
-      className="w-10 h-10 rounded bg-white/10 p-1 object-contain"
+      className="w-12 h-12 object-contain"
     />
-    <div className="leading-tight">
-      <h2 className="text-base font-bold">
-        Hanoi School of Business and Management, VNU
+
+    {/* Text Block */}
+    <div className="flex flex-col justify-center leading-snug">
+      <h2 className="text-[9px] font-bold leading-snug">
+        Hanoi School of Business and Management
       </h2>
-      <p className="text-blue-100 text-[11px] font-medium">
-        Student Identification Card
+      <p className="text-blue-100 text-[9px] font-medium leading-tight">
+        Staff Identification Card (VNU-HSB)
       </p>
     </div>
   </div>
 </div>
 
 {/* Card Body (denser spacing) */}
-<div className="px-4 py-4 space-y-3">
+<div className="px-4 py-1 space-y-1">
   {/* Avatar (smaller) */}
   <div className="flex justify-center mb-2">
     <img
       src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg"
       alt="Photo"
-      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+      className="w-40 h-40 rounded-full border-4 border-white shadow-md object-cover"
     />
   </div>
 
@@ -2677,7 +2680,7 @@ const CanvasView: React.FC = () => {
 
     <div className="border-b border-gray-200 pb-2">
       <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Department</p>
-      <p className="text-sm font-semibold text-gray-900 leading-snug">Faculty of Management</p>
+      <p className="text-sm font-bold text-gray-900">Faculty of Management</p>
     </div>
 
     <div className="grid grid-cols-2 gap-3 border-b border-gray-200 pb-2">

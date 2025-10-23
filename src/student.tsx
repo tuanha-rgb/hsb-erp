@@ -4259,64 +4259,82 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   }, []);
 
   return (
-    <div className="min-h-full flex items-center justify-center p-8 bg-gray-100">
-      <div className="w-full max-w-sm">
+     <div className="min-h-full flex items-center justify-center p-6 bg-gray-100">
+      <div className="w-full max-w-[420px] sm:max-w-[360px] mx-auto">
         {/* Student Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
           {/* Card Header */}
-          <div className="bg-blue-600 px-6 py-4 text-white text-center">
-            <h2 className="text-lg font-bold leading-tight mb-1">
-              Hanoi School of Business and Management, VNU
-            </h2>
-            <p className="text-blue-100 text-xs font-medium">Student Identification Card</p>
-          </div>
+          
+{/* Card Header (compact + aligned) */}
+<div className="bg-blue-600 px-4 py-2 text-white rounded-t-2xl">
+  <div className="flex items-center gap-3">
+    {/* Logo */}
+    <img
+      src="https://i.postimg.cc/Th8cNfKB/HSB-logo-white-singular-no-slogan.png"
+      alt="HSB Logo"
+      className="w-12 h-12 object-contain"
+    />
 
-          {/* Card Body */}
-          <div className="px-8 py-3">
-            {/* Avatar Section (taller) */}
-            <div className="flex justify-center mb-6"> 
-              <img src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
-              alt="Student Photo" 
-              className="w-56 h-56 rounded-full border-4 border-white shadow-md object-cover" /> 
-              </div>
+    {/* Text Block */}
+    <div className="flex flex-col justify-center leading-snug">
+      <h2 className="text-[9px] font-bold leading-snug">
+        Hanoi School of Business and Management
+      </h2>
+      <p className="text-blue-100 text-[10px] font-normal leading-snug">
+        Student Identification Card (VNU-HSB)
+      </p>
+    </div>
+  </div>
+</div>
+
+{/* Card Body (denser spacing) */}
+<div className="px-4 py-1 space-y-1">
+  {/* Avatar (smaller) */}
+  <div className="flex justify-center mb-2">
+    <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg"
+      alt="Photo"
+      className="w-39 h-39 rounded-full border-4 border-white shadow-md object-cover"
+    />
+  </div>
 
             {/* Student Information */}
-            <div className="space-y-2 text-gray-800">
-              <div className="border-b border-gray-200 pb-3">
-                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+            <div className="space-y-1 text-gray-800">
+              <div className="border-b border-gray-200 pb-2">
+                <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1 font-semibold">
                   Full Name
                 </p>
-                <p className="text-base font-bold text-gray-900">Nguyễn Văn A</p>
+                <p className="text-[10px] font-bold text-gray-900">Nguyễn Văn A</p>
               </div>
 
-              <div className="border-b border-gray-200 pb-3">
-                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+              <div className="border-b border-gray-200 pb-2">
+                <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1 font-semibold">
                   Student ID
                 </p>
-                <p className="text-base font-bold text-gray-900">22080000</p>
+                <p className="text-[10px] font-bold text-gray-900">22080000</p>
               </div>
 
-              <div className="border-b border-gray-200 pb-3">
-                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+              <div className="border-b border-gray-200 pb-2">
+                <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1 font-semibold">
                   Program
                 </p>
-                <p className="text-sm font-semibold text-gray-900 leading-snug">
+                <p className="text-[10px] font-bold text-gray-900">
                   Management of Enterprise and Technology
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
+              <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-2">
                 <div>
-                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                  <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1 font-semibold">
                     Cohort
                   </p>
-                  <p className="text-base font-bold text-gray-900">QH2025</p>
+                  <p className="text-[10px] font-bold text-gray-900">QH2025</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                  <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1 font-semibold">
                     Status
                   </p>
-                  <p className="text-base font-bold text-emerald-600">Active</p>
+                  <p className="text-[10px] font-bold text-emerald-600">Active</p>
                 </div>
               </div>
 
@@ -4325,7 +4343,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
                   <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
                     Valid Until
                   </p>
-                  <p className="text-base font-bold text-gray-900">2030</p>
+                  <p className="text-[10px] font-bold text-gray-900">2030</p>
                 </div>
 
                 <div className="flex justify-end">
