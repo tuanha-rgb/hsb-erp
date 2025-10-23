@@ -2640,7 +2640,7 @@ const CanvasView: React.FC = () => {
     <img
       src="https://i.postimg.cc/Th8cNfKB/HSB-logo-white-singular-no-slogan.png"
       alt="HSB Logo"
-      className="w-12 h-12 object-contain"
+      className="w-11 h-11 object-contain"
     />
 
     {/* Text Block */}
@@ -2689,7 +2689,7 @@ const CanvasView: React.FC = () => {
         <p className="text-sm font-bold text-gray-900">Lecturer</p>
       </div>
       <div>
-        <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Status</p>
+        <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Level</p>
         <p className="text-sm font-bold text-emerald-600">Dean</p>
       </div>
     </div>
