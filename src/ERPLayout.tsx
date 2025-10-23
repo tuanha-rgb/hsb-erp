@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo} from "react";
 import Student from "./student";
 import Lecturer from "./lecturer";
+import './index.css';  // <-- make sure this is here
 
 import type { LucideIcon } from "lucide-react";   // ✅ Import type for icons
 import RoleDropdown, { type RoleValue } from "./RoleDropdown";

@@ -15,9 +15,7 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
             submenu: [
               { id: 'student-services', label: 'Student Services Overview' },
               { id: 'student-profile', label: 'Student Profile' },
-              { id: 'tuition-fees', label: 'Tuition Fees' },
-              { id: 'gpa', label: 'GPA' },
-              { id: 'training-score', label: 'Training Score' },
+              { id: 'ec-score', label: 'EC Score' },
               { id: 'scholarships', label: 'Scholarships' },
               { id: 'feedback', label: 'Feedback' },
               { id: 'attendance', label: 'Attendance' },
@@ -35,7 +33,6 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
               { id: 'lecturer-profile', label: 'Lecturer Profile' },
               { id: 'lecturer-research', label: 'Research Management'},
               { id: 'grade-management', label: 'Grade Management' },
-              { id: 'student-management', label: 'Student Management' },
               { id: 'view-rankings', label: 'View Rankings' },
               { id: 'syllabus-management', label: 'Syllabus Management' },
               { id: 'schedule-management', label: 'Schedule Management' },

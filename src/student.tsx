@@ -4241,11 +4241,11 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   const Matriculations = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
-useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const url = await QRCode.toDataURL("22080000", {
+        const url = await QRCode.toDataURL("22080", "Faculty of Management",  {
           width: 112,
           margin: 1,
           errorCorrectionLevel: "H",
@@ -4255,83 +4255,97 @@ useEffect(() => {
         console.error("QR generation failed:", err);
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
-    return (
-      <div className="min-h-full flex items-center justify-center p-8 bg-gray-100">
-        <div className="w-full max-w-sm">
-          {/* Student Card */}
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
-            {/* Card Header */}
-            <div className="bg-blue-600 px-6 py-3 text-white text-center">
-              <h2 className="text-xl font-bold leading-tight mb-2">Hanoi School of Business and Management, VNU</h2>
-              <p className="text-blue-100 text-sm font-medium">Student Identification Card</p>
-            </div>
 
-            {/* Card Body */}
-            <div className="px-8 py-6">
-              {/* Student Photo */}
-              <div className="flex justify-center mb-6">
-                <img
-      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
-      alt="Student Photo"
-      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
-    />
+  return (
+    <div className="min-h-full flex items-center justify-center p-8 bg-gray-100">
+      <div className="w-full max-w-sm">
+        {/* Student Card */}
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+          {/* Card Header */}
+          <div className="bg-blue-600 px-6 py-4 text-white text-center">
+            <h2 className="text-lg font-bold leading-tight mb-1">
+              Hanoi School of Business and Management, VNU
+            </h2>
+            <p className="text-blue-100 text-xs font-medium">Student Identification Card</p>
+          </div>
+
+          {/* Card Body */}
+          <div className="px-8 py-3">
+            {/* Avatar Section (taller) */}
+            <div className="flex justify-center mb-6"> 
+              <img src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
+              alt="Student Photo" 
+              className="w-56 h-56 rounded-full border-4 border-white shadow-md object-cover" /> 
               </div>
 
-              {/* Student Information */}
-              <div className="space-y-4 text-gray-800">
-                <div className="border-b border-gray-200 pb-3">
-                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Full Name</p>
-                  <p className="text-base font-bold text-gray-900">Nguyễn Văn A</p>
+            {/* Student Information */}
+            <div className="space-y-2 text-gray-800">
+              <div className="border-b border-gray-200 pb-3">
+                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                  Full Name
+                </p>
+                <p className="text-base font-bold text-gray-900">Nguyễn Văn A</p>
+              </div>
+
+              <div className="border-b border-gray-200 pb-3">
+                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                  Student ID
+                </p>
+                <p className="text-base font-bold text-gray-900">22080000</p>
+              </div>
+
+              <div className="border-b border-gray-200 pb-3">
+                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                  Program
+                </p>
+                <p className="text-sm font-semibold text-gray-900 leading-snug">
+                  Management of Enterprise and Technology
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
+                <div>
+                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                    Cohort
+                  </p>
+                  <p className="text-base font-bold text-gray-900">QH2025</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                    Status
+                  </p>
+                  <p className="text-base font-bold text-emerald-600">Active</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 items-start">
+                <div>
+                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
+                    Valid Until
+                  </p>
+                  <p className="text-base font-bold text-gray-900">2030</p>
                 </div>
 
-                <div className="border-b border-gray-200 pb-3">
-                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Student ID</p>
-                  <p className="text-base font-bold text-gray-900">22080000</p>
-                </div>
-
-                <div className="border-b border-gray-200 pb-3">
-                  <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Program</p>
-                  <p className="text-sm font-semibold text-gray-900 leading-snug">Management of Entrepreneurship and Technology</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
-                  <div>
-                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Cohort</p>
-                    <p className="text-base font-bold text-gray-900">QH2025</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Status</p>
-                    <p className="text-base font-bold text-emerald-600">Active</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 items-start">
-                  <div>
-                    <p className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-semibold">Valid Until</p>
-                    <p className="text-base font-bold text-gray-900">31/08/2026</p>
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <div className="w-28 h-28 bg-white rounded-xl border border-gray-200 flex items-center justify-center p-2 shadow-sm">
-      {qrCodeUrl ? (
-        <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
-      ) : (
-        <span className="text-xs text-gray-400">Generating…</span>
-      )}
-    </div>
+                <div className="flex justify-end">
+                  <div className="w-30 h-30 bg-white rounded-xl border border-gray-200 flex items-center justify-center p-2 shadow-sm">
+                    {qrCodeUrl ? (
+                      <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="text-xs text-gray-400">Generating…</span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          {/* /Card Body */}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 
   const Finance = () => (
