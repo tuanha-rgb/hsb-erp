@@ -4245,7 +4245,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     let mounted = true;
     (async () => {
       try {
-        const url = await QRCode.toDataURL("22080", "Faculty of Management",  {
+        const url = await QRCode.toDataURL("Nguyen Van A | 22080000 | MET | QH2025 ",   {
           width: 112,
           margin: 1,
           errorCorrectionLevel: "H",

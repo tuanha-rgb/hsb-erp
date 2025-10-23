@@ -2613,7 +2613,7 @@ const CanvasView: React.FC = () => {
     let mounted = true;
     (async () => {
       try {
-        const url = await QRCode.toDataURL("22080000", {
+        const url = await QRCode.toDataURL("Nguyen Van A | 22080 | Faculty of Management | Lecturer-Dean ", {
           width: 112,
           margin: 1,
           errorCorrectionLevel: "H",
@@ -2627,87 +2627,88 @@ const CanvasView: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-full flex items-center justify-center p-8 bg-gray-100">
-      <div className="w-full max-w-sm">
+    <div className="min-h-full flex items-center justify-center p-6 bg-gray-100">
+      <div className="w-full max-w-ws">
         {/* Student Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
           {/* Card Header */}
-          <div className="bg-blue-600 px-6 py-4 text-white text-center">
-            <h2 className="text-lg font-bold leading-tight mb-1">
-              Hanoi School of Business and Management, VNU
-            </h2>
-            <p className="text-blue-100 text-xs font-medium">Staff Identification Card</p>
-          </div>
+          
+{/* Card Header (compact + aligned) */}
+<div className="bg-blue-600 px-4 py-3 text-white rounded-t-2xl">
+  <div className="flex items-center gap-3">
+    <img
+      src="https://i.postimg.cc/B68RPZHZ/logo-HSB-no-slogan.jpg"
+      alt="HSB Logo"
+      className="w-10 h-10 rounded bg-white/10 p-1 object-contain"
+    />
+    <div className="leading-tight">
+      <h2 className="text-base font-bold">
+        Hanoi School of Business and Management, VNU
+      </h2>
+      <p className="text-blue-100 text-[11px] font-medium">
+        Student Identification Card
+      </p>
+    </div>
+  </div>
+</div>
 
-          {/* Card Body */}
-          <div className="px-8 py-3">
-            {/* Avatar Section (taller) */}
-            <div className="flex justify-center mb-6"> 
-              <img src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
-              alt="Student Photo" 
-              className="w-56 h-56 rounded-full border-4 border-white shadow-md object-cover" /> 
-              </div>
+{/* Card Body (denser spacing) */}
+<div className="px-4 py-4 space-y-3">
+  {/* Avatar (smaller) */}
+  <div className="flex justify-center mb-2">
+    <img
+      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg"
+      alt="Photo"
+      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
+    />
+  </div>
 
-            {/* Student Information */}
-            <div className="space-y-2 text-gray-800">
-              <div className="border-b border-gray-200 pb-3">
-                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
-                  Full Name
-                </p>
-                <p className="text-base font-bold text-gray-900">Nguyễn Văn A</p>
-              </div>
+  {/* Info (tighter paddings + smaller labels) */}
+  <div className="space-y-2 text-gray-800">
+    <div className="border-b border-gray-200 pb-2">
+      <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Full Name</p>
+      <p className="text-sm font-bold text-gray-900">Nguyễn Văn A</p>
+    </div>
 
-              <div className="border-b border-gray-200 pb-3">
-                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
-                  Staff ID
-                </p>
-                <p className="text-base font-bold text-gray-900">22080</p>
-              </div>
+    <div className="border-b border-gray-200 pb-2">
+      <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Staff ID</p>
+      <p className="text-sm font-bold text-gray-900">22080</p>
+    </div>
 
-              <div className="border-b border-gray-200 pb-3">
-                <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
-                  Department
-                </p>
-                <p className="text-sm font-semibold text-gray-900 leading-snug">
-                  Faculty of Management
-                </p>
-              </div>
+    <div className="border-b border-gray-200 pb-2">
+      <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Department</p>
+      <p className="text-sm font-semibold text-gray-900 leading-snug">Faculty of Management</p>
+    </div>
 
-              <div className="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
-                <div>
-                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
-                    Type
-                  </p>
-                  <p className="text-base font-bold text-gray-900">Lecturer</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
-                    Status
-                  </p>
-                  <p className="text-base font-bold text-emerald-600">Dean</p>
-                </div>
-              </div>
+    <div className="grid grid-cols-2 gap-3 border-b border-gray-200 pb-2">
+      <div>
+        <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Type</p>
+        <p className="text-sm font-bold text-gray-900">Lecturer</p>
+      </div>
+      <div>
+        <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Status</p>
+        <p className="text-sm font-bold text-emerald-600">Dean</p>
+      </div>
+    </div>
 
-              <div className="grid grid-cols-2 gap-4 items-start">
-                <div>
-                  <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
-                    Valid Until
-                  </p>
-                  <p className="text-base font-bold text-gray-900">2030</p>
-                </div>
+    <div className="grid grid-cols-2 gap-3 items-start">
+      <div>
+        <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-0.5 font-semibold">Valid Until</p>
+        <p className="text-sm font-bold text-gray-900">2030</p>
+      </div>
+      <div className="flex justify-end">
+        <div className="w-24 h-24 bg-white rounded-xl border border-gray-200 flex items-center justify-center p-2 shadow-sm">
+          {qrCodeUrl ? (
+            <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+          ) : (
+            <span className="text-[10px] text-gray-400">Generating…</span>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-                <div className="flex justify-end">
-                  <div className="w-30 h-30 bg-white rounded-xl border border-gray-200 flex items-center justify-center p-2 shadow-sm">
-                    {qrCodeUrl ? (
-                      <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
-                    ) : (
-                      <span className="text-xs text-gray-400">Generating…</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           {/* /Card Body */}
         </div>
       </div>
