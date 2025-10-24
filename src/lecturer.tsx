@@ -2634,8 +2634,8 @@ const CanvasView: React.FC = () => {
           {/* Card Header */}
           
 {/* Card Header (compact + aligned) */}
-<div className="bg-blue-600 px-4 py-2 text-white rounded-t-2xl">
-  <div className="flex items-center gap-3">
+<div className="bg-blue-600 px-3 py-2 text-white rounded-t-2xl">
+  <div className="flex items-center gap-2">
     {/* Logo */}
     <img
       src="https://i.postimg.cc/Th8cNfKB/HSB-logo-white-singular-no-slogan.png"
@@ -2644,13 +2644,12 @@ const CanvasView: React.FC = () => {
     />
 
     {/* Text Block */}
-    <div className="flex flex-col justify-center leading-snug">
-      <h2 className="text-[9px] font-bold leading-snug">
+    <div className="leading-snug">
+      <h2 className="text-[11px] font-bold leading-snug">
         Hanoi School of Business and Management
       </h2>
-      <p className="text-blue-100 text-[9px] font-medium leading-tight">
-        Staff Identification Card (VNU-HSB)
-      </p>
+      <p className="text-blue-100 text-[11px] font-medium leading-tight">
+        Staff Identification Card (VNU-HSB) </p>
     </div>
   </div>
 </div>
