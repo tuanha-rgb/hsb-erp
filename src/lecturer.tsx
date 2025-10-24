@@ -457,35 +457,19 @@ const DashboardContent: React.FC = () => {
 
   return (
     <>
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Lecturer Dashboard</h1>
-            <p className="text-gray-500 mt-1">Welcome back, Dr. Smith</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option>This Week</option>
-              <option>This Month</option>
-              <option>This Semester</option>
-              <option>This Year</option>
-            </select>
-            <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="px-6 sm:px-6">
+  <div className="flex justify-between items-start">
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">Lecturer Dashboard</h1>
+      <p className="text-gray-500 mt-1">Welcome back, Dr. Nguyen Van A</p>
+    </div>
+  </div>
+</div>
+     
 
-      <div className="p-8">
+      <div className="p-2">
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-4 gap-4 mb-8">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -2903,7 +2887,7 @@ const LecturerApp: React.FC = () => {
     
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 p-2 w-full space-y-6 overflow-visible min-h-screen">
         {renderContent()}
       </main>
     </div>

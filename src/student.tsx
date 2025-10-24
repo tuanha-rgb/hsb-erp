@@ -4712,11 +4712,16 @@ const OneStop = () => (
 
   const Dashboard = () => (
     <div>
-                          <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">Welcome back, Nguyen Van A</h3>
-                          </div>
+                          <div className="px-6 sm:px-6">
+  <div className="flex justify-between items-start">
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
+      <p className="text-gray-500 mt-1">Welcome back, Nguyen Van A</p>
+    </div>
+  </div>
+</div>
 
-      <div className="grid grid-cols-4 gap-8 mb-8">
+      <div className="grid grid-cols-4 p-3 gap-8 mb-8">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
 
           <div className="flex items-center justify-between mb-4">
@@ -5896,7 +5901,7 @@ const Matriculation = () => {
 
   {/* Main Content Area */}
   <div className="flex-1 flex flex-col overflow-hidden">
-    <main className="flex-1 p-0 w-full space-y-6 overflow-visible min-h-screen">
+    <main className="flex-1 p-2 w-full space-y-6 overflow-visible min-h-screen">
       {/* ... Content rendering based on activePage ... */}
       {activePage === 'dashboard' && <Dashboard />}
       {activePage === 'profile' && <Profile />}
