@@ -5763,7 +5763,7 @@ const Matriculation = () => {
   {/* Sidebar */}
   <div
     className={`${
-      sidebarCollapsed ? 'w-16' : 'w-64'
+      sidebarCollapsed ? 'w-16' : 'w-60'
     } relative bg-slate-800 text-white flex flex-col transition-all duration-300`}
   >
     {/* 1. Controls rail for COLLAPSED view (Appears only when sidebarCollapsed is true) */}

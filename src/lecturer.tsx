@@ -2760,16 +2760,15 @@ const LecturerApp: React.FC = () => {
       <div className="flex min-h-screen bg-gray-50">
       {/* Left Sidebar */}
       <aside
-        className={`${isCollapsed ? 'w-16' : 'w-64'} relative bg-slate-800 text-white flex flex-col transition-all duration-300`}
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
+        className={`${isCollapsed ? 'w-16' : 'w-60'} relative bg-slate-800 text-white flex flex-col transition-all duration-300`}
+       
       >
         {/* Header: title + controls on the same baseline */}
         <div className="p-4 border-b border-slate-700">
           <div className={`${isCollapsed ? 'hidden' : 'block'}`}>
             {/* Row 1: Title (left) + Controls (right) aligned */}
-            <div className="flex items-baseline justify-between">
-              <h1 className="text-2xl font-bold leading-tight">HSB ERP</h1>
+            <div className="flex items-start justify-between">
+               <h1 className="text-2xl font-bold leading-none">HSB ERP</h1>
 
               <div className="flex items-baseline gap-2">
                 {/* Lock / Unlock */}
@@ -2799,7 +2798,7 @@ const LecturerApp: React.FC = () => {
             </div>
 
             {/* Row 2: Subtitle */}
-            <p className="text-slate-400 text-sm mt-1">Staff Portal</p>
+        <p className="text-slate-300 text-sm leading-none">Staff Portal</p>
           </div>
 
           {/* When collapsed, show compact controls (optional) */}

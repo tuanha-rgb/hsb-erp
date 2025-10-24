@@ -204,7 +204,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-2">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -557,135 +557,6 @@ const AdminDashboard = () => {
   );
 };
 
-  const StudentDashboard = () => (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-      <div className="grid grid-cols-4 gap-6">
-        <StatCard title="GPA" value="3.45" change="↑ 0.12 vs last semester" icon={TrendingUp} bgColor="bg-blue-100" iconColor="text-blue-600" />
-        <StatCard title="Active Courses" value="6" change="Current semester" icon={BookOpen} bgColor="bg-green-100" iconColor="text-green-600" />
-        <StatCard title="Attendance" value="92%" change="↑ 3% vs last semester" icon={UserCheck} bgColor="bg-purple-100" iconColor="text-purple-600" />
-        <StatCard title="Projects" value="8" change="5 completed, 3 ongoing" icon={Briefcase} bgColor="bg-orange-100" iconColor="text-orange-600" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Current Courses</h3>
-          <div className="space-y-3">
-            {[
-              {code: 'CS301', name: 'Data Structures', progress: 75},
-              {code: 'CS302', name: 'Database Systems', progress: 60},
-              {code: 'CS303', name: 'FONS', progress: 80}
-            ].map((course, i) => (
-              <div key={i} className="p-4 border rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <div>
-                    <p className="font-semibold text-sm">{course.name}</p>
-                    <p className="text-xs text-gray-500">{course.code}</p>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{width: `${course.progress}%`}}></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Upcoming Deadlines</h3>
-          <div className="space-y-3">
-            {[
-              {course: 'CS301', task: 'Assignment 3', date: 'Oct 18'},
-              {course: 'CS302', task: 'Project Proposal', date: 'Oct 20'},
-              {course: 'CS303', task: 'Midterm Exam', date: 'Oct 25'}
-            ].map((item, i) => (
-              <div key={i} className="p-4 border rounded-lg">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="font-semibold text-sm">{item.task}</p>
-                    <p className="text-xs text-gray-600">{item.course}</p>
-                  </div>
-                  <p className="text-sm font-semibold">{item.date}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const LecturerDashboard = () => (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Lecturer Dashboard</h1>
-      <div className="grid grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-blue-600" />
-            </div>
-            <button className="p-2 bg-gray-50 rounded-lg"><ArrowRight className="w-5 h-5" /></button>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Teaching Hours</p>
-          <p className="text-2xl font-bold text-gray-900">480h</p>
-          <p className="text-xs text-green-600 mt-2">Total cumulative</p>
-          <p className="text-xs text-gray-600 mt-1">Workload: 16h/week</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-green-600" />
-            </div>
-            <button className="p-2 bg-gray-50 rounded-lg"><ArrowRight className="w-5 h-5" /></button>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Publications</p>
-          <p className="text-2xl font-bold text-gray-900 mb-2">8</p>
-          <p className="text-xs text-gray-600">Papers: 5 & Patents: 3</p>
-        </div>
-        <StatCard title="Community Hours" value="120h" change="This academic year" icon={Users} bgColor="bg-purple-100" iconColor="text-purple-600" />
-        <StatCard title="Active Projects" value="5" change="2 completed this year" icon={Briefcase} bgColor="bg-orange-100" iconColor="text-orange-600" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">My Courses</h3>
-          <div className="space-y-3">
-            {[
-              {code: 'CS401', name: 'Introduction to AI', students: 65},
-              {code: 'CS501', name: 'Machine Learning', students: 58},
-              {code: 'CS601', name: 'Deep Learning', students: 42}
-            ].map((course, i) => (
-              <div key={i} className="p-4 border rounded-lg">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="font-semibold text-sm">{course.name}</p>
-                    <p className="text-xs text-gray-500">{course.code}</p>
-                  </div>
-                  <p className="text-sm font-semibold text-blue-600">{course.students}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Pending Tasks</h3>
-          <div className="space-y-3">
-            {[
-              {task: 'Grade submission - CS401', deadline: 'Oct 20', priority: 'high'},
-              {task: 'Syllabus update - CS501', deadline: 'Oct 25', priority: 'medium'},
-              {task: 'Thesis review', deadline: 'Oct 30', priority: 'medium'}
-            ].map((item, i) => (
-              <div key={i} className="p-4 border rounded-lg">
-                <p className="font-semibold text-sm">{item.task}</p>
-                <p className="text-xs text-gray-600 mt-1">Due: {item.deadline}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   const FacultyDashboard = () => (
     <div className="space-y-6">
@@ -917,8 +788,8 @@ const DepartmentOverview = () => {
     : departments.filter(d => d.id === selectedDepartment);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Department Overview</h1>
@@ -1336,7 +1207,7 @@ const FinanceMetricCards: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-2">
       <div className="grid grid-cols-4 gap-6">
         <MetricCard 
           title="Total Revenue" 
@@ -1503,7 +1374,7 @@ const FinanceMetricCards: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-2">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -2736,7 +2607,7 @@ const LibraryDashboard = () => (
 ];
 
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen bg-gray-50 p-2">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Lecturer Profile Management</h1>
@@ -4211,8 +4082,8 @@ const ResearchManagement = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-3">
+      <div className="max-w mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
@@ -4507,7 +4378,7 @@ const ResearchManagement = () => {
     ];
 
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen bg-gray-50 p-2">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Student Profile Management</h1>
@@ -4868,7 +4739,7 @@ const ResearchManagement = () => {
     });
 
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen bg-gray-50 p-2">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Events Dashboard</h1>
@@ -5305,7 +5176,7 @@ const TimetableOverview = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Timetable Overview</h1>
@@ -5788,8 +5659,8 @@ const ClassOverview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Classes Overview</h1>
@@ -6179,7 +6050,7 @@ const ClassOverview = () => {
     ];
 
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen bg-gray-50 p-2">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
@@ -6392,8 +6263,8 @@ const ClassOverview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Faculty Rankings</h1>
@@ -6698,7 +6569,7 @@ const ClassOverview = () => {
     ];
 
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen bg-gray-50 p-2">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Lecturers Overview</h1>
@@ -7071,8 +6942,8 @@ const AlumniOverview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Alumni Dashboard</h1>
@@ -7565,8 +7436,8 @@ const OneStopService = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">One-Stop Service Center</h1>
@@ -8009,9 +7880,9 @@ const GradeManagement = () => {
   ];
 
   const OverviewDashboard = () => (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100">
           <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
             <Users className="w-6 h-6 text-blue-600" />
           </div>
@@ -8148,7 +8019,7 @@ const GradeManagement = () => {
   );
 
   const CourseAnalysis = () => (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
@@ -8419,7 +8290,7 @@ const GradeManagement = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="mx-auto w-full max-w-[1600px] space-y-4">
+      <div className="mx-auto w-full max-w space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Grade Management</h1>
@@ -9145,8 +9016,8 @@ const HRProfileManagement = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">HR Profile Management</h1>
           <p className="text-sm text-gray-500 mt-1">Manage all staff profiles, qualifications, and political training status</p>
@@ -10070,7 +9941,7 @@ const HRProfileManagement = () => {
       {/* Sidebar */}
       <div 
         className={`bg-slate-800 text-white overflow-y-auto transition-all duration-300 ${
-          sidebarCollapsed ? 'w-16' : 'w-64'
+          sidebarCollapsed ? 'w-16' : 'w-60'
         } ${!sidebarLocked && !sidebarCollapsed ? 'absolute left-0 top-0 bottom-0 z-40 shadow-2xl' : 'relative'}`}
         onMouseEnter={() => {
           if (!sidebarLocked && sidebarCollapsed) {
@@ -10176,7 +10047,7 @@ const HRProfileManagement = () => {
 
       {/* Main Content */}
       <div className={`flex-1 overflow-y-auto transition-all duration-300`}>
-        <div className="p-8">
+        <div className="p-2">
           {renderContent()}
         </div>
       </div>
