@@ -2645,7 +2645,7 @@ const CanvasView: React.FC = () => {
 
     {/* Text Block */}
     <div className="leading-snug">
-      <h2 className="text-[11px] font-bold leading-snug">
+      <h2 className="text-[10.6px] font-bold leading-snug">
         Hanoi School of Business and Management
       </h2>
       <p className="text-blue-100 text-[11px] font-medium leading-tight">
