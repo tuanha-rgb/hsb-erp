@@ -15,7 +15,7 @@ import {
   Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
-  Edit, Save, ShieldCheck, Phone, Mail 
+  Edit, Save, ShieldCheck, Phone, Mail, Trash2 
 } from "lucide-react";
 
 
@@ -1958,6 +1958,985 @@ const FinanceMetricCards: React.FC = () => {
     </div>
   );
 };
+
+{/*Scholarship tab*/}
+const Scholarship = () => {
+
+  const [activeTab, setActiveTab] = useState('overview');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [showCreateScholarship, setShowCreateScholarship] = useState(false);
+  const [showPushConfirmation, setShowPushConfirmation] = useState(false);
+  const [selectedScholarshipToPush, setSelectedScholarshipToPush] = useState(null);
+  const [pushedScholarships, setPushedScholarships] = useState([]);
+
+  const handlePushScholarship = (scholarshipId) => {
+    setSelectedScholarshipToPush(scholarshipId);
+    setShowPushConfirmation(true);
+  };
+
+  const confirmPush = () => {
+    setPushedScholarships([...pushedScholarships, selectedScholarshipToPush]);
+    setShowPushConfirmation(false);
+    setSelectedScholarshipToPush(null);
+  };
+
+  const scholarships = [
+    {
+      id: 1,
+      name: 'Merit-Based Scholarship',
+      type: 'Internal - Merit',
+      amount: '10,000,000 VND',
+      period: '2024-2025',
+      deadline: '2024-12-31',
+      status: 'Active',
+      applicants: 45,
+      awarded: 12,
+      budget: '120,000,000 VND',
+      budgetUsed: '60,000,000 VND',
+      department: 'Academic Affairs'
+    },
+    {
+      id: 2,
+      name: 'Commendation Scholarship',
+      type: 'Internal - Commendation',
+      amount: '5,000,000 VND',
+      period: '2024-2025',
+      deadline: '2025-01-15',
+      status: 'Active',
+      applicants: 38,
+      awarded: 8,
+      budget: '50,000,000 VND',
+      budgetUsed: '25,000,000 VND',
+      department: 'Student Services'
+    },
+    {
+      id: 3,
+      name: 'TechCorp Vietnam Scholarship',
+      type: 'External - Company',
+      amount: '20,000,000 VND',
+      period: '2024-2025',
+      deadline: '2025-02-28',
+      status: 'Active',
+      applicants: 67,
+      awarded: 5,
+      budget: '100,000,000 VND',
+      budgetUsed: '100,000,000 VND',
+      department: 'Academic Affairs',
+      sponsor: 'TechCorp Vietnam'
+    },
+    {
+      id: 4,
+      name: 'VinGroup Talent Scholarship',
+      type: 'External - Company',
+      amount: '25,000,000 VND',
+      period: '2024-2025',
+      deadline: '2024-12-20',
+      status: 'Active',
+      applicants: 89,
+      awarded: 10,
+      budget: '250,000,000 VND',
+      budgetUsed: '250,000,000 VND',
+      department: 'Academic Affairs',
+      sponsor: 'VinGroup'
+    },
+    {
+      id: 5,
+      name: 'HSB Alumni Scholarship',
+      type: 'External - Alumni',
+      amount: '8,000,000 VND',
+      period: '2024-2025',
+      deadline: '2025-01-31',
+      status: 'Active',
+      applicants: 52,
+      awarded: 15,
+      budget: '120,000,000 VND',
+      budgetUsed: '120,000,000 VND',
+      department: 'Student Services',
+      sponsor: 'HSB Alumni Association'
+    }
+  ];
+
+  const applications = [
+    {
+      id: 1,
+      studentId: '22080000',
+      studentName: 'Nguyễn Văn A',
+      scholarshipName: 'Merit-Based Scholarship',
+      amount: '10,000,000 VND',
+      submittedDate: '2024-10-15',
+      status: 'Under Review',
+      gpa: 3.85,
+      department: 'Academic Affairs',
+      reviewer: 'Dr. Trần Thị B',
+      documents: ['Transcript', 'Recommendation Letter', 'Personal Statement']
+    },
+    {
+      id: 2,
+      studentId: '22080001',
+      studentName: 'Lê Thị C',
+      scholarshipName: 'TechCorp Vietnam Scholarship',
+      amount: '20,000,000 VND',
+      submittedDate: '2024-10-18',
+      status: 'Approved',
+      gpa: 3.92,
+      department: 'Academic Affairs',
+      reviewer: 'Dr. Trần Thị B',
+      approvedDate: '2024-10-22',
+      documents: ['Transcript', 'Project Portfolio', 'Recommendation Letter']
+    },
+    {
+      id: 3,
+      studentId: '22080002',
+      studentName: 'Phạm Văn D',
+      scholarshipName: 'Commendation Scholarship',
+      amount: '5,000,000 VND',
+      submittedDate: '2024-10-12',
+      status: 'Under Review',
+      gpa: 3.45,
+      department: 'Student Services',
+      reviewer: 'Ms. Nguyễn Thị E',
+      documents: ['Transcript', 'Community Service Certificate', 'Personal Statement']
+    },
+    {
+      id: 4,
+      studentId: '22080003',
+      studentName: 'Hoàng Thị F',
+      scholarshipName: 'VinGroup Talent Scholarship',
+      amount: '25,000,000 VND',
+      submittedDate: '2024-10-20',
+      status: 'Pending Documents',
+      gpa: 3.88,
+      department: 'Academic Affairs',
+      reviewer: 'Dr. Trần Thị B',
+      documents: ['Transcript', 'Recommendation Letter']
+    },
+    {
+      id: 5,
+      studentId: '22080004',
+      studentName: 'Đỗ Văn G',
+      scholarshipName: 'HSB Alumni Scholarship',
+      amount: '8,000,000 VND',
+      submittedDate: '2024-10-19',
+      status: 'Rejected',
+      gpa: 3.12,
+      department: 'Student Services',
+      reviewer: 'Ms. Nguyễn Thị E',
+      rejectedDate: '2024-10-23',
+      rejectionReason: 'Does not meet minimum GPA requirement',
+      documents: ['Transcript', 'Financial Need Statement']
+    },
+    {
+      id: 6,
+      studentId: '22080005',
+      studentName: 'Vũ Thị H',
+      scholarshipName: 'Merit-Based Scholarship',
+      amount: '10,000,000 VND',
+      submittedDate: '2024-10-21',
+      status: 'Approved',
+      gpa: 3.95,
+      department: 'Academic Affairs',
+      reviewer: 'Dr. Trần Thị B',
+      approvedDate: '2024-10-24',
+      documents: ['Transcript', 'Recommendation Letter', 'Research Publication']
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Approved': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'Under Review': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'Pending Documents': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Rejected': return 'bg-red-100 text-red-700 border-red-200';
+      case 'Active': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'Closed': return 'bg-gray-100 text-gray-700 border-gray-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const filteredApplications = filterStatus === 'all' 
+    ? applications 
+    : applications.filter(app => app.status === filterStatus);
+
+  const totalApplicants = applications.length;
+  const approvedCount = applications.filter(a => a.status === 'Approved').length;
+  const underReviewCount = applications.filter(a => a.status === 'Under Review').length;
+  const pendingCount = applications.filter(a => a.status === 'Pending Documents').length;
+  const rejectedCount = applications.filter(a => a.status === 'Rejected').length;
+  
+  const totalBudget = scholarships.reduce((sum, s) => {
+    const amount = parseInt(s.budget.replace(/[^0-9]/g, ''));
+    return sum + amount;
+  }, 0);
+  
+  const totalBudgetUsed = scholarships.reduce((sum, s) => {
+    const amount = parseInt(s.budgetUsed.replace(/[^0-9]/g, ''));
+    return sum + amount;
+  }, 0);
+
+  const renderOverview = () => (
+    <div className="space-y-4">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <FileText className="text-blue-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Total Applications</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{totalApplicants}</p>
+          <p className="text-sm text-gray-500">{scholarships.length} active scholarships</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-emerald-100 rounded-xl">
+              <CheckCircle className="text-emerald-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Approved</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{approvedCount}</p>
+          <p className="text-sm text-emerald-600 font-medium">+{Math.round((approvedCount/totalApplicants)*100)}% approval rate</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-amber-100 rounded-xl">
+              <Clock className="text-amber-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Under Review</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{underReviewCount}</p>
+          <p className="text-sm text-gray-500">Requires attention</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-purple-100 rounded-xl">
+              <DollarSign className="text-purple-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Budget Usage</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{Math.round((totalBudgetUsed/totalBudget)*100)}%</p>
+          <p className="text-sm text-gray-500">{(totalBudgetUsed/1000000).toFixed(0)}M / {(totalBudget/1000000).toFixed(0)}M VND</p>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Application Status Distribution</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Approved</span>
+              <div className="flex items-center gap-3">
+                <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{width: `${(approvedCount/totalApplicants)*100}%`}}></div>
+                </div>
+                <span className="text-sm font-semibold text-gray-900 w-8">{approvedCount}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Under Review</span>
+              <div className="flex items-center gap-3">
+                <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-full" style={{width: `${(underReviewCount/totalApplicants)*100}%`}}></div>
+                </div>
+                <span className="text-sm font-semibold text-gray-900 w-8">{underReviewCount}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Pending Documents</span>
+              <div className="flex items-center gap-3">
+                <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full" style={{width: `${(pendingCount/totalApplicants)*100}%`}}></div>
+                </div>
+                <span className="text-sm font-semibold text-gray-900 w-8">{pendingCount}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Rejected</span>
+              <div className="flex items-center gap-3">
+                <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-red-500 rounded-full" style={{width: `${(rejectedCount/totalApplicants)*100}%`}}></div>
+                </div>
+                <span className="text-sm font-semibold text-gray-900 w-8">{rejectedCount}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Scholarships by Applications</h3>
+          <div className="space-y-4">
+            {scholarships.sort((a, b) => b.applicants - a.applicants).slice(0, 5).map((scholarship, idx) => (
+              <div key={scholarship.id} className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center font-bold text-purple-600">
+                  {idx + 1}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">{scholarship.name}</p>
+                  <p className="text-xs text-gray-500">{scholarship.department}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">{scholarship.applicants}</p>
+                  <p className="text-xs text-gray-500">applicants</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+        <div className="space-y-3">
+          {applications.slice(0, 5).map(app => (
+            <div key={app.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold">
+                  {app.studentName.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{app.studentName}</p>
+                  <p className="text-xs text-gray-500">Applied for {app.scholarshipName}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500">{app.submittedDate}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(app.status)}`}>
+                  {app.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderApplications = () => (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Filter size={20} className="text-gray-400" />
+            <button
+              onClick={() => setFilterStatus('all')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                filterStatus === 'all'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All ({applications.length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('Under Review')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                filterStatus === 'Under Review'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Under Review ({underReviewCount})
+            </button>
+            <button
+              onClick={() => setFilterStatus('Approved')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                filterStatus === 'Approved'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Approved ({approvedCount})
+            </button>
+            <button
+              onClick={() => setFilterStatus('Pending Documents')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                filterStatus === 'Pending Documents'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Pending ({pendingCount})
+            </button>
+          </div>
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by student name or ID..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Applications Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Scholarship</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">GPA</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Submitted</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredApplications.map(app => (
+                <tr key={app.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold">
+                        {app.studentName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{app.studentName}</p>
+                        <p className="text-xs text-gray-500">{app.studentId}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm font-medium text-gray-900">{app.scholarshipName}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm font-semibold text-indigo-600">{app.amount}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm font-semibold text-gray-900">{app.gpa}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-gray-700">{app.department}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-gray-700">{app.submittedDate}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(app.status)}`}>
+                      {app.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => {
+                        setSelectedApplication(app);
+                        setShowApplicationModal(true);
+                      }}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
+                    >
+                      <Eye size={14} />
+                      Review
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Application Review Modal */}
+      {showApplicationModal && selectedApplication && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white font-bold text-2xl border border-white/30">
+                    {selectedApplication.studentName.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold mb-1">{selectedApplication.studentName}</h2>
+                    <p className="text-indigo-100">ID: {selectedApplication.studentId}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`px-3 py-1 bg-white text-indigo-700 text-xs font-semibold rounded-full`}>
+                        {selectedApplication.status}
+                      </span>
+                      <span className="text-sm text-indigo-100">GPA: {selectedApplication.gpa}</span>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowApplicationModal(false)}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <XCircle size={24} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-280px)]">
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Scholarship Applied</h3>
+                  <p className="text-lg font-bold text-gray-900">{selectedApplication.scholarshipName}</p>
+                  <p className="text-sm text-indigo-600 font-semibold mt-1">{selectedApplication.amount}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Submission Date</h3>
+                  <p className="text-lg font-bold text-gray-900">{selectedApplication.submittedDate}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Department</h3>
+                  <p className="text-lg font-bold text-gray-900">{selectedApplication.department}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Reviewer</h3>
+                  <p className="text-lg font-bold text-gray-900">{selectedApplication.reviewer}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Submitted Documents</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedApplication.documents.map((doc, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <FileText className="text-indigo-600" size={20} />
+                      <span className="text-sm font-medium text-gray-900">{doc}</span>
+                      <button className="ml-auto text-indigo-600 hover:text-indigo-700">
+                        <Download size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedApplication.rejectionReason && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="text-red-600 mt-0.5" size={20} />
+                    <div>
+                      <h3 className="text-sm font-semibold text-red-900 mb-1">Rejection Reason</h3>
+                      <p className="text-sm text-red-700">{selectedApplication.rejectionReason}</p>
+                      <p className="text-xs text-red-600 mt-1">Date: {selectedApplication.rejectedDate}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedApplication.approvedDate && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="text-emerald-600 mt-0.5" size={20} />
+                    <div>
+                      <h3 className="text-sm font-semibold text-emerald-900 mb-1">Approved</h3>
+                      <p className="text-sm text-emerald-700">This application has been approved</p>
+                      <p className="text-xs text-emerald-600 mt-1">Date: {selectedApplication.approvedDate}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-gray-200 p-6 bg-gray-50">
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowApplicationModal(false)}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Close
+                </button>
+                {selectedApplication.status === 'Under Review' && (
+                  <>
+                    <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                      Reject Application
+                    </button>
+                    <button className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium">
+                      Approve Application
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderScholarships = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search scholarships..."
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <button
+          onClick={() => setShowCreateScholarship(true)}
+          className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+        >
+          <Plus size={20} />
+          Create Scholarship
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {scholarships.map(scholarship => (
+          <div key={scholarship.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-xl font-bold text-gray-900">{scholarship.name}</h3>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(scholarship.status)}`}>
+                    {scholarship.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">{scholarship.type}</p>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handlePushScholarship(scholarship.id)}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                    pushedScholarships.includes(scholarship.id)
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-300 text-gray-500 hover:bg-gray-400'
+                  }`}
+                >
+                  <CheckCircle size={16} />
+                  {pushedScholarships.includes(scholarship.id) ? 'Pushed' : 'Push'}
+                </button>
+                <button className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" title="Edit">
+                  <Edit size={18} className="text-gray-700" />
+                </button>
+                <button className="p-2 bg-red-100 rounded-lg hover:bg-red-200 transition-colors" title="Delete">
+                  <Trash2 size={18} className="text-red-600" />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-5 gap-6 mb-4">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Amount</p>
+                <p className="text-lg font-bold text-indigo-600">{scholarship.amount}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Period</p>
+                <p className="text-lg font-bold text-gray-900">{scholarship.period}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Deadline</p>
+                <p className="text-lg font-bold text-gray-900">{scholarship.deadline}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Department</p>
+                <p className="text-lg font-bold text-gray-900">{scholarship.department}</p>
+              </div>
+              {scholarship.sponsor && (
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Sponsor</p>
+                  <p className="text-sm font-semibold text-gray-900">{scholarship.sponsor}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+              <div className="bg-blue-50 rounded-lg p-3">
+                <p className="text-xs text-blue-600 font-medium mb-1">Applicants</p>
+                <p className="text-2xl font-bold text-blue-900">{scholarship.applicants}</p>
+              </div>
+              <div className="bg-emerald-50 rounded-lg p-3">
+                <p className="text-xs text-emerald-600 font-medium mb-1">Awarded</p>
+                <p className="text-2xl font-bold text-emerald-900">{scholarship.awarded}</p>
+              </div>
+              <div className="bg-purple-50 rounded-lg p-3">
+                <p className="text-xs text-purple-600 font-medium mb-1">Budget Usage</p>
+                <p className="text-2xl font-bold text-purple-900">
+                  {Math.round((parseInt(scholarship.budgetUsed.replace(/[^0-9]/g, ''))/parseInt(scholarship.budget.replace(/[^0-9]/g, '')))*100)}%
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Push Confirmation Modal */}
+      {showPushConfirmation && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <CheckCircle size={24} />
+                </div>
+                <h2 className="text-2xl font-bold">Confirm Push to Students</h2>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                Are you sure you want to push this scholarship to all eligible students? 
+                Once pushed, students will be able to view and apply for this scholarship.
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900 font-medium">
+                  This action will:
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-blue-800">
+                  <li>• Notify all eligible students via email</li>
+                  <li>• Make the scholarship visible in student portal</li>
+                  <li>• Enable students to submit applications</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 p-6 bg-gray-50">
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => {
+                    setShowPushConfirmation(false);
+                    setSelectedScholarshipToPush(null);
+                  }}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmPush}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                >
+                  <CheckCircle size={20} />
+                  Confirm Push
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Scholarship Modal */}
+      {showCreateScholarship && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Create New Scholarship</h2>
+                <button 
+                  onClick={() => setShowCreateScholarship(false)}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <XCircle size={24} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              <form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Scholarship Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter scholarship name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <option>Internal - Merit</option>
+                      <option>Internal - Commendation</option>
+                      <option>External - Company</option>
+                      <option>External - International</option>
+                      <option>External - Alumni</option>
+                      <option>External - Partner</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Department</label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <option>Academic Affairs</option>
+                      <option>Student Services</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Amount (VND)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="10,000,000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Budget (VND)</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="100,000,000"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Period</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="2024-2025"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Deadline</label>
+                    <input
+                      type="date"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sponsor (Optional)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Company or organization name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                  <textarea
+                        rows={3}
+
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter scholarship description"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Requirements</label>
+                  <textarea
+                        rows={3}
+
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter requirements (one per line)"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Benefits</label>
+                  <textarea
+                        rows={3}
+
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter benefits (one per line)"
+                  ></textarea>
+                </div>
+              </form>
+            </div>
+
+            <div className="border-t border-gray-200 p-6 bg-gray-50">
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowCreateScholarship(false)}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowCreateScholarship(false);
+                    alert('Scholarship created successfully! You can now push it to students from the scholarships list.');
+                  }}
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                >
+                  Create Scholarship
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Scholarship Management Portal</h1>
+              <p className="text-gray-600 mt-1">Admin Dashboard for Academic Affairs & Student Services</p>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex gap-4 mt-6">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'overview'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <BarChart3 size={20} />
+                Overview
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('applications')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'applications'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <FileText size={20} />
+                Applications
+                <span className="px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded-full">
+                  {underReviewCount}
+                </span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('scholarships')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'scholarships'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Award size={20} />
+                Scholarships
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w mx-auto px-8 py-4">
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'applications' && renderApplications()}
+        {activeTab === 'scholarships' && renderScholarships()}
+      </div>
+    </div>
+  );
+}
 
 const LibraryDashboard = () => (
     <div className="space-y-6">
@@ -8373,6 +9352,9 @@ const GradeManagement = () => {
     }
     if (activeTab === 'student-services') {
       return <StudentServicesOverview />;
+    }
+    if (activeTab === 'scholarships') {
+      return <Scholarship />;
     }
     if (activeTab === 'finance-overview') {
       return <FinanceOverview />;
