@@ -5660,7 +5660,7 @@ const Matriculation = () => {
   }, []);
 
   return (
-    <div className="min-h-full flex items-center justify-center p-6 bg-gray-100">
+    <div className="min-h-full flex items-center justify-center bg-white">
       <div className="w-full max-w-[420px] sm:max-w-[360px] mx-auto">
         {/* Student Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
@@ -5678,7 +5678,7 @@ const Matriculation = () => {
 
     {/* Text Block */}
     <div className="leading-snug">
-      <h2 className="text-[11px] font-bold leading-snug">
+      <h2 className="text-[10.5px] font-bold leading-snug">
         Hanoi School of Business and Management
       </h2>
       <p className="text-blue-100 text-[11px] font-medium leading-tight">
