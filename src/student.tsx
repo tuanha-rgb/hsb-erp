@@ -6,9 +6,8 @@ import * as QRCode from "qrcode";
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
   CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
-FileQuestion, FileDown, PieChart, Filter, XCircle,
-FileText,
-MessageSquare} from 'lucide-react';
+FileQuestion, FileDown, PieChart, Filter, XCircle, Pencil, Users, FileText, MessageSquare} 
+from 'lucide-react';
 
 export default function Student() {
   const [activePage, setActivePage] = useState('calendar');
@@ -4786,7 +4785,7 @@ const Dashboard = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="col-span-2 space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
@@ -4915,93 +4914,92 @@ const Dashboard = () => (
   );
 
 const Profile = () => (
-    <div className="space-y-6 p-6">
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-6">
-            <div className="flex justify-center mb-6">
-                <img
-      src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
-      alt="Student Photo"
-      className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
-    />
-              </div>
-            <div>
-              <div className="flex items-center gap-4 mb-2">
-                <h2 className="text-3xl font-bold">Nguyễn Văn A</h2>
-                <div className="flex items-center gap-3 px-4 py-2 bg-white/20 rounded-lg">
-                  <div className="text-center border-r border-white/30 pr-3">
-                    <p className="text-xs text-blue-100 mb-1">GPA</p>
-                    <p className="text-xl font-bold">3.45</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-blue-100 mb-1">EC Level</p>
-                    <p className="text-sm font-semibold">Excellent</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 text-blue-100">
-                <div className="flex items-center gap-2">
-                  <CreditCard size={18} />
-                  <span>22080000</span>
-                </div>
-                <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
-                  Internship
-                </span>
-              </div>
+    <div className="space-y-6 p-3">
+    {/* Profile hero (responsive) */}
+<div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 sm:p-6 lg:p-8">
+  {/* Top row: avatar + name/badges + actions */}
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    {/* Left: avatar + name + badges */}
+    <div className="flex flex-wrap items-center gap-4 flex-1 min-w-0">
+      {/* Avatar */}
+      <img
+        src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg"
+        alt="Avatar"
+        className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white/20 object-cover shrink-0"
+      />
+
+      {/* Name + chips */}
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-bold leading-tight text-2xl sm:text-3xl lg:text-4xl min-w-0">
+            <span className="truncate block">Nguyễn Văn A</span>
+          </h1>
+
+          {/* GPA + EC Level chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="px-3 py-1.5 rounded-lg bg-white/15 backdrop-blur text-sm">
+              <span className="opacity-90 mr-2">GPA</span>
+              <span className="font-semibold">3.45</span>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-blue-600"></span>
-            </button>
-            <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 transition-colors">
-              <Edit3 size={18} />
-              <span>Edit Profile</span>
-            </button>
+            <div className="px-3 py-1.5 rounded-lg bg-white/15 backdrop-blur text-sm">
+              <span className="opacity-90 mr-2">EC Level</span>
+              <span className="font-semibold">Excellent</span>
+            </div>
           </div>
         </div>
-        
-        <div className="grid grid-cols-6 gap-4 pt-6 border-t border-white/20">
-          <div className="col-span-2">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Mail size={18} />
-              </div>
-              <div>
-                <p className="text-blue-100 text-xs">Email</p>
-                <p className="font-medium text-sm">met22080001@hsb.edu.vn</p>
-              </div>
-            </div>
+
+        {/* ID + tag line – wraps under the name on small screens */}
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="opacity-90">22080000</span>
           </div>
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Phone size={18} />
-              </div>
-              <div>
-                <p className="text-blue-100 text-xs">Phone</p>
-                <p className="font-medium text-sm">0846238088</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p className="text-blue-100 text-xs mb-1">Program</p>
-            <p className="font-semibold">MET</p>
-          </div>
-          <div>
-            <p className="text-blue-100 text-xs mb-1">Cohort</p>
-            <p className="font-semibold">QH-2022-D</p>
-          </div>
-          <div>
-            <p className="text-blue-100 text-xs mb-1">Current Semester</p>
-            <p className="font-semibold">5</p>
-          </div>
+          <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur text-xs">
+            Internship
+          </span>
         </div>
       </div>
+    </div>
 
-      <div className="grid grid-cols-3 gap-6">
+    {/* Right: actions – stack below on small screens */}
+    <div className="absolute top-4 right-4 flex items-center gap-3 mt-6">
+    <button className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
+      <Bell size={18} />
+    </button>
+    <button className="px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30 text-sm font-medium transition-colors flex items-center gap-2">
+      <Pencil size={16} />
+      Edit
+    </button>
+  </div>
+  </div>
+
+  {/* Info row – becomes 1/2/5 columns as screen grows */}
+  <div className="mt-4 sm:mt-6 border-t border-white/20 pt-4 sm:pt-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+      <div className="min-w-0">
+        <p className="text-white/80 text-sm mb-1">Email</p>
+        <p className="font-semibold truncate">met22080001@hsb.edu.vn</p>
+      </div>
+      <div className="min-w-0">
+        <p className="text-white/80 text-sm mb-1">Phone</p>
+        <p className="font-semibold truncate">0846238088</p>
+      </div>
+      <div className="min-w-0">
+        <p className="text-white/80 text-sm mb-1">Program</p>
+        <p className="font-semibold truncate">MET</p>
+      </div>
+      <div className="min-w-0">
+        <p className="text-white/80 text-sm mb-1">Cohort</p>
+        <p className="font-semibold truncate">QH-2022-D</p>
+      </div>
+      <div className="min-w-0">
+        <p className="text-white/80 text-sm mb-1">Current Semester</p>
+        <p className="font-semibold">5</p>
+      </div>
+    </div>
+  </div>
+</div>
+{/*profile info card*/}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="col-span-2 space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Personal Information</h3>
