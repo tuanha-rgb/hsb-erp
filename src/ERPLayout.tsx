@@ -2870,10 +2870,10 @@ const Scholarship = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w mx-auto px-8 py-6">
+      <div className="bg-white border-b border-gray-200 rounded-xl border sticky top-0 z-10">
+        <div className="max-w mx-auto px-9 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Scholarship Management Portal</h1>
@@ -2929,7 +2929,7 @@ const Scholarship = () => {
         </div>
       </div>
 
-      <div className="max-w mx-auto px-8 py-4">
+      <div className="max-w mx-auto px-3 py-3">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'applications' && renderApplications()}
         {activeTab === 'scholarships' && renderScholarships()}
@@ -5444,7 +5444,7 @@ const StudentServicesOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {services.map((service) => (
             <div
               key={service.id}
@@ -5477,7 +5477,7 @@ const StudentServicesOverview = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-6 mt-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Service Request Trends</h3>
             <div className="h-64 flex items-end justify-between gap-3">
@@ -5677,7 +5677,7 @@ const StudentProfileAdmin = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-4">
               <div className="flex-1 relative">
@@ -5705,7 +5705,7 @@ const StudentProfileAdmin = () => {
                 onChange={(e) => setFilterProgram(e.target.value)}
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Programs</option>
+                <option value="all">Faculties</option>
                 <option value="cs">FONS</option>
                 <option value="ba">FOM</option>
                 <option value="se">FONS</option>
@@ -5993,10 +5993,10 @@ const CourseFeedback =() => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w mx-auto px-8 py-6">
+      <div className="bg-white border-b rounded-xl border-gray-200 sticky top-0 z-10">
+        <div className="max-w mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Course Feedback Management</h1>
@@ -6006,7 +6006,7 @@ const CourseFeedback =() => {
         </div>
       </div>
 
-      <div className="max-w mx-auto px-8 py-4">
+      <div className="max-w mx-auto px-2 py-3">
         <div className="space-y-4">
           {/* Statistics Cards */}
           <div className="grid grid-cols-4 gap-4">
@@ -6483,7 +6483,7 @@ const EventsDashboard = () => {
     });
 
     return (
-      <div className="min-h-screen bg-gray-50 p-2">
+      <div className="min-h-screen bg-gray-50 p-3">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Events Dashboard</h1>
@@ -6495,7 +6495,7 @@ const EventsDashboard = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-4 mt-3">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
