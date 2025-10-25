@@ -7,7 +7,7 @@ import {
   Home, User as UserIcon, BookText, Globe, Lock, ChevronLeft,
   Mail, Phone, Building2, Edit, GraduationCap,
   Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare, DollarSign, Search, Filter, Eye, MoreVertical,
-  User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon
+  User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon, Pencil
 } from 'lucide-react';
 import * as QRCode from "qrcode";
 
@@ -293,12 +293,12 @@ const LecturerProfile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-8 py-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 sm:p-6 lg:p-8">
+        <div className="max-w mx-auto">
           <div className="flex justify-between items-start">
-            <div className="flex items-start gap-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               {/* Profile pic */}
-              <div className="flex justify-center mb-6">
+              <div className="flex flex-wrap items-center gap-4 flex-1 min-w-0">
                 <img
       src="https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg" 
       alt="Student Photo"
@@ -318,34 +318,34 @@ const LecturerProfile = () => {
                     {lecturerInfo.rating} - {lecturerInfo.ratingLevel}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
                   <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
+                    <Mail className="min-w-0" />
                     <span>{lecturerInfo.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
+                    <Phone className="min-w-0" />
                     <span>{lecturerInfo.phone}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
+                    <Building2 className="min-w-0" />
                     <span>{lecturerInfo.department}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="min-w-0" />
                     <span>Office: {lecturerInfo.office}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
-                <Bell className="w-4 h-4" />
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-                <Edit className="w-4 h-4" />
-                Edit Profile
-              </button>
+            <div className="absolute top-4 right-4 flex items-center gap-3 mt-6">
+    <button className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
+      <Bell size={18} />
+    </button>
+    <button className="px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30 text-sm font-medium transition-colors flex items-center gap-2">
+      <Pencil size={16} />
+      Edit
+    </button>
             </div>
           </div>
 
@@ -365,7 +365,7 @@ const LecturerProfile = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-8 py-8">
+      <div className="max-w mx-auto px-8 py-8">
         {activeTab === 'overview' && (
           <div className="grid grid-cols-3 gap-6">
             {/* Left Column - Personal & Academic Info */}
@@ -654,7 +654,7 @@ const ScheduleView = () => {
   return (
     <div className="flex-1 overflow-auto">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-white border-b rounded-xl border-gray-200 px-9 py-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Schedule & Tasks</h1>
@@ -1092,9 +1092,9 @@ const LecturerTeaching = () => {
   };
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto p-3">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-white border-b border-gray-200 px-6 py-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Teaching Management</h1>
@@ -1113,9 +1113,9 @@ const LecturerTeaching = () => {
         </div>
       </div>
 
-      <div className="p-2">
+      <div className="p-3">
         {/* Teaching Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-50 rounded-lg">
@@ -1190,7 +1190,7 @@ const LecturerTeaching = () => {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden  mt-3">
           <div className="border-b border-gray-200">
             <div className="flex">
               <button
@@ -1818,9 +1818,9 @@ const ResearchView = () => {
   };
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto p-3">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-white border-b rounded-xl border-gray-200 px-6 py-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
@@ -1833,7 +1833,7 @@ const ResearchView = () => {
         </div>
       </div>
 
-      <div className="p-2">
+      <div className="p-3 mt-3">
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -2169,8 +2169,8 @@ const CanvasView = () => {
   return (
     <div>
       {/* Header */}
-      <div className="header bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] text-white rounded-b-[24px] mb-12 shadow-[0_4px_20px_rgba(91,108,232,0.3)] p-8 md:p-8 lg:p-8" style={{ padding: "32px 48px" }}>
-        <div className="header-content max-w-[1200px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+      <div className="header bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] rounded-xl  text-white  mb-3 shadow-[0_4px_20px_rgba(91,108,232,0.3)] p-8 md:p-8 lg:p-8" >
+        <div className="header-content max-w mx-auto rounded-xl flex items-center justify-between gap-4 flex-wrap">
           <div>
             <div className="header-title text-[28px] font-bold mb-1">HSB Canvas / LMS</div>
             <div className="header-subtitle text-sm opacity-90">Lecturer Management System</div>
@@ -2186,7 +2186,7 @@ const CanvasView = () => {
       </div>
 
       {/* Container */}
-      <div className="container max-w-[1200px] mx-auto px-12 pb-12">
+      <div className="p-3">
         {/* Course Overview Stats */}
         <div className="section mb-12">
           <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">Course Overview</h2>

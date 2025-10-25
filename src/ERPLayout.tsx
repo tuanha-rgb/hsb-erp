@@ -3327,7 +3327,7 @@ const TimetableCalendar = () => {
       const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
       
       return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">
           <div className="p-4 border-b border-gray-200">
             <h3 className="font-bold text-lg">{currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
           </div>
@@ -3446,7 +3446,7 @@ const TimetableCalendar = () => {
     };
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-3">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Timetable Calendar</h1>
@@ -3454,7 +3454,7 @@ const TimetableCalendar = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mt-3">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <button
