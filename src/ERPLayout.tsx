@@ -15,7 +15,7 @@ import {
   Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
-  Edit, Save, ShieldCheck, Phone, Mail, Trash2 
+  Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus 
 } from "lucide-react";
 
 
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2">
+    <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -558,7 +558,7 @@ const AdminDashboard = () => {
 };
 
 
-  const FacultyDashboard = () => (
+const FacultyDashboard = () => (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Faculty Dashboard</h1>
       <div className="grid grid-cols-4 gap-6">
@@ -1076,7 +1076,7 @@ const DepartmentOverview = () => {
   );
 };
 
-  const DepartmentDashboard = () => (
+const DepartmentDashboard = () => (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Department Dashboard</h1>
       <div className="grid grid-cols-4 gap-6">
@@ -3256,7 +3256,7 @@ const LibraryDashboard = () => (
     </div>
   );
 
-  const TimetableCalendar = () => {
+const TimetableCalendar = () => {
     const [viewMode, setViewMode] = useState('week');
     const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 15)); // Oct 15, 2025
     const [selectedRoom, setSelectedRoom] = useState('all');
@@ -3560,7 +3560,7 @@ const LibraryDashboard = () => (
     );
   };
 
-  const LecturerProfileAdmin = () => {
+const LecturerProfileAdmin = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterDepartment, setFilterDepartment] = useState('all');
     const [filterPosition, setFilterPosition] = useState('all');
@@ -3849,10 +3849,9 @@ const LibraryDashboard = () => (
     );
   };
 
-  {/*research management for lecturer*/}
+{/*research management for lecturer*/}
 
  
-
 const ResearchManagement = () => {
   const [activeView, setActiveView] = useState('overview');
   const [filterType, setFilterType] = useState('all');
@@ -5340,9 +5339,279 @@ const ResearchManagement = () => {
   );
 };
 
+const StudentServicesOverview = () => {
+    const [selectedService, setSelectedService] = useState(null);
 
+    const services = [
+      {
+        id: 'housing',
+        title: 'Housing Services',
+        icon: Building,
+        color: 'blue',
+        stats: { total: 450, occupied: 387, available: 63 },
+        description: 'Manage student dormitories, room assignments, and housing requests.',
+        requests: 28,
+        items: [
+          { name: 'Dormitory A', capacity: 200, occupied: 178, rate: '$300/month' },
+          { name: 'Dormitory B', capacity: 150, occupied: 132, rate: '$280/month' },
+          { name: 'Dormitory C', capacity: 100, occupied: 77, rate: '$250/month' }
+        ]
+      },
+      {
+        id: 'scholarships',
+        title: 'Scholarships',
+        icon: Award,
+        color: 'green',
+        stats: { total: 892, active: 756, pending: 136 },
+        description: 'Track scholarship applications, awards, and disbursements.',
+        requests: 45,
+        items: [
+          { name: 'Merit-based Scholarship', recipients: 342, amount: '$2,000', status: 'Active' },
+          { name: 'Need-based Scholarship', recipients: 198, amount: '$3,000', status: 'Active' },
+          { name: 'Athletic Scholarship', recipients: 89, amount: '$2,500', status: 'Active' },
+          { name: 'Research Scholarship', recipients: 127, amount: '$4,000', status: 'Active' }
+        ]
+      },
+      {
+        id: 'financial-aid',
+        title: 'Financial Aid',
+        icon: DollarSign,
+        color: 'purple',
+        stats: { total: 1248, approved: 1089, processing: 159 },
+        description: 'Process student loans, grants, and financial assistance programs.',
+        requests: 67,
+        items: [
+          { name: 'Student Loans', applicants: 456, avgAmount: '$8,500', status: 'Ongoing' },
+          { name: 'Emergency Grants', applicants: 89, avgAmount: '$500', status: 'Available' },
+          { name: 'Work-Study Programs', participants: 234, avgEarning: '$12/hour', status: 'Active' },
+          { name: 'Tuition Payment Plans', enrolled: 469, avgMonthly: '$850', status: 'Active' }
+        ]
+      },
+      {
+        id: 'requests',
+        title: 'Student Requests',
+        icon: FileText,
+        color: 'orange',
+        stats: { total: 342, pending: 89, completed: 253 },
+        description: 'Handle various student service requests and administrative forms.',
+        requests: 89,
+        items: [
+          { name: 'Transcript Requests', pending: 23, avgTime: '2 days' },
+          { name: 'Leave of Absence', pending: 12, avgTime: '5 days' },
+          { name: 'Course Withdrawal', pending: 18, avgTime: '3 days' },
+          { name: 'Grade Appeals', pending: 8, avgTime: '7 days' },
+          { name: 'Transfer Credits', pending: 28, avgTime: '10 days' }
+        ]
+      },
+      {
+        id: 'clubs',
+        title: 'Clubs & Activities',
+        icon: Users,
+        color: 'pink',
+        stats: { total: 48, active: 45, forming: 3 },
+        description: 'Manage student organizations, clubs, and extracurricular activities.',
+        requests: 15,
+        items: [
+          { name: 'Tech Innovation Club', members: 156, meetings: 'Weekly', budget: '$2,500' },
+          { name: 'Business Leaders Society', members: 89, meetings: 'Bi-weekly', budget: '$1,800' },
+          { name: 'Volunteer Corps', members: 234, meetings: 'Monthly', budget: '$3,000' },
+          { name: 'Sports & Recreation', members: 412, meetings: 'Weekly', budget: '$5,000' }
+        ]
+      },
+      {
+        id: 'disciplinary',
+        title: 'Disciplinary Actions',
+        icon: AlertTriangle,
+        color: 'red',
+        stats: { total: 45, active: 12, resolved: 33 },
+        description: 'Track and manage student conduct violations and disciplinary proceedings.',
+        requests: 12,
+        items: [
+          { name: 'Academic Integrity', cases: 18, severity: 'Medium', avgResolution: '15 days' },
+          { name: 'Code of Conduct', cases: 15, severity: 'Low', avgResolution: '10 days' },
+          { name: 'Attendance Violations', cases: 8, severity: 'Low', avgResolution: '7 days' },
+          { name: 'Safety Violations', cases: 4, severity: 'High', avgResolution: '20 days' }
+        ]
+      }
+    ];
 
-  const StudentProfileAdmin = () => {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive management of all student support services</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          {services.map((service) => (
+            <div
+              key={service.id}
+              onClick={() => setSelectedService(service)}
+              className={`bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-${service.color}-500 hover:shadow-lg transition-all cursor-pointer`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-14 h-14 bg-${service.color}-100 rounded-xl flex items-center justify-center`}>
+                  <service.icon className={`w-7 h-7 text-${service.color}-600`} />
+                </div>
+                {service.requests > 0 && (
+                  <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                    {service.requests} pending
+                  </span>
+                )}
+              </div>
+              
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{service.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+              
+              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200">
+                {Object.entries(service.stats).map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-xs text-gray-500 capitalize">{key}</p>
+                    <p className="text-lg font-bold text-gray-900">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Service Request Trends</h3>
+            <div className="h-64 flex items-end justify-between gap-3">
+              {[
+                { housing: 18, scholarships: 32, financial: 45, requests: 67, clubs: 12, disciplinary: 8 },
+                { housing: 22, scholarships: 38, financial: 52, requests: 72, clubs: 15, disciplinary: 6 },
+                { housing: 25, scholarships: 42, financial: 58, requests: 78, clubs: 18, disciplinary: 10 },
+                { housing: 28, scholarships: 45, financial: 67, requests: 89, clubs: 15, disciplinary: 12 }
+              ].map((data, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex flex-col gap-0.5">
+                    <div className="w-full bg-blue-500 rounded-t" style={{ height: `${data.housing}px` }}></div>
+                    <div className="w-full bg-green-500" style={{ height: `${data.scholarships}px` }}></div>
+                    <div className="w-full bg-purple-500" style={{ height: `${data.financial}px` }}></div>
+                    <div className="w-full bg-orange-500" style={{ height: `${data.requests}px` }}></div>
+                    <div className="w-full bg-pink-500" style={{ height: `${data.clubs}px` }}></div>
+                    <div className="w-full bg-red-500" style={{ height: `${data.disciplinary}px` }}></div>
+                  </div>
+                  <span className="text-xs text-gray-500">Q{i + 1}</span>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-gray-200">
+              {services.map((service) => (
+                <div key={service.id} className="flex items-center gap-2">
+                  <div className={`w-3 h-3 bg-${service.color}-500 rounded`}></div>
+                  <span className="text-xs text-gray-600">{service.title.split(' ')[0]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
+            <div className="space-y-4">
+              {[
+                { service: 'Housing', action: 'New room assignment', student: 'S001234', time: '10 min ago', color: 'blue' },
+                { service: 'Scholarships', action: 'Application approved', student: 'S001567', time: '25 min ago', color: 'green' },
+                { service: 'Financial Aid', action: 'Loan disbursed', student: 'S001892', time: '1 hour ago', color: 'purple' },
+                { service: 'Requests', action: 'Transcript issued', student: 'S002134', time: '2 hours ago', color: 'orange' },
+                { service: 'Clubs', action: 'New member joined', student: 'S002456', time: '3 hours ago', color: 'pink' },
+                { service: 'Disciplinary', action: 'Case resolved', student: 'S002789', time: '5 hours ago', color: 'red' }
+              ].map((activity, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <div className={`w-2 h-2 rounded-full bg-${activity.color}-500 mt-1.5`}></div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
+                        <p className="text-xs text-gray-600">{activity.service} • {activity.student}</p>
+                      </div>
+                      <span className="text-xs text-gray-400">{activity.time}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {selectedService && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedService(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className={`bg-gradient-to-br from-${selectedService.color}-400 to-${selectedService.color}-600 p-6`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center`}>
+                    <selectedService.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <button 
+                    onClick={() => setSelectedService(null)}
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <h2 className="text-3xl font-bold text-white">{selectedService.title}</h2>
+                <p className="text-white text-opacity-90 mt-2">{selectedService.description}</p>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.entries(selectedService.stats).map(([key, value]) => (
+                    <div key={key} className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">{key}</p>
+                      <p className="text-3xl font-bold text-gray-900">{renderValue(value)}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Details</h3>
+                  <div className="space-y-3">
+                    {selectedService.items.map((item, i) => (
+                      <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-900">{item.name}</p>
+                            <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                              {Object.entries(item).filter(([key]) => key !== 'name').map(([key, value]) => (
+                                <span key={key}>
+                                  <span className="text-gray-500 capitalize">{key}:</span> <span className="font-semibold">{value as React.ReactNode}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-100">
+                            Manage
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button className={`flex-1 px-4 py-2 bg-${selectedService.color}-600 text-white rounded-lg hover:bg-${selectedService.color}-700 font-medium`}>
+                    View All Records
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Export Report
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+const StudentProfileAdmin = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterProgram, setFilterProgram] = useState('all');
     const [filterLevel, setFilterLevel] = useState('all');
@@ -5357,7 +5626,7 @@ const ResearchManagement = () => {
     ];
 
     return (
-      <div className="min-h-screen bg-gray-50 p-2">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Student Profile Management</h1>
@@ -5597,7 +5866,503 @@ const ResearchManagement = () => {
     );
   };
 
-  const EventsDashboard = () => {
+const CourseFeedback =() => {
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [showFeedbackDetail, setShowFeedbackDetail] = useState(false);
+  const [showPositiveComments, setShowPositiveComments] = useState(false);
+  const [showNegativeComments, setShowNegativeComments] = useState(false);
+
+  const courseFeedback = [
+    {
+      id: 1,
+      courseCode: 'CS301',
+      courseName: 'Data Structures and Algorithms',
+      instructor: 'Dr. Nguyễn Văn A',
+      semester: 'Fall 2024',
+      totalResponses: 45,
+      averageScore: 8.3,
+      scoreDistribution: { 1: 0, 2: 0, 3: 1, 4: 2, 5: 3, 6: 5, 7: 8, 8: 12, 9: 10, 10: 4 },
+      sentimentBreakdown: { positive: 35, neutral: 8, negative: 2 },
+      comments: [
+        { id: 1, text: 'Excellent course! The professor explains concepts very clearly and the assignments are challenging but fair.', score: 9, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Great learning experience. The material is well-organized and the instructor is always available for questions.', score: 9, sentiment: 'positive', date: '2024-10-19' },
+        { id: 4, text: 'Very informative and engaging lectures. I feel much more confident in my coding skills now.', score: 10, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'The pace is too fast for beginners. More foundational material would be helpful.', score: 6, sentiment: 'negative', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 2,
+      courseCode: 'BUS202',
+      courseName: 'Strategic Management',
+      instructor: 'Prof. Trần Thị B',
+      semester: 'Fall 2024',
+      totalResponses: 52,
+      averageScore: 7.8,
+      scoreDistribution: { 1: 0, 2: 1, 3: 2, 4: 3, 5: 5, 6: 8, 7: 12, 8: 14, 9: 6, 10: 1 },
+      sentimentBreakdown: { positive: 28, neutral: 18, negative: 6 },
+      comments: [
+        { id: 1, text: 'Very practical approach to strategy. Case studies are particularly useful.', score: 8, sentiment: 'positive', date: '2024-10-20' },
+        { id: 3, text: 'Too much theory, not enough real-world application.', score: 5, sentiment: 'negative', date: '2024-10-18' },
+        { id: 4, text: 'The professor brings great industry experience to the classroom.', score: 9, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'Group projects are well-structured and help develop teamwork skills.', score: 8, sentiment: 'positive', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 3,
+      courseCode: 'ENG101',
+      courseName: 'Business English Communication',
+      instructor: 'Ms. Lê Thị C',
+      semester: 'Fall 2024',
+      totalResponses: 38,
+      averageScore: 9.1,
+      scoreDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 2, 7: 4, 8: 8, 9: 15, 10: 8 },
+      sentimentBreakdown: { positive: 34, neutral: 3, negative: 1 },
+      comments: [
+        { id: 1, text: 'Outstanding teacher! My English skills have improved dramatically.', score: 10, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Very engaging and supportive learning environment. Highly recommend!', score: 9, sentiment: 'positive', date: '2024-10-19' },
+        { id: 3, text: 'Excellent feedback on presentations and written work.', score: 9, sentiment: 'positive', date: '2024-10-18' },
+        { id: 4, text: 'The course materials are well-designed and relevant to business contexts.', score: 8, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'Perfect balance of speaking, writing, and listening activities.', score: 10, sentiment: 'positive', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 4,
+      courseCode: 'MATH203',
+      courseName: 'Statistics for Business',
+      instructor: 'Dr. Phạm Văn D',
+      semester: 'Fall 2024',
+      totalResponses: 41,
+      averageScore: 6.9,
+      scoreDistribution: { 1: 1, 2: 2, 3: 4, 4: 5, 5: 6, 6: 8, 7: 9, 8: 4, 9: 2, 10: 0 },
+      sentimentBreakdown: { positive: 15, neutral: 16, negative: 10 },
+      comments: [
+        { id: 1, text: 'Difficult material but the professor tries to make it accessible.', score: 7, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Need more examples and practice problems during class.', score: 6, sentiment: 'negative', date: '2024-10-19' },
+        { id: 4, text: 'Good course for understanding statistical concepts in business context.', score: 8, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'Too much emphasis on theory, not enough on practical application.', score: 5, sentiment: 'negative', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 5,
+      courseCode: 'MKT301',
+      courseName: 'Digital Marketing',
+      instructor: 'Ms. Hoàng Thị E',
+      semester: 'Fall 2024',
+      totalResponses: 47,
+      averageScore: 8.7,
+      scoreDistribution: { 1: 0, 2: 0, 3: 0, 4: 1, 5: 2, 6: 3, 7: 6, 8: 15, 9: 14, 10: 6 },
+      sentimentBreakdown: { positive: 40, neutral: 5, negative: 2 },
+      comments: [
+        { id: 1, text: 'Amazing course! Very up-to-date with current digital marketing trends.', score: 10, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Practical assignments that prepare you for real marketing roles.', score: 9, sentiment: 'positive', date: '2024-10-19' },
+        { id: 3, text: 'The instructor has great industry connections and shares valuable insights.', score: 9, sentiment: 'positive', date: '2024-10-18' },
+        { id: 5, text: 'Excellent use of case studies from Vietnamese and international companies.', score: 9, sentiment: 'positive', date: '2024-10-16' }
+      ]
+    }
+  ];
+
+  const overallAverageScore = (courseFeedback.reduce((sum, course) => sum + course.averageScore, 0) / courseFeedback.length).toFixed(1);
+  const totalResponses = courseFeedback.reduce((sum, course) => sum + course.totalResponses, 0);
+  const totalPositive = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.positive, 0);
+  const totalNeutral = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.neutral, 0);
+  const totalNegative = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.negative, 0);
+
+  const getSentimentColor = (sentiment) => {
+    switch(sentiment) {
+      case 'positive': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'neutral': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'negative': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getSentimentIcon = (sentiment) => {
+    switch(sentiment) {
+      case 'positive': return <ThumbsUp size={16} />;
+      case 'neutral': return <Minus size={16} />;
+      case 'negative': return <ThumbsDown size={16} />;
+      default: return null;
+    }
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 8.5) return 'text-emerald-600';
+    if (score >= 7.0) return 'text-blue-600';
+    if (score >= 6.0) return 'text-amber-600';
+    return 'text-red-600';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Course Feedback Management</h1>
+              <p className="text-gray-600 mt-1">Student feedback analysis and sentiment tracking</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w mx-auto px-8 py-4">
+        <div className="space-y-4">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <BarChart3 className="text-blue-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Average Score</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{overallAverageScore}</p>
+              <p className="text-sm text-gray-500">Out of 10.0</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <MessageSquare className="text-purple-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Total Responses</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{totalResponses}</p>
+              <p className="text-sm text-gray-500">{courseFeedback.length} courses</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-emerald-100 rounded-xl">
+                  <ThumbsUp className="text-emerald-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Positive Sentiment</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{Math.round((totalPositive/totalResponses)*100)}%</p>
+              <p className="text-sm text-emerald-600 font-medium">{totalPositive} responses</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-red-100 rounded-xl">
+                  <ThumbsDown className="text-red-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Needs Attention</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{totalNegative}</p>
+              <p className="text-sm text-red-600 font-medium">Negative responses</p>
+            </div>
+          </div>
+
+          {/* Sentiment Overview Chart */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Sentiment Distribution</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ThumbsUp size={18} className="text-emerald-600" />
+                  <span className="text-sm text-gray-600">Positive</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full" style={{width: `${(totalPositive/totalResponses)*100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-12">{totalPositive}</span>
+                  <span className="text-sm text-gray-500 w-12">{Math.round((totalPositive/totalResponses)*100)}%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Minus size={18} className="text-amber-600" />
+                  <span className="text-sm text-gray-600">Neutral</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500 rounded-full" style={{width: `${(totalNeutral/totalResponses)*100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-12">{totalNeutral}</span>
+                  <span className="text-sm text-gray-500 w-12">{Math.round((totalNeutral/totalResponses)*100)}%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ThumbsDown size={18} className="text-red-600" />
+                  <span className="text-sm text-gray-600">Negative</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-500 rounded-full" style={{width: `${(totalNegative/totalResponses)*100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-12">{totalNegative}</span>
+                  <span className="text-sm text-gray-500 w-12">{Math.round((totalNegative/totalResponses)*100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Feedback List */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Course Feedback Analysis</h3>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {courseFeedback.map(course => (
+                <div key={course.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h4 className="text-lg font-bold text-gray-900">{course.courseCode}</h4>
+                        <span className={`text-2xl font-bold ${getScoreColor(course.averageScore)}`}>
+                          {course.averageScore.toFixed(1)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              size={16} 
+                              className={i < Math.round(course.averageScore/2) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">{course.courseName}</p>
+                      <p className="text-xs text-gray-500 mt-1">{course.instructor} • {course.semester}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setShowFeedbackDetail(true);
+                      }}
+                      className="flex items-center gap-1 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
+                    >
+                      <Eye size={16} />
+                      View Details
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-xs text-gray-500 mb-1">Responses</p>
+                      <p className="text-xl font-bold text-gray-900">{course.totalResponses}</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <p className="text-xs text-blue-600 font-medium mb-1">Average Score</p>
+                      <p className="text-xl font-bold text-blue-900">
+                        {course.averageScore.toFixed(1)}/10
+                      </p>
+                    </div>
+                    <div className="bg-emerald-50 rounded-lg p-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <ThumbsUp size={14} className="text-emerald-600" />
+                        <p className="text-xs text-emerald-600 font-medium">Positive</p>
+                      </div>
+                      <p className="text-xl font-bold text-emerald-900">
+                        {Math.round((course.sentimentBreakdown.positive/course.totalResponses)*100)}%
+                      </p>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <ThumbsDown size={14} className="text-red-600" />
+                        <p className="text-xs text-red-600 font-medium">Negative</p>
+                      </div>
+                      <p className="text-xl font-bold text-red-900">
+                        {Math.round((course.sentimentBreakdown.negative/course.totalResponses)*100)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Feedback Detail Modal */}
+          {showFeedbackDetail && selectedCourse && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                        <MessageSquare size={32} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h2 className="text-2xl font-bold">{selectedCourse.courseCode} - {selectedCourse.courseName}</h2>
+                          <span className="text-3xl font-bold">
+                            {selectedCourse.averageScore.toFixed(1)}
+                          </span>
+                        </div>
+                        <p className="text-indigo-100">{selectedCourse.instructor} • {selectedCourse.semester}</p>
+                        <p className="text-indigo-200 text-sm mt-1">{selectedCourse.totalResponses} responses</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowFeedbackDetail(false)}
+                      className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                      <XCircle size={24} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-250px)]">
+                  {/* Top Metrics Cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BarChart3 className="text-blue-600" size={20} />
+                        <span className="text-sm font-semibold text-blue-900">Average Score</span>
+                      </div>
+                      <p className="text-4xl font-bold text-blue-900">{selectedCourse.averageScore.toFixed(1)}/10</p>
+                      <p className="text-sm text-blue-700 mt-1">{selectedCourse.totalResponses} responses</p>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ThumbsUp className="text-emerald-600" size={20} />
+                        <span className="text-sm font-semibold text-emerald-900">Positive</span>
+                      </div>
+                      <p className="text-4xl font-bold text-emerald-900">{selectedCourse.sentimentBreakdown.positive}</p>
+                      <p className="text-sm text-emerald-700 mt-1">
+                        {Math.round((selectedCourse.sentimentBreakdown.positive/selectedCourse.totalResponses)*100)}% of responses
+                      </p>
+                    </div>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ThumbsDown className="text-red-600" size={20} />
+                        <span className="text-sm font-semibold text-red-900">Negative</span>
+                      </div>
+                      <p className="text-4xl font-bold text-red-900">{selectedCourse.sentimentBreakdown.negative}</p>
+                      <p className="text-sm text-red-700 mt-1">
+                        {Math.round((selectedCourse.sentimentBreakdown.negative/selectedCourse.totalResponses)*100)}% of responses
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Student Comments */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Student Comments</h3>
+                    
+                    {/* Positive Comments Dropdown */}
+                    <div className="mb-3 border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setShowPositiveComments(!showPositiveComments)}
+                        className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-emerald-100 rounded-lg">
+                            <ThumbsUp className="text-emerald-600" size={18} />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-gray-900">Positive Responses</p>
+                            <p className="text-xs text-gray-500">{selectedCourse.comments.filter(c => c.sentiment === 'positive').length} comments</p>
+                          </div>
+                        </div>
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${showPositiveComments ? 'rotate-180' : ''}`}
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {showPositiveComments && (
+                        <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
+                          {selectedCourse.comments
+                            .filter(comment => comment.sentiment === 'positive')
+                            .map(comment => (
+                              <div key={comment.id} className="bg-white border border-emerald-200 rounded-lg p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <span className="text-sm font-bold text-emerald-600">Score: {comment.score}/10</span>
+                                  <span className="text-xs text-gray-500">{comment.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed">{comment.text}</p>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Negative Comments Dropdown */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setShowNegativeComments(!showNegativeComments)}
+                        className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-red-100 rounded-lg">
+                            <ThumbsDown className="text-red-600" size={18} />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-gray-900">Negative Responses</p>
+                            <p className="text-xs text-gray-500">{selectedCourse.comments.filter(c => c.sentiment === 'negative').length} comments</p>
+                          </div>
+                        </div>
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${showNegativeComments ? 'rotate-180' : ''}`}
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {showNegativeComments && (
+                        <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
+                          {selectedCourse.comments
+                            .filter(comment => comment.sentiment === 'negative')
+                            .map(comment => (
+                              <div key={comment.id} className="bg-white border border-red-200 rounded-lg p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <span className="text-sm font-bold text-red-600">Score: {comment.score}/10</span>
+                                  <span className="text-xs text-gray-500">{comment.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed">{comment.text}</p>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                  <div className="flex gap-3 justify-end">
+                    <button 
+                      onClick={() => setShowFeedbackDetail(false)}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    >
+                      Close
+                    </button>
+                    <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2">
+                      <Download size={20} />
+                      Export Report
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+const EventsDashboard = () => {
     const [viewMode, setViewMode] = useState('grid');
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterType, setFilterType] = useState('all');
@@ -6932,278 +7697,8 @@ const ClassOverview = () => {
   );
 };
 
-   const StudentServicesOverview = () => {
-    const [selectedService, setSelectedService] = useState(null);
 
-    const services = [
-      {
-        id: 'housing',
-        title: 'Housing Services',
-        icon: Building,
-        color: 'blue',
-        stats: { total: 450, occupied: 387, available: 63 },
-        description: 'Manage student dormitories, room assignments, and housing requests.',
-        requests: 28,
-        items: [
-          { name: 'Dormitory A', capacity: 200, occupied: 178, rate: '$300/month' },
-          { name: 'Dormitory B', capacity: 150, occupied: 132, rate: '$280/month' },
-          { name: 'Dormitory C', capacity: 100, occupied: 77, rate: '$250/month' }
-        ]
-      },
-      {
-        id: 'scholarships',
-        title: 'Scholarships',
-        icon: Award,
-        color: 'green',
-        stats: { total: 892, active: 756, pending: 136 },
-        description: 'Track scholarship applications, awards, and disbursements.',
-        requests: 45,
-        items: [
-          { name: 'Merit-based Scholarship', recipients: 342, amount: '$2,000', status: 'Active' },
-          { name: 'Need-based Scholarship', recipients: 198, amount: '$3,000', status: 'Active' },
-          { name: 'Athletic Scholarship', recipients: 89, amount: '$2,500', status: 'Active' },
-          { name: 'Research Scholarship', recipients: 127, amount: '$4,000', status: 'Active' }
-        ]
-      },
-      {
-        id: 'financial-aid',
-        title: 'Financial Aid',
-        icon: DollarSign,
-        color: 'purple',
-        stats: { total: 1248, approved: 1089, processing: 159 },
-        description: 'Process student loans, grants, and financial assistance programs.',
-        requests: 67,
-        items: [
-          { name: 'Student Loans', applicants: 456, avgAmount: '$8,500', status: 'Ongoing' },
-          { name: 'Emergency Grants', applicants: 89, avgAmount: '$500', status: 'Available' },
-          { name: 'Work-Study Programs', participants: 234, avgEarning: '$12/hour', status: 'Active' },
-          { name: 'Tuition Payment Plans', enrolled: 469, avgMonthly: '$850', status: 'Active' }
-        ]
-      },
-      {
-        id: 'requests',
-        title: 'Student Requests',
-        icon: FileText,
-        color: 'orange',
-        stats: { total: 342, pending: 89, completed: 253 },
-        description: 'Handle various student service requests and administrative forms.',
-        requests: 89,
-        items: [
-          { name: 'Transcript Requests', pending: 23, avgTime: '2 days' },
-          { name: 'Leave of Absence', pending: 12, avgTime: '5 days' },
-          { name: 'Course Withdrawal', pending: 18, avgTime: '3 days' },
-          { name: 'Grade Appeals', pending: 8, avgTime: '7 days' },
-          { name: 'Transfer Credits', pending: 28, avgTime: '10 days' }
-        ]
-      },
-      {
-        id: 'clubs',
-        title: 'Clubs & Activities',
-        icon: Users,
-        color: 'pink',
-        stats: { total: 48, active: 45, forming: 3 },
-        description: 'Manage student organizations, clubs, and extracurricular activities.',
-        requests: 15,
-        items: [
-          { name: 'Tech Innovation Club', members: 156, meetings: 'Weekly', budget: '$2,500' },
-          { name: 'Business Leaders Society', members: 89, meetings: 'Bi-weekly', budget: '$1,800' },
-          { name: 'Volunteer Corps', members: 234, meetings: 'Monthly', budget: '$3,000' },
-          { name: 'Sports & Recreation', members: 412, meetings: 'Weekly', budget: '$5,000' }
-        ]
-      },
-      {
-        id: 'disciplinary',
-        title: 'Disciplinary Actions',
-        icon: AlertTriangle,
-        color: 'red',
-        stats: { total: 45, active: 12, resolved: 33 },
-        description: 'Track and manage student conduct violations and disciplinary proceedings.',
-        requests: 12,
-        items: [
-          { name: 'Academic Integrity', cases: 18, severity: 'Medium', avgResolution: '15 days' },
-          { name: 'Code of Conduct', cases: 15, severity: 'Low', avgResolution: '10 days' },
-          { name: 'Attendance Violations', cases: 8, severity: 'Low', avgResolution: '7 days' },
-          { name: 'Safety Violations', cases: 4, severity: 'High', avgResolution: '20 days' }
-        ]
-      }
-    ];
-
-    return (
-      <div className="min-h-screen bg-gray-50 p-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive management of all student support services</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-6">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              onClick={() => setSelectedService(service)}
-              className={`bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-${service.color}-500 hover:shadow-lg transition-all cursor-pointer`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-14 h-14 bg-${service.color}-100 rounded-xl flex items-center justify-center`}>
-                  <service.icon className={`w-7 h-7 text-${service.color}-600`} />
-                </div>
-                {service.requests > 0 && (
-                  <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
-                    {service.requests} pending
-                  </span>
-                )}
-              </div>
-              
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{service.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-              
-              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200">
-                {Object.entries(service.stats).map(([key, value]) => (
-                  <div key={key}>
-                    <p className="text-xs text-gray-500 capitalize">{key}</p>
-                    <p className="text-lg font-bold text-gray-900">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Service Request Trends</h3>
-            <div className="h-64 flex items-end justify-between gap-3">
-              {[
-                { housing: 18, scholarships: 32, financial: 45, requests: 67, clubs: 12, disciplinary: 8 },
-                { housing: 22, scholarships: 38, financial: 52, requests: 72, clubs: 15, disciplinary: 6 },
-                { housing: 25, scholarships: 42, financial: 58, requests: 78, clubs: 18, disciplinary: 10 },
-                { housing: 28, scholarships: 45, financial: 67, requests: 89, clubs: 15, disciplinary: 12 }
-              ].map((data, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full flex flex-col gap-0.5">
-                    <div className="w-full bg-blue-500 rounded-t" style={{ height: `${data.housing}px` }}></div>
-                    <div className="w-full bg-green-500" style={{ height: `${data.scholarships}px` }}></div>
-                    <div className="w-full bg-purple-500" style={{ height: `${data.financial}px` }}></div>
-                    <div className="w-full bg-orange-500" style={{ height: `${data.requests}px` }}></div>
-                    <div className="w-full bg-pink-500" style={{ height: `${data.clubs}px` }}></div>
-                    <div className="w-full bg-red-500" style={{ height: `${data.disciplinary}px` }}></div>
-                  </div>
-                  <span className="text-xs text-gray-500">Q{i + 1}</span>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-gray-200">
-              {services.map((service) => (
-                <div key={service.id} className="flex items-center gap-2">
-                  <div className={`w-3 h-3 bg-${service.color}-500 rounded`}></div>
-                  <span className="text-xs text-gray-600">{service.title.split(' ')[0]}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
-            <div className="space-y-4">
-              {[
-                { service: 'Housing', action: 'New room assignment', student: 'S001234', time: '10 min ago', color: 'blue' },
-                { service: 'Scholarships', action: 'Application approved', student: 'S001567', time: '25 min ago', color: 'green' },
-                { service: 'Financial Aid', action: 'Loan disbursed', student: 'S001892', time: '1 hour ago', color: 'purple' },
-                { service: 'Requests', action: 'Transcript issued', student: 'S002134', time: '2 hours ago', color: 'orange' },
-                { service: 'Clubs', action: 'New member joined', student: 'S002456', time: '3 hours ago', color: 'pink' },
-                { service: 'Disciplinary', action: 'Case resolved', student: 'S002789', time: '5 hours ago', color: 'red' }
-              ].map((activity, i) => (
-                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
-                  <div className={`w-2 h-2 rounded-full bg-${activity.color}-500 mt-1.5`}></div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
-                        <p className="text-xs text-gray-600">{activity.service} • {activity.student}</p>
-                      </div>
-                      <span className="text-xs text-gray-400">{activity.time}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {selectedService && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedService(null)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className={`bg-gradient-to-br from-${selectedService.color}-400 to-${selectedService.color}-600 p-6`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center`}>
-                    <selectedService.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <button 
-                    onClick={() => setSelectedService(null)}
-                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <h2 className="text-3xl font-bold text-white">{selectedService.title}</h2>
-                <p className="text-white text-opacity-90 mt-2">{selectedService.description}</p>
-              </div>
-
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-3 gap-4">
-                  {Object.entries(selectedService.stats).map(([key, value]) => (
-                    <div key={key} className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">{key}</p>
-                      <p className="text-3xl font-bold text-gray-900">{renderValue(value)}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Details</h3>
-                  <div className="space-y-3">
-                    {selectedService.items.map((item, i) => (
-                      <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold text-gray-900">{item.name}</p>
-                            <div className="flex gap-4 mt-2 text-sm text-gray-600">
-                              {Object.entries(item).filter(([key]) => key !== 'name').map(([key, value]) => (
-                                <span key={key}>
-                                  <span className="text-gray-500 capitalize">{key}:</span> <span className="font-semibold">{value as React.ReactNode}</span>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-100">
-                            Manage
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
-                  <button className={`flex-1 px-4 py-2 bg-${selectedService.color}-600 text-white rounded-lg hover:bg-${selectedService.color}-700 font-medium`}>
-                    View All Records
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Export Report
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Settings
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-  const ViewRankings = () => {
+const ViewRankings = () => {
   const [filterFaculty, setFilterFaculty] = useState('all');
   const [filterLevel, setFilterLevel] = useState('all');
   const [sortBy, setSortBy] = useState('overall');
@@ -7442,7 +7937,8 @@ const ClassOverview = () => {
     </div>
   );
 };
-  const LecturersOverview = () => {
+
+const LecturersOverview = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [filterDepartment, setFilterDepartment] = useState('all');
 
@@ -9316,78 +9812,6 @@ const GradeManagement = () => {
   );
 };
 
-{/*Show tab content*/}
-  const renderContent = () => {
-   
-   if (activeTab === "dashboard") {
-  if (userType === "admin") return <AdminDashboard />;
-
-  if (userType === "faculty") return <FacultyDashboard />;
-  if (userType === "department") return <DepartmentDashboard />;
-}
-
-    if (activeTab === 'student-profile') {
-      return <StudentProfileAdmin />;
-    }
-    if (activeTab === 'lecturer-profile') {
-      return <LecturerProfileAdmin />;
-    }
-    if (activeTab === 'lecturers-overview') {
-      return <LecturersOverview />;
-    }
-    if (activeTab === 'lecturer-research'){
-      return <ResearchManagement/>;
-    }
-    if (activeTab == 'grade-management'){
-      return <GradeManagement/>;
-    }
-    if (activeTab == 'hr-profile'){
-      return <HRProfileManagement/>;
-    }
-    if (activeTab === 'library-dashboard') {
-      return <LibraryDashboard />;
-    }
-    if (activeTab === 'events-dashboard') {
-      return <EventsDashboard />;
-    }
-    if (activeTab === 'student-services') {
-      return <StudentServicesOverview />;
-    }
-    if (activeTab === 'scholarships') {
-      return <Scholarship />;
-    }
-    if (activeTab === 'finance-overview') {
-      return <FinanceOverview />;
-    }
-    if (activeTab === 'view-rankings') { 
-      return <ViewRankings />;
-    } 
-    if (activeTab === 'timetable-overview') {
-      return <TimetableOverview />;
-    }
-    if (activeTab === 'departments-overview') {
-      return <DepartmentOverview />;
-    }
-    if (activeTab === 'class-overview') {
-      return <ClassOverview />;
-    }
-    if (activeTab === 'alumni-overview') {
-      return <AlumniOverview />;
-    }
-    if (activeTab == 'one-stop-service'){
-      return <OneStopService/>;
-    }
-    if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
-      return <TimetableCalendar />;
-    }
-    return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4 text-gray-900">{activeTab}</h2>
-        <p className="text-gray-600">Content for {activeTab} will be displayed here.</p>
-      </div>
-    );
-  };
-
 {/*HR Profile start */}
 const HRProfileManagement = () => {
   const [activeView, setActiveView] = useState('overview');
@@ -10916,6 +11340,84 @@ const HRProfileManagement = () => {
     </div>
   );
 };
+
+{/*render nav*/}
+
+{/*Show tab content*/}
+  const renderContent = () => {
+   
+   if (activeTab === "dashboard") {
+  if (userType === "admin") return <AdminDashboard />;
+
+  if (userType === "faculty") return <FacultyDashboard />;
+  if (userType === "department") return <DepartmentDashboard />;
+}
+
+    if (activeTab === 'student-profile') {
+      return <StudentProfileAdmin />;
+    }
+    if (activeTab === 'lecturer-profile') {
+      return <LecturerProfileAdmin />;
+    }
+    if (activeTab === 'lecturers-overview') {
+      return <LecturersOverview />;
+    }
+    if (activeTab === 'lecturer-research'){
+      return <ResearchManagement/>;
+    }
+    if (activeTab == 'grade-management'){
+      return <GradeManagement/>;
+    }
+    if (activeTab == 'feedback'){
+      return <CourseFeedback/>;
+    }
+    if (activeTab == 'hr-profile'){
+      return <HRProfileManagement/>;
+    }
+    if (activeTab === 'library-dashboard') {
+      return <LibraryDashboard />;
+    }
+    if (activeTab === 'events-dashboard') {
+      return <EventsDashboard />;
+    }
+    if (activeTab === 'student-services') {
+      return <StudentServicesOverview />;
+    }
+    if (activeTab === 'scholarships') {
+      return <Scholarship />;
+    }
+    if (activeTab === 'finance-overview') {
+      return <FinanceOverview />;
+    }
+    if (activeTab === 'view-rankings') { 
+      return <ViewRankings />;
+    } 
+    if (activeTab === 'timetable-overview') {
+      return <TimetableOverview />;
+    }
+    if (activeTab === 'departments-overview') {
+      return <DepartmentOverview />;
+    }
+    if (activeTab === 'class-overview') {
+      return <ClassOverview />;
+    }
+    if (activeTab === 'alumni-overview') {
+      return <AlumniOverview />;
+    }
+    if (activeTab == 'one-stop-service'){
+      return <OneStopService/>;
+    }
+    if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
+      return <TimetableCalendar />;
+    }
+    return (
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4 text-gray-900">{activeTab}</h2>
+        <p className="text-gray-600">Content for {activeTab} will be displayed here.</p>
+      </div>
+    );
+  };
+
 
 
   return (

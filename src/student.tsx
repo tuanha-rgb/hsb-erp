@@ -6,7 +6,7 @@ import * as QRCode from "qrcode";
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
   CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
-FileQuestion, FileDown, PieChart, 
+FileQuestion, FileDown, PieChart, Filter, XCircle,
 FileText,
 MessageSquare} from 'lucide-react';
 
@@ -1763,7 +1763,7 @@ const getTagStyle = (t: string) => {
       return 'bg-gray-100 text-gray-700 border-gray-200';
   }
 };
-// --- Render function ---
+// --- Canvas function ---
 const Canvas = ({
   canvasSidebarOpen,
   setCanvasSidebarOpen,
@@ -3745,8 +3745,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
 
 
-
-  const Calendars = () => (
+const Calendars = () => (
     <div className="space-y-6">
       {/* Calendar Header */}
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 text-white">
@@ -3978,7 +3977,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     </div>
   );
 
-  const Activities = () => (
+const Activities = () => (
     <div className="space-y-6">
       {/* Activities Overview */}
       <div className="grid grid-cols-4 gap-6">
@@ -4239,9 +4238,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
   );
 
  
-
-
-  const Finance = () => (
+const Finance = () => (
     <div className="space-y-6">
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-4 gap-6">
@@ -4494,7 +4491,7 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
       </div>
     </div>
   );
-  const [selectedRequestType, setSelectedRequestType] = useState<string>('');
+const [selectedRequestType, setSelectedRequestType] = useState<string>('');
 
 // One-Stop: catalog of common forms
 const commonForms = [
@@ -4710,7 +4707,7 @@ const OneStop = () => (
   </div>
 );
 
-  const Dashboard = () => (
+const Dashboard = () => (
     <div>
                           <div className="px-6 sm:px-6">
   <div className="flex justify-between items-start">
@@ -4897,7 +4894,7 @@ const OneStop = () => (
     </div>
   );
 
-  const Profile = () => (
+const Profile = () => (
     <div className="space-y-6">
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
         <div className="flex items-start justify-between mb-6">
@@ -5156,9 +5153,6 @@ const OneStop = () => (
       </div>
     </div>
   );
-
-
-
 
 
 const Documents = () => {
@@ -5642,8 +5636,731 @@ const Documents = () => {
   );
 };
 
-// export default RenderDocuments;
 
+
+/* ---------- Types ---------- */
+type Scholarship = {
+  id: number;
+  name: string;
+  type: string;
+  amount: string;
+  period: string;
+  deadline: string;
+  status: string;
+  description: string;
+  requirements: string[];
+  benefits: string[];
+  applicationStatus: string;
+  canApply?: boolean;
+  // optional extras
+  awardDate?: string;
+  sponsor?: string | string[];
+};
+
+/* ---------- Component ---------- */
+const ScholarshipManagement = () => {
+  const [scholarshipFilter, setScholarshipFilter] =
+    useState<"all" | "internal" | "external">("all");
+  const [selectedScholarship, setSelectedScholarship] =
+    useState<Scholarship | null>(null);
+  const [showScholarshipModal, setShowScholarshipModal] = useState(false);
+
+  const scholarships: { internal: Scholarship[]; external: Scholarship[] } = {
+    internal: [
+      {
+        id: 1,
+        name: "Merit-Based Scholarship",
+        type: "Internal - Merit",
+        amount: "10,000,000 VND",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2024-12-31",
+        status: "Active",
+        description:
+          "Awarded to students with exceptional academic performance (GPA ≥ 3.7)",
+        requirements: ["GPA ≥ 3.7", "No disciplinary actions", "Full-time enrollment"],
+        benefits: [
+          "Full tuition coverage for one semester",
+          "Priority course registration",
+          "Academic advisor access",
+        ],
+        applicationStatus: "Awarded",
+        awardDate: "2024-09-01",
+      },
+      {
+        id: 2,
+        name: "Commendation Scholarship",
+        type: "Internal - Commendation",
+        amount: "5,000,000 VND",
+        period: "Semester 1, 2024-2025",
+        deadline: "2025-01-15",
+        status: "Open",
+        description:
+          "Recognition for outstanding contributions to university activities and community service",
+        requirements: [
+          "Active participation in 2+ university clubs",
+          "Minimum 20 hours community service",
+          "GPA ≥ 3.0",
+        ],
+        benefits: ["Partial tuition support", "Certificate of recognition", "Resume enhancement"],
+        applicationStatus: "Eligible",
+        canApply: true,
+      },
+      {
+        id: 3,
+        name: "Academic Excellence Award",
+        type: "Internal - Merit",
+        amount: "15,000,000 VND",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2024-11-30",
+        status: "Closed",
+        description:
+          "Top performer scholarship for students ranking in top 5% of their cohort",
+        requirements: ["Top 5% class ranking", "GPA ≥ 3.9", "Research publication or presentation"],
+        benefits: ["Full tuition coverage", "Monthly stipend 2,000,000 VND", "Research fund access"],
+        applicationStatus: "Not Applied",
+        canApply: false,
+      },
+    ],
+    external: [
+      {
+        id: 4,
+        name: "TechCorp Vietnam Scholarship",
+        type: "External - Company Sponsor",
+        amount: "20,000,000 VND",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2025-02-28",
+        status: "Open",
+        description:
+          "Sponsored by TechCorp Vietnam for students pursuing technology and innovation studies",
+        requirements: [
+          "Technology-related major",
+          "GPA ≥ 3.5",
+          "Interest in software development",
+        ],
+        benefits: [
+          "Tuition support",
+          "Internship opportunity at TechCorp",
+          "Mentorship program",
+        ],
+        applicationStatus: "Under Review",
+        sponsor: ["TechCorp Vietnam"],
+        canApply: false,
+      },
+      {
+        id: 5,
+        name: "ASEAN Future Leaders Fund",
+        type: "External - International Funding",
+        amount: "$5,000 USD",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2025-03-15",
+        status: "Open",
+        description:
+          "International scholarship supporting future leaders across Southeast Asia",
+        requirements: [
+          "ASEAN citizenship",
+          "Leadership experience",
+          "GPA ≥ 3.6",
+          "English proficiency (IELTS 6.5+)",
+        ],
+        benefits: [
+          "Full tuition and living expenses",
+          "International conference attendance",
+          "Leadership training program",
+        ],
+        applicationStatus: "Eligible",
+        sponsor: ["ASEAN Foundation"],
+        canApply: true,
+      },
+      {
+        id: 6,
+        name: "VinGroup Talent Scholarship",
+        type: "External - Company Sponsor",
+        amount: "25,000,000 VND",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2024-12-20",
+        status: "Open",
+        description:
+          "Premier scholarship for outstanding students in business and technology fields",
+        requirements: [
+          "Business or Technology major",
+          "GPA ≥ 3.8",
+          "Demonstrated innovation or entrepreneurship",
+        ],
+        benefits: [
+          "Full tuition coverage",
+          "VinGroup internship guarantee",
+          "Career development program",
+          "Networking events",
+        ],
+        applicationStatus: "Eligible",
+        sponsor: ["VinGroup"],
+        canApply: true,
+      },
+      {
+        id: 7,
+        name: "HSB Alumni Scholarship",
+        type: "External - Alumni Sponsorship",
+        amount: "8,000,000 VND",
+        period: "Semester 2, 2024-2025",
+        deadline: "2025-01-31",
+        status: "Open",
+        description:
+          "Funded by HSB alumni to support current students in financial need with strong academic records",
+        requirements: ["Demonstrated financial need", "GPA ≥ 3.3", "Personal statement required"],
+        benefits: ["Tuition assistance", "Alumni mentorship", "Career networking opportunities"],
+        applicationStatus: "Not Applied",
+        sponsor: ["HSB Alumni Association"],
+        canApply: true,
+      },
+      {
+        id: 8,
+        name: "Samsung Innovation Scholarship",
+        type: "External - Partner Scholarship",
+        amount: "$3,000 USD",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2025-02-15",
+        status: "Open",
+        description: "Partnership scholarship supporting innovation and technology education",
+        requirements: ["STEM major", "Innovation project or patent", "GPA ≥ 3.6"],
+        benefits: [
+          "Financial support",
+          "Samsung internship opportunity",
+          "Technology training workshops",
+        ],
+        applicationStatus: "Eligible",
+        sponsor: ["Samsung Vietnam"],
+        canApply: true,
+      },
+      {
+        id: 9,
+        name: "JICA Development Scholarship",
+        type: "External - International Funding",
+        amount: "$8,000 USD",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2025-04-30",
+        status: "Open",
+        description:
+          "Japanese International Cooperation Agency scholarship for development studies",
+        requirements: [
+          "Interest in sustainable development",
+          "GPA ≥ 3.5",
+          "Japanese language proficiency (preferred)",
+        ],
+        benefits: [
+          "Full tuition and living allowance",
+          "Study visit to Japan",
+          "Professional network access",
+        ],
+        applicationStatus: "Eligible",
+        sponsor: ["JICA"],
+        canApply: true,
+      },
+      {
+        id: 10,
+        name: "Chevron STEM Excellence",
+        type: "External - Company Sponsor",
+        amount: "$4,500 USD",
+        period: "Full Academic Year 2024-2025",
+        deadline: "2025-02-28",
+        status: "Open",
+        description:
+          "Supporting students pursuing careers in STEM fields with focus on energy sector",
+        requirements: [
+          "Engineering or Science major",
+          "GPA ≥ 3.7",
+          "Interest in energy/sustainability",
+        ],
+        benefits: [
+          "Tuition support",
+          "Summer internship at Chevron",
+          "Industry mentorship",
+          "Career placement assistance",
+        ],
+        applicationStatus: "Not Applied",
+        sponsor: ["Chevron Corporation"],
+        canApply: true,
+      },
+    ],
+  };
+
+  const allScholarships: Scholarship[] = [
+    ...scholarships.internal,
+    ...scholarships.external,
+  ];
+
+  const filteredScholarships =
+    scholarshipFilter === "all"
+      ? allScholarships
+      : scholarshipFilter === "internal"
+      ? scholarships.internal
+      : scholarships.external;
+
+  /* ---------- Helpers ---------- */
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Open":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "Active":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "Closed":
+        return "bg-gray-100 text-gray-700 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getApplicationStatusColor = (status: string) => {
+    switch (status) {
+      case "Awarded":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "Under Review":
+        return "bg-amber-100 text-amber-700 border-amber-200";
+      case "Eligible":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "Not Applied":
+        return "bg-gray-100 text-gray-700 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    if (type.includes("Merit")) return "🏆";
+    if (type.includes("Commendation")) return "⭐";
+    if (type.includes("Company")) return "🏢";
+    if (type.includes("International")) return "🌍";
+    if (type.includes("Partner")) return "🤝";
+    if (type.includes("Alumni")) return "🎓";
+    return "💰";
+  };
+
+  // Stats
+  const awardedCount = allScholarships.filter(
+    (s) => s.applicationStatus === "Awarded"
+  ).length;
+  const underReviewCount = allScholarships.filter(
+    (s) => s.applicationStatus === "Under Review"
+  ).length;
+  const eligibleCount = allScholarships.filter(
+    (s) => s.applicationStatus === "Eligible"
+  ).length;
+  const openCount = allScholarships.filter((s) => s.status === "Open").length;
+
+  /* ---------- Render ---------- */
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="mx-auto w-full max-w px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Scholarship Management
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Explore and manage your scholarship opportunities
+              </p>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      {/* Page content */}
+      <div className="mx-auto w-full max-w px-6 lg:px-8 py-8 space-y-6">
+        {/* Hero */}
+        <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-6 md:p-8 text-white shadow-xl">
+          <div className="flex items-center justify-between gap-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Your Scholarship Journey</h2>
+              <p className="text-purple-100 mb-4">
+                Track your applications and discover new opportunities
+              </p>
+              <div className="flex items-center gap-6">
+                <div>
+                  <p className="text-purple-200 text-sm">Total Applied</p>
+                  <p className="text-3xl font-bold">
+                    {awardedCount + underReviewCount}
+                  </p>
+                </div>
+                <div className="w-px h-12 bg-purple-400" />
+                <div>
+                  <p className="text-purple-200 text-sm">Total Value</p>
+                  <p className="text-3xl font-bold">30M VND</p>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-white/30">
+                <p className="text-purple-100 text-sm mb-1">Success Rate</p>
+                <p className="text-5xl font-bold mb-2">50%</p>
+                <div className="flex items-center gap-2 text-sm">
+                  <TrendingUp size={16} />
+                  <span>1 of 2 awarded</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-emerald-100 rounded-xl">
+                <CheckCircle className="text-emerald-600" size={24} />
+              </div>
+              <span className="text-sm font-semibold text-gray-600">
+                Awarded
+              </span>
+            </div>
+            <p className="text-4xl font-bold text-gray-900 mb-1">
+              {awardedCount}
+            </p>
+            <p className="text-sm text-emerald-600 font-medium">10M VND total</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-amber-100 rounded-xl">
+                <Clock className="text-amber-600" size={24} />
+              </div>
+              <span className="text-sm font-semibold text-gray-600">
+                Under Review
+              </span>
+            </div>
+            <p className="text-4xl font-bold text-gray-900 mb-1">
+              {underReviewCount}
+            </p>
+            <p className="text-sm text-gray-500">Pending decision</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <Award className="text-blue-600" size={24} />
+              </div>
+              <span className="text-sm font-semibold text-gray-600">
+                Eligible
+              </span>
+            </div>
+            <p className="text-4xl font-bold text-gray-900 mb-1">
+              {eligibleCount}
+            </p>
+            <p className="text-sm text-blue-600 font-medium">Can apply now</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-purple-100 rounded-xl">
+                <DollarSign className="text-purple-600" size={24} />
+              </div>
+              <span className="text-sm font-semibold text-gray-600">
+                Available
+              </span>
+            </div>
+            <p className="text-4xl font-bold text-gray-900 mb-1">{openCount}</p>
+            <p className="text-sm text-gray-500">Open scholarships</p>
+          </div>
+        </div>
+
+        {/* Filters/Search */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Filter size={20} className="text-gray-400" />
+              {(["all", "internal", "external"] as const).map((k) => (
+                <button
+                  key={k}
+                  onClick={() => setScholarshipFilter(k)}
+                  className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                    scholarshipFilter === k
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {k[0].toUpperCase() + k.slice(1)} (
+                  {k === "all"
+                    ? allScholarships.length
+                    : k === "internal"
+                    ? scholarships.internal.length
+                    : scholarships.external.length}
+                  )
+                </button>
+              ))}
+            </div>
+            <div className="relative flex-1 max-w">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search scholarships by name, sponsor, or type..."
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Scholarships Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredScholarships.map((s) => (
+            <div
+              key={s.id}
+              className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all hover:border-purple-300"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="text-4xl">{getTypeIcon(s.type)}</span>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-gray-900 mb-1 leading-tight">
+                        {s.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{s.type}</p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                      s.status
+                    )}`}
+                  >
+                    {s.status}
+                  </span>
+                </div>
+
+                <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+                  {s.description}
+                </p>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <span className="text-sm text-gray-600 font-medium">
+                      Amount
+                    </span>
+                    <span className="font-bold text-purple-600">{s.amount}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar size={16} className="text-gray-400" />
+                    <span>{s.period}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock size={16} className="text-gray-400" />
+                    <span>
+                      Deadline: <strong>{s.deadline}</strong>
+                    </span>
+                  </div>
+                  {s.sponsor && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Award size={16} className="text-gray-400" />
+                      <span>
+                        Sponsor:{" "}
+                        <strong>
+                          {Array.isArray(s.sponsor) ? s.sponsor.join(", ") : s.sponsor}
+                        </strong>
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                  <span
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${getApplicationStatusColor(
+                      s.applicationStatus
+                    )}`}
+                  >
+                    {s.applicationStatus}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedScholarship(s);
+                        setShowScholarshipModal(true);
+                      }}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    >
+                      View Details
+                    </button>
+                    {s.canApply && (
+                      <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium shadow-md hover:shadow-lg">
+                        Apply Now
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Modal */}
+        {showScholarshipModal && selectedScholarship && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4 flex-1">
+                    <span className="text-5xl">
+                      {getTypeIcon(selectedScholarship.type)}
+                    </span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full border border-white/30">
+                          {selectedScholarship.type}
+                        </span>
+                        <span className="px-3 py-1 bg-white text-purple-700 text-xs font-semibold rounded-full">
+                          {selectedScholarship.status}
+                        </span>
+                      </div>
+                      <h2 className="text-2xl font-bold mb-2">
+                        {selectedScholarship.name}
+                      </h2>
+                      <div className="flex items-center gap-4 text-sm text-white/90 flex-wrap">
+                        <span>💰 {selectedScholarship.amount}</span>
+                        <span>📅 {selectedScholarship.deadline}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowScholarshipModal(false)}
+                    className="ml-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <XCircle size={24} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-250px)]">
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Description
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {selectedScholarship.description}
+                  </p>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Requirements
+                  </h3>
+                  <ul className="space-y-2">
+                    {selectedScholarship.requirements.map((req, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start gap-2 text-gray-700"
+                      >
+                        <CheckCircle
+                          size={18}
+                          className="text-emerald-500 mt-0.5 flex-shrink-0"
+                        />
+                        <span>{req}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Benefits
+                  </h3>
+                  <ul className="space-y-2">
+                    {selectedScholarship.benefits.map((benefit, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start gap-2 text-gray-700"
+                      >
+                        <Award
+                          size={18}
+                          className="text-purple-500 mt-0.5 flex-shrink-0"
+                        />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-5">
+                  <h3 className="text-sm font-semibold text-purple-900 mb-3">
+                    Scholarship Information
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-purple-700 font-medium">Amount:</span>
+                      <span className="text-gray-900 ml-2 font-semibold">
+                        {selectedScholarship.amount}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-purple-700 font-medium">Period:</span>
+                      <span className="text-gray-900 ml-2">
+                        {selectedScholarship.period}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-purple-700 font-medium">Deadline:</span>
+                      <span className="text-gray-900 ml-2">
+                        {selectedScholarship.deadline}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-purple-700 font-medium">Status:</span>
+                      <span className="text-gray-900 ml-2">
+                        {selectedScholarship.applicationStatus}
+                      </span>
+                    </div>
+                    {selectedScholarship.sponsor && (
+                      <div className="sm:col-span-2">
+                        <span className="text-purple-700 font-medium">
+                          Sponsor:
+                        </span>
+                        <span className="text-gray-900 ml-2">
+                          {Array.isArray(selectedScholarship.sponsor)
+                            ? selectedScholarship.sponsor.join(", ")
+                            : selectedScholarship.sponsor}
+                        </span>
+                      </div>
+                    )}
+                    {selectedScholarship.awardDate && (
+                      <div className="sm:col-span-2">
+                        <span className="text-purple-700 font-medium">
+                          Award Date:
+                        </span>
+                        <span className="text-gray-900 ml-2">
+                          {selectedScholarship.awardDate}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 p-6 bg-gray-50">
+                <div className="flex gap-3 justify-end">
+                  <button
+                    onClick={() => setShowScholarshipModal(false)}
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  >
+                    Close
+                  </button>
+                  {selectedScholarship.canApply && (
+                    <button className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2 shadow-md hover:shadow-lg">
+                      <FileText size={20} />
+                      Apply for Scholarship
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+{/*Student Card*/}
 const Matriculation = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
@@ -5856,6 +6573,7 @@ const Matriculation = () => {
         { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
         { id: 'documents', icon: BookOpen, label: 'Documents' },
         { id: 'matriculation', icon: User, label: 'Matriculation' },
+        { id: 'scholarship', icon: User, label: 'Scholarship' },
       ].map(item => (
         <button
           key={item.id}
@@ -5909,6 +6627,7 @@ const Matriculation = () => {
       {activePage === 'finance' && <Finance />}
       {activePage === 'activities' && <Activities />}
       {activePage === 'calendar' && <Calendars />}
+      {activePage === 'scholarship' && <ScholarshipManagement />}
       {activePage === 'canvas' && (
         <Canvas
           canvasSidebarOpen={canvasSidebarOpen}
