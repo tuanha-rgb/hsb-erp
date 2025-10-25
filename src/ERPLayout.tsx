@@ -227,7 +227,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-3">
         <MetricCard 
           icon={Users}
           label="Students"
@@ -822,7 +822,7 @@ const DepartmentOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -871,7 +871,7 @@ const DepartmentOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Department Performance</h3>
@@ -1021,7 +1021,7 @@ const DepartmentOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="font-semibold text-gray-900 mb-6">Budget Distribution</h3>
             <div className="space-y-4">
@@ -3587,7 +3587,7 @@ const LecturerProfileAdmin = () => {
 
     return (
       <div className="min-h-screen bg-gray-50 p-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Lecturer Profile Management</h1>
             <p className="text-sm text-gray-500 mt-1">Comprehensive faculty data and analytics</p>
@@ -3598,7 +3598,7 @@ const LecturerProfileAdmin = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-xs text-gray-500 mb-1">Total Lecturers</p>
             <p className="text-2xl font-bold text-gray-900">297</p>
@@ -4279,7 +4279,7 @@ const ResearchManagement = () => {
 
   const OverviewDashboard = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -5437,14 +5437,14 @@ const StudentServicesOverview = () => {
 
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
             <p className="text-sm text-gray-500 mt-1">Comprehensive management of all student support services</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {services.map((service) => (
             <div
               key={service.id}
@@ -5627,7 +5627,7 @@ const StudentProfileAdmin = () => {
 
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between  mb-5">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Student Profile Management</h1>
             <p className="text-sm text-gray-500 mt-1">Comprehensive student data and analytics</p>
@@ -5638,7 +5638,7 @@ const StudentProfileAdmin = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <p className="text-xs text-gray-500 mb-1">Total Students</p>
             <p className="text-2xl font-bold text-gray-900">2,000</p>
@@ -8039,13 +8039,13 @@ const LecturersOverview = () => {
       { name: 'FONS', faculty: 45, avgAge: 42, phd: '100%' },
       { name: 'FOM', faculty: 38, avgAge: 45, phd: '95%' },
       { name: 'FONS', faculty: 32, avgAge: 39, phd: '97%' },
-      { name: 'FONS', faculty: 28, avgAge: 38, phd: '100%' },
-      { name: 'Information Systems', faculty: 24, avgAge: 41, phd: '92%' }
+      { name: 'INS', faculty: 28, avgAge: 38, phd: '100%' },
+      { name: 'ITM', faculty: 24, avgAge: 41, phd: '92%' }
     ];
 
     return (
-      <div className="min-h-screen bg-gray-50 p-2">
-        <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-gray-50 p-3">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Lecturers Overview</h1>
             <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and insights on faculty performance and development</p>
@@ -8064,7 +8064,7 @@ const LecturersOverview = () => {
           </select>
         </div>
 
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -8121,7 +8121,7 @@ const LecturersOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {categories.map((category) => (
             <div
               key={category.id}
@@ -9356,7 +9356,7 @@ const GradeManagement = () => {
 
   const OverviewDashboard = () => (
     <div className="min-h-screen bg-gray-50 p-2">
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100">
           <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
             <Users className="w-6 h-6 text-blue-600" />
@@ -10131,7 +10131,7 @@ const HRProfileManagement = () => {
 
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
               <Users className="w-6 h-6 text-blue-600" />
@@ -10169,7 +10169,7 @@ const HRProfileManagement = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Staff by Department</h3>
             <div className="space-y-4">

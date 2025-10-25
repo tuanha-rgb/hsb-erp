@@ -309,8 +309,7 @@ const toggleCollapse = () => {
         maxParticipants: 300,
         status: 'confirmed',
         description: 'Annual technology conference featuring industry leaders and student presentations.',
-        ecPoints: 10,
-        image: '🎯'
+        ecPoints: 10
       },
       {
         id: 2,
@@ -325,8 +324,7 @@ const toggleCollapse = () => {
         maxParticipants: 500,
         status: 'confirmed',
         description: 'Meet with top employers and explore internship opportunities.',
-        ecPoints: 5,
-        image: '💼'
+        ecPoints: 5
       },
       {
         id: 3,
@@ -341,8 +339,7 @@ const toggleCollapse = () => {
         maxParticipants: 100,
         status: 'confirmed',
         description: 'Help the local community through various service projects.',
-        ecPoints: 15,
-        image: '🤝'
+        ecPoints: 15
       },
     ],
     available: [
@@ -359,8 +356,7 @@ const toggleCollapse = () => {
         maxParticipants: 50,
         status: 'open',
         description: 'Hands-on workshop covering latest ML frameworks and techniques.',
-        ecPoints: 8,
-        image: '🤖'
+        ecPoints: 8
       },
       {
         id: 5,
@@ -375,8 +371,7 @@ const toggleCollapse = () => {
         maxParticipants: 200,
         status: 'open',
         description: 'Inter-department sports competition including basketball, volleyball, and track.',
-        ecPoints: 12,
-        image: '⚽'
+        ecPoints: 12
       },
       {
         id: 6,
@@ -391,8 +386,7 @@ const toggleCollapse = () => {
         maxParticipants: 500,
         status: 'open',
         description: 'Celebrate diversity with food, music, and performances from around the world.',
-        ecPoints: 10,
-        image: '🎭'
+        ecPoints: 10
       },
       {
         id: 7,
@@ -407,8 +401,7 @@ const toggleCollapse = () => {
         maxParticipants: 50,
         status: 'open',
         description: 'Present your startup ideas to judges and win seed funding.',
-        ecPoints: 20,
-        image: '🚀'
+        ecPoints: 20
       },
     ],
     completed: [
@@ -423,8 +416,7 @@ const toggleCollapse = () => {
         organizer: 'CS Department',
         status: 'completed',
         ecPoints: 10,
-        certificateAvailable: true,
-        image: '💻'
+        certificateAvailable: true
       },
       {
         id: 9,
@@ -437,8 +429,7 @@ const toggleCollapse = () => {
         organizer: 'Environmental Club',
         status: 'completed',
         ecPoints: 12,
-        certificateAvailable: true,
-        image: '🌊'
+        certificateAvailable: true
       },
     ]
   };
@@ -559,9 +550,16 @@ const toggleCollapse = () => {
   };
 
   const Academic = () => (
+    
     <div className="space-y-6">
       {/* Sub Navigation Tabs */}
-      <div className="bg-white rounded-xl border border-gray-200 p-2">
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Academic Progress and Transcripts</h2>
+          <p className="text-gray-600 mt-1">Monitor your academic journey, view current courses, and access your official transcripts.</p>
+        </div>
+      </div>
         <div className="flex gap-2">
           <button
             onClick={() => setAcademicSubTab('courses')}
@@ -589,7 +587,7 @@ const toggleCollapse = () => {
       {academicSubTab === 'courses' ? (
         <>
           {/* Academic Overview Cards */}
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-blue-100 rounded-lg">
@@ -758,7 +756,7 @@ const toggleCollapse = () => {
                 <p className="font-medium text-sm">Register for Courses</p>
               </button>
               <button className="w-full bg-white/20 hover:bg-white/30 rounded-lg p-3 text-left transition-colors">
-                <p className="font-medium text-sm">Download Transcript</p>
+                <p className="font-medium text-sm">Request for Official Transcript</p>
               </button>
               <button className="w-full bg-white/20 hover:bg-white/30 rounded-lg p-3 text-left transition-colors">
                 <p className="font-medium text-sm">View Timetable</p>
@@ -811,13 +809,13 @@ const toggleCollapse = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Download Transcript (PDF)
+              Request for official Transcript
             </button>
             <button className="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
-              Print
+              Download non-standard transcript
             </button>
             <button className="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3980,7 +3978,7 @@ const Calendars = () => (
 const Activities = () => (
     <div className="space-y-6">
       {/* Activities Overview */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-white/20 rounded-lg">
@@ -4055,56 +4053,88 @@ const Activities = () => (
             </div>
           </div>
 
-          {/* My Registered Events */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">My Registered Events</h3>
-            <div className="space-y-4">
-              {activitiesData.registered.map(event => (
-                <div key={event.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex gap-4">
-                    <div className="text-4xl">{event.image}</div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{event.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{event.organizer}</p>
-                        </div>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getCategoryColor(event.category)}`}>
-                          {event.category}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">{event.description}</p>
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Clock size={16} />
-                          <span>{event.date} • {event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <span>📍 {event.location}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <div className="flex items-center gap-4 text-sm">
-                          <span className="text-gray-600">👥 {event.participants}/{event.maxParticipants}</span>
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 font-semibold rounded">
-                            +{event.ecPoints} EC Points
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                            View Details
-                          </button>
-                          <button className="px-4 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* My Registered Events (compact) */}
+<div className="bg-white rounded-xl border border-gray-200 p-5">
+  <h3 className="text-base font-semibold text-gray-900 mb-4">Registered Events</h3>
+
+  <div className="space-y-3">
+    {activitiesData.registered.map((event) => (
+      <div
+        key={event.id}
+        className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+      >
+        <div className="flex gap-3 min-w-0">
+          {/* Icon column only if provided */}
+          
+
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {/* Header: title + badge */}
+            <div className="grid grid-cols-[1fr_auto] items-start gap-2 mb-1.5">
+              <div className="min-w-0">
+                <h4 className="font-semibold text-gray-900 leading-snug truncate">
+                  {event.title}
+                </h4>
+                <p className="text-xs text-gray-600 mt-0.5">{event.organizer}</p>
+              </div>
+              <span
+                className={`shrink-0 px-2 py-0.5 text-[11px] font-semibold rounded-full border ${getCategoryColor(
+                  event.category
+                )}`}
+              >
+                {event.category}
+              </span>
+            </div>
+
+            {/* Description (tighter) */}
+            <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+              {event.description}
+            </p>
+
+            {/* Time & Location (tighter grid) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+              <div className="flex items-center gap-1.5 text-xs text-gray-700">
+                <Clock size={14} className="text-gray-500" />
+                <span>{event.date} • {event.time}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-gray-700">
+                <span role="img" aria-label="location">📍</span>
+                <span className="truncate">{event.location}</span>
+              </div>
+            </div>
+
+            {/* Footer: participants, points, actions (compact) */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-600">
+                  👥 {event.participants}/{event.maxParticipants}
+                </span>
+                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 font-semibold rounded">
+                  +{event.ecPoints} EC Points
+                </span>
+              </div>
+
+              <div className="flex gap-1.5">
+                <button
+                  className="px-3 py-1.5 text-xs text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  View Details
+                </button>
+                <button
+                  className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+
 
           {/* Available Events */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -4115,7 +4145,6 @@ const Activities = () => (
             <div className="grid grid-cols-2 gap-4">
               {activitiesData.available.map(event => (
                 <div key={event.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="text-3xl mb-3">{event.image}</div>
                   <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full border mb-3 ${getCategoryColor(event.category)}`}>
                     {event.category}
                   </span>
@@ -4189,7 +4218,6 @@ const Activities = () => (
               {activitiesData.completed.map(event => (
                 <div key={event.id} className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl">{event.image}</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-gray-900">{event.title}</p>
                       <p className="text-xs text-gray-600">{event.date}</p>
@@ -4241,15 +4269,15 @@ const Activities = () => (
 const Finance = () => (
     <div className="space-y-6">
       {/* Financial Overview Cards */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white leading-tight">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-white/20 rounded-lg">
               <DollarSign size={24} />
             </div>
           </div>
-          <p className="text-blue-100 text-sm font-medium">Total Tuition</p>
-          <p className="text-2xl font-bold mt-1">{formatCurrency(financialData.totalTuition)}</p>
+          <p className="text-blue-100 text-s font-medium">Tuition</p>
+          <p className="text-xl font-bold mt-1">{formatCurrency(financialData.totalTuition)}</p>
           <p className="text-blue-100 text-xs mt-2">Academic Year 2024-2025</p>
         </div>
 
@@ -4259,8 +4287,8 @@ const Finance = () => (
               <CheckCircle size={24} className="text-emerald-600" />
             </div>
           </div>
-          <p className="text-gray-600 text-sm font-medium">Total Paid</p>
-          <p className="text-2xl font-bold mt-1 text-gray-900">{formatCurrency(financialData.totalPaid)}</p>
+          <p className="text-gray-600 text-sm font-medium">Paid</p>
+          <p className="text-xl font-bold mt-1 text-gray-900">{formatCurrency(financialData.totalPaid)}</p>
           <p className="text-emerald-600 text-xs mt-2">75% completed</p>
         </div>
 
@@ -4270,8 +4298,8 @@ const Finance = () => (
               <AlertCircle size={24} className="text-red-600" />
             </div>
           </div>
-          <p className="text-gray-600 text-sm font-medium">Outstanding Balance</p>
-          <p className="text-2xl font-bold mt-1 text-red-600">{formatCurrency(financialData.outstanding)}</p>
+          <p className="text-gray-600 text-sm font-medium">Outstanding</p>
+          <p className="text-xl font-bold mt-1 text-red-600">{formatCurrency(financialData.outstanding)}</p>
           <p className="text-gray-500 text-xs mt-2">Due by Nov 15</p>
         </div>
 
@@ -4282,7 +4310,7 @@ const Finance = () => (
             </div>
           </div>
           <p className="text-gray-600 text-sm font-medium">Total Aid</p>
-          <p className="text-2xl font-bold mt-1 text-purple-600">{formatCurrency(financialData.scholarships + financialData.grants)}</p>
+          <p className="text-xl font-bold mt-1 text-purple-600">{formatCurrency(financialData.scholarships + financialData.grants)}</p>
           <p className="text-gray-500 text-xs mt-2">Scholarships & Grants</p>
         </div>
       </div>
@@ -4305,7 +4333,7 @@ const Finance = () => (
                 }`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{payment.description}</p>
+                      <p className="font-semibold text-red-600">{payment.description}</p>
                       <p className="text-sm text-gray-600 mt-1">Due Date: {payment.dueDate}</p>
                     </div>
                     {payment.status === 'pending' && (
@@ -4315,7 +4343,7 @@ const Finance = () => (
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(payment.amount)}</p>
+                    <p className="text-2xl font-bold text-red-600">{formatCurrency(payment.amount)}</p>
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                       Pay Now
                     </button>
@@ -4392,30 +4420,28 @@ const Finance = () => (
             </div>
           </div>
         </div>
-
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
           {/* Scholarships & Grants */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Award size={20} className="text-purple-600" />
+          <div className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6">
+            <div className="flex items-center gap-2 mb-5">
+             
               <h3 className="text-lg font-semibold text-gray-900">Scholarships & Grants</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {scholarshipsGrants.map(item => (
-                <div key={item.id} className={`p-4 rounded-lg border-2 ${
+                <div key={item.id} className={`p-3 sm:p-4 rounded-lg border-2 ${
                   item.type === 'scholarship' ? 'border-purple-200 bg-purple-50' : 'border-blue-200 bg-blue-50'
                 }`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-sm">{item.name}</h4>
+                      <h4 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 break-words">
+              {item.name}</h4>
                       <p className="text-xs text-gray-600 mt-1">{item.period}</p>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      item.type === 'scholarship' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {item.type === 'scholarship' ? 'Scholarship' : 'Grant'}
-                    </span>
+
+                    
+
                   </div>
                   <p className="text-xl font-bold text-gray-900 mb-2">{formatCurrency(item.amount)}</p>
                   <div className="flex items-center justify-between text-xs">
@@ -4438,9 +4464,7 @@ const Finance = () => (
             <div className="space-y-3">
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded">
-                    <CreditCard size={20} className="text-blue-600" />
-                  </div>
+                 
                   <div>
                     <p className="font-medium text-sm text-gray-900">Bank Transfer</p>
                     <p className="text-xs text-gray-600">HSB Account: 1234567890</p>
@@ -4449,9 +4473,7 @@ const Finance = () => (
               </div>
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded">
-                    <CreditCard size={20} className="text-purple-600" />
-                  </div>
+                  
                   <div>
                     <p className="font-medium text-sm text-gray-900">Credit/Debit Card</p>
                     <p className="text-xs text-gray-600">Visa, Mastercard accepted</p>
@@ -4460,9 +4482,7 @@ const Finance = () => (
               </div>
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 rounded">
-                    <DollarSign size={20} className="text-emerald-600" />
-                  </div>
+                  
                   <div>
                     <p className="font-medium text-sm text-gray-900">Cash Payment</p>
                     <p className="text-xs text-gray-600">At Finance Office</p>
@@ -4509,7 +4529,7 @@ const commonForms = [
 const OneStop = () => (
   // One-Stop service state
 
-  <div className="space-y-6">
+  <div className="space-y-6 p-6">
     {/* Header */}
     <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
       <div className="flex items-center justify-between">
@@ -4709,7 +4729,7 @@ const OneStop = () => (
 
 const Dashboard = () => (
     <div>
-                          <div className="px-6 sm:px-6">
+                          <div className="px-6 sm:px-6 p-2">
   <div className="flex justify-between items-start">
     <div>
       <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
@@ -4718,7 +4738,7 @@ const Dashboard = () => (
   </div>
 </div>
 
-      <div className="grid grid-cols-4 p-3 gap-8 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
 
           <div className="flex items-center justify-between mb-4">
@@ -4895,7 +4915,7 @@ const Dashboard = () => (
   );
 
 const Profile = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-8 text-white">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-6">
@@ -5416,7 +5436,7 @@ const Documents = () => {
 
   // ---- UI ----
   return (
-    <div className="space-y-6">
+    <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -5949,22 +5969,7 @@ const ScholarshipManagement = () => {
   /* ---------- Render ---------- */
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="mx-auto w-full max-w px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Scholarship Management
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Explore and manage your scholarship opportunities
-              </p>
-            </div>
-            
-          </div>
-        </div>
-      </div>
+      
 
       {/* Page content */}
       <div className="mx-auto w-full max-w px-6 lg:px-8 py-8 space-y-6">
@@ -6473,9 +6478,10 @@ const Matriculation = () => {
   );
 };
 
-  return (
+{/*Render sidebar*/}
 
-    
+return (
+  
 <div className="flex min-h-screen bg-gray-50">
   {/* Sidebar */}
   <div

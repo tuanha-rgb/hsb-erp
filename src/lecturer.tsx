@@ -469,7 +469,7 @@ const DashboardContent: React.FC = () => {
 
       <div className="p-2">
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -1111,9 +1111,9 @@ const LecturerTeaching: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-2">
         {/* Teaching Stats */}
-        <div className="grid grid-cols-6 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-50 rounded-lg">
@@ -1832,9 +1832,9 @@ const ResearchView: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-2">
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-50 rounded-lg">
