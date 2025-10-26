@@ -1581,12 +1581,12 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
       </aside>
 
       {/* Main Canvas Content */}
-<main className="flex-1 p-8 pb-24 sm:pb-28 w-full space-y-6 overflow-visible min-h-screen">
+<main className="flex-1 pb-24 sm:pb-28 w-full space-y-6 overflow-visible min-h-screen">
         {/* Courses Tab */}
         {canvasTab === 'courses' && !selectedCourse && (
-          <div className="space-y-4">
+          <div className="space-y-4 p-2">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold tracking-tight">Courses</h1>
+              <h1 className="text-2xl font-semibold tracking-tight p-2">Courses</h1>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200">
@@ -1662,9 +1662,9 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
 
         {/* Individual Course View */}
         {canvasTab === 'courses' && selectedCourse && (
-          <div className="space-y-4">
+          <div className="">
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 p-3">
               <button onClick={() => setSelectedCourse(null)} className="hover:text-gray-900">
                 Courses
               </button>
@@ -1733,8 +1733,8 @@ const assignmentDetails: Record<number, AssignmentDetail> = {
     
 
                   {/* Right Content - Module Details */}
-                  <div className="flex-1 min-h-0 overflow-y-auto p-8">
-                    <div className="mx-auto w-full max-w-none 2xl:max-w-[1600px]">
+                  <div className="flex-1 min-h-0 overflow-y-auto p-6">
+                    <div className="mx-auto w-full max-w-none 2xl:max-w">
                       <div className="mb-4 flex items-center gap-3">
                     {!modulesOpen && (
                       <button
@@ -3787,7 +3787,7 @@ const Profile = () => (
 
 const Academic = () => (
     
-    <div className="space-y-3">
+    <div className="space-y-3 p-3">
       {/* Sub Navigation Tabs */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -3869,7 +3869,7 @@ const Academic = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {/* Current Courses Detail */}
         <div className="col-span-2 bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
@@ -4637,7 +4637,7 @@ const StudentFeedbackPortal = () => {
 }  
 
 const Calendars = () => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Calendar Header */}
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
@@ -4687,7 +4687,7 @@ const Calendars = () => (
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         {/* Calendar Grid - 3 columns */}
         <div className="col-span-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -4869,9 +4869,9 @@ const Calendars = () => (
   );
 
 const Activities = () => (
-    <div className="space-y-6">
+    <div className="">
       {/* Activities Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-3">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-white/20 rounded-lg">
@@ -4917,9 +4917,9 @@ const Activities = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-3 p-3">
         {/* Main Content - Registered & Available Events */}
-        <div className="col-span-2 space-y-6">
+        <div className="col-span-2 space-y-3">
           {/* EC Level Progress */}
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between mb-4">
@@ -5160,9 +5160,9 @@ const Activities = () => (
 
  
 const Finance = () => (
-    <div className="space-y-6">
+    <div className="">
       {/* Financial Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-3">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white leading-tight">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-white/20 rounded-lg">
@@ -5208,7 +5208,7 @@ const Finance = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-6 p-3">
         {/* Left Column - Main Content */}
         <div className="col-span-2 space-y-6">
           {/* Outstanding Payments */}

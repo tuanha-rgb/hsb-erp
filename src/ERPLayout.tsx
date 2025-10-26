@@ -206,7 +206,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-1">Dashboard</h1>
           <p className="text-gray-600">October 15, 2025</p>
@@ -259,10 +259,10 @@ const AdminDashboard = () => {
       </div>
 
       {/* KPI Performance & Publications/Patents */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mb-3">
+      <div className="grid grid-cols-3 gap-3 mb-3">
         {/* KPI Performance */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 col-span-2">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">KPI Performance</h2>
             <select 
               value={selectedPeriod}
@@ -275,10 +275,10 @@ const AdminDashboard = () => {
             </select>
           </div>
           
-          <div className="space-y-8">
+          <div className="space-y-3">
             {/* Student Satisfaction */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Student Satisfaction</span>
                 <span className="text-sm font-bold text-gray-900">92%</span>
               </div>
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
 
             {/* Graduation Rate */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Graduation Rate</span>
                 <span className="text-sm font-bold text-gray-900">88%</span>
               </div>
@@ -300,7 +300,7 @@ const AdminDashboard = () => {
 
             {/* Employment Rate */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Employment Rate (6 months)</span>
                 <span className="text-sm font-bold text-gray-900">85%</span>
               </div>
@@ -311,7 +311,7 @@ const AdminDashboard = () => {
 
             {/* Research Output */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Research Output Target</span>
                 <span className="text-sm font-bold text-gray-900">96%</span>
               </div>
@@ -322,7 +322,7 @@ const AdminDashboard = () => {
 
             {/* Faculty Retention */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Faculty Retention</span>
                 <span className="text-sm font-bold text-gray-900">94%</span>
               </div>
@@ -333,7 +333,7 @@ const AdminDashboard = () => {
 
             {/* Budget Utilization */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Budget Utilization</span>
                 <span className="text-sm font-bold text-gray-900">78%</span>
               </div>
@@ -341,21 +341,12 @@ const AdminDashboard = () => {
                 <div className="bg-gradient-to-r from-pink-400 to-pink-500 h-3 rounded-full" style={{ width: '78%' }}></div>
               </div>
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-700">Research Investment</span>
-                <span className="text-sm font-bold text-gray-900">68%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-gradient-to-r from-purple-400 to-purple-500 h-3 rounded-full" style={{ width: '68%' }}></div>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Publications & Patents */}
-        <div className="bg-white rounded-lg border border-gray-200 p-3">
-          <div className="flex items-center w-full justify-between mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Publications & Patents</h2>
             <select 
               value={selectedEarningsPeriod}
@@ -368,12 +359,12 @@ const AdminDashboard = () => {
             </select>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-3">
             {/* Journal Articles */}
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Journal Articles</span>
-                <span className="text-2xl font-bold text-blue-900">84</span>
+                <span className="text-2xl font-bold text-blue-900">847</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -382,10 +373,10 @@ const AdminDashboard = () => {
             </div>
 
             {/* Conference Papers */}
-            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Conference Papers</span>
-                <span className="text-2xl font-bold text-purple-900">31</span>
+                <span className="text-2xl font-bold text-purple-900">312</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -394,10 +385,10 @@ const AdminDashboard = () => {
             </div>
 
             {/* Patents Filed */}
-            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Patents Filed</span>
-                <span className="text-2xl font-bold text-green-900">5</span>
+                <span className="text-2xl font-bold text-green-900">54</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -406,10 +397,10 @@ const AdminDashboard = () => {
             </div>
 
             {/* Patents Granted */}
-            <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Patents Granted</span>
-                <span className="text-2xl font-bold text-orange-900">3</span>
+                <span className="text-2xl font-bold text-orange-900">35</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -421,7 +412,7 @@ const AdminDashboard = () => {
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Total Output</span>
-              <span className="text-2xl font-bold text-blue-600">124</span>
+              <span className="text-xl font-bold text-blue-600">1,248</span>
             </div>
           </div>
         </div>
@@ -429,7 +420,7 @@ const AdminDashboard = () => {
 
       {/* Important Events */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-3">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-bold text-gray-900">Important Events</h2>
           <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
             View All Events
@@ -437,9 +428,9 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {upcomingEvents.map((event, i) => (
-            <div key={i} className={`p-6 ${event.color} rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer`}>
+            <div key={i} className={`p-3 ${event.color} rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer`}>
               <div className="flex flex-col">
                 <p className="text-xl font-bold text-gray-900 mb-2">{event.name}</p>
                 <p className="text-sm text-gray-600 mb-1">{event.date}</p>
@@ -451,8 +442,8 @@ const AdminDashboard = () => {
       </div>
 
       {/* Department Performance */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-3">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-bold text-gray-900">Department Performance</h2>
           <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
             View Details
@@ -507,7 +498,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Faculty & Research Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mt-3">
         {/* Faculty Statistics */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Faculty Statistics</h2>
@@ -2185,9 +2176,9 @@ const Scholarship = () => {
   }, 0);
 
   const renderOverview = () => (
-    <div className="space-y-4">
+    <div className="">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 bg-blue-100 rounded-xl">
@@ -2234,7 +2225,7 @@ const Scholarship = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 mt-3 gap-3">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Application Status Distribution</h3>
           <div className="space-y-3">
@@ -2300,9 +2291,9 @@ const Scholarship = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-3 mt-3">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-        <div className="space-y-3">
+        <div className="">
           {applications.slice(0, 5).map(app => (
             <div key={app.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
               <div className="flex items-center gap-3">
@@ -2882,7 +2873,7 @@ const Scholarship = () => {
     <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 rounded-xl border sticky top-0 z-10">
-        <div className="max-w mx-auto px-9 py-6">
+        <div className="max-w mx-auto p-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Scholarship Management Portal</h1>
@@ -2938,7 +2929,7 @@ const Scholarship = () => {
         </div>
       </div>
 
-      <div className="max-w mx-auto px-3 py-3">
+      <div className="max-w mx-auto py-3">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'applications' && renderApplications()}
         {activeTab === 'scholarships' && renderScholarships()}
@@ -3117,7 +3108,7 @@ const LibraryDashboard = () => (
         </div>
       </div>
 
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 col-span-2">
     <h3 className="text-lg font-semibold text-gray-900 mb-6">
       Usage Trends (Last 6 Months)
@@ -3185,7 +3176,7 @@ const LibraryDashboard = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
           <div className="space-y-3">
@@ -3463,7 +3454,7 @@ const TimetableCalendar = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mt-3">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <button
@@ -3569,117 +3560,384 @@ const TimetableCalendar = () => {
     );
   };
 
-const LecturerProfileAdmin = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterDepartment, setFilterDepartment] = useState('all');
-    const [filterPosition, setFilterPosition] = useState('all');
-    const [selectedLecturer, setSelectedLecturer] = useState(null);
 
-    const sampleLecturers = [
-    { id: 'L001239', name: 'Assoc.Prof. Vu Thi Hoa', department: 'FOM', position: 'Associate Professor', degree: 'PhD', teachingHours: '500h', publications: '29', status: 'Active' },
-{ id: 'L001240', name: 'Dr. Nguyen Quang Huy', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '410h', publications: '15', status: 'Active' },
-{ id: 'L001241', name: 'Dr. Bui Thi Huong', department: 'FOM', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '450h', publications: '21', status: 'Active' },
-{ id: 'L001242', name: 'Assoc.Prof. Tran Van Phuc', department: 'FONS', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '33', status: 'Active' },
-{ id: 'L001243', name: 'Prof. Pham Van Khoa', department: 'FOM', position: 'Professor', degree: 'PhD', teachingHours: '530h', publications: '40', status: 'Active' },
-{ id: 'L001244', name: 'Dr. Le Thi Bich', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '390h', publications: '11', status: 'Active' },
-{ id: 'L001245', name: 'Dr. Do Van Nam', department: 'FONS', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '460h', publications: '19', status: 'Active' },
-{ id: 'L001246', name: 'Assoc.Prof. Tran Thi Thu', department: 'FOM', position: 'Associate Professor', degree: 'PhD', teachingHours: '490h', publications: '27', status: 'Active' },
-{ id: 'L001247', name: 'Dr. Hoang Minh Tuan', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '400h', publications: '13', status: 'Active' },
-{ id: 'L001248', name: 'Prof. Nguyen Thi Kim', department: 'FOM', position: 'Professor', degree: 'PhD', teachingHours: '550h', publications: '42', status: 'Active' },
-{ id: 'L001249', name: 'Assoc.Prof. Dang Quang Binh', department: 'FOMAC', position: 'Associate Professor', degree: 'PhD', teachingHours: '470h', publications: '25', status: 'Active' },
-{ id: 'L001250', name: 'Dr. Nguyen Thi Thanh', department: 'FOMAC', position: 'Lecturer', degree: 'PhD', teachingHours: '420h', publications: '14', status: 'Active' },
-{ id: 'L001251', name: 'Prof. Tran Van Duong', department: 'FOMAC', position: 'Professor', degree: 'PhD', teachingHours: '540h', publications: '39', status: 'Active' },
-{ id: 'L001252', name: 'Dr. Le Thi Thu Ha', department: 'FOMAC', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '450h', publications: '20', status: 'Active' },
-{ id: 'L001253', name: 'Assoc.Prof. Pham Van Long', department: 'FOMAC', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '28', status: 'Active' },
 
-];
+{/*research management for lecturer*/}
+
+ 
+
+
+const StudentServicesOverview = () => {
+    const [selectedService, setSelectedService] = useState(null);
+
+    const services = [
+      {
+        id: 'housing',
+        title: 'Housing Services',
+        icon: Building,
+        color: 'blue',
+        stats: { total: 450, occupied: 387, available: 63 },
+        description: 'Manage student dormitories, room assignments, and housing requests.',
+        requests: 28,
+        items: [
+          { name: 'Dormitory A', capacity: 200, occupied: 178, rate: '$300/month' },
+          { name: 'Dormitory B', capacity: 150, occupied: 132, rate: '$280/month' },
+          { name: 'Dormitory C', capacity: 100, occupied: 77, rate: '$250/month' }
+        ]
+      },
+      {
+        id: 'scholarships',
+        title: 'Scholarships',
+        icon: Award,
+        color: 'green',
+        stats: { total: 892, active: 756, pending: 136 },
+        description: 'Track scholarship applications, awards, and disbursements.',
+        requests: 45,
+        items: [
+          { name: 'Merit-based Scholarship', recipients: 342, amount: '$2,000', status: 'Active' },
+          { name: 'Need-based Scholarship', recipients: 198, amount: '$3,000', status: 'Active' },
+          { name: 'Athletic Scholarship', recipients: 89, amount: '$2,500', status: 'Active' },
+          { name: 'Research Scholarship', recipients: 127, amount: '$4,000', status: 'Active' }
+        ]
+      },
+      {
+        id: 'financial-aid',
+        title: 'Financial Aid',
+        icon: DollarSign,
+        color: 'purple',
+        stats: { total: 1248, approved: 1089, processing: 159 },
+        description: 'Process student loans, grants, and financial assistance programs.',
+        requests: 67,
+        items: [
+          { name: 'Student Loans', applicants: 456, avgAmount: '$8,500', status: 'Ongoing' },
+          { name: 'Emergency Grants', applicants: 89, avgAmount: '$500', status: 'Available' },
+          { name: 'Work-Study Programs', participants: 234, avgEarning: '$12/hour', status: 'Active' },
+          { name: 'Tuition Payment Plans', enrolled: 469, avgMonthly: '$850', status: 'Active' }
+        ]
+      },
+      {
+        id: 'requests',
+        title: 'Student Requests',
+        icon: FileText,
+        color: 'orange',
+        stats: { total: 342, pending: 89, completed: 253 },
+        description: 'Handle various student service requests and administrative forms.',
+        requests: 89,
+        items: [
+          { name: 'Transcript Requests', pending: 23, avgTime: '2 days' },
+          { name: 'Leave of Absence', pending: 12, avgTime: '5 days' },
+          { name: 'Course Withdrawal', pending: 18, avgTime: '3 days' },
+          { name: 'Grade Appeals', pending: 8, avgTime: '7 days' },
+          { name: 'Transfer Credits', pending: 28, avgTime: '10 days' }
+        ]
+      },
+      {
+        id: 'clubs',
+        title: 'Clubs & Activities',
+        icon: Users,
+        color: 'pink',
+        stats: { total: 48, active: 45, forming: 3 },
+        description: 'Manage student organizations, clubs, and extracurricular activities.',
+        requests: 15,
+        items: [
+          { name: 'Tech Innovation Club', members: 156, meetings: 'Weekly', budget: '$2,500' },
+          { name: 'Business Leaders Society', members: 89, meetings: 'Bi-weekly', budget: '$1,800' },
+          { name: 'Volunteer Corps', members: 234, meetings: 'Monthly', budget: '$3,000' },
+          { name: 'Sports & Recreation', members: 412, meetings: 'Weekly', budget: '$5,000' }
+        ]
+      },
+      {
+        id: 'disciplinary',
+        title: 'Disciplinary Actions',
+        icon: AlertTriangle,
+        color: 'red',
+        stats: { total: 45, active: 12, resolved: 33 },
+        description: 'Track and manage student conduct violations and disciplinary proceedings.',
+        requests: 12,
+        items: [
+          { name: 'Academic Integrity', cases: 18, severity: 'Medium', avgResolution: '15 days' },
+          { name: 'Code of Conduct', cases: 15, severity: 'Low', avgResolution: '10 days' },
+          { name: 'Attendance Violations', cases: 8, severity: 'Low', avgResolution: '7 days' },
+          { name: 'Safety Violations', cases: 4, severity: 'High', avgResolution: '20 days' }
+        ]
+      }
+    ];
 
     return (
-      <div className="min-h-screen bg-gray-50 p-2">
-        <div className="flex items-center justify-between mb-5">
+      <div className="min-h-screen bg-gray-50 p-3">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Lecturer Profile Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive faculty data and analytics</p>
+            <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive management of all student support services</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {services.map((service) => (
+            <div
+              key={service.id}
+              onClick={() => setSelectedService(service)}
+              className={`bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-${service.color}-500 hover:shadow-lg transition-all cursor-pointer`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-14 h-14 bg-${service.color}-100 rounded-xl flex items-center justify-center`}>
+                  <service.icon className={`w-7 h-7 text-${service.color}-600`} />
+                </div>
+                {service.requests > 0 && (
+                  <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                    {service.requests} pending
+                  </span>
+                )}
+              </div>
+              
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{service.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+              
+              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200">
+                {Object.entries(service.stats).map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-xs text-gray-500 capitalize">{key}</p>
+                    <p className="text-lg font-bold text-gray-900">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 mt-3">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Service Request Trends</h3>
+            <div className="h-64 flex items-end justify-between gap-3">
+              {[
+                { housing: 18, scholarships: 32, financial: 45, requests: 67, clubs: 12, disciplinary: 8 },
+                { housing: 22, scholarships: 38, financial: 52, requests: 72, clubs: 15, disciplinary: 6 },
+                { housing: 25, scholarships: 42, financial: 58, requests: 78, clubs: 18, disciplinary: 10 },
+                { housing: 28, scholarships: 45, financial: 67, requests: 89, clubs: 15, disciplinary: 12 }
+              ].map((data, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex flex-col gap-0.5">
+                    <div className="w-full bg-blue-500 rounded-t" style={{ height: `${data.housing}px` }}></div>
+                    <div className="w-full bg-green-500" style={{ height: `${data.scholarships}px` }}></div>
+                    <div className="w-full bg-purple-500" style={{ height: `${data.financial}px` }}></div>
+                    <div className="w-full bg-orange-500" style={{ height: `${data.requests}px` }}></div>
+                    <div className="w-full bg-pink-500" style={{ height: `${data.clubs}px` }}></div>
+                    <div className="w-full bg-red-500" style={{ height: `${data.disciplinary}px` }}></div>
+                  </div>
+                  <span className="text-xs text-gray-500">Q{i + 1}</span>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-gray-200">
+              {services.map((service) => (
+                <div key={service.id} className="flex items-center gap-2">
+                  <div className={`w-3 h-3 bg-${service.color}-500 rounded`}></div>
+                  <span className="text-xs text-gray-600">{service.title.split(' ')[0]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
+            <div className="space-y-4">
+              {[
+                { service: 'Housing', action: 'New room assignment', student: 'S001234', time: '10 min ago', color: 'blue' },
+                { service: 'Scholarships', action: 'Application approved', student: 'S001567', time: '25 min ago', color: 'green' },
+                { service: 'Financial Aid', action: 'Loan disbursed', student: 'S001892', time: '1 hour ago', color: 'purple' },
+                { service: 'Requests', action: 'Transcript issued', student: 'S002134', time: '2 hours ago', color: 'orange' },
+                { service: 'Clubs', action: 'New member joined', student: 'S002456', time: '3 hours ago', color: 'pink' },
+                { service: 'Disciplinary', action: 'Case resolved', student: 'S002789', time: '5 hours ago', color: 'red' }
+              ].map((activity, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <div className={`w-2 h-2 rounded-full bg-${activity.color}-500 mt-1.5`}></div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
+                        <p className="text-xs text-gray-600">{activity.service} • {activity.student}</p>
+                      </div>
+                      <span className="text-xs text-gray-400">{activity.time}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {selectedService && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedService(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className={`bg-gradient-to-br from-${selectedService.color}-400 to-${selectedService.color}-600 p-6`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center`}>
+                    <selectedService.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <button 
+                    onClick={() => setSelectedService(null)}
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <h2 className="text-3xl font-bold text-white">{selectedService.title}</h2>
+                <p className="text-white text-opacity-90 mt-2">{selectedService.description}</p>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.entries(selectedService.stats).map(([key, value]) => (
+                    <div key={key} className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">{key}</p>
+                      <p className="text-3xl font-bold text-gray-900">{renderValue(value)}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Details</h3>
+                  <div className="space-y-3">
+                    {selectedService.items.map((item, i) => (
+                      <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-900">{item.name}</p>
+                            <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                              {Object.entries(item).filter(([key]) => key !== 'name').map(([key, value]) => (
+                                <span key={key}>
+                                  <span className="text-gray-500 capitalize">{key}:</span> <span className="font-semibold">{value as React.ReactNode}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-100">
+                            Manage
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button className={`flex-1 px-4 py-2 bg-${selectedService.color}-600 text-white rounded-lg hover:bg-${selectedService.color}-700 font-medium`}>
+                    View All Records
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Export Report
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+const StudentProfileAdmin = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterProgram, setFilterProgram] = useState('all');
+    const [filterLevel, setFilterLevel] = useState('all');
+    const [selectedStudent, setSelectedStudent] = useState(null);
+
+    const sampleStudents = [
+      { id: 'S001234', name: 'Nguyen Van An', program: 'FONS', level: 'Bachelor', year: '3', gpa: '3.45', status: 'Active' },
+      { id: 'S001235', name: 'Tran Thi Binh', program: 'FOM', level: 'Bachelor', year: '2', gpa: '3.72', status: 'Active' },
+      { id: 'S001236', name: 'Le Van Cuong', program: 'FONS', level: 'Master', year: '1', gpa: '3.88', status: 'Active' },
+      { id: 'S001237', name: 'Pham Thi Dung', program: 'FONS', level: 'Master', year: '2', gpa: '3.91', status: 'Active' },
+      { id: 'S001238', name: 'Hoang Van Em', program: 'FONS', level: 'PhD', year: '3', gpa: '3.95', status: 'Active' },
+    ];
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-3">
+        <div className="flex items-center justify-between  mb-3">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Student Profile Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive student data and analytics</p>
           </div>
           <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <Plus size={18} />
-            Add New Lecturer
+            Add New Student
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Lecturers</p>
-            <p className="text-2xl font-bold text-gray-900">297</p>
+            <p className="text-xs text-gray-500 mb-1">Total Students</p>
+            <p className="text-2xl font-bold text-gray-900">2,000</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Professors: 45 (15%)</p>
-              <p className="text-xs text-gray-600">Associate: 102 (34%)</p>
-              <p className="text-xs text-gray-600">Lecturers: 150 (51%)</p>
+              <p className="text-xs text-gray-600">Bachelor: 1,700 (85%)</p>
+              <p className="text-xs text-gray-600">Master: 300 (15%)</p>
+              <p className="text-xs text-gray-600">PhD: 30 (1.5%)</p>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Teaching Hours</p>
-            <p className="text-2xl font-bold text-gray-900">132,480h</p>
+            <p className="text-xs text-gray-500 mb-1">Bachelor Programs</p>
+            <p className="text-2xl font-bold text-gray-900">6</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Avg: 446h per lecturer</p>
-              <p className="text-xs text-gray-600">This academic year</p>
+              <p className="text-xs text-gray-600">Domestic: 5 programs</p>
+              <p className="text-xs text-gray-600">International: 1 program</p>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Publications</p>
-            <p className="text-2xl font-bold text-gray-900">1,248</p>
+            <p className="text-xs text-gray-500 mb-1">Master Programs</p>
+            <p className="text-2xl font-bold text-gray-900">3</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Papers: 892</p>
-              <p className="text-xs text-gray-600">Patents: 356</p>
+              <p className="text-xs text-gray-600">300 students enrolled</p>
+              <p className="text-xs text-gray-600">Avg. duration: 2 years</p>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Avg Workload</p>
-            <p className="text-2xl font-bold text-gray-900">14.8h/week</p>
+            <p className="text-xs text-gray-500 mb-1">PhD Program</p>
+            <p className="text-2xl font-bold text-gray-900">1</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Within standard range</p>
-              <p className="text-xs text-gray-600">12-16h recommended</p>
+              <p className="text-xs text-gray-600">30 doctoral students</p>
+              <p className="text-xs text-gray-600">Avg. duration: 4 years</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
-                  placeholder="Search by lecturer ID, name, email..."
+                  placeholder="Search by student ID, name, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <select 
-                value={filterDepartment}
-                onChange={(e) => setFilterDepartment(e.target.value)}
+                value={filterLevel}
+                onChange={(e) => setFilterLevel(e.target.value)}
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Departments</option>
+                <option value="all">All Levels</option>
+                <option value="bachelor">Bachelor</option>
+                <option value="master">Master</option>
+                <option value="phd">PhD</option>
+              </select>
+              <select 
+                value={filterProgram}
+                onChange={(e) => setFilterProgram(e.target.value)}
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Faculties</option>
                 <option value="cs">FONS</option>
                 <option value="ba">FOM</option>
                 <option value="se">FONS</option>
                 <option value="ds">FONS</option>
-              </select>
-              <select 
-                value={filterPosition}
-                onChange={(e) => setFilterPosition(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Positions</option>
-                <option value="professor">Professor</option>
-                <option value="associate">Associate Professor</option>
-                <option value="senior">Senior Lecturer</option>
-                <option value="lecturer">Lecturer</option>
               </select>
             </div>
           </div>
@@ -3688,42 +3946,39 @@ const LecturerProfileAdmin = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Lecturer ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student ID</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Full Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Position</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Degree</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Teaching Hours</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Publications</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Program</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Year</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">GPA</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sampleLecturers.map((lecturer) => (
-                  <tr key={lecturer.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{lecturer.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lecturer.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{lecturer.department}</td>
+                {sampleStudents.map((student) => (
+                  <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{student.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.program}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        lecturer.position === 'Professor' ? 'bg-purple-100 text-purple-700' :
-                        lecturer.position === 'Associate Professor' ? 'bg-blue-100 text-blue-700' :
-                        lecturer.position === 'Senior Lecturer' ? 'bg-green-100 text-green-700' :
-                        'bg-gray-100 text-gray-700'
+                        student.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
+                        student.level === 'Master' ? 'bg-purple-100 text-purple-700' :
+                        'bg-orange-100 text-orange-700'
                       }`}>
-                        {lecturer.position}
+                        {student.level}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{lecturer.degree}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{lecturer.teachingHours}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{lecturer.publications}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Year {student.year}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{student.gpa}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">{lecturer.status}</span>
+                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">{student.status}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button 
-                        onClick={() => setSelectedLecturer(lecturer)}
+                        onClick={() => setSelectedStudent(student)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
                         View Details
@@ -3736,7 +3991,7 @@ const LecturerProfileAdmin = () => {
           </div>
 
           <div className="p-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-600">Showing 1-5 of 297 lecturers</p>
+            <p className="text-sm text-gray-600">Showing 1-5 of 2,000 students</p>
             <div className="flex gap-2">
               <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Previous</button>
               <button className="px-3 py-1 bg-blue-600 text-white rounded">1</button>
@@ -3747,13 +4002,13 @@ const LecturerProfileAdmin = () => {
           </div>
         </div>
 
-        {selectedLecturer && (
+        {selectedStudent && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Lecturer Profile Details</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Student Profile Details</h2>
                 <button 
-                  onClick={() => setSelectedLecturer(null)}
+                  onClick={() => setSelectedStudent(null)}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
                   ✕
@@ -3763,90 +4018,71 @@ const LecturerProfileAdmin = () => {
                 <div className="grid grid-cols-3 gap-6">
                   <div className="col-span-1 flex flex-col items-center">
                     <div className="w-32 h-32 bg-gray-300 rounded-full mb-4"></div>
-                    <h3 className="text-xl font-bold text-gray-900">{selectedLecturer.name}</h3>
-                    <p className="text-sm text-gray-500">{selectedLecturer.id}</p>
-                    <p className="text-sm text-blue-600 mt-1">{selectedLecturer.position}</p>
+                    <h3 className="text-xl font-bold text-gray-900">{selectedStudent.name}</h3>
+                    <p className="text-sm text-gray-500">{selectedStudent.id}</p>
                   </div>
                   <div className="col-span-2 grid grid-cols-2 gap-4">
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Department</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.department}</p>
+                      <p className="text-xs text-gray-500 mb-1">Program</p>
+                      <p className="font-semibold text-gray-900">{selectedStudent.program}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Degree</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.degree}</p>
+                      <p className="text-xs text-gray-500 mb-1">Level</p>
+                      <p className="font-semibold text-gray-900">{selectedStudent.level}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Teaching Hours</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.teachingHours}</p>
+                      <p className="text-xs text-gray-500 mb-1">Current Year</p>
+                      <p className="font-semibold text-gray-900">Year {selectedStudent.year}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Publications</p>
-                      <p className="font-semibold text-gray-900">{selectedLecturer.publications}</p>
+                      <p className="text-xs text-gray-500 mb-1">GPA</p>
+                      <p className="font-semibold text-gray-900">{selectedStudent.gpa}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">Status</p>
-                      <p className="font-semibold text-green-600">{selectedLecturer.status}</p>
+                      <p className="font-semibold text-green-600">{selectedStudent.status}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">Email</p>
-                      <p className="font-semibold text-gray-900 text-sm">{selectedLecturer.id.toLowerCase()}@hsb.edu.vn</p>
+                      <p className="font-semibold text-gray-900 text-sm">{selectedStudent.id.toLowerCase()}@hsb.edu.vn</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Teaching Performance</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">Academic Performance</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Active Courses</span>
-                        <span className="font-semibold">6</span>
+                        <span className="text-gray-600">Credits Completed</span>
+                        <span className="font-semibold">95/120</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Student Rating</span>
-                        <span className="font-semibold">4.7/5.0</span>
+                        <span className="text-gray-600">Attendance Rate</span>
+                        <span className="font-semibold">94%</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Workload (weekly)</span>
-                        <span className="font-semibold">16h</span>
+                        <span className="text-gray-600">Training Score</span>
+                        <span className="font-semibold">85/100</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Research & Activities</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">Financial Status</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Research Projects</span>
-                        <span className="font-semibold">5 active</span>
+                        <span className="text-gray-600">Tuition Paid</span>
+                        <span className="font-semibold text-green-600">Current</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Community Hours</span>
-                        <span className="font-semibold">120h this year</span>
+                        <span className="text-gray-600">Scholarship</span>
+                        <span className="font-semibold">Merit-based 50%</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Conference Attendance</span>
-                        <span className="font-semibold">8 events</span>
+                        <span className="text-gray-600">Outstanding Balance</span>
+                        <span className="font-semibold">$0</span>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Recent Publications</h4>
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <p className="font-semibold text-gray-900">Machine Learning Applications in Healthcare</p>
-                      <p className="text-xs text-gray-600">Journal of AI Research, 2025</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="font-semibold text-gray-900">Deep Learning for Natural Language Processing</p>
-                      <p className="text-xs text-gray-600">International Conference on AI, 2024</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="font-semibold text-gray-900">Neural Networks and Pattern Recognition</p>
-                      <p className="text-xs text-gray-600">IEEE Transactions, 2024</p>
                     </div>
                   </div>
                 </div>
@@ -3858,9 +4094,1879 @@ const LecturerProfileAdmin = () => {
     );
   };
 
-{/*research management for lecturer*/}
+const CourseFeedback =() => {
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [showFeedbackDetail, setShowFeedbackDetail] = useState(false);
+  const [showPositiveComments, setShowPositiveComments] = useState(false);
+  const [showNegativeComments, setShowNegativeComments] = useState(false);
 
- 
+  const courseFeedback = [
+    {
+      id: 1,
+      courseCode: 'CS301',
+      courseName: 'Data Structures and Algorithms',
+      instructor: 'Dr. Nguyễn Văn A',
+      semester: 'Fall 2024',
+      totalResponses: 45,
+      averageScore: 8.3,
+      scoreDistribution: { 1: 0, 2: 0, 3: 1, 4: 2, 5: 3, 6: 5, 7: 8, 8: 12, 9: 10, 10: 4 },
+      sentimentBreakdown: { positive: 35, neutral: 8, negative: 2 },
+      comments: [
+        { id: 1, text: 'Excellent course! The professor explains concepts very clearly and the assignments are challenging but fair.', score: 9, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Great learning experience. The material is well-organized and the instructor is always available for questions.', score: 9, sentiment: 'positive', date: '2024-10-19' },
+        { id: 4, text: 'Very informative and engaging lectures. I feel much more confident in my coding skills now.', score: 10, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'The pace is too fast for beginners. More foundational material would be helpful.', score: 6, sentiment: 'negative', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 2,
+      courseCode: 'BUS202',
+      courseName: 'Strategic Management',
+      instructor: 'Prof. Trần Thị B',
+      semester: 'Fall 2024',
+      totalResponses: 52,
+      averageScore: 7.8,
+      scoreDistribution: { 1: 0, 2: 1, 3: 2, 4: 3, 5: 5, 6: 8, 7: 12, 8: 14, 9: 6, 10: 1 },
+      sentimentBreakdown: { positive: 28, neutral: 18, negative: 6 },
+      comments: [
+        { id: 1, text: 'Very practical approach to strategy. Case studies are particularly useful.', score: 8, sentiment: 'positive', date: '2024-10-20' },
+        { id: 3, text: 'Too much theory, not enough real-world application.', score: 5, sentiment: 'negative', date: '2024-10-18' },
+        { id: 4, text: 'The professor brings great industry experience to the classroom.', score: 9, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'Group projects are well-structured and help develop teamwork skills.', score: 8, sentiment: 'positive', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 3,
+      courseCode: 'ENG101',
+      courseName: 'Business English Communication',
+      instructor: 'Ms. Lê Thị C',
+      semester: 'Fall 2024',
+      totalResponses: 38,
+      averageScore: 9.1,
+      scoreDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 2, 7: 4, 8: 8, 9: 15, 10: 8 },
+      sentimentBreakdown: { positive: 34, neutral: 3, negative: 1 },
+      comments: [
+        { id: 1, text: 'Outstanding teacher! My English skills have improved dramatically.', score: 10, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Very engaging and supportive learning environment. Highly recommend!', score: 9, sentiment: 'positive', date: '2024-10-19' },
+        { id: 3, text: 'Excellent feedback on presentations and written work.', score: 9, sentiment: 'positive', date: '2024-10-18' },
+        { id: 4, text: 'The course materials are well-designed and relevant to business contexts.', score: 8, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'Perfect balance of speaking, writing, and listening activities.', score: 10, sentiment: 'positive', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 4,
+      courseCode: 'MATH203',
+      courseName: 'Statistics for Business',
+      instructor: 'Dr. Phạm Văn D',
+      semester: 'Fall 2024',
+      totalResponses: 41,
+      averageScore: 6.9,
+      scoreDistribution: { 1: 1, 2: 2, 3: 4, 4: 5, 5: 6, 6: 8, 7: 9, 8: 4, 9: 2, 10: 0 },
+      sentimentBreakdown: { positive: 15, neutral: 16, negative: 10 },
+      comments: [
+        { id: 1, text: 'Difficult material but the professor tries to make it accessible.', score: 7, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Need more examples and practice problems during class.', score: 6, sentiment: 'negative', date: '2024-10-19' },
+        { id: 4, text: 'Good course for understanding statistical concepts in business context.', score: 8, sentiment: 'positive', date: '2024-10-17' },
+        { id: 5, text: 'Too much emphasis on theory, not enough on practical application.', score: 5, sentiment: 'negative', date: '2024-10-16' }
+      ]
+    },
+    {
+      id: 5,
+      courseCode: 'MKT301',
+      courseName: 'Digital Marketing',
+      instructor: 'Ms. Hoàng Thị E',
+      semester: 'Fall 2024',
+      totalResponses: 47,
+      averageScore: 8.7,
+      scoreDistribution: { 1: 0, 2: 0, 3: 0, 4: 1, 5: 2, 6: 3, 7: 6, 8: 15, 9: 14, 10: 6 },
+      sentimentBreakdown: { positive: 40, neutral: 5, negative: 2 },
+      comments: [
+        { id: 1, text: 'Amazing course! Very up-to-date with current digital marketing trends.', score: 10, sentiment: 'positive', date: '2024-10-20' },
+        { id: 2, text: 'Practical assignments that prepare you for real marketing roles.', score: 9, sentiment: 'positive', date: '2024-10-19' },
+        { id: 3, text: 'The instructor has great industry connections and shares valuable insights.', score: 9, sentiment: 'positive', date: '2024-10-18' },
+        { id: 5, text: 'Excellent use of case studies from Vietnamese and international companies.', score: 9, sentiment: 'positive', date: '2024-10-16' }
+      ]
+    }
+  ];
+
+  const overallAverageScore = (courseFeedback.reduce((sum, course) => sum + course.averageScore, 0) / courseFeedback.length).toFixed(1);
+  const totalResponses = courseFeedback.reduce((sum, course) => sum + course.totalResponses, 0);
+  const totalPositive = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.positive, 0);
+  const totalNeutral = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.neutral, 0);
+  const totalNegative = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.negative, 0);
+
+  const getSentimentColor = (sentiment) => {
+    switch(sentiment) {
+      case 'positive': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'neutral': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'negative': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getSentimentIcon = (sentiment) => {
+    switch(sentiment) {
+      case 'positive': return <ThumbsUp size={16} />;
+      case 'neutral': return <Minus size={16} />;
+      case 'negative': return <ThumbsDown size={16} />;
+      default: return null;
+    }
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 8.5) return 'text-emerald-600';
+    if (score >= 7.0) return 'text-blue-600';
+    if (score >= 6.0) return 'text-amber-600';
+    return 'text-red-600';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3">
+      {/* Header */}
+      <div className="bg-white border-b rounded-xl border-gray-200 sticky top-0 z-10">
+        <div className="max-w mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Course Feedback Management</h1>
+              <p className="text-gray-600 mt-1">Student feedback analysis and sentiment tracking</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w mx-auto mt-3">
+        <div className="space-y-4">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <BarChart3 className="text-blue-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Average Score</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{overallAverageScore}</p>
+              <p className="text-sm text-gray-500">Out of 10.0</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <MessageSquare className="text-purple-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Total Responses</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{totalResponses}</p>
+              <p className="text-sm text-gray-500">{courseFeedback.length} courses</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-emerald-100 rounded-xl">
+                  <ThumbsUp className="text-emerald-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Positive Sentiment</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{Math.round((totalPositive/totalResponses)*100)}%</p>
+              <p className="text-sm text-emerald-600 font-medium">{totalPositive} responses</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-red-100 rounded-xl">
+                  <ThumbsDown className="text-red-600" size={24} />
+                </div>
+                <span className="text-sm font-semibold text-gray-600">Needs Attention</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{totalNegative}</p>
+              <p className="text-sm text-red-600 font-medium">Negative responses</p>
+            </div>
+          </div>
+
+          {/* Sentiment Overview Chart */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Sentiment Distribution</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ThumbsUp size={18} className="text-emerald-600" />
+                  <span className="text-sm text-gray-600">Positive</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full" style={{width: `${(totalPositive/totalResponses)*100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-12">{totalPositive}</span>
+                  <span className="text-sm text-gray-500 w-12">{Math.round((totalPositive/totalResponses)*100)}%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Minus size={18} className="text-amber-600" />
+                  <span className="text-sm text-gray-600">Neutral</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500 rounded-full" style={{width: `${(totalNeutral/totalResponses)*100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-12">{totalNeutral}</span>
+                  <span className="text-sm text-gray-500 w-12">{Math.round((totalNeutral/totalResponses)*100)}%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ThumbsDown size={18} className="text-red-600" />
+                  <span className="text-sm text-gray-600">Negative</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-500 rounded-full" style={{width: `${(totalNegative/totalResponses)*100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-12">{totalNegative}</span>
+                  <span className="text-sm text-gray-500 w-12">{Math.round((totalNegative/totalResponses)*100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Feedback List */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Course Feedback Analysis</h3>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {courseFeedback.map(course => (
+                <div key={course.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h4 className="text-lg font-bold text-gray-900">{course.courseCode}</h4>
+                        <span className={`text-2xl font-bold ${getScoreColor(course.averageScore)}`}>
+                          {course.averageScore.toFixed(1)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              size={16} 
+                              className={i < Math.round(course.averageScore/2) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">{course.courseName}</p>
+                      <p className="text-xs text-gray-500 mt-1">{course.instructor} • {course.semester}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setShowFeedbackDetail(true);
+                      }}
+                      className="flex items-center gap-1 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
+                    >
+                      <Eye size={16} />
+                      View Details
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-xs text-gray-500 mb-1">Responses</p>
+                      <p className="text-xl font-bold text-gray-900">{course.totalResponses}</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <p className="text-xs text-blue-600 font-medium mb-1">Average Score</p>
+                      <p className="text-xl font-bold text-blue-900">
+                        {course.averageScore.toFixed(1)}/10
+                      </p>
+                    </div>
+                    <div className="bg-emerald-50 rounded-lg p-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <ThumbsUp size={14} className="text-emerald-600" />
+                        <p className="text-xs text-emerald-600 font-medium">Positive</p>
+                      </div>
+                      <p className="text-xl font-bold text-emerald-900">
+                        {Math.round((course.sentimentBreakdown.positive/course.totalResponses)*100)}%
+                      </p>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <ThumbsDown size={14} className="text-red-600" />
+                        <p className="text-xs text-red-600 font-medium">Negative</p>
+                      </div>
+                      <p className="text-xl font-bold text-red-900">
+                        {Math.round((course.sentimentBreakdown.negative/course.totalResponses)*100)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Feedback Detail Modal */}
+          {showFeedbackDetail && selectedCourse && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                        <MessageSquare size={32} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h2 className="text-2xl font-bold">{selectedCourse.courseCode} - {selectedCourse.courseName}</h2>
+                          <span className="text-3xl font-bold">
+                            {selectedCourse.averageScore.toFixed(1)}
+                          </span>
+                        </div>
+                        <p className="text-indigo-100">{selectedCourse.instructor} • {selectedCourse.semester}</p>
+                        <p className="text-indigo-200 text-sm mt-1">{selectedCourse.totalResponses} responses</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowFeedbackDetail(false)}
+                      className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                      <XCircle size={24} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-250px)]">
+                  {/* Top Metrics Cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BarChart3 className="text-blue-600" size={20} />
+                        <span className="text-sm font-semibold text-blue-900">Average Score</span>
+                      </div>
+                      <p className="text-4xl font-bold text-blue-900">{selectedCourse.averageScore.toFixed(1)}/10</p>
+                      <p className="text-sm text-blue-700 mt-1">{selectedCourse.totalResponses} responses</p>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ThumbsUp className="text-emerald-600" size={20} />
+                        <span className="text-sm font-semibold text-emerald-900">Positive</span>
+                      </div>
+                      <p className="text-4xl font-bold text-emerald-900">{selectedCourse.sentimentBreakdown.positive}</p>
+                      <p className="text-sm text-emerald-700 mt-1">
+                        {Math.round((selectedCourse.sentimentBreakdown.positive/selectedCourse.totalResponses)*100)}% of responses
+                      </p>
+                    </div>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ThumbsDown className="text-red-600" size={20} />
+                        <span className="text-sm font-semibold text-red-900">Negative</span>
+                      </div>
+                      <p className="text-4xl font-bold text-red-900">{selectedCourse.sentimentBreakdown.negative}</p>
+                      <p className="text-sm text-red-700 mt-1">
+                        {Math.round((selectedCourse.sentimentBreakdown.negative/selectedCourse.totalResponses)*100)}% of responses
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Student Comments */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Student Comments</h3>
+                    
+                    {/* Positive Comments Dropdown */}
+                    <div className="mb-3 border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setShowPositiveComments(!showPositiveComments)}
+                        className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-emerald-100 rounded-lg">
+                            <ThumbsUp className="text-emerald-600" size={18} />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-gray-900">Positive Responses</p>
+                            <p className="text-xs text-gray-500">{selectedCourse.comments.filter(c => c.sentiment === 'positive').length} comments</p>
+                          </div>
+                        </div>
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${showPositiveComments ? 'rotate-180' : ''}`}
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {showPositiveComments && (
+                        <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
+                          {selectedCourse.comments
+                            .filter(comment => comment.sentiment === 'positive')
+                            .map(comment => (
+                              <div key={comment.id} className="bg-white border border-emerald-200 rounded-lg p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <span className="text-sm font-bold text-emerald-600">Score: {comment.score}/10</span>
+                                  <span className="text-xs text-gray-500">{comment.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed">{comment.text}</p>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Negative Comments Dropdown */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setShowNegativeComments(!showNegativeComments)}
+                        className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-red-100 rounded-lg">
+                            <ThumbsDown className="text-red-600" size={18} />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-gray-900">Negative Responses</p>
+                            <p className="text-xs text-gray-500">{selectedCourse.comments.filter(c => c.sentiment === 'negative').length} comments</p>
+                          </div>
+                        </div>
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${showNegativeComments ? 'rotate-180' : ''}`}
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {showNegativeComments && (
+                        <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
+                          {selectedCourse.comments
+                            .filter(comment => comment.sentiment === 'negative')
+                            .map(comment => (
+                              <div key={comment.id} className="bg-white border border-red-200 rounded-lg p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <span className="text-sm font-bold text-red-600">Score: {comment.score}/10</span>
+                                  <span className="text-xs text-gray-500">{comment.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed">{comment.text}</p>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                  <div className="flex gap-3 justify-end">
+                    <button 
+                      onClick={() => setShowFeedbackDetail(false)}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    >
+                      Close
+                    </button>
+                    <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2">
+                      <Download size={20} />
+                      Export Report
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+const ClassOverview = () => {
+  const [selectedSemester, setSelectedSemester] = useState('current');
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [viewMode, setViewMode] = useState('overview');
+
+  const classData = {
+    totalClasses: 186,
+    activeClasses: 178,
+    completedClasses: 8,
+    avgClassSize: 32,
+    totalEnrollment: 5952,
+    utilizationRate: 87,
+    satisfactionRate: 4.3
+  };
+
+  const facultyClasses = [
+    {
+      id: 'fons',
+      name: 'FONS',
+      classes: 48,
+      students: 1536,
+      avgSize: 32,
+      utilization: 92,
+      color: 'purple'
+    },
+    {
+      id: 'fom',
+      name: 'FOM',
+      classes: 42,
+      students: 1344,
+      avgSize: 32,
+      utilization: 88,
+      color: 'blue'
+    },
+    {
+      id: 'fomac',
+      name: 'FOMAC',
+      classes: 38,
+      students: 1216,
+      avgSize: 32,
+      utilization: 85,
+      color: 'green'
+    },
+    {
+      id: 'ins',
+      name: 'INS',
+      classes: 32,
+      students: 1024,
+      avgSize: 32,
+      utilization: 83,
+      color: 'orange'
+    },
+    {
+      id: 'itm',
+      name: 'ITM',
+      classes: 26,
+      students: 832,
+      avgSize: 32,
+      utilization: 79,
+      color: 'pink'
+    }
+  ];
+
+  const classTypes = [
+    {
+      type: 'Theory',
+      count: 98,
+      percentage: 53,
+      icon: BookOpen,
+      color: 'blue'
+    },
+    {
+      type: 'Practical/Lab',
+      count: 56,
+      percentage: 30,
+      icon: Target,
+      color: 'green'
+    },
+    {
+      type: 'Seminar',
+      count: 22,
+      percentage: 12,
+      icon: Users,
+      color: 'purple'
+    },
+    {
+      type: 'Online',
+      count: 10,
+      percentage: 5,
+      icon: Clock,
+      color: 'orange'
+    }
+  ];
+
+  const timeSlots = [
+    { slot: '7:00 - 9:00', classes: 42, utilization: 95 },
+    { slot: '9:00 - 11:00', classes: 48, utilization: 98 },
+    { slot: '11:00 - 13:00', classes: 38, utilization: 87 },
+    { slot: '13:00 - 15:00', classes: 35, utilization: 82 },
+    { slot: '15:00 - 17:00', classes: 23, utilization: 68 }
+  ];
+
+  const recentActivities = [
+    { class: 'CS301 - Data Structures', action: 'Class started', time: '30 min ago', type: 'success' },
+    { class: 'BA205 - Marketing Strategy', action: 'Assignment due today', time: '2 hours ago', type: 'warning' },
+    { class: 'DS402 - Machine Learning', action: 'Midterm scheduled', time: '5 hours ago', type: 'info' },
+    { class: 'SE301 - FONS', action: 'Project submission', time: '1 day ago', type: 'info' }
+  ];
+
+  const getFacultyColor = (color) => {
+    switch(color) {
+      case 'blue': return 'from-blue-400 to-blue-600';
+      case 'green': return 'from-green-400 to-green-600';
+      case 'purple': return 'from-purple-400 to-purple-600';
+      case 'orange': return 'from-orange-400 to-orange-600';
+      case 'pink': return 'from-pink-400 to-pink-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  const getIconColor = (color) => {
+    switch(color) {
+      case 'blue': return 'bg-blue-100 text-blue-600';
+      case 'green': return 'bg-green-100 text-green-600';
+      case 'purple': return 'bg-purple-100 text-purple-600';
+      case 'orange': return 'bg-orange-100 text-orange-600';
+      case 'pink': return 'bg-pink-100 text-pink-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Classes Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive view of all classes, schedules, and performance metrics</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="current">Current Semester</option>
+              <option value="fall2024">Fall 2024</option>
+              <option value="spring2024">Spring 2024</option>
+              <option value="fall2023">Fall 2023</option>
+            </select>
+            <select 
+              value={selectedFaculty}
+              onChange={(e) => setSelectedFaculty(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">All Faculties</option>
+              <option value="fons">FONS</option>
+              <option value="fom">FOM</option>
+              <option value="fomac">FOMAC</option>
+              <option value="ins">INS</option>
+              <option value="itm">ITM</option>
+            </select>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Classes</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.totalClasses}</p>
+            <p className="text-xs text-green-600 mt-2">↑ 12 vs last semester</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Active Classes</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.activeClasses}</p>
+            <p className="text-xs text-gray-600 mt-2">{classData.completedClasses} completed</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Enrollment</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.totalEnrollment.toLocaleString()}</p>
+            <p className="text-xs text-gray-600 mt-2">Avg: {classData.avgClassSize} per class</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Utilization Rate</p>
+            <p className="text-3xl font-bold text-gray-900">{classData.utilizationRate}%</p>
+            <p className="text-xs text-green-600 mt-2">↑ 3% vs last semester</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Classes by Faculty</h3>
+              <Building className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {facultyClasses.map((faculty) => (
+                <div key={faculty.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{faculty.name}</span>
+                    <span className="text-sm font-bold text-gray-900">{faculty.classes} classes</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getFacultyColor(faculty.color)}`}
+                      style={{width: `${faculty.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{faculty.students} students • {faculty.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Class Types</h3>
+              <Target className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-3">
+              {classTypes.map((type, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 ${getIconColor(type.color)} rounded-lg flex items-center justify-center`}>
+                      <type.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{type.type}</p>
+                      <p className="text-xs text-gray-500">{type.count} classes</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">{type.percentage}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Recent Activities</h3>
+              <Calendar className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {recentActivities.map((activity, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                    activity.type === 'success' ? 'bg-green-500' :
+                    activity.type === 'warning' ? 'bg-yellow-500' :
+                    'bg-blue-500'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
+                    <p className="text-xs text-gray-600">{activity.class}</p>
+                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Time Slot Distribution</h3>
+            <div className="space-y-4">
+              {timeSlots.map((slot, i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">{slot.slot}</span>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">{slot.classes} classes</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                      style={{width: `${slot.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{slot.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Class Performance Metrics</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Average Attendance Rate</span>
+                  <span className="text-2xl font-bold text-gray-900">92%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{width: '92%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Student Satisfaction</span>
+                  <span className="text-2xl font-bold text-gray-900">4.3/5.0</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[1,2,3,4,5].map((star) => (
+                    <Award key={star} className={`w-5 h-5 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Assignment Completion</span>
+                  <span className="text-2xl font-bold text-gray-900">88%</span>
+                </div>
+                <div className="w-full bg-purple-200 rounded-full h-2">
+                  <div className="bg-purple-600 h-2 rounded-full" style={{width: '88%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Pass Rate</span>
+                  <span className="text-2xl font-bold text-gray-900">91%</span>
+                </div>
+                <div className="w-full bg-orange-200 rounded-full h-2">
+                  <div className="bg-orange-600 h-2 rounded-full" style={{width: '91%'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-900">Top Performing Classes</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Class Code</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Class Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Enrolled</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Attendance</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {[
+                  { code: 'CS401', name: 'Artificial Intelligence', faculty: 'FONS', enrolled: 45, attendance: 96, satisfaction: 4.8, passRate: 94, status: 'Active' },
+                  { code: 'BA305', name: 'Strategic Management', faculty: 'FOM', enrolled: 38, attendance: 94, satisfaction: 4.7, passRate: 92, status: 'Active' },
+                  { code: 'DS402', name: 'Machine Learning', faculty: 'FONS', enrolled: 42, attendance: 95, satisfaction: 4.6, passRate: 91, status: 'Active' },
+                  { code: 'MC301', name: 'Digital Marketing', faculty: 'FOMAC', enrolled: 35, attendance: 93, satisfaction: 4.5, passRate: 90, status: 'Active' },
+                  { code: 'IT305', name: 'Cloud Computing', faculty: 'ITM', enrolled: 40, attendance: 92, satisfaction: 4.5, passRate: 89, status: 'Active' }
+                ].map((classItem, i) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="font-semibold text-blue-600">{classItem.code}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">{classItem.name}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600">{classItem.faculty}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{classItem.enrolled}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{classItem.attendance}%</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Award className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm font-semibold text-gray-900">{classItem.satisfaction}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{classItem.passRate}%</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-300">
+                        {classItem.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+const LecturersOverview = () => {
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [filterDepartment, setFilterDepartment] = useState('all');
+
+    const categories = [
+      {
+        id: 'workload',
+        title: 'Workload Distribution',
+        icon: Clock,
+        color: 'blue',
+        stats: { avgHours: '14.8h', maxLoad: '20h', minLoad: '8h' },
+        description: 'Track teaching hours, course load, and workload balance across faculty.',
+        data: [
+          { name: 'Dr. Nguyen Van Minh', dept: 'FONS', hours: 16, courses: 4, students: 240, status: 'Optimal' },
+          { name: 'Dr. Tran Thi Lan', dept: 'Business Admin', hours: 18, courses: 5, students: 280, status: 'High' },
+          { name: 'Dr. Le Van Hieu', dept: 'FONS', hours: 14, courses: 3, students: 180, status: 'Optimal' },
+          { name: 'Dr. Pham Thi Mai', dept: 'FONS', hours: 15, courses: 4, students: 220, status: 'Optimal' },
+          { name: 'Dr. Hoang Van Tuan', dept: 'FONS', hours: 12, courses: 3, students: 165, status: 'Low' }
+        ]
+      },
+      {
+        id: 'performance',
+        title: 'Teaching Performance',
+        icon: TrendingUp,
+        color: 'green',
+        stats: { avgRating: '4.3/5', topRated: 47, needsImprovement: 12 },
+        description: 'Monitor student evaluations, teaching quality, and performance metrics.',
+        data: [
+          { name: 'Dr. Nguyen Van Minh', rating: 4.7, studentFeedback: 156, passRate: '94%', engagement: 'High' },
+          { name: 'Dr. Tran Thi Lan', rating: 4.5, studentFeedback: 189, passRate: '91%', engagement: 'High' },
+          { name: 'Dr. Le Van Hieu', rating: 4.2, studentFeedback: 134, passRate: '88%', engagement: 'Medium' },
+          { name: 'Dr. Pham Thi Mai', rating: 4.8, studentFeedback: 178, passRate: '96%', engagement: 'High' },
+          { name: 'Dr. Hoang Van Tuan', rating: 4.1, studentFeedback: 98, passRate: '87%', engagement: 'Medium' }
+        ]
+      },
+      {
+        id: 'research',
+        title: 'Research Output',
+        icon: FileText,
+        color: 'purple',
+        stats: { totalPubs: 1248, avgPerFaculty: 4.2, hIndex: '18.5' },
+        description: 'Track publications, research projects, citations, and academic contributions.',
+        data: [
+          { name: 'Dr. Nguyen Van Minh', publications: 24, citations: 342, projects: 5, grants: '$125,000' },
+          { name: 'Dr. Tran Thi Lan', publications: 38, citations: 567, projects: 8, grants: '$245,000' },
+          { name: 'Dr. Le Van Hieu', publications: 12, citations: 189, projects: 3, grants: '$78,000' },
+          { name: 'Dr. Pham Thi Mai', publications: 31, citations: 489, projects: 6, grants: '$198,000' },
+          { name: 'Dr. Hoang Van Tuan', publications: 18, citations: 276, projects: 4, grants: '$92,000' }
+        ]
+      },
+      {
+        id: 'development',
+        title: 'Professional Development',
+        icon: Award,
+        color: 'orange',
+        stats: { workshops: 89, certifications: 134, conferences: 67 },
+        description: 'Monitor faculty training, workshops, certifications, and skill development.',
+        data: [
+          { name: 'Dr. Nguyen Van Minh', workshops: 8, conferences: 5, certifications: 3, lastTraining: '2 weeks ago' },
+          { name: 'Dr. Tran Thi Lan', workshops: 12, conferences: 8, certifications: 5, lastTraining: '1 week ago' },
+          { name: 'Dr. Le Van Hieu', workshops: 5, conferences: 3, certifications: 2, lastTraining: '1 month ago' },
+          { name: 'Dr. Pham Thi Mai', workshops: 10, conferences: 6, certifications: 4, lastTraining: '3 weeks ago' },
+          { name: 'Dr. Hoang Van Tuan', workshops: 6, conferences: 4, certifications: 2, lastTraining: '2 months ago' }
+        ]
+      },
+      {
+        id: 'community',
+        title: 'Community Engagement',
+        icon: Users,
+        color: 'pink',
+        stats: { totalHours: 35640, avgPerFaculty: 120, activeProjects: 45 },
+        description: 'Track community service, outreach programs, and social impact initiatives.',
+        data: [
+          { name: 'Dr. Nguyen Van Minh', hours: 120, projects: 4, impact: 'High', focus: 'STEM Education' },
+          { name: 'Dr. Tran Thi Lan', hours: 145, projects: 6, impact: 'High', focus: 'Business Mentorship' },
+          { name: 'Dr. Le Van Hieu', hours: 95, projects: 3, impact: 'Medium', focus: 'Tech Literacy' },
+          { name: 'Dr. Pham Thi Mai', hours: 130, projects: 5, impact: 'High', focus: 'Data for Good' },
+          { name: 'Dr. Hoang Van Tuan', hours: 105, projects: 3, impact: 'Medium', focus: 'Youth Coding' }
+        ]
+      },
+      {
+        id: 'recognition',
+        title: 'Awards & Recognition',
+        icon: Award,
+        color: 'yellow',
+        stats: { totalAwards: 156, teachingAwards: 67, researchAwards: 89 },
+        description: 'Showcase faculty achievements, honors, and institutional recognition.',
+        data: [
+          { name: 'Dr. Nguyen Van Minh', awards: 5, latest: 'Best Teaching Award 2024', type: 'Teaching' },
+          { name: 'Dr. Tran Thi Lan', awards: 8, latest: 'Outstanding Research 2024', type: 'Research' },
+          { name: 'Dr. Le Van Hieu', awards: 3, latest: 'Innovation Award 2023', type: 'Innovation' },
+          { name: 'Dr. Pham Thi Mai', awards: 7, latest: 'Excellence in Mentorship 2024', type: 'Mentorship' },
+          { name: 'Dr. Hoang Van Tuan', awards: 4, latest: 'Community Impact 2023', type: 'Service' }
+        ]
+      }
+    ];
+
+    const departments = [
+      { name: 'FONS', faculty: 45, avgAge: 42, phd: '100%' },
+      { name: 'FOM', faculty: 38, avgAge: 45, phd: '95%' },
+      { name: 'FONS', faculty: 32, avgAge: 39, phd: '97%' },
+      { name: 'INS', faculty: 28, avgAge: 38, phd: '100%' },
+      { name: 'ITM', faculty: 24, avgAge: 41, phd: '92%' }
+    ];
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-3">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Lecturers Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and insights on faculty performance and development</p>
+          </div>
+          <select 
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">All Departments</option>
+            <option value="cs">FONS</option>
+            <option value="ba">FOM</option>
+            <option value="se">FONS</option>
+            <option value="ds">FONS</option>
+            <option value="is">Information Systems</option>
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Total Faculty</p>
+            <p className="text-3xl font-bold text-gray-900">297</p>
+            <p className="text-xs text-gray-600 mt-2">Across 5 departments</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Avg Performance</p>
+            <p className="text-3xl font-bold text-gray-900">4.3/5</p>
+            <p className="text-xs text-green-600 mt-2">↑ 0.2 vs last year</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <FileText className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Publications</p>
+            <p className="text-3xl font-bold text-gray-900">1,248</p>
+            <p className="text-xs text-green-600 mt-2">↑ 12% vs last year</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Clock className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Avg Workload</p>
+            <p className="text-3xl font-bold text-gray-900">14.8h</p>
+            <p className="text-xs text-gray-600 mt-2">Per week</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-pink-600" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Awards</p>
+            <p className="text-3xl font-bold text-gray-900">156</p>
+            <p className="text-xs text-gray-600 mt-2">This academic year</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              onClick={() => setSelectedCategory(category)}
+              className={`bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-${category.color}-500 hover:shadow-lg transition-all cursor-pointer`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-14 h-14 bg-${category.color}-100 rounded-xl flex items-center justify-center`}>
+                  <category.icon className={`w-7 h-7 text-${category.color}-600`} />
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{category.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{category.description}</p>
+              
+              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200">
+                {Object.entries(category.stats).map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-xs text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                    <p className="text-sm font-bold text-gray-900">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Department Distribution</h3>
+            <div className="space-y-4">
+              {departments.map((dept, i) => (
+                <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-gray-900">{dept.name}</h4>
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+                      {dept.faculty} faculty
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500 text-xs">Avg Age</p>
+                      <p className="font-semibold text-gray-900">{dept.avgAge} years</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs">PhD Rate</p>
+                      <p className="font-semibold text-gray-900">{dept.phd}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs">Status</p>
+                      <p className="font-semibold text-green-600">Active</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Faculty Composition</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-700 font-medium">Professors</span>
+                  <span className="text-lg font-bold text-gray-900">45 (15%)</span>
+                </div>
+                <div className="w-full bg-purple-200 rounded-full h-2">
+                  <div className="bg-purple-600 h-2 rounded-full" style={{width: '15%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-700 font-medium">Associate Professors</span>
+                  <span className="text-lg font-bold text-gray-900">102 (34%)</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{width: '34%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-700 font-medium">Senior Lecturers</span>
+                  <span className="text-lg font-bold text-gray-900">78 (26%)</span>
+                </div>
+                <div className="w-full bg-green-200 rounded-full h-2">
+                  <div className="bg-green-600 h-2 rounded-full" style={{width: '26%'}}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-700 font-medium">Lecturers</span>
+                  <span className="text-lg font-bold text-gray-900">72 (25%)</span>
+                </div>
+                <div className="w-full bg-orange-200 rounded-full h-2">
+                  <div className="bg-orange-600 h-2 rounded-full" style={{width: '25%'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {selectedCategory && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedCategory(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className={`bg-gradient-to-br from-${selectedCategory.color}-400 to-${selectedCategory.color}-600 p-6`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center`}>
+                    <selectedCategory.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <button 
+                    onClick={() => setSelectedCategory(null)}
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <h2 className="text-3xl font-bold text-white">{selectedCategory.title}</h2>
+                <p className="text-white text-opacity-90 mt-2">{selectedCategory.description}</p>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.entries(selectedCategory.stats).map(([key, value]) => (
+                    <div key={key} className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900">{value as React.ReactNode}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Faculty Details</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+                          {Object.keys(selectedCategory.data[0])
+                            .filter(key => key !== 'name' && key !== 'dept')
+                            .map(key => (
+                              <th key={key} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                                {key.replace(/([A-Z])/g, ' $1').trim()}
+                              </th>
+                            ))}
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {selectedCategory.data.map((item, i) => (
+                          <tr key={i} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                              <div>
+                                <p>{item.name}</p>
+                                {item.dept && <p className="text-xs text-gray-500">{item.dept}</p>}
+                              </div>
+                            </td>
+                            {Object.entries(item)
+                              .filter(([key]) => key !== 'name' && key !== 'dept')
+                              .map(([key, value]) => (
+                                <td key={key} className="px-4 py-3 text-sm text-gray-600">
+                                  {key === 'status' ? (
+                                    <span className={`px-2 py-1 text-xs rounded-full ${
+                                      value === 'High' ? 'bg-red-100 text-red-700' :
+                                      value === 'Optimal' ? 'bg-green-100 text-green-700' :
+                                      'bg-yellow-100 text-yellow-700'
+                                    }`}>
+                                      {value as React.ReactNode}
+                                    </span>
+                                  ) : key === 'engagement' || key === 'impact' ? (
+                                    <span className={`px-2 py-1 text-xs rounded-full ${
+                                      value === 'High' ? 'bg-green-100 text-green-700' :
+                                      'bg-blue-100 text-blue-700'
+                                    }`}>
+                                      {value as React.ReactNode}
+                                    </span>
+                                  ) : (
+                                    <span className="font-semibold">{value as React.ReactNode}</span>
+                                  )}
+                                </td>
+                              ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button className={`flex-1 px-4 py-2 bg-${selectedCategory.color}-600 text-white rounded-lg hover:bg-${selectedCategory.color}-700 font-medium`}>
+                    Export Full Report
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    View Analytics
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    Compare Faculty
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+const GradeManagement = () => {
+  const [activeView, setActiveView] = useState('overview');
+  const [selectedFaculty, setSelectedFaculty] = useState('all');
+  const [selectedProgram, setSelectedProgram] = useState('all');
+  const [selectedSemester, setSelectedSemester] = useState('fall-2024');
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+
+  const faculties = [
+    { code: 'FOM', name: 'Faculty of Management' },
+    { code: 'FOMAC', name: 'Faculty of Marketing and Communication' },
+    { code: 'FONS', name: 'Faculty of Nontraditional Security' }
+  ];
+
+  const programs = {
+    bachelor: [
+      { code: 'MET', name: 'Management Economics and Technology', faculty: 'FOM' },
+      { code: 'MAC', name: 'Marketing and Communication', faculty: 'FOMAC' },
+      { code: 'HAT', name: 'Hospitality and Tourism', faculty: 'FOM' },
+      { code: 'MAS', name: 'Management and Sustainability', faculty: 'FOM' },
+      { code: 'BNS', name: 'Business and Nontraditional Security', faculty: 'FONS' },
+      { code: 'HAS', name: 'Health Administration and Security', faculty: 'FONS' }
+    ],
+    master: [
+      { code: 'HSB-MBA', name: 'Master of Business Administration', faculty: 'FOM' },
+      { code: 'MOTE', name: 'Master of Technology and Entrepreneurship', faculty: 'FONS' },
+      { code: 'MNS', name: 'Master of Nontraditional Security', faculty: 'FONS' }
+    ],
+    phd: [
+      { code: 'DMS', name: 'Doctor of Management Science', faculty: 'FOM' }
+    ]
+  };
+
+  const bachelorProgramStats = [
+    { code: 'MET', students: 380, passRate: 64.2, stdDev: 0.52 },
+    { code: 'MAC', students: 320, passRate: 83.5, stdDev: 0.58 },
+    { code: 'HAT', students: 290, passRate: 82.8, stdDev: 0.61 },
+    { code: 'MAS', students: 310, passRate: 75.1, stdDev: 0.48 },
+    { code: 'BNS', students: 340, passRate: 86.3, stdDev: 0.45 },
+    { code: 'HAS', students: 210, passRate: 84.8, stdDev: 0.50 }
+  ];
+
+  const facultyMetrics = [
+    { code: 'FOM', name: 'Faculty of Management', timelyDelivery: 89.5, stdDev: 0.54, skewness: -0.32, kurtosis: 2.85 },
+    { code: 'FOMAC', name: 'Faculty of Marketing and Communication', timelyDelivery: 92.3, stdDev: 0.58, skewness: -0.28, kurtosis: 2.92 },
+    { code: 'FONS', name: 'Faculty of Nontraditional Security', timelyDelivery: 94.1, stdDev: 0.47, skewness: -0.35, kurtosis: 3.12 }
+  ];
+
+  const courseData = [
+    { id: 'HSB1001', name: 'Quản trị học / Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Nguyen Van A', students: 45, avgGrade: 3.45, passRate: 95.6 },
+    { id: 'HSB1002', name: 'Kinh tế học / Economics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Tran Thi B', students: 52, avgGrade: 3.28, passRate: 92.3 },
+    { id: 'HSB1003', name: 'Phân tích dữ liệu / Data Analysis', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Le Van C', students: 38, avgGrade: 3.52, passRate: 97.4 },
+    { id: 'HSB1004', name: 'Luật Kinh doanh và đạo đức kinh doanh / Business Law and Ethics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Pham Thi D', students: 48, avgGrade: 3.38, passRate: 93.8 },
+    { id: 'HSB1005', name: 'Nguyên lý kế toán / Principle of Accounting', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Hoang Van E', students: 44, avgGrade: 3.15, passRate: 90.9 },
+    { id: 'HSB1006', name: 'Quản trị tài chính doanh nghiệp / Management of Corporate Finance', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Vo Thi F', students: 42, avgGrade: 3.42, passRate: 94.5 },
+    { id: 'HSB2014', name: 'Quản trị công ty / Corporate Governance', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Bui Van G', students: 36, avgGrade: 3.58, passRate: 96.2 },
+    { id: 'HSB1033', name: 'Quản trị nguồn nhân lực và nhân tài / Management of Human Resource & Talents', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Dinh Thi H', students: 50, avgGrade: 3.35, passRate: 93.5 },
+    { id: 'HSB2001E', name: 'Tư duy chiến lược và quản trị chiến lược / Strategic Thinking and Strategic Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Ly Van I', students: 40, avgGrade: 3.48, passRate: 95.0 },
+    { id: 'HSB2003E', name: 'Kinh doanh toàn cầu / Global Business', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Mai Van J', students: 35, avgGrade: 3.62, passRate: 97.1 },
+    { id: 'HSB2004E', name: 'Quản trị thương hiệu và tài sản trí tuệ / Management of Branding and Intellectual Property', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Dang Thi K', students: 38, avgGrade: 3.55, passRate: 96.8 },
+    { id: 'HSB3119', name: 'Tổng quan về Khoa học dữ liệu / Introduction to Data Science', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Cao Van L', students: 32, avgGrade: 3.68, passRate: 98.1 },
+    { id: 'HSB2023', name: 'Toán ứng dụng / Applied Mathematics', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Phan Thi M', students: 46, avgGrade: 3.22, passRate: 91.3 },
+    { id: 'HSB2011', name: 'Nguyên lý Marketing và truyền thông / Principles of Marketing & Communication', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Truong Van N', students: 55, avgGrade: 3.45, passRate: 94.5 },
+    { id: 'MNS401', name: 'Cybersecurity Management', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Ta Van Canh', students: 38, avgGrade: 3.52, passRate: 97.4 },
+    { id: 'MBA501', name: 'Corporate Strategy', program: 'HSB-MBA', faculty: 'FOM', level: 'Master', instructor: 'Dr. Le Van P', students: 28, avgGrade: 3.68, passRate: 100 },
+    { id: 'MNS601', name: 'Advanced Security Analysis', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Tran Thi Q', students: 22, avgGrade: 3.71, passRate: 100 }
+  ];
+
+  const studentGrades = [
+    { studentId: '25080001', name: 'Do Thi Hoa', midterm: 8.2, final: 8.7, assignments: 8.5, participation: 9.0, overall: 8.60, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080002', name: 'Nguyen Van Phuc', midterm: 7.0, final: 7.5, assignments: 7.8, participation: 7.6, overall: 7.48, letterGrade: 'C', gpa: 2.5 },
+{ studentId: '25080003', name: 'Tran Thi Lan', midterm: 9.3, final: 9.0, assignments: 9.1, participation: 9.2, overall: 9.15, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080004', name: 'Bui Van Tien', midterm: 6.8, final: 6.5, assignments: 6.9, participation: 7.0, overall: 6.80, letterGrade: 'C', gpa: 2.0 },
+{ studentId: '25080005', name: 'Le Thi Mai', midterm: 8.5, final: 8.3, assignments: 8.4, participation: 8.6, overall: 8.45, letterGrade: 'B', gpa: 3.5 },
+{ studentId: '25080006', name: 'Pham Van Kien', midterm: 7.2, final: 7.0, assignments: 7.4, participation: 7.5, overall: 7.28, letterGrade: 'C', gpa: 2.5 },
+{ studentId: '25080007', name: 'Hoang Thi Thu', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.5, overall: 9.13, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080008', name: 'Nguyen Van Minh', midterm: 8.0, final: 8.2, assignments: 8.1, participation: 8.4, overall: 8.18, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080009', name: 'Tran Thi Quynh', midterm: 7.5, final: 8.0, assignments: 7.8, participation: 8.1, overall: 7.85, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080010', name: 'Le Van Hung', midterm: 6.2, final: 6.5, assignments: 6.8, participation: 6.9, overall: 6.60, letterGrade: 'D', gpa: 2.0 },
+{ studentId: '25080011', name: 'Nguyen Thi Huong', midterm: 8.7, final: 9.0, assignments: 8.9, participation: 9.2, overall: 8.95, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080012', name: 'Tran Van Hoang', midterm: 7.3, final: 7.0, assignments: 7.2, participation: 7.5, overall: 7.25, letterGrade: 'C', gpa: 2.5 },
+{ studentId: '25080013', name: 'Pham Thi Lien', midterm: 9.2, final: 9.3, assignments: 9.0, participation: 9.4, overall: 9.23, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080014', name: 'Bui Van Nam', midterm: 6.9, final: 7.2, assignments: 7.0, participation: 6.8, overall: 6.98, letterGrade: 'C', gpa: 2.0 },
+{ studentId: '25080015', name: 'Hoang Thi Yen', midterm: 8.4, final: 8.7, assignments: 8.6, participation: 8.8, overall: 8.63, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080016', name: 'Le Van Hai', midterm: 7.8, final: 8.0, assignments: 7.9, participation: 8.2, overall: 7.98, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080017', name: 'Nguyen Thi Thao', midterm: 6.5, final: 6.8, assignments: 6.7, participation: 7.0, overall: 6.75, letterGrade: 'D', gpa: 2.0 },
+{ studentId: '25080018', name: 'Tran Van Phong', midterm: 8.1, final: 8.3, assignments: 8.0, participation: 8.4, overall: 8.20, letterGrade: 'B', gpa: 3.0 },
+{ studentId: '25080019', name: 'Pham Thi Van', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.1, overall: 9.03, letterGrade: 'A', gpa: 4.0 },
+{ studentId: '25080020', name: 'Le Van Long', midterm: 7.0, final: 7.3, assignments: 7.2, participation: 7.1, overall: 7.15, letterGrade: 'C', gpa: 2.5 }
+
+  
+  
+  ];
+
+  const OverviewDashboard = () => (
+    <div className="min-h-screen bg-gray-50">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+            <Users className="w-6 h-6 text-blue-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Students</p>
+          <p className="text-3xl font-bold text-gray-900">2,000</p>
+          <p className="text-xs text-green-600 mt-2">↑ 8.5% vs last year</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+            <Award className="w-6 h-6 text-green-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Average GPA</p>
+          <p className="text-3xl font-bold text-gray-900">2.88</p>
+          <p className="text-xs text-green-600 mt-2">↑ 0.12 vs last semester</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+            <TrendingUp className="w-6 h-6 text-purple-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Pass Rate</p>
+          <p className="text-3xl font-bold text-gray-900">84.8%</p>
+          <p className="text-xs text-green-600 mt-2">↑ 1.2% vs last semester</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+            <AlertCircle className="w-6 h-6 text-orange-600" />
+          </div>
+          <p className="text-sm text-gray-500 mb-1">At-Risk Students</p>
+          <p className="text-3xl font-bold text-gray-900">86</p>
+          <p className="text-xs text-green-600 mt-2">↓ 12 vs last semester</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance by Level</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Bachelor Programs</span>
+                <span className="text-lg font-bold text-blue-600">1850</span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Avg GPA: 3.35</p>
+                <p>Pass Rate: 64.2%</p>
+              </div>
+            </div>
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Master Programs</span>
+                <span className="text-lg font-bold text-purple-600">120</span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Avg GPA: 3.68</p>
+                <p>Pass Rate: 78.5%</p>
+              </div>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">PhD Program</span>
+                <span className="text-lg font-bold text-green-600">30</span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>Avg GPA: 3.82</p>
+                <p>Pass Rate: 90%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Faculty Metrics</h3>
+          <div className="space-y-4">
+            {facultyMetrics.map((faculty, i) => (
+              <div key={i} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="font-semibold text-gray-900">{faculty.code}</p>
+                    <p className="text-xs text-gray-600 mt-1">{faculty.name}</p>
+                  </div>
+                  <span className="text-sm font-bold text-blue-600">{faculty.timelyDelivery}%</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-xs">
+                    <span className="text-gray-600">Timely Delivery:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.timelyDelivery}%</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-600">S.D:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.stdDev}</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-600">Skewness:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.skewness}</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-600">Kurtosis:</span>
+                    <span className="font-semibold text-gray-900 ml-1">{faculty.kurtosis}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Bachelor Programs</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {bachelorProgramStats.map((prog, i) => (
+              <div key={i} className="p-2 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-m font-bold text-gray-900">{prog.code}</h4>
+                  <span className="text-sm text-gray-500">{prog.students}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">Pass Rate</p>
+                    <p className="text-m font-bold text-green-600">{prog.passRate}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">S.D Score</p>
+                    <p className="text-m font-bold text-blue-600">{prog.stdDev}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const CourseAnalysis = () => (
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <select 
+                value={selectedFaculty}
+                onChange={(e) => setSelectedFaculty(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Faculties</option>
+                {faculties.map(f => (
+                  <option key={f.code} value={f.code}>{f.code} - {f.name}</option>
+                ))}
+              </select>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Download size={18} />
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Code</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Name</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Program</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Instructor</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Students</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Avg Grade</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {courseData.map((course) => (
+                <tr key={course.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-blue-600">{course.id}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-gray-900">{course.name}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm font-medium text-gray-900">{course.program}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      course.faculty === 'FOM' ? 'bg-blue-100 text-blue-700' :
+                      course.faculty === 'FOMAC' ? 'bg-purple-100 text-purple-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {course.faculty}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      course.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
+                      course.level === 'Master' ? 'bg-purple-100 text-purple-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {course.level}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{course.instructor}</td>
+                  <td className="px-6 py-4 text-sm font-semibold">{course.students}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      course.avgGrade >= 3.5 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {course.avgGrade}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      course.passRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {course.passRate}%
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button 
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setActiveView('grading');
+                      }}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Manage Grades
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const GradeInsertion = () => {
+    if (!selectedCourse) {
+      return (
+        <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
+          <div className="max-w-md mx-auto">
+            <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Course Selected</h3>
+            <p className="text-gray-600 mb-6">Please select a course from the Course Analysis tab.</p>
+            <button 
+              onClick={() => setActiveView('courses')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Go to Course Analysis
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedCourse.id} - {selectedCourse.name}</h2>
+                <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                  <span>Program: {selectedCourse.program}</span>
+                  <span>•</span>
+                  <span>Instructor: {selectedCourse.instructor}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedCourse(null)}
+                className="p-2 hover:bg-white rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Student Grades</h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setEditMode(!editMode)}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  {editMode ? <X size={18} /> : <Edit size={18} />}
+                  {editMode ? 'Cancel' : 'Edit Grades'}
+                </button>
+                {editMode && (
+                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <Save size={18} />
+                    Save Changes
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Student ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Midterm (30%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Final (40%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Assignments (20%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Participation (10%)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Overall</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Letter Grade</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">GPA</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {studentGrades.map((student) => (
+                    <tr key={student.studentId} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-blue-600">{student.studentId}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{student.name}</td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.midterm}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.midterm}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.final}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.final}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.assignments}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.assignments}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {editMode ? (
+                          <input 
+                            type="number" 
+                            defaultValue={student.participation}
+                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">{student.participation}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-sm font-bold text-gray-900">{student.overall}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          student.letterGrade === 'A' ? 'bg-green-100 text-green-700' :
+                          student.letterGrade === 'B' ? 'bg-blue-100 text-blue-700' :
+                          student.letterGrade === 'C' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {student.letterGrade}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-sm font-bold text-gray-900">{student.gpa}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3">
+      <div className="mx-auto w-full max-w space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Grade Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Monitor and manage student performance</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="border-b border-gray-200">
+            <div className="flex gap-1 p-2">
+              <button
+                onClick={() => { setActiveView('overview'); setSelectedCourse(null); }}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${
+                  activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => { setActiveView('courses'); setSelectedCourse(null); }}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${
+                  activeView === 'courses' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                }`}
+              >
+                Course Analysis
+              </button>
+              <button
+                onClick={() => setActiveView('grading')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${
+                  activeView === 'grading' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                }`}
+              >
+                Grade Insertion
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {activeView === 'overview' && <OverviewDashboard />}
+        {activeView === 'courses' && <CourseAnalysis />}
+        {activeView === 'grading' && <GradeInsertion />}
+      </div>
+    </div>
+  );
+};
+
 const ResearchManagement = () => {
   const [activeView, setActiveView] = useState('overview');
   const [filterType, setFilterType] = useState('all');
@@ -4287,9 +6393,9 @@ const ResearchManagement = () => {
   };
 
   const OverviewDashboard = () => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <Briefcase className="w-6 h-6 text-blue-600" />
@@ -4458,7 +6564,7 @@ const ResearchManagement = () => {
 
   const ProjectsView = () => (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-3">
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 flex-1">
@@ -5070,7 +7176,7 @@ const ResearchManagement = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-3">
-      <div className="max-w mx-auto space-y-6">
+      <div className="max-w mx-auto space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
@@ -5348,377 +7454,117 @@ const ResearchManagement = () => {
   );
 };
 
-const StudentServicesOverview = () => {
-    const [selectedService, setSelectedService] = useState(null);
-
-    const services = [
-      {
-        id: 'housing',
-        title: 'Housing Services',
-        icon: Building,
-        color: 'blue',
-        stats: { total: 450, occupied: 387, available: 63 },
-        description: 'Manage student dormitories, room assignments, and housing requests.',
-        requests: 28,
-        items: [
-          { name: 'Dormitory A', capacity: 200, occupied: 178, rate: '$300/month' },
-          { name: 'Dormitory B', capacity: 150, occupied: 132, rate: '$280/month' },
-          { name: 'Dormitory C', capacity: 100, occupied: 77, rate: '$250/month' }
-        ]
-      },
-      {
-        id: 'scholarships',
-        title: 'Scholarships',
-        icon: Award,
-        color: 'green',
-        stats: { total: 892, active: 756, pending: 136 },
-        description: 'Track scholarship applications, awards, and disbursements.',
-        requests: 45,
-        items: [
-          { name: 'Merit-based Scholarship', recipients: 342, amount: '$2,000', status: 'Active' },
-          { name: 'Need-based Scholarship', recipients: 198, amount: '$3,000', status: 'Active' },
-          { name: 'Athletic Scholarship', recipients: 89, amount: '$2,500', status: 'Active' },
-          { name: 'Research Scholarship', recipients: 127, amount: '$4,000', status: 'Active' }
-        ]
-      },
-      {
-        id: 'financial-aid',
-        title: 'Financial Aid',
-        icon: DollarSign,
-        color: 'purple',
-        stats: { total: 1248, approved: 1089, processing: 159 },
-        description: 'Process student loans, grants, and financial assistance programs.',
-        requests: 67,
-        items: [
-          { name: 'Student Loans', applicants: 456, avgAmount: '$8,500', status: 'Ongoing' },
-          { name: 'Emergency Grants', applicants: 89, avgAmount: '$500', status: 'Available' },
-          { name: 'Work-Study Programs', participants: 234, avgEarning: '$12/hour', status: 'Active' },
-          { name: 'Tuition Payment Plans', enrolled: 469, avgMonthly: '$850', status: 'Active' }
-        ]
-      },
-      {
-        id: 'requests',
-        title: 'Student Requests',
-        icon: FileText,
-        color: 'orange',
-        stats: { total: 342, pending: 89, completed: 253 },
-        description: 'Handle various student service requests and administrative forms.',
-        requests: 89,
-        items: [
-          { name: 'Transcript Requests', pending: 23, avgTime: '2 days' },
-          { name: 'Leave of Absence', pending: 12, avgTime: '5 days' },
-          { name: 'Course Withdrawal', pending: 18, avgTime: '3 days' },
-          { name: 'Grade Appeals', pending: 8, avgTime: '7 days' },
-          { name: 'Transfer Credits', pending: 28, avgTime: '10 days' }
-        ]
-      },
-      {
-        id: 'clubs',
-        title: 'Clubs & Activities',
-        icon: Users,
-        color: 'pink',
-        stats: { total: 48, active: 45, forming: 3 },
-        description: 'Manage student organizations, clubs, and extracurricular activities.',
-        requests: 15,
-        items: [
-          { name: 'Tech Innovation Club', members: 156, meetings: 'Weekly', budget: '$2,500' },
-          { name: 'Business Leaders Society', members: 89, meetings: 'Bi-weekly', budget: '$1,800' },
-          { name: 'Volunteer Corps', members: 234, meetings: 'Monthly', budget: '$3,000' },
-          { name: 'Sports & Recreation', members: 412, meetings: 'Weekly', budget: '$5,000' }
-        ]
-      },
-      {
-        id: 'disciplinary',
-        title: 'Disciplinary Actions',
-        icon: AlertTriangle,
-        color: 'red',
-        stats: { total: 45, active: 12, resolved: 33 },
-        description: 'Track and manage student conduct violations and disciplinary proceedings.',
-        requests: 12,
-        items: [
-          { name: 'Academic Integrity', cases: 18, severity: 'Medium', avgResolution: '15 days' },
-          { name: 'Code of Conduct', cases: 15, severity: 'Low', avgResolution: '10 days' },
-          { name: 'Attendance Violations', cases: 8, severity: 'Low', avgResolution: '7 days' },
-          { name: 'Safety Violations', cases: 4, severity: 'High', avgResolution: '20 days' }
-        ]
-      }
-    ];
-
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Student Services Overview</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive management of all student support services</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              onClick={() => setSelectedService(service)}
-              className={`bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-${service.color}-500 hover:shadow-lg transition-all cursor-pointer`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-14 h-14 bg-${service.color}-100 rounded-xl flex items-center justify-center`}>
-                  <service.icon className={`w-7 h-7 text-${service.color}-600`} />
-                </div>
-                {service.requests > 0 && (
-                  <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
-                    {service.requests} pending
-                  </span>
-                )}
-              </div>
-              
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{service.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-              
-              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200">
-                {Object.entries(service.stats).map(([key, value]) => (
-                  <div key={key}>
-                    <p className="text-xs text-gray-500 capitalize">{key}</p>
-                    <p className="text-lg font-bold text-gray-900">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-6 mt-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Service Request Trends</h3>
-            <div className="h-64 flex items-end justify-between gap-3">
-              {[
-                { housing: 18, scholarships: 32, financial: 45, requests: 67, clubs: 12, disciplinary: 8 },
-                { housing: 22, scholarships: 38, financial: 52, requests: 72, clubs: 15, disciplinary: 6 },
-                { housing: 25, scholarships: 42, financial: 58, requests: 78, clubs: 18, disciplinary: 10 },
-                { housing: 28, scholarships: 45, financial: 67, requests: 89, clubs: 15, disciplinary: 12 }
-              ].map((data, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full flex flex-col gap-0.5">
-                    <div className="w-full bg-blue-500 rounded-t" style={{ height: `${data.housing}px` }}></div>
-                    <div className="w-full bg-green-500" style={{ height: `${data.scholarships}px` }}></div>
-                    <div className="w-full bg-purple-500" style={{ height: `${data.financial}px` }}></div>
-                    <div className="w-full bg-orange-500" style={{ height: `${data.requests}px` }}></div>
-                    <div className="w-full bg-pink-500" style={{ height: `${data.clubs}px` }}></div>
-                    <div className="w-full bg-red-500" style={{ height: `${data.disciplinary}px` }}></div>
-                  </div>
-                  <span className="text-xs text-gray-500">Q{i + 1}</span>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-gray-200">
-              {services.map((service) => (
-                <div key={service.id} className="flex items-center gap-2">
-                  <div className={`w-3 h-3 bg-${service.color}-500 rounded`}></div>
-                  <span className="text-xs text-gray-600">{service.title.split(' ')[0]}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
-            <div className="space-y-4">
-              {[
-                { service: 'Housing', action: 'New room assignment', student: 'S001234', time: '10 min ago', color: 'blue' },
-                { service: 'Scholarships', action: 'Application approved', student: 'S001567', time: '25 min ago', color: 'green' },
-                { service: 'Financial Aid', action: 'Loan disbursed', student: 'S001892', time: '1 hour ago', color: 'purple' },
-                { service: 'Requests', action: 'Transcript issued', student: 'S002134', time: '2 hours ago', color: 'orange' },
-                { service: 'Clubs', action: 'New member joined', student: 'S002456', time: '3 hours ago', color: 'pink' },
-                { service: 'Disciplinary', action: 'Case resolved', student: 'S002789', time: '5 hours ago', color: 'red' }
-              ].map((activity, i) => (
-                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
-                  <div className={`w-2 h-2 rounded-full bg-${activity.color}-500 mt-1.5`}></div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
-                        <p className="text-xs text-gray-600">{activity.service} • {activity.student}</p>
-                      </div>
-                      <span className="text-xs text-gray-400">{activity.time}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {selectedService && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedService(null)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className={`bg-gradient-to-br from-${selectedService.color}-400 to-${selectedService.color}-600 p-6`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center`}>
-                    <selectedService.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <button 
-                    onClick={() => setSelectedService(null)}
-                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <h2 className="text-3xl font-bold text-white">{selectedService.title}</h2>
-                <p className="text-white text-opacity-90 mt-2">{selectedService.description}</p>
-              </div>
-
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-3 gap-4">
-                  {Object.entries(selectedService.stats).map(([key, value]) => (
-                    <div key={key} className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">{key}</p>
-                      <p className="text-3xl font-bold text-gray-900">{renderValue(value)}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Details</h3>
-                  <div className="space-y-3">
-                    {selectedService.items.map((item, i) => (
-                      <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold text-gray-900">{item.name}</p>
-                            <div className="flex gap-4 mt-2 text-sm text-gray-600">
-                              {Object.entries(item).filter(([key]) => key !== 'name').map(([key, value]) => (
-                                <span key={key}>
-                                  <span className="text-gray-500 capitalize">{key}:</span> <span className="font-semibold">{value as React.ReactNode}</span>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-100">
-                            Manage
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
-                  <button className={`flex-1 px-4 py-2 bg-${selectedService.color}-600 text-white rounded-lg hover:bg-${selectedService.color}-700 font-medium`}>
-                    View All Records
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Export Report
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Settings
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-const StudentProfileAdmin = () => {
+const LecturerProfileAdmin = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterProgram, setFilterProgram] = useState('all');
-    const [filterLevel, setFilterLevel] = useState('all');
-    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [filterDepartment, setFilterDepartment] = useState('all');
+    const [filterPosition, setFilterPosition] = useState('all');
+    const [selectedLecturer, setSelectedLecturer] = useState(null);
 
-    const sampleStudents = [
-      { id: 'S001234', name: 'Nguyen Van An', program: 'FONS', level: 'Bachelor', year: '3', gpa: '3.45', status: 'Active' },
-      { id: 'S001235', name: 'Tran Thi Binh', program: 'FOM', level: 'Bachelor', year: '2', gpa: '3.72', status: 'Active' },
-      { id: 'S001236', name: 'Le Van Cuong', program: 'FONS', level: 'Master', year: '1', gpa: '3.88', status: 'Active' },
-      { id: 'S001237', name: 'Pham Thi Dung', program: 'FONS', level: 'Master', year: '2', gpa: '3.91', status: 'Active' },
-      { id: 'S001238', name: 'Hoang Van Em', program: 'FONS', level: 'PhD', year: '3', gpa: '3.95', status: 'Active' },
-    ];
+    const sampleLecturers = [
+    { id: 'L001239', name: 'Assoc.Prof. Vu Thi Hoa', department: 'FOM', position: 'Associate Professor', degree: 'PhD', teachingHours: '500h', publications: '29', status: 'Active' },
+{ id: 'L001240', name: 'Dr. Nguyen Quang Huy', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '410h', publications: '15', status: 'Active' },
+{ id: 'L001241', name: 'Dr. Bui Thi Huong', department: 'FOM', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '450h', publications: '21', status: 'Active' },
+{ id: 'L001242', name: 'Assoc.Prof. Tran Van Phuc', department: 'FONS', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '33', status: 'Active' },
+{ id: 'L001243', name: 'Prof. Pham Van Khoa', department: 'FOM', position: 'Professor', degree: 'PhD', teachingHours: '530h', publications: '40', status: 'Active' },
+{ id: 'L001244', name: 'Dr. Le Thi Bich', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '390h', publications: '11', status: 'Active' },
+{ id: 'L001245', name: 'Dr. Do Van Nam', department: 'FONS', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '460h', publications: '19', status: 'Active' },
+{ id: 'L001246', name: 'Assoc.Prof. Tran Thi Thu', department: 'FOM', position: 'Associate Professor', degree: 'PhD', teachingHours: '490h', publications: '27', status: 'Active' },
+{ id: 'L001247', name: 'Dr. Hoang Minh Tuan', department: 'FONS', position: 'Lecturer', degree: 'PhD', teachingHours: '400h', publications: '13', status: 'Active' },
+{ id: 'L001248', name: 'Prof. Nguyen Thi Kim', department: 'FOM', position: 'Professor', degree: 'PhD', teachingHours: '550h', publications: '42', status: 'Active' },
+{ id: 'L001249', name: 'Assoc.Prof. Dang Quang Binh', department: 'FOMAC', position: 'Associate Professor', degree: 'PhD', teachingHours: '470h', publications: '25', status: 'Active' },
+{ id: 'L001250', name: 'Dr. Nguyen Thi Thanh', department: 'FOMAC', position: 'Lecturer', degree: 'PhD', teachingHours: '420h', publications: '14', status: 'Active' },
+{ id: 'L001251', name: 'Prof. Tran Van Duong', department: 'FOMAC', position: 'Professor', degree: 'PhD', teachingHours: '540h', publications: '39', status: 'Active' },
+{ id: 'L001252', name: 'Dr. Le Thi Thu Ha', department: 'FOMAC', position: 'Senior Lecturer', degree: 'PhD', teachingHours: '450h', publications: '20', status: 'Active' },
+{ id: 'L001253', name: 'Assoc.Prof. Pham Van Long', department: 'FOMAC', position: 'Associate Professor', degree: 'PhD', teachingHours: '480h', publications: '28', status: 'Active' },
+
+];
 
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex items-center justify-between  mb-5">
+      <div className="min-h-screen bg-gray-50 p-3">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Student Profile Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive student data and analytics</p>
+            <h1 className="text-3xl font-bold text-gray-900">Lecturer Profile Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive faculty data and analytics</p>
           </div>
           <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <Plus size={18} />
-            Add New Student
+            Add New Lecturer
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Students</p>
-            <p className="text-2xl font-bold text-gray-900">2,000</p>
+            <p className="text-xs font-semibold text-blue-500 mb-1">Total Lecturers</p>
+            <p className="text-2xl font-bold text-gray-900">297</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Bachelor: 1,700 (85%)</p>
-              <p className="text-xs text-gray-600">Master: 300 (15%)</p>
-              <p className="text-xs text-gray-600">PhD: 30 (1.5%)</p>
+              <p className="text-xs text-gray-600">Professors: 45 (15%)</p>
+              <p className="text-xs text-gray-600">Associate: 102 (34%)</p>
+              <p className="text-xs text-gray-600">Lecturers: 150 (51%)</p>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Bachelor Programs</p>
-            <p className="text-2xl font-bold text-gray-900">6</p>
+            <p className="text-xs font-semibold text-blue-500 mb-1">Total Teaching Hours</p>
+            <p className="text-2xl font-bold text-gray-900">132,480h</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Domestic: 5 programs</p>
-              <p className="text-xs text-gray-600">International: 1 program</p>
+              <p className="text-xs text-gray-600">Avg: 446h per lecturer</p>
+              <p className="text-xs text-gray-600">This academic year</p>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Master Programs</p>
-            <p className="text-2xl font-bold text-gray-900">3</p>
+            <p className="text-xs font-semibold text-blue-500 mb-1">Total Publications</p>
+            <p className="text-2xl font-bold text-gray-900">1,248</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">300 students enrolled</p>
-              <p className="text-xs text-gray-600">Avg. duration: 2 years</p>
+              <p className="text-xs text-gray-600">Papers: 892</p>
+              <p className="text-xs text-gray-600">Patents: 356</p>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">PhD Program</p>
-            <p className="text-2xl font-bold text-gray-900">1</p>
+            <p className="text-xs font-semibold text-blue-500 mb-1">Avg Workload</p>
+            <p className="text-2xl font-bold text-gray-900">14.8h/week</p>
             <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">30 doctoral students</p>
-              <p className="text-xs text-gray-600">Avg. duration: 4 years</p>
+              <p className="text-xs text-gray-600">Within standard range</p>
+              <p className="text-xs text-gray-600">12-16h recommended</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-3">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
-                  placeholder="Search by student ID, name, email..."
+                  placeholder="Search by lecturer ID, name, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <select 
-                value={filterLevel}
-                onChange={(e) => setFilterLevel(e.target.value)}
+                value={filterDepartment}
+                onChange={(e) => setFilterDepartment(e.target.value)}
                 className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Levels</option>
-                <option value="bachelor">Bachelor</option>
-                <option value="master">Master</option>
-                <option value="phd">PhD</option>
-              </select>
-              <select 
-                value={filterProgram}
-                onChange={(e) => setFilterProgram(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">Faculties</option>
+                <option value="all">All Departments</option>
                 <option value="cs">FONS</option>
                 <option value="ba">FOM</option>
                 <option value="se">FONS</option>
                 <option value="ds">FONS</option>
+              </select>
+              <select 
+                value={filterPosition}
+                onChange={(e) => setFilterPosition(e.target.value)}
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Positions</option>
+                <option value="professor">Professor</option>
+                <option value="associate">Associate Professor</option>
+                <option value="senior">Senior Lecturer</option>
+                <option value="lecturer">Lecturer</option>
               </select>
             </div>
           </div>
@@ -5727,39 +7573,42 @@ const StudentProfileAdmin = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Lecturer ID</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Full Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Program</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">GPA</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Position</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Degree</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Teaching Hours</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Publications</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sampleStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{student.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.program}</td>
+                {sampleLecturers.map((lecturer) => (
+                  <tr key={lecturer.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{lecturer.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lecturer.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{lecturer.department}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        student.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
-                        student.level === 'Master' ? 'bg-purple-100 text-purple-700' :
-                        'bg-orange-100 text-orange-700'
+                        lecturer.position === 'Professor' ? 'bg-purple-100 text-purple-700' :
+                        lecturer.position === 'Associate Professor' ? 'bg-blue-100 text-blue-700' :
+                        lecturer.position === 'Senior Lecturer' ? 'bg-green-100 text-green-700' :
+                        'bg-gray-100 text-gray-700'
                       }`}>
-                        {student.level}
+                        {lecturer.position}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Year {student.year}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{student.gpa}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{lecturer.degree}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{lecturer.teachingHours}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{lecturer.publications}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">{student.status}</span>
+                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">{lecturer.status}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button 
-                        onClick={() => setSelectedStudent(student)}
+                        onClick={() => setSelectedLecturer(lecturer)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
                         View Details
@@ -5772,7 +7621,7 @@ const StudentProfileAdmin = () => {
           </div>
 
           <div className="p-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-600">Showing 1-5 of 2,000 students</p>
+            <p className="text-sm text-gray-600">Showing 1-5 of 297 lecturers</p>
             <div className="flex gap-2">
               <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Previous</button>
               <button className="px-3 py-1 bg-blue-600 text-white rounded">1</button>
@@ -5783,13 +7632,13 @@ const StudentProfileAdmin = () => {
           </div>
         </div>
 
-        {selectedStudent && (
+        {selectedLecturer && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Student Profile Details</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Lecturer Profile Details</h2>
                 <button 
-                  onClick={() => setSelectedStudent(null)}
+                  onClick={() => setSelectedLecturer(null)}
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
                   ✕
@@ -5799,1083 +7648,92 @@ const StudentProfileAdmin = () => {
                 <div className="grid grid-cols-3 gap-6">
                   <div className="col-span-1 flex flex-col items-center">
                     <div className="w-32 h-32 bg-gray-300 rounded-full mb-4"></div>
-                    <h3 className="text-xl font-bold text-gray-900">{selectedStudent.name}</h3>
-                    <p className="text-sm text-gray-500">{selectedStudent.id}</p>
+                    <h3 className="text-xl font-bold text-gray-900">{selectedLecturer.name}</h3>
+                    <p className="text-sm text-gray-500">{selectedLecturer.id}</p>
+                    <p className="text-sm text-blue-600 mt-1">{selectedLecturer.position}</p>
                   </div>
                   <div className="col-span-2 grid grid-cols-2 gap-4">
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Program</p>
-                      <p className="font-semibold text-gray-900">{selectedStudent.program}</p>
+                      <p className="text-xs text-gray-500 mb-1">Department</p>
+                      <p className="font-semibold text-gray-900">{selectedLecturer.department}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Level</p>
-                      <p className="font-semibold text-gray-900">{selectedStudent.level}</p>
+                      <p className="text-xs text-gray-500 mb-1">Degree</p>
+                      <p className="font-semibold text-gray-900">{selectedLecturer.degree}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Current Year</p>
-                      <p className="font-semibold text-gray-900">Year {selectedStudent.year}</p>
+                      <p className="text-xs text-gray-500 mb-1">Teaching Hours</p>
+                      <p className="font-semibold text-gray-900">{selectedLecturer.teachingHours}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">GPA</p>
-                      <p className="font-semibold text-gray-900">{selectedStudent.gpa}</p>
+                      <p className="text-xs text-gray-500 mb-1">Publications</p>
+                      <p className="font-semibold text-gray-900">{selectedLecturer.publications}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">Status</p>
-                      <p className="font-semibold text-green-600">{selectedStudent.status}</p>
+                      <p className="font-semibold text-green-600">{selectedLecturer.status}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">Email</p>
-                      <p className="font-semibold text-gray-900 text-sm">{selectedStudent.id.toLowerCase()}@hsb.edu.vn</p>
+                      <p className="font-semibold text-gray-900 text-sm">{selectedLecturer.id.toLowerCase()}@hsb.edu.vn</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Academic Performance</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">Teaching Performance</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Credits Completed</span>
-                        <span className="font-semibold">95/120</span>
+                        <span className="text-gray-600">Active Courses</span>
+                        <span className="font-semibold">6</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Attendance Rate</span>
-                        <span className="font-semibold">94%</span>
+                        <span className="text-gray-600">Student Rating</span>
+                        <span className="font-semibold">4.7/5.0</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Training Score</span>
-                        <span className="font-semibold">85/100</span>
+                        <span className="text-gray-600">Workload (weekly)</span>
+                        <span className="font-semibold">16h</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Financial Status</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">Research & Activities</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Tuition Paid</span>
-                        <span className="font-semibold text-green-600">Current</span>
+                        <span className="text-gray-600">Research Projects</span>
+                        <span className="font-semibold">5 active</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Scholarship</span>
-                        <span className="font-semibold">Merit-based 50%</span>
+                        <span className="text-gray-600">Community Hours</span>
+                        <span className="font-semibold">120h this year</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Outstanding Balance</span>
-                        <span className="font-semibold">$0</span>
+                        <span className="text-gray-600">Conference Attendance</span>
+                        <span className="font-semibold">8 events</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-const CourseFeedback =() => {
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [showFeedbackDetail, setShowFeedbackDetail] = useState(false);
-  const [showPositiveComments, setShowPositiveComments] = useState(false);
-  const [showNegativeComments, setShowNegativeComments] = useState(false);
-
-  const courseFeedback = [
-    {
-      id: 1,
-      courseCode: 'CS301',
-      courseName: 'Data Structures and Algorithms',
-      instructor: 'Dr. Nguyễn Văn A',
-      semester: 'Fall 2024',
-      totalResponses: 45,
-      averageScore: 8.3,
-      scoreDistribution: { 1: 0, 2: 0, 3: 1, 4: 2, 5: 3, 6: 5, 7: 8, 8: 12, 9: 10, 10: 4 },
-      sentimentBreakdown: { positive: 35, neutral: 8, negative: 2 },
-      comments: [
-        { id: 1, text: 'Excellent course! The professor explains concepts very clearly and the assignments are challenging but fair.', score: 9, sentiment: 'positive', date: '2024-10-20' },
-        { id: 2, text: 'Great learning experience. The material is well-organized and the instructor is always available for questions.', score: 9, sentiment: 'positive', date: '2024-10-19' },
-        { id: 4, text: 'Very informative and engaging lectures. I feel much more confident in my coding skills now.', score: 10, sentiment: 'positive', date: '2024-10-17' },
-        { id: 5, text: 'The pace is too fast for beginners. More foundational material would be helpful.', score: 6, sentiment: 'negative', date: '2024-10-16' }
-      ]
-    },
-    {
-      id: 2,
-      courseCode: 'BUS202',
-      courseName: 'Strategic Management',
-      instructor: 'Prof. Trần Thị B',
-      semester: 'Fall 2024',
-      totalResponses: 52,
-      averageScore: 7.8,
-      scoreDistribution: { 1: 0, 2: 1, 3: 2, 4: 3, 5: 5, 6: 8, 7: 12, 8: 14, 9: 6, 10: 1 },
-      sentimentBreakdown: { positive: 28, neutral: 18, negative: 6 },
-      comments: [
-        { id: 1, text: 'Very practical approach to strategy. Case studies are particularly useful.', score: 8, sentiment: 'positive', date: '2024-10-20' },
-        { id: 3, text: 'Too much theory, not enough real-world application.', score: 5, sentiment: 'negative', date: '2024-10-18' },
-        { id: 4, text: 'The professor brings great industry experience to the classroom.', score: 9, sentiment: 'positive', date: '2024-10-17' },
-        { id: 5, text: 'Group projects are well-structured and help develop teamwork skills.', score: 8, sentiment: 'positive', date: '2024-10-16' }
-      ]
-    },
-    {
-      id: 3,
-      courseCode: 'ENG101',
-      courseName: 'Business English Communication',
-      instructor: 'Ms. Lê Thị C',
-      semester: 'Fall 2024',
-      totalResponses: 38,
-      averageScore: 9.1,
-      scoreDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 2, 7: 4, 8: 8, 9: 15, 10: 8 },
-      sentimentBreakdown: { positive: 34, neutral: 3, negative: 1 },
-      comments: [
-        { id: 1, text: 'Outstanding teacher! My English skills have improved dramatically.', score: 10, sentiment: 'positive', date: '2024-10-20' },
-        { id: 2, text: 'Very engaging and supportive learning environment. Highly recommend!', score: 9, sentiment: 'positive', date: '2024-10-19' },
-        { id: 3, text: 'Excellent feedback on presentations and written work.', score: 9, sentiment: 'positive', date: '2024-10-18' },
-        { id: 4, text: 'The course materials are well-designed and relevant to business contexts.', score: 8, sentiment: 'positive', date: '2024-10-17' },
-        { id: 5, text: 'Perfect balance of speaking, writing, and listening activities.', score: 10, sentiment: 'positive', date: '2024-10-16' }
-      ]
-    },
-    {
-      id: 4,
-      courseCode: 'MATH203',
-      courseName: 'Statistics for Business',
-      instructor: 'Dr. Phạm Văn D',
-      semester: 'Fall 2024',
-      totalResponses: 41,
-      averageScore: 6.9,
-      scoreDistribution: { 1: 1, 2: 2, 3: 4, 4: 5, 5: 6, 6: 8, 7: 9, 8: 4, 9: 2, 10: 0 },
-      sentimentBreakdown: { positive: 15, neutral: 16, negative: 10 },
-      comments: [
-        { id: 1, text: 'Difficult material but the professor tries to make it accessible.', score: 7, sentiment: 'positive', date: '2024-10-20' },
-        { id: 2, text: 'Need more examples and practice problems during class.', score: 6, sentiment: 'negative', date: '2024-10-19' },
-        { id: 4, text: 'Good course for understanding statistical concepts in business context.', score: 8, sentiment: 'positive', date: '2024-10-17' },
-        { id: 5, text: 'Too much emphasis on theory, not enough on practical application.', score: 5, sentiment: 'negative', date: '2024-10-16' }
-      ]
-    },
-    {
-      id: 5,
-      courseCode: 'MKT301',
-      courseName: 'Digital Marketing',
-      instructor: 'Ms. Hoàng Thị E',
-      semester: 'Fall 2024',
-      totalResponses: 47,
-      averageScore: 8.7,
-      scoreDistribution: { 1: 0, 2: 0, 3: 0, 4: 1, 5: 2, 6: 3, 7: 6, 8: 15, 9: 14, 10: 6 },
-      sentimentBreakdown: { positive: 40, neutral: 5, negative: 2 },
-      comments: [
-        { id: 1, text: 'Amazing course! Very up-to-date with current digital marketing trends.', score: 10, sentiment: 'positive', date: '2024-10-20' },
-        { id: 2, text: 'Practical assignments that prepare you for real marketing roles.', score: 9, sentiment: 'positive', date: '2024-10-19' },
-        { id: 3, text: 'The instructor has great industry connections and shares valuable insights.', score: 9, sentiment: 'positive', date: '2024-10-18' },
-        { id: 5, text: 'Excellent use of case studies from Vietnamese and international companies.', score: 9, sentiment: 'positive', date: '2024-10-16' }
-      ]
-    }
-  ];
-
-  const overallAverageScore = (courseFeedback.reduce((sum, course) => sum + course.averageScore, 0) / courseFeedback.length).toFixed(1);
-  const totalResponses = courseFeedback.reduce((sum, course) => sum + course.totalResponses, 0);
-  const totalPositive = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.positive, 0);
-  const totalNeutral = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.neutral, 0);
-  const totalNegative = courseFeedback.reduce((sum, course) => sum + course.sentimentBreakdown.negative, 0);
-
-  const getSentimentColor = (sentiment) => {
-    switch(sentiment) {
-      case 'positive': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'neutral': return 'bg-amber-100 text-amber-700 border-amber-200';
-      case 'negative': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
-
-  const getSentimentIcon = (sentiment) => {
-    switch(sentiment) {
-      case 'positive': return <ThumbsUp size={16} />;
-      case 'neutral': return <Minus size={16} />;
-      case 'negative': return <ThumbsDown size={16} />;
-      default: return null;
-    }
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 8.5) return 'text-emerald-600';
-    if (score >= 7.0) return 'text-blue-600';
-    if (score >= 6.0) return 'text-amber-600';
-    return 'text-red-600';
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-3">
-      {/* Header */}
-      <div className="bg-white border-b rounded-xl border-gray-200 sticky top-0 z-10">
-        <div className="max-w mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Course Feedback Management</h1>
-              <p className="text-gray-600 mt-1">Student feedback analysis and sentiment tracking</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w mx-auto px-2 py-3">
-        <div className="space-y-4">
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <BarChart3 className="text-blue-600" size={24} />
-                </div>
-                <span className="text-sm font-semibold text-gray-600">Average Score</span>
-              </div>
-              <p className="text-4xl font-bold text-gray-900 mb-1">{overallAverageScore}</p>
-              <p className="text-sm text-gray-500">Out of 10.0</p>
-            </div>
-
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <MessageSquare className="text-purple-600" size={24} />
-                </div>
-                <span className="text-sm font-semibold text-gray-600">Total Responses</span>
-              </div>
-              <p className="text-4xl font-bold text-gray-900 mb-1">{totalResponses}</p>
-              <p className="text-sm text-gray-500">{courseFeedback.length} courses</p>
-            </div>
-
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-emerald-100 rounded-xl">
-                  <ThumbsUp className="text-emerald-600" size={24} />
-                </div>
-                <span className="text-sm font-semibold text-gray-600">Positive Sentiment</span>
-              </div>
-              <p className="text-4xl font-bold text-gray-900 mb-1">{Math.round((totalPositive/totalResponses)*100)}%</p>
-              <p className="text-sm text-emerald-600 font-medium">{totalPositive} responses</p>
-            </div>
-
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-red-100 rounded-xl">
-                  <ThumbsDown className="text-red-600" size={24} />
-                </div>
-                <span className="text-sm font-semibold text-gray-600">Needs Attention</span>
-              </div>
-              <p className="text-4xl font-bold text-gray-900 mb-1">{totalNegative}</p>
-              <p className="text-sm text-red-600 font-medium">Negative responses</p>
-            </div>
-          </div>
-
-          {/* Sentiment Overview Chart */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Sentiment Distribution</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ThumbsUp size={18} className="text-emerald-600" />
-                  <span className="text-sm text-gray-600">Positive</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{width: `${(totalPositive/totalResponses)*100}%`}}></div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">{totalPositive}</span>
-                  <span className="text-sm text-gray-500 w-12">{Math.round((totalPositive/totalResponses)*100)}%</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Minus size={18} className="text-amber-600" />
-                  <span className="text-sm text-gray-600">Neutral</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full" style={{width: `${(totalNeutral/totalResponses)*100}%`}}></div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">{totalNeutral}</span>
-                  <span className="text-sm text-gray-500 w-12">{Math.round((totalNeutral/totalResponses)*100)}%</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ThumbsDown size={18} className="text-red-600" />
-                  <span className="text-sm text-gray-600">Negative</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-96 h-4 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-500 rounded-full" style={{width: `${(totalNegative/totalResponses)*100}%`}}></div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">{totalNegative}</span>
-                  <span className="text-sm text-gray-500 w-12">{Math.round((totalNegative/totalResponses)*100)}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Course Feedback List */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Course Feedback Analysis</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {courseFeedback.map(course => (
-                <div key={course.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h4 className="text-lg font-bold text-gray-900">{course.courseCode}</h4>
-                        <span className={`text-2xl font-bold ${getScoreColor(course.averageScore)}`}>
-                          {course.averageScore.toFixed(1)}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              size={16} 
-                              className={i < Math.round(course.averageScore/2) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">{course.courseName}</p>
-                      <p className="text-xs text-gray-500 mt-1">{course.instructor} • {course.semester}</p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setShowFeedbackDetail(true);
-                      }}
-                      className="flex items-center gap-1 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
-                    >
-                      <Eye size={16} />
-                      View Details
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500 mb-1">Responses</p>
-                      <p className="text-xl font-bold text-gray-900">{course.totalResponses}</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-xs text-blue-600 font-medium mb-1">Average Score</p>
-                      <p className="text-xl font-bold text-blue-900">
-                        {course.averageScore.toFixed(1)}/10
-                      </p>
-                    </div>
-                    <div className="bg-emerald-50 rounded-lg p-3">
-                      <div className="flex items-center gap-1 mb-1">
-                        <ThumbsUp size={14} className="text-emerald-600" />
-                        <p className="text-xs text-emerald-600 font-medium">Positive</p>
-                      </div>
-                      <p className="text-xl font-bold text-emerald-900">
-                        {Math.round((course.sentimentBreakdown.positive/course.totalResponses)*100)}%
-                      </p>
-                    </div>
-                    <div className="bg-red-50 rounded-lg p-3">
-                      <div className="flex items-center gap-1 mb-1">
-                        <ThumbsDown size={14} className="text-red-600" />
-                        <p className="text-xs text-red-600 font-medium">Negative</p>
-                      </div>
-                      <p className="text-xl font-bold text-red-900">
-                        {Math.round((course.sentimentBreakdown.negative/course.totalResponses)*100)}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Feedback Detail Modal */}
-          {showFeedbackDetail && selectedCourse && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
-                        <MessageSquare size={32} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <h2 className="text-2xl font-bold">{selectedCourse.courseCode} - {selectedCourse.courseName}</h2>
-                          <span className="text-3xl font-bold">
-                            {selectedCourse.averageScore.toFixed(1)}
-                          </span>
-                        </div>
-                        <p className="text-indigo-100">{selectedCourse.instructor} • {selectedCourse.semester}</p>
-                        <p className="text-indigo-200 text-sm mt-1">{selectedCourse.totalResponses} responses</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setShowFeedbackDetail(false)}
-                      className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                    >
-                      <XCircle size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-250px)]">
-                  {/* Top Metrics Cards */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BarChart3 className="text-blue-600" size={20} />
-                        <span className="text-sm font-semibold text-blue-900">Average Score</span>
-                      </div>
-                      <p className="text-4xl font-bold text-blue-900">{selectedCourse.averageScore.toFixed(1)}/10</p>
-                      <p className="text-sm text-blue-700 mt-1">{selectedCourse.totalResponses} responses</p>
-                    </div>
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <ThumbsUp className="text-emerald-600" size={20} />
-                        <span className="text-sm font-semibold text-emerald-900">Positive</span>
-                      </div>
-                      <p className="text-4xl font-bold text-emerald-900">{selectedCourse.sentimentBreakdown.positive}</p>
-                      <p className="text-sm text-emerald-700 mt-1">
-                        {Math.round((selectedCourse.sentimentBreakdown.positive/selectedCourse.totalResponses)*100)}% of responses
-                      </p>
-                    </div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <ThumbsDown className="text-red-600" size={20} />
-                        <span className="text-sm font-semibold text-red-900">Negative</span>
-                      </div>
-                      <p className="text-4xl font-bold text-red-900">{selectedCourse.sentimentBreakdown.negative}</p>
-                      <p className="text-sm text-red-700 mt-1">
-                        {Math.round((selectedCourse.sentimentBreakdown.negative/selectedCourse.totalResponses)*100)}% of responses
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Student Comments */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Student Comments</h3>
-                    
-                    {/* Positive Comments Dropdown */}
-                    <div className="mb-3 border border-gray-200 rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => setShowPositiveComments(!showPositiveComments)}
-                        className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-emerald-100 rounded-lg">
-                            <ThumbsUp className="text-emerald-600" size={18} />
-                          </div>
-                          <div className="text-left">
-                            <p className="font-semibold text-gray-900">Positive Responses</p>
-                            <p className="text-xs text-gray-500">{selectedCourse.comments.filter(c => c.sentiment === 'positive').length} comments</p>
-                          </div>
-                        </div>
-                        <svg 
-                          className={`w-5 h-5 text-gray-400 transition-transform ${showPositiveComments ? 'rotate-180' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      
-                      {showPositiveComments && (
-                        <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
-                          {selectedCourse.comments
-                            .filter(comment => comment.sentiment === 'positive')
-                            .map(comment => (
-                              <div key={comment.id} className="bg-white border border-emerald-200 rounded-lg p-4">
-                                <div className="flex items-start justify-between mb-2">
-                                  <span className="text-sm font-bold text-emerald-600">Score: {comment.score}/10</span>
-                                  <span className="text-xs text-gray-500">{comment.date}</span>
-                                </div>
-                                <p className="text-sm text-gray-700 leading-relaxed">{comment.text}</p>
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Negative Comments Dropdown */}
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => setShowNegativeComments(!showNegativeComments)}
-                        className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-red-100 rounded-lg">
-                            <ThumbsDown className="text-red-600" size={18} />
-                          </div>
-                          <div className="text-left">
-                            <p className="font-semibold text-gray-900">Negative Responses</p>
-                            <p className="text-xs text-gray-500">{selectedCourse.comments.filter(c => c.sentiment === 'negative').length} comments</p>
-                          </div>
-                        </div>
-                        <svg 
-                          className={`w-5 h-5 text-gray-400 transition-transform ${showNegativeComments ? 'rotate-180' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      
-                      {showNegativeComments && (
-                        <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
-                          {selectedCourse.comments
-                            .filter(comment => comment.sentiment === 'negative')
-                            .map(comment => (
-                              <div key={comment.id} className="bg-white border border-red-200 rounded-lg p-4">
-                                <div className="flex items-start justify-between mb-2">
-                                  <span className="text-sm font-bold text-red-600">Score: {comment.score}/10</span>
-                                  <span className="text-xs text-gray-500">{comment.date}</span>
-                                </div>
-                                <p className="text-sm text-gray-700 leading-relaxed">{comment.text}</p>
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 p-6 bg-gray-50">
-                  <div className="flex gap-3 justify-end">
-                    <button 
-                      onClick={() => setShowFeedbackDetail(false)}
-                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                    >
-                      Close
-                    </button>
-                    <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2">
-                      <Download size={20} />
-                      Export Report
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-const EventsDashboard = () => {
-    const [viewMode, setViewMode] = useState('grid');
-    const [filterStatus, setFilterStatus] = useState('all');
-    const [filterType, setFilterType] = useState('all');
-    const [selectedEvent, setSelectedEvent] = useState(null);
-
-    const sampleEvents = [
-      {
-        id: 'EVT001',
-        name: 'Annual Tech Conference 2025',
-        type: 'Conference',
-        date: '2025-10-25',
-        time: '09:00 - 17:00',
-        location: 'Main Auditorium',
-        capacity: 500,
-        registered: 423,
-        status: 'Open',
-        organizer: 'CS Department',
-        description: 'Annual technology conference featuring keynotes, workshops, and networking.',
-        color: 'blue'
-      },
-      {
-        id: 'EVT002',
-        name: 'Career Fair',
-        type: 'Career',
-        date: '2025-10-28',
-        time: '10:00 - 16:00',
-        location: 'Sports Center',
-        capacity: 1000,
-        registered: 847,
-        status: 'Open',
-        organizer: 'Career Services',
-        description: 'Meet top employers and explore internship and job opportunities.',
-        color: 'green'
-      },
-      {
-        id: 'EVT003',
-        name: 'Research Symposium',
-        type: 'Academic',
-        date: '2025-10-20',
-        time: '13:00 - 18:00',
-        location: 'Conference Hall B',
-        capacity: 200,
-        registered: 156,
-        status: 'Open',
-        organizer: 'Graduate School',
-        description: 'Showcase of cutting-edge research by faculty and graduate students.',
-        color: 'purple'
-      },
-      {
-        id: 'EVT004',
-        name: 'Student Orientation',
-        type: 'Orientation',
-        date: '2025-10-16',
-        time: '08:00 - 12:00',
-        location: 'Main Campus',
-        capacity: 800,
-        registered: 800,
-        status: 'Full',
-        organizer: 'Student Affairs',
-        description: 'Welcome new students and introduce campus resources.',
-        color: 'orange'
-      },
-      {
-        id: 'EVT005',
-        name: 'Alumni Networking Night',
-        type: 'Social',
-        date: '2025-11-05',
-        time: '18:00 - 21:00',
-        location: 'University Club',
-        capacity: 300,
-        registered: 187,
-        status: 'Open',
-        organizer: 'Alumni Relations',
-        description: 'Connect with successful alumni and build professional networks.',
-        color: 'pink'
-      },
-      {
-        id: 'EVT006',
-        name: 'Startup Pitch Competition',
-        type: 'Competition',
-        date: '2025-11-10',
-        time: '14:00 - 18:00',
-        location: 'Innovation Hub',
-        capacity: 150,
-        registered: 89,
-        status: 'Open',
-        organizer: 'Entrepreneurship Center',
-        description: 'Students pitch their startup ideas to win funding and mentorship.',
-        color: 'yellow'
-      }
-    ];
-
-    const getStatusColor = (status) => {
-      switch (status) {
-        case 'Open': return 'bg-green-100 text-green-700';
-        case 'Full': return 'bg-red-100 text-red-700';
-        case 'Closed': return 'bg-gray-100 text-gray-700';
-        default: return 'bg-blue-100 text-blue-700';
-      }
-    };
-
-    const getTypeColor = (type) => {
-      switch (type) {
-        case 'Conference': return 'bg-blue-100 text-blue-700';
-        case 'Career': return 'bg-green-100 text-green-700';
-        case 'Academic': return 'bg-purple-100 text-purple-700';
-        case 'Orientation': return 'bg-orange-100 text-orange-700';
-        case 'Social': return 'bg-pink-100 text-pink-700';
-        case 'Competition': return 'bg-yellow-100 text-yellow-700';
-        default: return 'bg-gray-100 text-gray-700';
-      }
-    };
-
-    const filteredEvents = sampleEvents.filter(event => {
-      if (filterStatus !== 'all' && event.status.toLowerCase() !== filterStatus) return false;
-      if (filterType !== 'all' && event.type.toLowerCase() !== filterType.toLowerCase()) return false;
-      return true;
-    });
-
-    return (
-      <div className="min-h-screen bg-gray-50 p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Events Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage and track university events</p>
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <Plus size={18} />
-            Create Event
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Total Events</p>
-            <p className="text-3xl font-bold text-gray-900">24</p>
-            <p className="text-xs text-gray-600 mt-2">6 upcoming this month</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <UserCheck className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Total Registrations</p>
-            <p className="text-3xl font-bold text-gray-900">2,502</p>
-            <p className="text-xs text-green-600 mt-2">↑ 18% vs last month</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Avg Attendance</p>
-            <p className="text-3xl font-bold text-gray-900">87%</p>
-            <p className="text-xs text-gray-600 mt-2">Based on check-ins</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Capacity Utilization</p>
-            <p className="text-3xl font-bold text-gray-900">73%</p>
-            <p className="text-xs text-gray-600 mt-2">Overall average</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100 mt-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    placeholder="Search events..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                  />
-                </div>
-                <select 
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                >
-                  <option value="all">All Status</option>
-                  <option value="open">Open</option>
-                  <option value="full">Full</option>
-                  <option value="closed">Closed</option>
-                </select>
-                <select 
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                >
-                  <option value="all">All Types</option>
-                  <option value="Conference">Conference</option>
-                  <option value="Career">Career</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Orientation">Orientation</option>
-                  <option value="Social">Social</option>
-                  <option value="Competition">Competition</option>
-                </select>
-              </div>
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'
-                  }`}
-                >
-                  Grid
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'
-                  }`}
-                >
-                  List
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
-              {filteredEvents.map((event) => (
-                <div key={event.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                     onClick={() => setSelectedEvent(event)}>
-                  <div className={`h-32 bg-gradient-to-br from-${event.color}-400 to-${event.color}-600 p-4 flex flex-col justify-between`}>
-                    <div className="flex items-start justify-between">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(event.type)}`}>
-                        {event.type}
-                      </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-                        {event.status}
-                      </span>
-                    </div>
-                    <h3 className="text-white font-bold text-lg">{event.name}</h3>
-                  </div>
-                  <div className="p-4 space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar size={16} />
-                      <span>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock size={16} />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Building size={16} />
-                      <span>{event.location}</span>
-                    </div>
-                    <div className="pt-3 border-t border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-gray-500">Registration</span>
-                        <span className="text-xs font-semibold text-gray-900">{event.registered}/{event.capacity}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${event.status === 'Full' ? 'bg-red-500' : 'bg-blue-500'}`}
-                          style={{width: `${(event.registered / event.capacity) * 100}%`}}
-                        ></div>
-                      </div>
-                    </div>
-                    <button className="w-full mt-3 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium">
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Event Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date & Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Registrations</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredEvents.map((event) => (
-                    <tr key={event.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-semibold text-gray-900">{event.name}</p>
-                          <p className="text-xs text-gray-500">{event.organizer}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(event.type)}`}>
-                          {event.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        <div>
-                          <p>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                          <p className="text-xs text-gray-500">{event.time}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{event.location}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-gray-600">{event.registered}/{event.capacity}</span>
-                              <span className="font-semibold">{Math.round((event.registered/event.capacity)*100)}%</span>
-                            </div>
-                            <div className="w-24 bg-gray-200 rounded-full h-1.5">
-                              <div 
-                                className={`h-1.5 rounded-full ${event.status === 'Full' ? 'bg-red-500' : 'bg-blue-500'}`}
-                                style={{width: `${(event.registered / event.capacity) * 100}%`}}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-                          {event.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button 
-                          onClick={() => setSelectedEvent(event)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Event Types Distribution</h3>
-            <div className="space-y-3">
-              {[
-                {type: 'Conference', count: 8, color: 'blue'},
-                {type: 'Career', count: 5, color: 'green'},
-                {type: 'Academic', count: 4, color: 'purple'},
-                {type: 'Social', count: 4, color: 'pink'},
-                {type: 'Competition', count: 3, color: 'yellow'}
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full bg-${item.color}-500`}></div>
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm text-gray-700">{item.type}</span>
-                      <span className="text-sm font-semibold text-gray-900">{item.count}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className={`h-2 rounded-full bg-${item.color}-500`} style={{width: `${(item.count/24)*100}%`}}></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
-            <div className="space-y-4">
-              {[
-                {action: 'New registration', event: 'Career Fair', time: '5 min ago', type: 'success'},
-                {action: 'Event created', event: 'Workshop: AI Ethics', time: '1 hour ago', type: 'info'},
-                {action: 'Capacity reached', event: 'Student Orientation', time: '2 hours ago', type: 'warning'},
-                {action: 'Event completed', event: 'Guest Lecture Series', time: '1 day ago', type: 'neutral'}
-              ].map((activity, i) => (
-                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                    activity.type === 'success' ? 'bg-green-500' :
-                    activity.type === 'info' ? 'bg-blue-500' :
-                    activity.type === 'warning' ? 'bg-orange-500' :
-                    'bg-gray-400'
-                  }`}></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-600">{activity.event}</p>
-                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {selectedEvent && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedEvent(null)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className={`h-40 bg-gradient-to-br from-${selectedEvent.color}-400 to-${selectedEvent.color}-600 p-6 flex flex-col justify-between`}>
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(selectedEvent.type)}`}>
-                      {selectedEvent.type}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedEvent.status)}`}>
-                      {selectedEvent.status}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => setSelectedEvent(null)}
-                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">{selectedEvent.name}</h2>
-                  <p className="text-white text-opacity-90 text-sm mt-1">{selectedEvent.organizer}</p>
-                </div>
-              </div>
-              
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <Calendar size={18} />
-                      <span className="text-xs font-semibold uppercase">Date</span>
-                    </div>
-                    <p className="font-semibold text-gray-900">
-                      {new Date(selectedEvent.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <Clock size={18} />
-                      <span className="text-xs font-semibold uppercase">Time</span>
-                    </div>
-                    <p className="font-semibold text-gray-900">{selectedEvent.time}</p>
-                  </div>
-                  
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <Building size={18} />
-                      <span className="text-xs font-semibold uppercase">Location</span>
-                    </div>
-                    <p className="font-semibold text-gray-900">{selectedEvent.location}</p>
-                  </div>
-                  
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <Users size={18} />
-                      <span className="text-xs font-semibold uppercase">Capacity</span>
-                    </div>
-                    <p className="font-semibold text-gray-900">{selectedEvent.capacity} attendees</p>
                   </div>
                 </div>
 
                 <div className="p-4 border border-gray-200 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Registration Progress</h4>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Registered Attendees</span>
-                    <span className="text-lg font-bold text-gray-900">{selectedEvent.registered} / {selectedEvent.capacity}</span>
+                  <h4 className="font-semibold text-gray-900 mb-3">Recent Publications</h4>
+                  <div className="space-y-2">
+                    <div className="text-sm">
+                      <p className="font-semibold text-gray-900">Machine Learning Applications in Healthcare</p>
+                      <p className="text-xs text-gray-600">Journal of AI Research, 2025</p>
+                    </div>
+                    <div className="text-sm">
+                      <p className="font-semibold text-gray-900">Deep Learning for Natural Language Processing</p>
+                      <p className="text-xs text-gray-600">International Conference on AI, 2024</p>
+                    </div>
+                    <div className="text-sm">
+                      <p className="font-semibold text-gray-900">Neural Networks and Pattern Recognition</p>
+                      <p className="text-xs text-gray-600">IEEE Transactions, 2024</p>
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-                    <div 
-                      className={`h-3 rounded-full ${selectedEvent.status === 'Full' ? 'bg-red-500' : 'bg-blue-500'}`}
-                      style={{width: `${(selectedEvent.registered / selectedEvent.capacity) * 100}%`}}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    {selectedEvent.capacity - selectedEvent.registered} spots remaining
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">Description</h4>
-                  <p className="text-gray-600 text-sm leading-relaxed">{selectedEvent.description}</p>
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
-                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-                    Manage Registrations
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Edit Event
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Export Data
-                  </button>
                 </div>
               </div>
             </div>
@@ -6884,828 +7742,6 @@ const EventsDashboard = () => {
       </div>
     );
   };
-
-const TimetableOverview = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date(2025, 9, 15));
-
-  const occupancyData = [
-    { time: '08:00', rooms: 45, capacity: 80, rate: 56 },
-    { time: '09:00', rooms: 68, capacity: 80, rate: 85 },
-    { time: '10:00', rooms: 72, capacity: 80, rate: 90 },
-    { time: '11:00', rooms: 65, capacity: 80, rate: 81 },
-    { time: '12:00', rooms: 32, capacity: 80, rate: 40 },
-    { time: '13:00', rooms: 58, capacity: 80, rate: 73 },
-    { time: '14:00', rooms: 70, capacity: 80, rate: 88 },
-    { time: '15:00', rooms: 62, capacity: 80, rate: 78 },
-    { time: '16:00', rooms: 48, capacity: 80, rate: 60 },
-    { time: '17:00', rooms: 28, capacity: 80, rate: 35 }
-  ];
-
-  const upcomingHolidays = [
-    { name: 'National Day', date: 'Oct 20, 2025', type: 'Public Holiday', daysAway: 4 },
-    { name: 'Mid-semester Break', date: 'Oct 28-30, 2025', type: 'Academic Break', daysAway: 12 },
-    { name: 'Founder\'s Day', date: 'Nov 5, 2025', type: 'University Holiday', daysAway: 20 }
-  ];
-
-  const pendingChanges = [
-    { id: 1, type: 'Room Change', course: 'CS301 - Data Structures', from: 'A101', to: 'A205', requestedBy: 'Dr. Nguyen', status: 'Pending', priority: 'High' },
-    { id: 2, type: 'Time Change', course: 'BA201 - Marketing', from: '10:00-11:30', to: '14:00-15:30', requestedBy: 'Dr. Le', status: 'Pending', priority: 'Medium' },
-    { id: 3, type: 'Makeup Class', course: 'CS401 - AI Fundamentals', date: 'Oct 22, 2025', time: '15:00-16:30', requestedBy: 'Dr. Pham', status: 'Approved', priority: 'Low' },
-    { id: 4, type: 'Room Change', course: 'CS502 - Deep Learning', from: 'A202', to: 'A301', requestedBy: 'Dr. Nguyen', status: 'Pending', priority: 'High' },
-    { id: 5, type: 'Class Cancellation', course: 'BA301 - Strategic Mgmt', date: 'Oct 18, 2025', reason: 'Conference', requestedBy: 'Dr. Vo', status: 'Pending', priority: 'Medium' }
-  ];
-
-  const roomUtilization = [
-    { building: 'Building A', total: 30, occupied: 27, available: 3, rate: 90 },
-    { building: 'Building B', total: 25, occupied: 21, available: 4, rate: 84 },
-    { building: 'Building C', total: 15, occupied: 12, available: 3, rate: 80 },
-    { building: 'Labs', total: 10, occupied: 9, available: 1, rate: 90 }
-  ];
-
-  const conflicts = [
-    { type: 'Double Booking', room: 'A101', time: 'Mon 10:00-11:30', courses: 'CS301 & BA202', severity: 'Critical' },
-    { type: 'Capacity Issue', room: 'B205', enrolled: 85, capacity: 80, course: 'BA301', severity: 'High' },
-    { type: 'Instructor Conflict', instructor: 'Dr. Le', time: 'Wed 14:00-15:30', courses: 'BA201 & BA302', severity: 'Critical' }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Timetable Overview</h1>
-          <p className="text-sm text-gray-500 mt-1">Real-time schedule monitoring and management</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
-            Export Report
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-            Manage Schedule
-          </button>
-        </div>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Building className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Total Rooms</p>
-          <p className="text-3xl font-bold text-gray-900">80</p>
-          <p className="text-xs text-gray-600 mt-2">Across 4 buildings</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Avg Occupancy</p>
-          <p className="text-3xl font-bold text-gray-900">87%</p>
-          <p className="text-xs text-green-600 mt-2">↑ 3% vs last week</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-purple-600" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Active Classes</p>
-          <p className="text-3xl font-bold text-gray-900">68</p>
-          <p className="text-xs text-gray-600 mt-2">Current time slot</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6 text-orange-600" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Pending Changes</p>
-          <p className="text-3xl font-bold text-gray-900">5</p>
-          <p className="text-xs text-orange-600 mt-2">3 high priority</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Conflicts</p>
-          <p className="text-3xl font-bold text-red-600">3</p>
-          <p className="text-xs text-red-600 mt-2">Requires attention</p>
-        </div>
-      </div>
-
-      {/* Conflicts Alert */}
-      {conflicts.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-red-900 mb-2">Schedule Conflicts Detected</h3>
-              <div className="space-y-2">
-                {conflicts.map((conflict, i) => (
-                  <div key={i} className="text-sm text-red-800">
-                    <span className="font-semibold">{conflict.type}:</span> {
-                      conflict.type === 'Double Booking' ? `${conflict.room} at ${conflict.time} (${conflict.courses})` :
-                      conflict.type === 'Capacity Issue' ? `${conflict.room} - ${conflict.course} (${conflict.enrolled}/${conflict.capacity} students)` :
-                      `${conflict.instructor} at ${conflict.time} (${conflict.courses})`
-                    }
-                  </div>
-                ))}
-              </div>
-              <button className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
-                Resolve Conflicts
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-        {/* Room Occupancy Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-2">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Occupancy by Time Slot</h3>
-          <div className="h-80 flex items-end justify-between gap-2">
-            {occupancyData.map((slot, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center">
-                <div className="w-full relative" style={{height: '280px'}}>
-                  <div 
-                    className={`w-full absolute bottom-0 rounded-t-lg transition-all hover:opacity-80 cursor-pointer ${
-                      slot.rate >= 85 ? 'bg-red-500' :
-                      slot.rate >= 70 ? 'bg-orange-500' :
-                      slot.rate >= 50 ? 'bg-blue-500' :
-                      'bg-green-500'
-                    }`}
-                    style={{height: `${(slot.rate / 100) * 280}px`}}
-                    title={`${slot.rooms}/${slot.capacity} rooms (${slot.rate}%)`}
-                  >
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-700">
-                      {slot.rate}%
-                    </div>
-                  </div>
-                </div>
-                <span className="text-xs text-gray-600 mt-2">{slot.time}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-xs text-gray-600">&lt;50% Low</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded"></div>
-              <span className="text-xs text-gray-600">50-70% Moderate</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-orange-500 rounded"></div>
-              <span className="text-xs text-gray-600">70-85% High</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-500 rounded"></div>
-              <span className="text-xs text-gray-600">&gt;85% Critical</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Room Utilization by Building */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Utilization by Building</h3>
-          <div className="space-y-4">
-            {roomUtilization.map((building, i) => (
-              <div key={i} className="p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-gray-900">{building.building}</h4>
-                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
-                    building.rate >= 85 ? 'bg-red-100 text-red-700' :
-                    building.rate >= 70 ? 'bg-orange-100 text-orange-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {building.rate}%
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                  <div>
-                    <p className="text-xs text-gray-500">Total</p>
-                    <p className="font-bold text-gray-900">{building.total}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Occupied</p>
-                    <p className="font-bold text-blue-600">{building.occupied}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Available</p>
-                    <p className="font-bold text-green-600">{building.available}</p>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full ${
-                      building.rate >= 85 ? 'bg-red-500' :
-                      building.rate >= 70 ? 'bg-orange-500' :
-                      'bg-blue-500'
-                    }`}
-                    style={{width: `${building.rate}%`}}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        {/* Pending Changes */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Pending Schedule Changes</h3>
-            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
-              {pendingChanges.filter(c => c.status === 'Pending').length} pending
-            </span>
-          </div>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {pendingChanges.map((change) => (
-              <div key={change.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
-                        change.type === 'Room Change' ? 'bg-blue-100 text-blue-700' :
-                        change.type === 'Time Change' ? 'bg-purple-100 text-purple-700' :
-                        change.type === 'Makeup Class' ? 'bg-green-100 text-green-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {change.type}
-                      </span>
-                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
-                        change.priority === 'High' ? 'bg-red-100 text-red-700' :
-                        change.priority === 'Medium' ? 'bg-orange-100 text-orange-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {change.priority}
-                      </span>
-                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
-                        change.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                        'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {change.status}
-                      </span>
-                    </div>
-                    <p className="font-semibold text-gray-900 text-sm">{change.course}</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {change.from && change.to ? (
-                        <>From: <span className="font-semibold">{change.from}</span> → To: <span className="font-semibold">{change.to}</span></>
-                      ) : change.date ? (
-                        <>Date: <span className="font-semibold">{change.date}</span> {change.time && `at ${change.time}`}</>
-                      ) : (
-                        <span className="font-semibold">{change.reason}</span>
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Requested by: {change.requestedBy}</p>
-                  </div>
-                </div>
-                {change.status === 'Pending' && (
-                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
-                    <button className="flex-1 px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700">
-                      Approve
-                    </button>
-                    <button className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-xs font-medium hover:bg-gray-50">
-                      Review
-                    </button>
-                    <button className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700">
-                      Reject
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Upcoming Holidays */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Upcoming Holidays & Breaks</h3>
-          <div className="space-y-4">
-            {upcomingHolidays.map((holiday, i) => (
-              <div key={i} className="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">{holiday.name}</h4>
-                    <p className="text-sm text-gray-600 mt-1">{holiday.date}</p>
-                    <span className="inline-block mt-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
-                      {holiday.type}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-purple-600">{holiday.daysAway}</p>
-                    <p className="text-xs text-gray-500">days away</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-              <Calendar size={16} />
-              Schedule Impact
-            </h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• 3 classes affected by National Day</li>
-              <li>• 48 classes rescheduled for mid-semester break</li>
-              <li>• 12 makeup classes scheduled</li>
-            </ul>
-          </div>
-
-          <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-            <h4 className="font-semibold text-green-900 mb-2">Quick Stats</h4>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-green-700">Teaching Days Left</p>
-                <p className="text-2xl font-bold text-green-900">42</p>
-              </div>
-              <div>
-                <p className="text-green-700">Exam Period</p>
-                <p className="text-2xl font-bold text-green-900">Dec 15</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-4 gap-4">
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-              <Plus className="w-5 h-5 text-blue-600" />
-            </div>
-            <p className="font-semibold text-gray-900 text-sm">Add Class</p>
-            <p className="text-xs text-gray-500 mt-1">Schedule new class</p>
-          </button>
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-left">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-              <Search className="w-5 h-5 text-green-600" />
-            </div>
-            <p className="font-semibold text-gray-900 text-sm">Find Room</p>
-            <p className="text-xs text-gray-500 mt-1">Check availability</p>
-          </button>
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-              <BarChart3 className="w-5 h-5 text-purple-600" />
-            </div>
-            <p className="font-semibold text-gray-900 text-sm">Analytics</p>
-            <p className="text-xs text-gray-500 mt-1">View detailed reports</p>
-          </button>
-          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all text-left">
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-              <Settings className="w-5 h-5 text-orange-600" />
-            </div>
-            <p className="font-semibold text-gray-900 text-sm">Settings</p>
-            <p className="text-xs text-gray-500 mt-1">Configure schedules</p>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-const ClassOverview = () => {
-  const [selectedSemester, setSelectedSemester] = useState('current');
-  const [selectedFaculty, setSelectedFaculty] = useState('all');
-  const [viewMode, setViewMode] = useState('overview');
-
-  const classData = {
-    totalClasses: 186,
-    activeClasses: 178,
-    completedClasses: 8,
-    avgClassSize: 32,
-    totalEnrollment: 5952,
-    utilizationRate: 87,
-    satisfactionRate: 4.3
-  };
-
-  const facultyClasses = [
-    {
-      id: 'fons',
-      name: 'FONS',
-      classes: 48,
-      students: 1536,
-      avgSize: 32,
-      utilization: 92,
-      color: 'purple'
-    },
-    {
-      id: 'fom',
-      name: 'FOM',
-      classes: 42,
-      students: 1344,
-      avgSize: 32,
-      utilization: 88,
-      color: 'blue'
-    },
-    {
-      id: 'fomac',
-      name: 'FOMAC',
-      classes: 38,
-      students: 1216,
-      avgSize: 32,
-      utilization: 85,
-      color: 'green'
-    },
-    {
-      id: 'ins',
-      name: 'INS',
-      classes: 32,
-      students: 1024,
-      avgSize: 32,
-      utilization: 83,
-      color: 'orange'
-    },
-    {
-      id: 'itm',
-      name: 'ITM',
-      classes: 26,
-      students: 832,
-      avgSize: 32,
-      utilization: 79,
-      color: 'pink'
-    }
-  ];
-
-  const classTypes = [
-    {
-      type: 'Theory',
-      count: 98,
-      percentage: 53,
-      icon: BookOpen,
-      color: 'blue'
-    },
-    {
-      type: 'Practical/Lab',
-      count: 56,
-      percentage: 30,
-      icon: Target,
-      color: 'green'
-    },
-    {
-      type: 'Seminar',
-      count: 22,
-      percentage: 12,
-      icon: Users,
-      color: 'purple'
-    },
-    {
-      type: 'Online',
-      count: 10,
-      percentage: 5,
-      icon: Clock,
-      color: 'orange'
-    }
-  ];
-
-  const timeSlots = [
-    { slot: '7:00 - 9:00', classes: 42, utilization: 95 },
-    { slot: '9:00 - 11:00', classes: 48, utilization: 98 },
-    { slot: '11:00 - 13:00', classes: 38, utilization: 87 },
-    { slot: '13:00 - 15:00', classes: 35, utilization: 82 },
-    { slot: '15:00 - 17:00', classes: 23, utilization: 68 }
-  ];
-
-  const recentActivities = [
-    { class: 'CS301 - Data Structures', action: 'Class started', time: '30 min ago', type: 'success' },
-    { class: 'BA205 - Marketing Strategy', action: 'Assignment due today', time: '2 hours ago', type: 'warning' },
-    { class: 'DS402 - Machine Learning', action: 'Midterm scheduled', time: '5 hours ago', type: 'info' },
-    { class: 'SE301 - FONS', action: 'Project submission', time: '1 day ago', type: 'info' }
-  ];
-
-  const getFacultyColor = (color) => {
-    switch(color) {
-      case 'blue': return 'from-blue-400 to-blue-600';
-      case 'green': return 'from-green-400 to-green-600';
-      case 'purple': return 'from-purple-400 to-purple-600';
-      case 'orange': return 'from-orange-400 to-orange-600';
-      case 'pink': return 'from-pink-400 to-pink-600';
-      default: return 'from-gray-400 to-gray-600';
-    }
-  };
-
-  const getIconColor = (color) => {
-    switch(color) {
-      case 'blue': return 'bg-blue-100 text-blue-600';
-      case 'green': return 'bg-green-100 text-green-600';
-      case 'purple': return 'bg-purple-100 text-purple-600';
-      case 'orange': return 'bg-orange-100 text-orange-600';
-      case 'pink': return 'bg-pink-100 text-pink-600';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="max-w- mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Classes Overview</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive view of all classes, schedules, and performance metrics</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <select 
-              value={selectedSemester}
-              onChange={(e) => setSelectedSemester(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="current">Current Semester</option>
-              <option value="fall2024">Fall 2024</option>
-              <option value="spring2024">Spring 2024</option>
-              <option value="fall2023">Fall 2023</option>
-            </select>
-            <select 
-              value={selectedFaculty}
-              onChange={(e) => setSelectedFaculty(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="all">All Faculties</option>
-              <option value="fons">FONS</option>
-              <option value="fom">FOM</option>
-              <option value="fomac">FOMAC</option>
-              <option value="ins">INS</option>
-              <option value="itm">ITM</option>
-            </select>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-              Export Report
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Total Classes</p>
-            <p className="text-3xl font-bold text-gray-900">{classData.totalClasses}</p>
-            <p className="text-xs text-green-600 mt-2">↑ 12 vs last semester</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Active Classes</p>
-            <p className="text-3xl font-bold text-gray-900">{classData.activeClasses}</p>
-            <p className="text-xs text-gray-600 mt-2">{classData.completedClasses} completed</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Total Enrollment</p>
-            <p className="text-3xl font-bold text-gray-900">{classData.totalEnrollment.toLocaleString()}</p>
-            <p className="text-xs text-gray-600 mt-2">Avg: {classData.avgClassSize} per class</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Utilization Rate</p>
-            <p className="text-3xl font-bold text-gray-900">{classData.utilizationRate}%</p>
-            <p className="text-xs text-green-600 mt-2">↑ 3% vs last semester</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Classes by Faculty</h3>
-              <Building className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="space-y-4">
-              {facultyClasses.map((faculty) => (
-                <div key={faculty.id}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">{faculty.name}</span>
-                    <span className="text-sm font-bold text-gray-900">{faculty.classes} classes</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full bg-gradient-to-r ${getFacultyColor(faculty.color)}`}
-                      style={{width: `${faculty.utilization}%`}}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{faculty.students} students • {faculty.utilization}% utilization</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Class Types</h3>
-              <Target className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="space-y-3">
-              {classTypes.map((type, i) => (
-                <div key={i} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 ${getIconColor(type.color)} rounded-lg flex items-center justify-center`}>
-                      <type.icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{type.type}</p>
-                      <p className="text-xs text-gray-500">{type.count} classes</p>
-                    </div>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">{type.percentage}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Recent Activities</h3>
-              <Calendar className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="space-y-4">
-              {recentActivities.map((activity, i) => (
-                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                    activity.type === 'success' ? 'bg-green-500' :
-                    activity.type === 'warning' ? 'bg-yellow-500' :
-                    'bg-blue-500'
-                  }`}></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-600">{activity.class}</p>
-                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-900 mb-6">Time Slot Distribution</h3>
-            <div className="space-y-4">
-              {timeSlots.map((slot, i) => (
-                <div key={i}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{slot.slot}</span>
-                    </div>
-                    <span className="text-sm font-bold text-gray-900">{slot.classes} classes</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
-                      style={{width: `${slot.utilization}%`}}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{slot.utilization}% utilization</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-900 mb-6">Class Performance Metrics</h3>
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Average Attendance Rate</span>
-                  <span className="text-2xl font-bold text-gray-900">92%</span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{width: '92%'}}></div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Student Satisfaction</span>
-                  <span className="text-2xl font-bold text-gray-900">4.3/5.0</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {[1,2,3,4,5].map((star) => (
-                    <Award key={star} className={`w-5 h-5 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Assignment Completion</span>
-                  <span className="text-2xl font-bold text-gray-900">88%</span>
-                </div>
-                <div className="w-full bg-purple-200 rounded-full h-2">
-                  <div className="bg-purple-600 h-2 rounded-full" style={{width: '88%'}}></div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-orange-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Pass Rate</span>
-                  <span className="text-2xl font-bold text-gray-900">91%</span>
-                </div>
-                <div className="w-full bg-orange-200 rounded-full h-2">
-                  <div className="bg-orange-600 h-2 rounded-full" style={{width: '91%'}}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900">Top Performing Classes</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Class Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Class Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Enrolled</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Attendance</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {[
-                  { code: 'CS401', name: 'Artificial Intelligence', faculty: 'FONS', enrolled: 45, attendance: 96, satisfaction: 4.8, passRate: 94, status: 'Active' },
-                  { code: 'BA305', name: 'Strategic Management', faculty: 'FOM', enrolled: 38, attendance: 94, satisfaction: 4.7, passRate: 92, status: 'Active' },
-                  { code: 'DS402', name: 'Machine Learning', faculty: 'FONS', enrolled: 42, attendance: 95, satisfaction: 4.6, passRate: 91, status: 'Active' },
-                  { code: 'MC301', name: 'Digital Marketing', faculty: 'FOMAC', enrolled: 35, attendance: 93, satisfaction: 4.5, passRate: 90, status: 'Active' },
-                  { code: 'IT305', name: 'Cloud Computing', faculty: 'ITM', enrolled: 40, attendance: 92, satisfaction: 4.5, passRate: 89, status: 'Active' }
-                ].map((classItem, i) => (
-                  <tr key={i} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-semibold text-blue-600">{classItem.code}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{classItem.name}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{classItem.faculty}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{classItem.enrolled}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{classItem.attendance}%</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        <span className="text-sm font-semibold text-gray-900">{classItem.satisfaction}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{classItem.passRate}%</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-300">
-                        {classItem.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 
 const ViewRankings = () => {
   const [filterFaculty, setFilterFaculty] = useState('all');
@@ -7945,243 +7981,385 @@ const ViewRankings = () => {
       </div>
     </div>
   );
-};
+};  
 
-const LecturersOverview = () => {
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [filterDepartment, setFilterDepartment] = useState('all');
 
-    const categories = [
+const EventsDashboard = () => {
+    const [viewMode, setViewMode] = useState('grid');
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [filterType, setFilterType] = useState('all');
+    const [selectedEvent, setSelectedEvent] = useState(null);
+
+    const sampleEvents = [
       {
-        id: 'workload',
-        title: 'Workload Distribution',
-        icon: Clock,
-        color: 'blue',
-        stats: { avgHours: '14.8h', maxLoad: '20h', minLoad: '8h' },
-        description: 'Track teaching hours, course load, and workload balance across faculty.',
-        data: [
-          { name: 'Dr. Nguyen Van Minh', dept: 'FONS', hours: 16, courses: 4, students: 240, status: 'Optimal' },
-          { name: 'Dr. Tran Thi Lan', dept: 'Business Admin', hours: 18, courses: 5, students: 280, status: 'High' },
-          { name: 'Dr. Le Van Hieu', dept: 'FONS', hours: 14, courses: 3, students: 180, status: 'Optimal' },
-          { name: 'Dr. Pham Thi Mai', dept: 'FONS', hours: 15, courses: 4, students: 220, status: 'Optimal' },
-          { name: 'Dr. Hoang Van Tuan', dept: 'FONS', hours: 12, courses: 3, students: 165, status: 'Low' }
-        ]
+        id: 'EVT001',
+        name: 'Annual Tech Conference 2025',
+        type: 'Conference',
+        date: '2025-10-25',
+        time: '09:00 - 17:00',
+        location: 'Main Auditorium',
+        capacity: 500,
+        registered: 423,
+        status: 'Open',
+        organizer: 'CS Department',
+        description: 'Annual technology conference featuring keynotes, workshops, and networking.',
+        color: 'blue'
       },
       {
-        id: 'performance',
-        title: 'Teaching Performance',
-        icon: TrendingUp,
-        color: 'green',
-        stats: { avgRating: '4.3/5', topRated: 47, needsImprovement: 12 },
-        description: 'Monitor student evaluations, teaching quality, and performance metrics.',
-        data: [
-          { name: 'Dr. Nguyen Van Minh', rating: 4.7, studentFeedback: 156, passRate: '94%', engagement: 'High' },
-          { name: 'Dr. Tran Thi Lan', rating: 4.5, studentFeedback: 189, passRate: '91%', engagement: 'High' },
-          { name: 'Dr. Le Van Hieu', rating: 4.2, studentFeedback: 134, passRate: '88%', engagement: 'Medium' },
-          { name: 'Dr. Pham Thi Mai', rating: 4.8, studentFeedback: 178, passRate: '96%', engagement: 'High' },
-          { name: 'Dr. Hoang Van Tuan', rating: 4.1, studentFeedback: 98, passRate: '87%', engagement: 'Medium' }
-        ]
+        id: 'EVT002',
+        name: 'Career Fair',
+        type: 'Career',
+        date: '2025-10-28',
+        time: '10:00 - 16:00',
+        location: 'Sports Center',
+        capacity: 1000,
+        registered: 847,
+        status: 'Open',
+        organizer: 'Career Services',
+        description: 'Meet top employers and explore internship and job opportunities.',
+        color: 'green'
       },
       {
-        id: 'research',
-        title: 'Research Output',
-        icon: FileText,
-        color: 'purple',
-        stats: { totalPubs: 1248, avgPerFaculty: 4.2, hIndex: '18.5' },
-        description: 'Track publications, research projects, citations, and academic contributions.',
-        data: [
-          { name: 'Dr. Nguyen Van Minh', publications: 24, citations: 342, projects: 5, grants: '$125,000' },
-          { name: 'Dr. Tran Thi Lan', publications: 38, citations: 567, projects: 8, grants: '$245,000' },
-          { name: 'Dr. Le Van Hieu', publications: 12, citations: 189, projects: 3, grants: '$78,000' },
-          { name: 'Dr. Pham Thi Mai', publications: 31, citations: 489, projects: 6, grants: '$198,000' },
-          { name: 'Dr. Hoang Van Tuan', publications: 18, citations: 276, projects: 4, grants: '$92,000' }
-        ]
+        id: 'EVT003',
+        name: 'Research Symposium',
+        type: 'Academic',
+        date: '2025-10-20',
+        time: '13:00 - 18:00',
+        location: 'Conference Hall B',
+        capacity: 200,
+        registered: 156,
+        status: 'Open',
+        organizer: 'Graduate School',
+        description: 'Showcase of cutting-edge research by faculty and graduate students.',
+        color: 'purple'
       },
       {
-        id: 'development',
-        title: 'Professional Development',
-        icon: Award,
-        color: 'orange',
-        stats: { workshops: 89, certifications: 134, conferences: 67 },
-        description: 'Monitor faculty training, workshops, certifications, and skill development.',
-        data: [
-          { name: 'Dr. Nguyen Van Minh', workshops: 8, conferences: 5, certifications: 3, lastTraining: '2 weeks ago' },
-          { name: 'Dr. Tran Thi Lan', workshops: 12, conferences: 8, certifications: 5, lastTraining: '1 week ago' },
-          { name: 'Dr. Le Van Hieu', workshops: 5, conferences: 3, certifications: 2, lastTraining: '1 month ago' },
-          { name: 'Dr. Pham Thi Mai', workshops: 10, conferences: 6, certifications: 4, lastTraining: '3 weeks ago' },
-          { name: 'Dr. Hoang Van Tuan', workshops: 6, conferences: 4, certifications: 2, lastTraining: '2 months ago' }
-        ]
+        id: 'EVT004',
+        name: 'Student Orientation',
+        type: 'Orientation',
+        date: '2025-10-16',
+        time: '08:00 - 12:00',
+        location: 'Main Campus',
+        capacity: 800,
+        registered: 800,
+        status: 'Full',
+        organizer: 'Student Affairs',
+        description: 'Welcome new students and introduce campus resources.',
+        color: 'orange'
       },
       {
-        id: 'community',
-        title: 'Community Engagement',
-        icon: Users,
-        color: 'pink',
-        stats: { totalHours: 35640, avgPerFaculty: 120, activeProjects: 45 },
-        description: 'Track community service, outreach programs, and social impact initiatives.',
-        data: [
-          { name: 'Dr. Nguyen Van Minh', hours: 120, projects: 4, impact: 'High', focus: 'STEM Education' },
-          { name: 'Dr. Tran Thi Lan', hours: 145, projects: 6, impact: 'High', focus: 'Business Mentorship' },
-          { name: 'Dr. Le Van Hieu', hours: 95, projects: 3, impact: 'Medium', focus: 'Tech Literacy' },
-          { name: 'Dr. Pham Thi Mai', hours: 130, projects: 5, impact: 'High', focus: 'Data for Good' },
-          { name: 'Dr. Hoang Van Tuan', hours: 105, projects: 3, impact: 'Medium', focus: 'Youth Coding' }
-        ]
+        id: 'EVT005',
+        name: 'Alumni Networking Night',
+        type: 'Social',
+        date: '2025-11-05',
+        time: '18:00 - 21:00',
+        location: 'University Club',
+        capacity: 300,
+        registered: 187,
+        status: 'Open',
+        organizer: 'Alumni Relations',
+        description: 'Connect with successful alumni and build professional networks.',
+        color: 'pink'
       },
       {
-        id: 'recognition',
-        title: 'Awards & Recognition',
-        icon: Award,
-        color: 'yellow',
-        stats: { totalAwards: 156, teachingAwards: 67, researchAwards: 89 },
-        description: 'Showcase faculty achievements, honors, and institutional recognition.',
-        data: [
-          { name: 'Dr. Nguyen Van Minh', awards: 5, latest: 'Best Teaching Award 2024', type: 'Teaching' },
-          { name: 'Dr. Tran Thi Lan', awards: 8, latest: 'Outstanding Research 2024', type: 'Research' },
-          { name: 'Dr. Le Van Hieu', awards: 3, latest: 'Innovation Award 2023', type: 'Innovation' },
-          { name: 'Dr. Pham Thi Mai', awards: 7, latest: 'Excellence in Mentorship 2024', type: 'Mentorship' },
-          { name: 'Dr. Hoang Van Tuan', awards: 4, latest: 'Community Impact 2023', type: 'Service' }
-        ]
+        id: 'EVT006',
+        name: 'Startup Pitch Competition',
+        type: 'Competition',
+        date: '2025-11-10',
+        time: '14:00 - 18:00',
+        location: 'Innovation Hub',
+        capacity: 150,
+        registered: 89,
+        status: 'Open',
+        organizer: 'Entrepreneurship Center',
+        description: 'Students pitch their startup ideas to win funding and mentorship.',
+        color: 'yellow'
       }
     ];
 
-    const departments = [
-      { name: 'FONS', faculty: 45, avgAge: 42, phd: '100%' },
-      { name: 'FOM', faculty: 38, avgAge: 45, phd: '95%' },
-      { name: 'FONS', faculty: 32, avgAge: 39, phd: '97%' },
-      { name: 'INS', faculty: 28, avgAge: 38, phd: '100%' },
-      { name: 'ITM', faculty: 24, avgAge: 41, phd: '92%' }
-    ];
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'Open': return 'bg-green-100 text-green-700';
+        case 'Full': return 'bg-red-100 text-red-700';
+        case 'Closed': return 'bg-gray-100 text-gray-700';
+        default: return 'bg-blue-100 text-blue-700';
+      }
+    };
+
+    const getTypeColor = (type) => {
+      switch (type) {
+        case 'Conference': return 'bg-blue-100 text-blue-700';
+        case 'Career': return 'bg-green-100 text-green-700';
+        case 'Academic': return 'bg-purple-100 text-purple-700';
+        case 'Orientation': return 'bg-orange-100 text-orange-700';
+        case 'Social': return 'bg-pink-100 text-pink-700';
+        case 'Competition': return 'bg-yellow-100 text-yellow-700';
+        default: return 'bg-gray-100 text-gray-700';
+      }
+    };
+
+    const filteredEvents = sampleEvents.filter(event => {
+      if (filterStatus !== 'all' && event.status.toLowerCase() !== filterStatus) return false;
+      if (filterType !== 'all' && event.type.toLowerCase() !== filterType.toLowerCase()) return false;
+      return true;
+    });
 
     return (
       <div className="min-h-screen bg-gray-50 p-3">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Lecturers Overview</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and insights on faculty performance and development</p>
+            <h1 className="text-3xl font-bold text-gray-900">Events Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage and track university events</p>
           </div>
-          <select 
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Departments</option>
-            <option value="cs">FONS</option>
-            <option value="ba">FOM</option>
-            <option value="se">FONS</option>
-            <option value="ds">FONS</option>
-            <option value="is">Information Systems</option>
-          </select>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <Plus size={18} />
+            Create Event
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-3">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-600" />
+                <Calendar className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mb-1">Total Faculty</p>
-            <p className="text-3xl font-bold text-gray-900">297</p>
-            <p className="text-xs text-gray-600 mt-2">Across 5 departments</p>
+            <p className="text-sm text-gray-500 mb-1">Total Events</p>
+            <p className="text-3xl font-bold text-gray-900">24</p>
+            <p className="text-xs text-gray-600 mt-2">6 upcoming this month</p>
           </div>
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+                <UserCheck className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mb-1">Avg Performance</p>
-            <p className="text-3xl font-bold text-gray-900">4.3/5</p>
-            <p className="text-xs text-green-600 mt-2">↑ 0.2 vs last year</p>
+            <p className="text-sm text-gray-500 mb-1">Total Registrations</p>
+            <p className="text-3xl font-bold text-gray-900">2,502</p>
+            <p className="text-xs text-green-600 mt-2">↑ 18% vs last month</p>
           </div>
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-purple-600" />
+                <Users className="w-6 h-6 text-purple-600" />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mb-1">Publications</p>
-            <p className="text-3xl font-bold text-gray-900">1,248</p>
-            <p className="text-xs text-green-600 mt-2">↑ 12% vs last year</p>
+            <p className="text-sm text-gray-500 mb-1">Avg Attendance</p>
+            <p className="text-3xl font-bold text-gray-900">87%</p>
+            <p className="text-xs text-gray-600 mt-2">Based on check-ins</p>
           </div>
 
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-orange-600" />
+                <TrendingUp className="w-6 h-6 text-orange-600" />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mb-1">Avg Workload</p>
-            <p className="text-3xl font-bold text-gray-900">14.8h</p>
-            <p className="text-xs text-gray-600 mt-2">Per week</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-pink-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Awards</p>
-            <p className="text-3xl font-bold text-gray-900">156</p>
-            <p className="text-xs text-gray-600 mt-2">This academic year</p>
+            <p className="text-sm text-gray-500 mb-1">Capacity Utilization</p>
+            <p className="text-3xl font-bold text-gray-900">73%</p>
+            <p className="text-xs text-gray-600 mt-2">Overall average</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {categories.map((category) => (
-            <div
-              key={category.id}
-              onClick={() => setSelectedCategory(category)}
-              className={`bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-${category.color}-500 hover:shadow-lg transition-all cursor-pointer`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-14 h-14 bg-${category.color}-100 rounded-xl flex items-center justify-center`}>
-                  <category.icon className={`w-7 h-7 text-${category.color}-600`} />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-3">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    placeholder="Search events..."
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                  />
                 </div>
+                <select 
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Status</option>
+                  <option value="open">Open</option>
+                  <option value="full">Full</option>
+                  <option value="closed">Closed</option>
+                </select>
+                <select 
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Types</option>
+                  <option value="Conference">Conference</option>
+                  <option value="Career">Career</option>
+                  <option value="Academic">Academic</option>
+                  <option value="Orientation">Orientation</option>
+                  <option value="Social">Social</option>
+                  <option value="Competition">Competition</option>
+                </select>
               </div>
-              
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{category.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">{category.description}</p>
-              
-              <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200">
-                {Object.entries(category.stats).map(([key, value]) => (
-                  <div key={key}>
-                    <p className="text-xs text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                    <p className="text-sm font-bold text-gray-900">{value}</p>
-                  </div>
-                ))}
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'
+                  }`}
+                >
+                  Grid
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'
+                  }`}
+                >
+                  List
+                </button>
               </div>
             </div>
-          ))}
+          </div>
+
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {filteredEvents.map((event) => (
+                <div key={event.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                     onClick={() => setSelectedEvent(event)}>
+                  <div className={`h-32 bg-gradient-to-br from-${event.color}-400 to-${event.color}-600 p-4 flex flex-col justify-between`}>
+                    <div className="flex items-start justify-between">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(event.type)}`}>
+                        {event.type}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
+                        {event.status}
+                      </span>
+                    </div>
+                    <h3 className="text-white font-bold text-lg">{event.name}</h3>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar size={16} />
+                      <span>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock size={16} />
+                      <span>{event.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Building size={16} />
+                      <span>{event.location}</span>
+                    </div>
+                    <div className="pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-500">Registration</span>
+                        <span className="text-xs font-semibold text-gray-900">{event.registered}/{event.capacity}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${event.status === 'Full' ? 'bg-red-500' : 'bg-blue-500'}`}
+                          style={{width: `${(event.registered / event.capacity) * 100}%`}}
+                        ></div>
+                      </div>
+                    </div>
+                    <button className="w-full mt-3 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium">
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Event Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date & Time</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Registrations</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredEvents.map((event) => (
+                    <tr key={event.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-semibold text-gray-900">{event.name}</p>
+                          <p className="text-xs text-gray-500">{event.organizer}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(event.type)}`}>
+                          {event.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        <div>
+                          <p>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          <p className="text-xs text-gray-500">{event.time}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{event.location}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-600">{event.registered}/{event.capacity}</span>
+                              <span className="font-semibold">{Math.round((event.registered/event.capacity)*100)}%</span>
+                            </div>
+                            <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                              <div 
+                                className={`h-1.5 rounded-full ${event.status === 'Full' ? 'bg-red-500' : 'bg-blue-500'}`}
+                                style={{width: `${(event.registered / event.capacity) * 100}%`}}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
+                          {event.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button 
+                          onClick={() => setSelectedEvent(event)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          Manage
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mt-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Department Distribution</h3>
-            <div className="space-y-4">
-              {departments.map((dept, i) => (
-                <div key={i} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-gray-900">{dept.name}</h4>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
-                      {dept.faculty} faculty
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500 text-xs">Avg Age</p>
-                      <p className="font-semibold text-gray-900">{dept.avgAge} years</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Event Types Distribution</h3>
+            <div className="space-y-3">
+              {[
+                {type: 'Conference', count: 8, color: 'blue'},
+                {type: 'Career', count: 5, color: 'green'},
+                {type: 'Academic', count: 4, color: 'purple'},
+                {type: 'Social', count: 4, color: 'pink'},
+                {type: 'Competition', count: 3, color: 'yellow'}
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className={`w-3 h-3 rounded-full bg-${item.color}-500`}></div>
+                  <div className="flex-1">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-gray-700">{item.type}</span>
+                      <span className="text-sm font-semibold text-gray-900">{item.count}</span>
                     </div>
-                    <div>
-                      <p className="text-gray-500 text-xs">PhD Rate</p>
-                      <p className="font-semibold text-gray-900">{dept.phd}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 text-xs">Status</p>
-                      <p className="font-semibold text-green-600">Active</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className={`h-2 rounded-full bg-${item.color}-500`} style={{width: `${(item.count/24)*100}%`}}></div>
                     </div>
                   </div>
                 </div>
@@ -8190,147 +8368,126 @@ const LecturersOverview = () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Faculty Composition</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
             <div className="space-y-4">
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-700 font-medium">Professors</span>
-                  <span className="text-lg font-bold text-gray-900">45 (15%)</span>
+              {[
+                {action: 'New registration', event: 'Career Fair', time: '5 min ago', type: 'success'},
+                {action: 'Event created', event: 'Workshop: AI Ethics', time: '1 hour ago', type: 'info'},
+                {action: 'Capacity reached', event: 'Student Orientation', time: '2 hours ago', type: 'warning'},
+                {action: 'Event completed', event: 'Guest Lecture Series', time: '1 day ago', type: 'neutral'}
+              ].map((activity, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                    activity.type === 'success' ? 'bg-green-500' :
+                    activity.type === 'info' ? 'bg-blue-500' :
+                    activity.type === 'warning' ? 'bg-orange-500' :
+                    'bg-gray-400'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
+                    <p className="text-xs text-gray-600">{activity.event}</p>
+                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                  </div>
                 </div>
-                <div className="w-full bg-purple-200 rounded-full h-2">
-                  <div className="bg-purple-600 h-2 rounded-full" style={{width: '15%'}}></div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-700 font-medium">Associate Professors</span>
-                  <span className="text-lg font-bold text-gray-900">102 (34%)</span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{width: '34%'}}></div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-700 font-medium">Senior Lecturers</span>
-                  <span className="text-lg font-bold text-gray-900">78 (26%)</span>
-                </div>
-                <div className="w-full bg-green-200 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{width: '26%'}}></div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-orange-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-700 font-medium">Lecturers</span>
-                  <span className="text-lg font-bold text-gray-900">72 (25%)</span>
-                </div>
-                <div className="w-full bg-orange-200 rounded-full h-2">
-                  <div className="bg-orange-600 h-2 rounded-full" style={{width: '25%'}}></div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {selectedCategory && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedCategory(null)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className={`bg-gradient-to-br from-${selectedCategory.color}-400 to-${selectedCategory.color}-600 p-6`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center`}>
-                    <selectedCategory.icon className="w-8 h-8 text-white" />
+        {selectedEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedEvent(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className={`h-40 bg-gradient-to-br from-${selectedEvent.color}-400 to-${selectedEvent.color}-600 p-6 flex flex-col justify-between`}>
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(selectedEvent.type)}`}>
+                      {selectedEvent.type}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedEvent.status)}`}>
+                      {selectedEvent.status}
+                    </span>
                   </div>
                   <button 
-                    onClick={() => setSelectedCategory(null)}
+                    onClick={() => setSelectedEvent(null)}
                     className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
                   >
                     ✕
                   </button>
                 </div>
-                <h2 className="text-3xl font-bold text-white">{selectedCategory.title}</h2>
-                <p className="text-white text-opacity-90 mt-2">{selectedCategory.description}</p>
-              </div>
-
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-3 gap-4">
-                  {Object.entries(selectedCategory.stats).map(([key, value]) => (
-                    <div key={key} className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">{value as React.ReactNode}</p>
-                    </div>
-                  ))}
-                </div>
-
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Faculty Details</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-                          {Object.keys(selectedCategory.data[0])
-                            .filter(key => key !== 'name' && key !== 'dept')
-                            .map(key => (
-                              <th key={key} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                                {key.replace(/([A-Z])/g, ' $1').trim()}
-                              </th>
-                            ))}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {selectedCategory.data.map((item, i) => (
-                          <tr key={i} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                              <div>
-                                <p>{item.name}</p>
-                                {item.dept && <p className="text-xs text-gray-500">{item.dept}</p>}
-                              </div>
-                            </td>
-                            {Object.entries(item)
-                              .filter(([key]) => key !== 'name' && key !== 'dept')
-                              .map(([key, value]) => (
-                                <td key={key} className="px-4 py-3 text-sm text-gray-600">
-                                  {key === 'status' ? (
-                                    <span className={`px-2 py-1 text-xs rounded-full ${
-                                      value === 'High' ? 'bg-red-100 text-red-700' :
-                                      value === 'Optimal' ? 'bg-green-100 text-green-700' :
-                                      'bg-yellow-100 text-yellow-700'
-                                    }`}>
-                                      {value as React.ReactNode}
-                                    </span>
-                                  ) : key === 'engagement' || key === 'impact' ? (
-                                    <span className={`px-2 py-1 text-xs rounded-full ${
-                                      value === 'High' ? 'bg-green-100 text-green-700' :
-                                      'bg-blue-100 text-blue-700'
-                                    }`}>
-                                      {value as React.ReactNode}
-                                    </span>
-                                  ) : (
-                                    <span className="font-semibold">{value as React.ReactNode}</span>
-                                  )}
-                                </td>
-                              ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <h2 className="text-2xl font-bold text-white">{selectedEvent.name}</h2>
+                  <p className="text-white text-opacity-90 text-sm mt-1">{selectedEvent.organizer}</p>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Calendar size={18} />
+                      <span className="text-xs font-semibold uppercase">Date</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">
+                      {new Date(selectedEvent.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Clock size={18} />
+                      <span className="text-xs font-semibold uppercase">Time</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedEvent.time}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Building size={18} />
+                      <span className="text-xs font-semibold uppercase">Location</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedEvent.location}</p>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-2">
+                      <Users size={18} />
+                      <span className="text-xs font-semibold uppercase">Capacity</span>
+                    </div>
+                    <p className="font-semibold text-gray-900">{selectedEvent.capacity} attendees</p>
                   </div>
                 </div>
 
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">Registration Progress</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Registered Attendees</span>
+                    <span className="text-lg font-bold text-gray-900">{selectedEvent.registered} / {selectedEvent.capacity}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div 
+                      className={`h-3 rounded-full ${selectedEvent.status === 'Full' ? 'bg-red-500' : 'bg-blue-500'}`}
+                      style={{width: `${(selectedEvent.registered / selectedEvent.capacity) * 100}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {selectedEvent.capacity - selectedEvent.registered} spots remaining
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Description</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">{selectedEvent.description}</p>
+                </div>
+
                 <div className="flex gap-3 pt-4 border-t border-gray-200">
-                  <button className={`flex-1 px-4 py-2 bg-${selectedCategory.color}-600 text-white rounded-lg hover:bg-${selectedCategory.color}-700 font-medium`}>
-                    Export Full Report
+                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    Manage Registrations
                   </button>
                   <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    View Analytics
+                    Edit Event
                   </button>
                   <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    Compare Faculty
+                    Export Data
                   </button>
                 </div>
               </div>
@@ -8340,6 +8497,398 @@ const LecturersOverview = () => {
       </div>
     );
   };
+
+const TimetableOverview = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date(2025, 9, 15));
+
+  const occupancyData = [
+    { time: '08:00', rooms: 45, capacity: 80, rate: 56 },
+    { time: '09:00', rooms: 68, capacity: 80, rate: 85 },
+    { time: '10:00', rooms: 72, capacity: 80, rate: 90 },
+    { time: '11:00', rooms: 65, capacity: 80, rate: 81 },
+    { time: '12:00', rooms: 32, capacity: 80, rate: 40 },
+    { time: '13:00', rooms: 58, capacity: 80, rate: 73 },
+    { time: '14:00', rooms: 70, capacity: 80, rate: 88 },
+    { time: '15:00', rooms: 62, capacity: 80, rate: 78 },
+    { time: '16:00', rooms: 48, capacity: 80, rate: 60 },
+    { time: '17:00', rooms: 28, capacity: 80, rate: 35 }
+  ];
+
+  const upcomingHolidays = [
+    { name: 'National Day', date: 'Oct 20, 2025', type: 'Public Holiday', daysAway: 4 },
+    { name: 'Founder\'s Day', date: 'Nov 5, 2025', type: 'University Holiday', daysAway: 20 }
+  ];
+
+  const pendingChanges = [
+    { id: 1, type: 'Room Change', course: 'CS301 - Data Structures', from: 'A101', to: 'A205', requestedBy: 'Dr. Nguyen', status: 'Pending', priority: 'High' },
+    { id: 2, type: 'Time Change', course: 'BA201 - Marketing', from: '10:00-11:30', to: '14:00-15:30', requestedBy: 'Dr. Le', status: 'Pending', priority: 'Medium' },
+    { id: 3, type: 'Makeup Class', course: 'CS401 - AI Fundamentals', date: 'Oct 22, 2025', time: '15:00-16:30', requestedBy: 'Dr. Pham', status: 'Approved', priority: 'Low' },
+    { id: 4, type: 'Room Change', course: 'CS502 - Deep Learning', from: 'A202', to: 'A301', requestedBy: 'Dr. Nguyen', status: 'Pending', priority: 'High' },
+    { id: 5, type: 'Class Cancellation', course: 'BA301 - Strategic Mgmt', date: 'Oct 18, 2025', reason: 'Conference', requestedBy: 'Dr. Vo', status: 'Pending', priority: 'Medium' }
+  ];
+
+  const roomUtilization = [
+    { building: 'Building A', total: 30, occupied: 27, available: 3, rate: 90 },
+    { building: 'Building B', total: 25, occupied: 21, available: 4, rate: 84 },
+    { building: 'Building C', total: 15, occupied: 12, available: 3, rate: 80 }
+  ];
+
+  const conflicts = [
+    { type: 'Double Booking', room: 'A101', time: 'Mon 10:00-11:30', courses: 'CS301 & BA202', severity: 'Critical' },
+    { type: 'Capacity Issue', room: 'B205', enrolled: 85, capacity: 80, course: 'BA301', severity: 'High' },
+    { type: 'Instructor Conflict', instructor: 'Dr. Le', time: 'Wed 14:00-15:30', courses: 'BA201 & BA302', severity: 'Critical' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Timetable Overview</h1>
+          <p className="text-sm text-gray-500 mt-1">Real-time schedule monitoring and management</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+            Export Report
+          </button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+            Manage Schedule
+          </button>
+        </div>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 mt-3">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Building className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Rooms</p>
+          <p className="text-3xl font-bold text-gray-900">80</p>
+          <p className="text-xs text-gray-600 mt-2">Across 4 buildings</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Avg Occupancy</p>
+          <p className="text-3xl font-bold text-gray-900">87%</p>
+          <p className="text-xs text-green-600 mt-2">↑ 3% vs last week</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Active Classes</p>
+          <p className="text-3xl font-bold text-gray-900">68</p>
+          <p className="text-xs text-gray-600 mt-2">Current time slot</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-orange-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Pending Changes</p>
+          <p className="text-3xl font-bold text-gray-900">5</p>
+          <p className="text-xs text-orange-600 mt-2">3 high priority</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Conflicts</p>
+          <p className="text-3xl font-bold text-red-600">3</p>
+          <p className="text-xs text-red-600 mt-2">Requires attention</p>
+        </div>
+      </div>
+
+      {/* Conflicts Alert */}
+      {conflicts.length > 0 && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mt-3">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-900 mb-2">Schedule Conflicts Detected</h3>
+              <div className="space-y-2">
+                {conflicts.map((conflict, i) => (
+                  <div key={i} className="text-sm text-red-800">
+                    <span className="font-semibold">{conflict.type}:</span> {
+                      conflict.type === 'Double Booking' ? `${conflict.room} at ${conflict.time} (${conflict.courses})` :
+                      conflict.type === 'Capacity Issue' ? `${conflict.room} - ${conflict.course} (${conflict.enrolled}/${conflict.capacity} students)` :
+                      `${conflict.instructor} at ${conflict.time} (${conflict.courses})`
+                    }
+                  </div>
+                ))}
+              </div>
+              <button className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                Resolve Conflicts
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+        {/* Room Occupancy Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Occupancy by Time Slot</h3>
+          <div className="h-80 flex items-end justify-between gap-2">
+            {occupancyData.map((slot, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <div className="w-full relative" style={{height: '280px'}}>
+                  <div 
+                    className={`w-full absolute bottom-0 rounded-t-lg transition-all hover:opacity-80 cursor-pointer ${
+                      slot.rate >= 85 ? 'bg-red-500' :
+                      slot.rate >= 70 ? 'bg-orange-500' :
+                      slot.rate >= 50 ? 'bg-blue-500' :
+                      'bg-green-500'
+                    }`}
+                    style={{height: `${(slot.rate / 100) * 280}px`}}
+                    title={`${slot.rooms}/${slot.capacity} rooms (${slot.rate}%)`}
+                  >
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-700">
+                      {slot.rate}%
+                    </div>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-600 mt-2">{slot.time}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500 rounded"></div>
+              <span className="text-xs text-gray-600">&lt;50% Low</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+              <span className="text-xs text-gray-600">50-70% Moderate</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-orange-500 rounded"></div>
+              <span className="text-xs text-gray-600">70-85% High</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-500 rounded"></div>
+              <span className="text-xs text-gray-600">&gt;85% Critical</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Room Utilization by Building */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Utilization by Building</h3>
+          <div className="space-y-4">
+            {roomUtilization.map((building, i) => (
+              <div key={i} className="p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900">{building.building}</h4>
+                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                    building.rate >= 85 ? 'bg-red-100 text-red-700' :
+                    building.rate >= 70 ? 'bg-orange-100 text-orange-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {building.rate}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-sm mb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Total</p>
+                    <p className="font-bold text-gray-900">{building.total}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Occupied</p>
+                    <p className="font-bold text-blue-600">{building.occupied}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Available</p>
+                    <p className="font-bold text-green-600">{building.available}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      building.rate >= 85 ? 'bg-red-500' :
+                      building.rate >= 70 ? 'bg-orange-500' :
+                      'bg-blue-500'
+                    }`}
+                    style={{width: `${building.rate}%`}}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mt-3">
+        {/* Pending Changes */}
+        <div className="bg-white p-6  rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900">Pending Schedule Changes</h3>
+            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
+              {pendingChanges.filter(c => c.status === 'Pending').length} pending
+            </span>
+          </div>
+          <div className="space-y-3 overflow-y-auto h-[520px] pr-2">
+            {pendingChanges.map((change) => (
+              <div key={change.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                        change.type === 'Room Change' ? 'bg-blue-100 text-blue-700' :
+                        change.type === 'Time Change' ? 'bg-purple-100 text-purple-700' :
+                        change.type === 'Makeup Class' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {change.type}
+                      </span>
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                        change.priority === 'High' ? 'bg-red-100 text-red-700' :
+                        change.priority === 'Medium' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {change.priority}
+                      </span>
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                        change.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {change.status}
+                      </span>
+                    </div>
+                    <p className="font-semibold text-gray-900 text-sm">{change.course}</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {change.from && change.to ? (
+                        <>From: <span className="font-semibold">{change.from}</span> → To: <span className="font-semibold">{change.to}</span></>
+                      ) : change.date ? (
+                        <>Date: <span className="font-semibold">{change.date}</span> {change.time && `at ${change.time}`}</>
+                      ) : (
+                        <span className="font-semibold">{change.reason}</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Requested by: {change.requestedBy}</p>
+                  </div>
+                </div>
+                {change.status === 'Pending' && (
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                    <button className="flex-1 px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700">
+                      Approve
+                    </button>
+                    <button className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-xs font-medium hover:bg-gray-50">
+                      Review
+                    </button>
+                    <button className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700">
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Holidays */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Upcoming Holidays & Breaks</h3>
+          <div className="space-y-4">
+            {upcomingHolidays.map((holiday, i) => (
+              <div key={i} className="p-4 border-l-4 border-purple-500 bg-purple-50 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">{holiday.name}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{holiday.date}</p>
+                    <span className="inline-block mt-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                      {holiday.type}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">{holiday.daysAway}</p>
+                    <p className="text-xs text-gray-500">days away</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+              <Calendar size={16} />
+              Schedule Impact
+            </h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• 3 classes affected by National Day</li>
+              <li>• 48 classes rescheduled for mid-semester break</li>
+              <li>• 12 makeup classes scheduled</li>
+            </ul>
+          </div>
+
+          <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+            <h4 className="font-semibold text-green-900 mb-2">Quick Stats</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-green-700">Teaching Days Left</p>
+                <p className="text-2xl font-bold text-green-900">42</p>
+              </div>
+              <div>
+                <p className="text-green-700">Exam Period</p>
+                <p className="text-2xl font-bold text-green-900">Dec 15</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mt-3">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+              <Plus className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Add Class</p>
+            <p className="text-xs text-gray-500 mt-1">Schedule new class</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-left">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+              <Search className="w-5 h-5 text-green-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Find Room</p>
+            <p className="text-xs text-gray-500 mt-1">Check availability</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Analytics</p>
+            <p className="text-xs text-gray-500 mt-1">View detailed reports</p>
+          </button>
+          <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all text-left">
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+              <Settings className="w-5 h-5 text-orange-600" />
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">Settings</p>
+            <p className="text-xs text-gray-500 mt-1">Configure schedules</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 const AlumniOverview = () => {
@@ -9269,557 +9818,7 @@ const OneStopService = () => {
 };
 
 
-const GradeManagement = () => {
-  const [activeView, setActiveView] = useState('overview');
-  const [selectedFaculty, setSelectedFaculty] = useState('all');
-  const [selectedProgram, setSelectedProgram] = useState('all');
-  const [selectedSemester, setSelectedSemester] = useState('fall-2024');
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [editMode, setEditMode] = useState(false);
 
-  const faculties = [
-    { code: 'FOM', name: 'Faculty of Management' },
-    { code: 'FOMAC', name: 'Faculty of Marketing and Communication' },
-    { code: 'FONS', name: 'Faculty of Nontraditional Security' }
-  ];
-
-  const programs = {
-    bachelor: [
-      { code: 'MET', name: 'Management Economics and Technology', faculty: 'FOM' },
-      { code: 'MAC', name: 'Marketing and Communication', faculty: 'FOMAC' },
-      { code: 'HAT', name: 'Hospitality and Tourism', faculty: 'FOM' },
-      { code: 'MAS', name: 'Management and Sustainability', faculty: 'FOM' },
-      { code: 'BNS', name: 'Business and Nontraditional Security', faculty: 'FONS' },
-      { code: 'HAS', name: 'Health Administration and Security', faculty: 'FONS' }
-    ],
-    master: [
-      { code: 'HSB-MBA', name: 'Master of Business Administration', faculty: 'FOM' },
-      { code: 'MOTE', name: 'Master of Technology and Entrepreneurship', faculty: 'FONS' },
-      { code: 'MNS', name: 'Master of Nontraditional Security', faculty: 'FONS' }
-    ],
-    phd: [
-      { code: 'DMS', name: 'Doctor of Management Science', faculty: 'FOM' }
-    ]
-  };
-
-  const bachelorProgramStats = [
-    { code: 'MET', students: 380, passRate: 64.2, stdDev: 0.52 },
-    { code: 'MAC', students: 320, passRate: 83.5, stdDev: 0.58 },
-    { code: 'HAT', students: 290, passRate: 82.8, stdDev: 0.61 },
-    { code: 'MAS', students: 310, passRate: 75.1, stdDev: 0.48 },
-    { code: 'BNS', students: 340, passRate: 86.3, stdDev: 0.45 },
-    { code: 'HAS', students: 210, passRate: 84.8, stdDev: 0.50 }
-  ];
-
-  const facultyMetrics = [
-    { code: 'FOM', name: 'Faculty of Management', timelyDelivery: 89.5, stdDev: 0.54, skewness: -0.32, kurtosis: 2.85 },
-    { code: 'FOMAC', name: 'Faculty of Marketing and Communication', timelyDelivery: 92.3, stdDev: 0.58, skewness: -0.28, kurtosis: 2.92 },
-    { code: 'FONS', name: 'Faculty of Nontraditional Security', timelyDelivery: 94.1, stdDev: 0.47, skewness: -0.35, kurtosis: 3.12 }
-  ];
-
-  const courseData = [
-    { id: 'HSB1001', name: 'Quản trị học / Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Nguyen Van A', students: 45, avgGrade: 3.45, passRate: 95.6 },
-    { id: 'HSB1002', name: 'Kinh tế học / Economics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Tran Thi B', students: 52, avgGrade: 3.28, passRate: 92.3 },
-    { id: 'HSB1003', name: 'Phân tích dữ liệu / Data Analysis', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Le Van C', students: 38, avgGrade: 3.52, passRate: 97.4 },
-    { id: 'HSB1004', name: 'Luật Kinh doanh và đạo đức kinh doanh / Business Law and Ethics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Pham Thi D', students: 48, avgGrade: 3.38, passRate: 93.8 },
-    { id: 'HSB1005', name: 'Nguyên lý kế toán / Principle of Accounting', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Hoang Van E', students: 44, avgGrade: 3.15, passRate: 90.9 },
-    { id: 'HSB1006', name: 'Quản trị tài chính doanh nghiệp / Management of Corporate Finance', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Vo Thi F', students: 42, avgGrade: 3.42, passRate: 94.5 },
-    { id: 'HSB2014', name: 'Quản trị công ty / Corporate Governance', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Bui Van G', students: 36, avgGrade: 3.58, passRate: 96.2 },
-    { id: 'HSB1033', name: 'Quản trị nguồn nhân lực và nhân tài / Management of Human Resource & Talents', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Dinh Thi H', students: 50, avgGrade: 3.35, passRate: 93.5 },
-    { id: 'HSB2001E', name: 'Tư duy chiến lược và quản trị chiến lược / Strategic Thinking and Strategic Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Ly Van I', students: 40, avgGrade: 3.48, passRate: 95.0 },
-    { id: 'HSB2003E', name: 'Kinh doanh toàn cầu / Global Business', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Mai Van J', students: 35, avgGrade: 3.62, passRate: 97.1 },
-    { id: 'HSB2004E', name: 'Quản trị thương hiệu và tài sản trí tuệ / Management of Branding and Intellectual Property', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Dang Thi K', students: 38, avgGrade: 3.55, passRate: 96.8 },
-    { id: 'HSB3119', name: 'Tổng quan về Khoa học dữ liệu / Introduction to Data Science', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Cao Van L', students: 32, avgGrade: 3.68, passRate: 98.1 },
-    { id: 'HSB2023', name: 'Toán ứng dụng / Applied Mathematics', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Phan Thi M', students: 46, avgGrade: 3.22, passRate: 91.3 },
-    { id: 'HSB2011', name: 'Nguyên lý Marketing và truyền thông / Principles of Marketing & Communication', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Truong Van N', students: 55, avgGrade: 3.45, passRate: 94.5 },
-    { id: 'MNS401', name: 'Cybersecurity Management', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Ta Van Canh', students: 38, avgGrade: 3.52, passRate: 97.4 },
-    { id: 'MBA501', name: 'Corporate Strategy', program: 'HSB-MBA', faculty: 'FOM', level: 'Master', instructor: 'Dr. Le Van P', students: 28, avgGrade: 3.68, passRate: 100 },
-    { id: 'MNS601', name: 'Advanced Security Analysis', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Tran Thi Q', students: 22, avgGrade: 3.71, passRate: 100 }
-  ];
-
-  const studentGrades = [
-    { studentId: '25080001', name: 'Do Thi Hoa', midterm: 8.2, final: 8.7, assignments: 8.5, participation: 9.0, overall: 8.60, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080002', name: 'Nguyen Van Phuc', midterm: 7.0, final: 7.5, assignments: 7.8, participation: 7.6, overall: 7.48, letterGrade: 'C', gpa: 2.5 },
-{ studentId: '25080003', name: 'Tran Thi Lan', midterm: 9.3, final: 9.0, assignments: 9.1, participation: 9.2, overall: 9.15, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080004', name: 'Bui Van Tien', midterm: 6.8, final: 6.5, assignments: 6.9, participation: 7.0, overall: 6.80, letterGrade: 'C', gpa: 2.0 },
-{ studentId: '25080005', name: 'Le Thi Mai', midterm: 8.5, final: 8.3, assignments: 8.4, participation: 8.6, overall: 8.45, letterGrade: 'B', gpa: 3.5 },
-{ studentId: '25080006', name: 'Pham Van Kien', midterm: 7.2, final: 7.0, assignments: 7.4, participation: 7.5, overall: 7.28, letterGrade: 'C', gpa: 2.5 },
-{ studentId: '25080007', name: 'Hoang Thi Thu', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.5, overall: 9.13, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080008', name: 'Nguyen Van Minh', midterm: 8.0, final: 8.2, assignments: 8.1, participation: 8.4, overall: 8.18, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080009', name: 'Tran Thi Quynh', midterm: 7.5, final: 8.0, assignments: 7.8, participation: 8.1, overall: 7.85, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080010', name: 'Le Van Hung', midterm: 6.2, final: 6.5, assignments: 6.8, participation: 6.9, overall: 6.60, letterGrade: 'D', gpa: 2.0 },
-{ studentId: '25080011', name: 'Nguyen Thi Huong', midterm: 8.7, final: 9.0, assignments: 8.9, participation: 9.2, overall: 8.95, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080012', name: 'Tran Van Hoang', midterm: 7.3, final: 7.0, assignments: 7.2, participation: 7.5, overall: 7.25, letterGrade: 'C', gpa: 2.5 },
-{ studentId: '25080013', name: 'Pham Thi Lien', midterm: 9.2, final: 9.3, assignments: 9.0, participation: 9.4, overall: 9.23, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080014', name: 'Bui Van Nam', midterm: 6.9, final: 7.2, assignments: 7.0, participation: 6.8, overall: 6.98, letterGrade: 'C', gpa: 2.0 },
-{ studentId: '25080015', name: 'Hoang Thi Yen', midterm: 8.4, final: 8.7, assignments: 8.6, participation: 8.8, overall: 8.63, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080016', name: 'Le Van Hai', midterm: 7.8, final: 8.0, assignments: 7.9, participation: 8.2, overall: 7.98, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080017', name: 'Nguyen Thi Thao', midterm: 6.5, final: 6.8, assignments: 6.7, participation: 7.0, overall: 6.75, letterGrade: 'D', gpa: 2.0 },
-{ studentId: '25080018', name: 'Tran Van Phong', midterm: 8.1, final: 8.3, assignments: 8.0, participation: 8.4, overall: 8.20, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080019', name: 'Pham Thi Van', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.1, overall: 9.03, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080020', name: 'Le Van Long', midterm: 7.0, final: 7.3, assignments: 7.2, participation: 7.1, overall: 7.15, letterGrade: 'C', gpa: 2.5 }
-
-  
-  
-  ];
-
-  const OverviewDashboard = () => (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-            <Users className="w-6 h-6 text-blue-600" />
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Total Students</p>
-          <p className="text-3xl font-bold text-gray-900">2,000</p>
-          <p className="text-xs text-green-600 mt-2">↑ 8.5% vs last year</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-            <Award className="w-6 h-6 text-green-600" />
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Average GPA</p>
-          <p className="text-3xl font-bold text-gray-900">2.88</p>
-          <p className="text-xs text-green-600 mt-2">↑ 0.12 vs last semester</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-            <TrendingUp className="w-6 h-6 text-purple-600" />
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Pass Rate</p>
-          <p className="text-3xl font-bold text-gray-900">84.8%</p>
-          <p className="text-xs text-green-600 mt-2">↑ 1.2% vs last semester</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-            <AlertCircle className="w-6 h-6 text-orange-600" />
-          </div>
-          <p className="text-sm text-gray-500 mb-1">At-Risk Students</p>
-          <p className="text-3xl font-bold text-gray-900">86</p>
-          <p className="text-xs text-green-600 mt-2">↓ 12 vs last semester</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance by Level</h3>
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Bachelor Programs</span>
-                <span className="text-lg font-bold text-blue-600">1850</span>
-              </div>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p>Avg GPA: 3.35</p>
-                <p>Pass Rate: 64.2%</p>
-              </div>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Master Programs</span>
-                <span className="text-lg font-bold text-purple-600">120</span>
-              </div>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p>Avg GPA: 3.68</p>
-                <p>Pass Rate: 78.5%</p>
-              </div>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">PhD Program</span>
-                <span className="text-lg font-bold text-green-600">30</span>
-              </div>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p>Avg GPA: 3.82</p>
-                <p>Pass Rate: 90%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Faculty Metrics</h3>
-          <div className="space-y-4">
-            {facultyMetrics.map((faculty, i) => (
-              <div key={i} className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="font-semibold text-gray-900">{faculty.code}</p>
-                    <p className="text-xs text-gray-600 mt-1">{faculty.name}</p>
-                  </div>
-                  <span className="text-sm font-bold text-blue-600">{faculty.timelyDelivery}%</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="text-xs">
-                    <span className="text-gray-600">Timely Delivery:</span>
-                    <span className="font-semibold text-gray-900 ml-1">{faculty.timelyDelivery}%</span>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-gray-600">S.D:</span>
-                    <span className="font-semibold text-gray-900 ml-1">{faculty.stdDev}</span>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-gray-600">Skewness:</span>
-                    <span className="font-semibold text-gray-900 ml-1">{faculty.skewness}</span>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-gray-600">Kurtosis:</span>
-                    <span className="font-semibold text-gray-900 ml-1">{faculty.kurtosis}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Bachelor Programs</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {bachelorProgramStats.map((prog, i) => (
-              <div key={i} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-xl font-bold text-gray-900">{prog.code}</h4>
-                  <span className="text-sm text-gray-500">{prog.students}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-600 mb-1">Pass Rate</p>
-                    <p className="text-xl font-bold text-green-600">{prog.passRate}%</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600 mb-1">S.D Score</p>
-                    <p className="text-xl font-bold text-blue-600">{prog.stdDev}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const CourseAnalysis = () => (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <select 
-                value={selectedFaculty}
-                onChange={(e) => setSelectedFaculty(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All Faculties</option>
-                {faculties.map(f => (
-                  <option key={f.code} value={f.code}>{f.code} - {f.name}</option>
-                ))}
-              </select>
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              <Download size={18} />
-              Export
-            </button>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Code</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Name</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Program</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Instructor</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Students</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Avg Grade</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {courseData.map((course) => (
-                <tr key={course.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <span className="font-semibold text-blue-600">{course.id}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-sm text-gray-900">{course.name}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-gray-900">{course.program}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      course.faculty === 'FOM' ? 'bg-blue-100 text-blue-700' :
-                      course.faculty === 'FOMAC' ? 'bg-purple-100 text-purple-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {course.faculty}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      course.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
-                      course.level === 'Master' ? 'bg-purple-100 text-purple-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {course.level}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{course.instructor}</td>
-                  <td className="px-6 py-4 text-sm font-semibold">{course.students}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      course.avgGrade >= 3.5 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {course.avgGrade}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      course.passRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {course.passRate}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button 
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setActiveView('grading');
-                      }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Manage Grades
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const GradeInsertion = () => {
-    if (!selectedCourse) {
-      return (
-        <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
-          <div className="max-w-md mx-auto">
-            <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Course Selected</h3>
-            <p className="text-gray-600 mb-6">Please select a course from the Course Analysis tab.</p>
-            <button 
-              onClick={() => setActiveView('courses')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Go to Course Analysis
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">{selectedCourse.id} - {selectedCourse.name}</h2>
-                <div className="flex gap-4 mt-2 text-sm text-gray-600">
-                  <span>Program: {selectedCourse.program}</span>
-                  <span>•</span>
-                  <span>Instructor: {selectedCourse.instructor}</span>
-                </div>
-              </div>
-              <button 
-                onClick={() => setSelectedCourse(null)}
-                className="p-2 hover:bg-white rounded-lg"
-              >
-                <X size={20} />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Student Grades</h3>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setEditMode(!editMode)}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  {editMode ? <X size={18} /> : <Edit size={18} />}
-                  {editMode ? 'Cancel' : 'Edit Grades'}
-                </button>
-                {editMode && (
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <Save size={18} />
-                    Save Changes
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Student ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Midterm (30%)</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Final (40%)</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Assignments (20%)</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Participation (10%)</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Overall</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Letter Grade</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">GPA</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {studentGrades.map((student) => (
-                    <tr key={student.studentId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-blue-600">{student.studentId}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{student.name}</td>
-                      <td className="px-4 py-3 text-center">
-                        {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.midterm}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                            step="0.1"
-                            min="0"
-                            max="10"
-                          />
-                        ) : (
-                          <span className="text-sm font-semibold">{student.midterm}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.final}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                            step="0.1"
-                            min="0"
-                            max="10"
-                          />
-                        ) : (
-                          <span className="text-sm font-semibold">{student.final}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.assignments}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                            step="0.1"
-                            min="0"
-                            max="10"
-                          />
-                        ) : (
-                          <span className="text-sm font-semibold">{student.assignments}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.participation}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                            step="0.1"
-                            min="0"
-                            max="10"
-                          />
-                        ) : (
-                          <span className="text-sm font-semibold">{student.participation}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="text-sm font-bold text-gray-900">{student.overall}</span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          student.letterGrade === 'A' ? 'bg-green-100 text-green-700' :
-                          student.letterGrade === 'B' ? 'bg-blue-100 text-blue-700' :
-                          student.letterGrade === 'C' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {student.letterGrade}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="text-sm font-bold text-gray-900">{student.gpa}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="mx-auto w-full max-w space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Grade Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Monitor and manage student performance</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="border-b border-gray-200">
-            <div className="flex gap-1 p-2">
-              <button
-                onClick={() => { setActiveView('overview'); setSelectedCourse(null); }}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                  activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => { setActiveView('courses'); setSelectedCourse(null); }}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                  activeView === 'courses' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-                }`}
-              >
-                Course Analysis
-              </button>
-              <button
-                onClick={() => setActiveView('grading')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                  activeView === 'grading' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-                }`}
-              >
-                Grade Insertion
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {activeView === 'overview' && <OverviewDashboard />}
-        {activeView === 'courses' && <CourseAnalysis />}
-        {activeView === 'grading' && <GradeInsertion />}
-      </div>
-    </div>
-  );
-};
 
 {/*HR Profile start */}
 const HRProfileManagement = () => {
