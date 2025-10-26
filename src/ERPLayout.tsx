@@ -204,7 +204,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -259,10 +259,10 @@ const AdminDashboard = () => {
       </div>
 
       {/* KPI Performance & Publications/Patents */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mb-3">
         {/* KPI Performance */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 col-span-2">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">KPI Performance</h2>
             <select 
               value={selectedPeriod}
@@ -275,10 +275,10 @@ const AdminDashboard = () => {
             </select>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Student Satisfaction */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Student Satisfaction</span>
                 <span className="text-sm font-bold text-gray-900">92%</span>
               </div>
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
 
             {/* Graduation Rate */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Graduation Rate</span>
                 <span className="text-sm font-bold text-gray-900">88%</span>
               </div>
@@ -300,7 +300,7 @@ const AdminDashboard = () => {
 
             {/* Employment Rate */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Employment Rate (6 months)</span>
                 <span className="text-sm font-bold text-gray-900">85%</span>
               </div>
@@ -311,7 +311,7 @@ const AdminDashboard = () => {
 
             {/* Research Output */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Research Output Target</span>
                 <span className="text-sm font-bold text-gray-900">96%</span>
               </div>
@@ -322,7 +322,7 @@ const AdminDashboard = () => {
 
             {/* Faculty Retention */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Faculty Retention</span>
                 <span className="text-sm font-bold text-gray-900">94%</span>
               </div>
@@ -333,7 +333,7 @@ const AdminDashboard = () => {
 
             {/* Budget Utilization */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Budget Utilization</span>
                 <span className="text-sm font-bold text-gray-900">78%</span>
               </div>
@@ -341,12 +341,21 @@ const AdminDashboard = () => {
                 <div className="bg-gradient-to-r from-pink-400 to-pink-500 h-3 rounded-full" style={{ width: '78%' }}></div>
               </div>
             </div>
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-gray-700">Research Investment</span>
+                <span className="text-sm font-bold text-gray-900">68%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-gradient-to-r from-purple-400 to-purple-500 h-3 rounded-full" style={{ width: '68%' }}></div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Publications & Patents */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-3">
+          <div className="flex items-center w-full justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Publications & Patents</h2>
             <select 
               value={selectedEarningsPeriod}
@@ -364,7 +373,7 @@ const AdminDashboard = () => {
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Journal Articles</span>
-                <span className="text-2xl font-bold text-blue-900">847</span>
+                <span className="text-2xl font-bold text-blue-900">84</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -376,7 +385,7 @@ const AdminDashboard = () => {
             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Conference Papers</span>
-                <span className="text-2xl font-bold text-purple-900">312</span>
+                <span className="text-2xl font-bold text-purple-900">31</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -388,7 +397,7 @@ const AdminDashboard = () => {
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Patents Filed</span>
-                <span className="text-2xl font-bold text-green-900">54</span>
+                <span className="text-2xl font-bold text-green-900">5</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -400,7 +409,7 @@ const AdminDashboard = () => {
             <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Patents Granted</span>
-                <span className="text-2xl font-bold text-orange-900">35</span>
+                <span className="text-2xl font-bold text-orange-900">3</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp className="w-3 h-3 text-green-600" />
@@ -412,14 +421,14 @@ const AdminDashboard = () => {
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Total Output</span>
-              <span className="text-xl font-bold text-blue-600">1,248</span>
+              <span className="text-2xl font-bold text-blue-600">124</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Important Events */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-3">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Important Events</h2>
           <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
@@ -442,7 +451,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Department Performance */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-3">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Department Performance</h2>
           <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
@@ -498,7 +507,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Faculty & Research Stats */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mb-3">
         {/* Faculty Statistics */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Faculty Statistics</h2>
@@ -2955,7 +2964,7 @@ const LibraryDashboard = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
           <p className="text-xs text-gray-500 mb-1">Total Collection</p>
           <p className="text-2xl font-bold text-gray-900">87,543</p>
@@ -3002,7 +3011,7 @@ const LibraryDashboard = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-900">Textbooks</h3>
@@ -6495,7 +6504,7 @@ const EventsDashboard = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4 mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -6542,7 +6551,7 @@ const EventsDashboard = () => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-6 border-b border-gray-100 mt-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -6599,7 +6608,7 @@ const EventsDashboard = () => {
           </div>
 
           {viewMode === 'grid' ? (
-            <div className="p-6 grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
               {filteredEvents.map((event) => (
                 <div key={event.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                      onClick={() => setSelectedEvent(event)}>
@@ -6937,7 +6946,7 @@ const TimetableOverview = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -7020,7 +7029,7 @@ const TimetableOverview = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {/* Room Occupancy Chart */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-2">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Room Occupancy by Time Slot</h3>
@@ -7083,7 +7092,7 @@ const TimetableOverview = () => {
                     {building.rate}%
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-sm mb-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                   <div>
                     <p className="text-xs text-gray-500">Total</p>
                     <p className="font-bold text-gray-900">{building.total}</p>
@@ -7439,7 +7448,7 @@ const ClassOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -7485,7 +7494,7 @@ const ClassOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Classes by Faculty</h3>

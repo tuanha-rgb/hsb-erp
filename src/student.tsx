@@ -6,8 +6,8 @@ import * as QRCode from "qrcode";
 import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search, 
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
   CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
-FileQuestion, FileDown, PieChart, Filter, XCircle, Pencil, Users, FileText, Gem, Notebook,
-MessageSquare} 
+FileQuestion, FileDown, PieChart, Filter, XCircle, Pencil, Users, FileText, Gem, Notebook, Book, Building,
+Star, Send, MessageSquare} 
 from 'lucide-react';
 
 export default function Student() {
@@ -3351,7 +3351,7 @@ const Dashboard = () => (
   </div>
 </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-3 p-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-3">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
 
           <div className="flex items-center justify-between mb-4">
@@ -3399,14 +3399,14 @@ const Dashboard = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-1 xl:grid-cols-3 gap-3 p-3 ">
+        <div className="col-span-2 space-y-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold text-gray-900">Upcoming Activities & Events</h3>
               <button className="text-blue-600 text-sm font-medium hover:underline">View Calendar</button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {upcomingActivities.map(activity => (
                 <div key={activity.id} className={`border-l-4 rounded-lg p-4 transition-all hover:shadow-md ${
                   activity.urgent 
@@ -3528,7 +3528,7 @@ const Dashboard = () => (
   );
 
 const Profile = () => (
-    <div className="space-y-6 p-3">
+    <div className="space-y-3 p-3">
     {/* Profile hero (responsive) */}
 <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 sm:p-6 lg:p-8">
   {/* Top row: avatar + name/badges + actions */}
@@ -3613,9 +3613,9 @@ const Profile = () => (
   </div>
 </div>
 {/*profile info card*/}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         <div className="col-span-2 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-3">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Personal Information</h3>
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -3645,8 +3645,8 @@ const Profile = () => (
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Student Performance</h3>
               <div className="flex items-center gap-6">
                 <div className="text-right">
@@ -3685,8 +3685,8 @@ const Profile = () => (
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Additional Information</h3>
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-4">Party Activity</h4>
@@ -3718,33 +3718,31 @@ const Profile = () => (
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Status</h3>
-            <div className="space-y-4">
+        <div className="space-y-3">
+          <div className="bg-white rounded-xl border border-gray-200 p-3">
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Current Status</label>
+                <label className="text-m font-bold text-gray-600 mb-1 block">Current Status</label>
                 <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                   Internship
                 </span>
-              </div>
+              
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Enrollment Date</label>
+                <label className="text-sm text-gray-600 block mt-2">Enrollment Date</label>
                 <p className="text-gray-500 italic">Not specified</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Leave Start Date</label>
+                <label className="text-sm text-gray-600 mt-2 block">Leave Start Date</label>
                 <p className="text-gray-500 italic">Not applicable</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Leave End Date</label>
+                <label className="text-sm text-gray-600 mt-2 block">Leave End Date</label>
                 <p className="text-gray-500 italic">Not applicable</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 p-3">
+            <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-emerald-100 rounded-lg">
                 <Briefcase size={20} className="text-emerald-600" />
               </div>
@@ -3752,17 +3750,17 @@ const Profile = () => (
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Company</label>
+                <label className="text-sm text-gray-600 mt-2 block">Company</label>
                 <p className="text-gray-500 italic">Not assigned</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600 mb-1 block">Status</label>
+                <label className="text-sm text-gray-600 mt-2 block">Status</label>
                 <p className="text-gray-500 italic">Pending</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-3">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <Globe size={20} className="text-purple-600" />
@@ -3772,8 +3770,8 @@ const Profile = () => (
             <p className="text-gray-500 italic">No exchange program</p>
           </div>
 
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200 p-3">
+            <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-orange-100 rounded-lg">
                 <Award size={20} className="text-orange-600" />
               </div>
@@ -3789,16 +3787,16 @@ const Profile = () => (
 
 const Academic = () => (
     
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Sub Navigation Tabs */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Academic Progress and Transcripts</h2>
           <p className="text-gray-600 mt-1">Monitor your academic journey, view current courses, and access your official transcripts.</p>
         </div>
       </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <button
             onClick={() => setAcademicSubTab('courses')}
             className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -4189,6 +4187,454 @@ const Academic = () => (
     </div>
   );
 
+
+const StudentFeedbackPortal = () => {
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [filterCategory, setFilterCategory] = useState('all');
+
+  const availableSurveys = [
+    {
+      id: 1,
+      title: 'CS301 - Data Structures Course Feedback',
+      category: 'Course Feedback',
+      instructor: 'Dr. Nguyễn Văn A',
+      type: 'Course',
+      icon: Book,
+      deadline: '2024-11-30',
+      estimatedTime: '5-7 minutes',
+      status: 'Open',
+      responses: 23,
+      totalStudents: 45,
+      description: 'Share your experience with the Data Structures and Algorithms course. Your feedback helps us improve teaching methods and course content.',
+      questions: [
+        'How would you rate the overall quality of this course?',
+        'The instructor explained concepts clearly',
+        'Course materials were helpful and relevant',
+        'Assignments were appropriate for the learning objectives',
+        'What aspects of the course did you find most valuable?',
+        'What suggestions do you have for improving this course?'
+      ]
+    },
+    {
+      id: 2,
+      title: 'BUS202 - Strategic Management Evaluation',
+      category: 'Course Feedback',
+      instructor: 'Prof. Trần Thị B',
+      type: 'Course',
+      icon: Book,
+      deadline: '2024-11-28',
+      estimatedTime: '5-7 minutes',
+      status: 'Open',
+      responses: 31,
+      totalStudents: 52,
+      description: 'Provide feedback on the Strategic Management course to help enhance the learning experience for future students.',
+      questions: [
+        'Rate the overall course quality',
+        'Instructor effectiveness in teaching',
+        'Relevance of case studies and examples',
+        'Quality of course materials',
+        'Most valuable learning outcomes',
+        'Suggestions for improvement'
+      ]
+    },
+    {
+      id: 3,
+      title: 'Fall 2024 Program Satisfaction Survey',
+      category: 'Program Feedback',
+      type: 'Program',
+      icon: Users,
+      deadline: '2024-12-15',
+      estimatedTime: '10-15 minutes',
+      status: 'Open',
+      responses: 156,
+      totalStudents: 320,
+      description: 'Help us understand your overall experience with the Management of Entrepreneurship and Technology program. Your input shapes the future of our curriculum.',
+      questions: [
+        'Overall satisfaction with the program',
+        'Quality of courses in your major',
+        'Program structure and flexibility',
+        'Support from academic advisors',
+        'Career preparation and practical skills',
+        'Campus resources and facilities',
+        'What has been your best experience in the program?',
+        'What areas need improvement?',
+        'Would you recommend this program to others?'
+      ]
+    },
+    {
+      id: 4,
+      title: 'Career Services & Employability Feedback',
+      category: 'Employability',
+      type: 'Services',
+      icon: Briefcase,
+      deadline: '2024-12-10',
+      estimatedTime: '8-10 minutes',
+      status: 'Open',
+      responses: 89,
+      totalStudents: 280,
+      description: 'Share your experience with career counseling, job placement services, and internship support to help us better prepare students for their careers.',
+      questions: [
+        'Quality of career counseling services',
+        'Usefulness of resume/CV workshops',
+        'Interview preparation support',
+        'Job/internship placement assistance',
+        'Industry connections and networking events',
+        'Skills development programs',
+        'How well has the program prepared you for employment?',
+        'Additional services you would like to see'
+      ]
+    },
+    {
+      id: 5,
+      title: 'Library & Learning Resources Survey',
+      category: 'Services Feedback',
+      type: 'Services',
+      icon: Building,
+      deadline: '2024-12-05',
+      estimatedTime: '5 minutes',
+      status: 'Open',
+      responses: 203,
+      totalStudents: 450,
+      description: 'Tell us about your experience using library services, study spaces, and online resources.',
+      questions: [
+        'Library facilities and study spaces',
+        'Availability of books and resources',
+        'Online database access',
+        'Library staff helpfulness',
+        'Operating hours convenience',
+        'Suggestions for new resources or improvements'
+      ]
+    },
+    {
+      id: 6,
+      title: 'Student Support Services Evaluation',
+      category: 'Services Feedback',
+      type: 'Services',
+      icon: Users,
+      deadline: '2024-12-08',
+      estimatedTime: '6-8 minutes',
+      status: 'Open',
+      responses: 142,
+      totalStudents: 380,
+      description: 'Evaluate the quality of student support services including academic advising, counseling, and student affairs.',
+      questions: [
+        'Academic advising quality',
+        'Student counseling services',
+        'Financial aid support',
+        'International student services',
+        'Extracurricular activities',
+        'Overall student life experience',
+        'What support services have been most helpful?',
+        'What additional support would you like?'
+      ]
+    },
+    {
+      id: 7,
+      title: 'Mid-Semester Course Check-in',
+      category: 'Course Feedback',
+      instructor: 'Various',
+      type: 'Course',
+      icon: Book,
+      deadline: '2024-11-15',
+      estimatedTime: '3-4 minutes',
+      status: 'Completed',
+      responses: 45,
+      totalStudents: 45,
+      description: 'Quick feedback on your current courses to help instructors make real-time improvements.',
+      questions: [
+        'How is the course pace?',
+        'Are learning objectives clear?',
+        'Quality of instruction so far',
+        'Any immediate concerns or suggestions?'
+      ]
+    },
+    {
+      id: 8,
+      title: 'Campus Facilities & Infrastructure',
+      category: 'Services Feedback',
+      type: 'Services',
+      icon: Building,
+      deadline: '2024-12-20',
+      estimatedTime: '5-7 minutes',
+      status: 'Open',
+      responses: 187,
+      totalStudents: 500,
+      description: 'Share your feedback on campus facilities including classrooms, labs, dining, and recreational spaces.',
+      questions: [
+        'Classroom facilities quality',
+        'Computer labs and equipment',
+        'Cafeteria and dining options',
+        'Sports and recreation facilities',
+        'Campus cleanliness and maintenance',
+        'Accessibility for all students',
+        'Suggestions for facility improvements'
+      ]
+    }
+  ];
+
+  const filteredSurveys = filterCategory === 'all' 
+    ? availableSurveys 
+    : availableSurveys.filter(survey => survey.category === filterCategory);
+
+  const openSurveys = availableSurveys.filter(s => s.status === 'Open').length;
+  const completedSurveys = availableSurveys.filter(s => s.status === 'Completed').length;
+
+  const getStatusColor = (status) => {
+    if (status === 'Open') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    if (status === 'Completed') return 'bg-gray-100 text-gray-700 border-gray-200';
+    return 'bg-blue-100 text-blue-700 border-blue-200';
+  };
+
+  const getCategoryColor = (category) => {
+    switch(category) {
+      case 'Course Feedback': return 'bg-blue-100 text-blue-700';
+      case 'Program Feedback': return 'bg-purple-100 text-purple-700';
+      case 'Employability': return 'bg-orange-100 text-orange-700';
+      case 'Services Feedback': return 'bg-teal-100 text-teal-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const categories = ['Course Feedback', 'Program Feedback', 'Employability', 'Services Feedback'];
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3 ">
+      
+
+      <div className="max-w mx-auto ">
+        <div className="space-y-3">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                
+                <span className="text-sm font-semibold text-gray-600">Open Surveys</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{openSurveys}</p>
+              <p className="text-sm text-emerald-600 font-medium">Available to complete</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                
+                <span className="text-sm font-semibold text-gray-600">Completed</span>
+              </div>
+              <p className="text-4xl font-bold text-gray-900 mb-1">{completedSurveys}</p>
+              <p className="text-sm text-gray-500">Surveys submitted</p>
+            </div>
+
+            
+          </div>
+
+          {/* Filters and Search */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm font-semibold text-gray-600">Category:</span>
+                <button
+                  onClick={() => setFilterCategory('all')}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                    filterCategory === 'all'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  All ({availableSurveys.length})
+                </button>
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilterCategory(cat)}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      filterCategory === cat
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat} ({availableSurveys.filter(s => s.category === cat).length})
+                  </button>
+                ))}
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search surveys..."
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Surveys Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
+            {filteredSurveys.map(survey => (
+              <div
+                key={survey.id}
+                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all hover:border-indigo-300"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="p-3 bg-indigo-100 rounded-xl">
+                    <survey.icon className="text-indigo-600" size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-bold text-lg text-gray-900 leading-tight">{survey.title}</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(survey.status)}`}>
+                        {survey.status}
+                      </span>
+                    </div>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(survey.category)}`}>
+                      {survey.category}
+                    </span>
+                  </div>
+                </div>
+
+                {survey.instructor && (
+                  <p className="text-sm text-gray-600 mb-3">
+                    <span className="font-medium">Instructor:</span> {survey.instructor}
+                  </p>
+                )}
+
+                <p className="text-sm text-gray-700 mb-4 line-clamp-2">{survey.description}</p>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar size={16} className="text-gray-400" />
+                    <span>Deadline: <strong>{survey.deadline}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock size={16} className="text-gray-400" />
+                    <span>Estimated time: <strong>{survey.estimatedTime}</strong></span>
+                  </div>
+                  {survey.status === 'Open' && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                         
+                     </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedSurvey(survey);
+                      setShowSurveyModal(true);
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    <FileText size={16} />
+                    View Details
+                  </button>
+                  {survey.status === 'Open' && (
+                    <button className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                      <ChevronRight size={16} />
+                      Start Survey
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Survey Detail Modal */}
+          {showSurveyModal && selectedSurvey && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                        <selectedSurvey.icon size={32} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h2 className="text-2xl font-bold">{selectedSurvey.title}</h2>
+                          <span className={`px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full border border-white/30`}>
+                            {selectedSurvey.status}
+                          </span>
+                        </div>
+                        <p className="text-indigo-100">{selectedSurvey.category}</p>
+                        {selectedSurvey.instructor && (
+                          <p className="text-indigo-200 text-sm mt-1">Instructor: {selectedSurvey.instructor}</p>
+                        )}
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowSurveyModal(false)}
+                      className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                      <span className="text-2xl">×</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-250px)]">
+                  {/* Survey Info */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">About This Survey</h3>
+                    <p className="text-gray-700 leading-relaxed">{selectedSurvey.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-sm text-gray-600 mb-1">Deadline</p>
+                      <p className="text-lg font-bold text-gray-900">{selectedSurvey.deadline}</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-sm text-gray-600 mb-1">Estimated Time</p>
+                      <p className="text-lg font-bold text-gray-900">{selectedSurvey.estimatedTime}</p>
+                    </div>
+                  </div>
+
+                  {/* Questions Preview */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Survey Questions ({selectedSurvey.questions.length})</h3>
+                    <div className="space-y-2">
+                      {selectedSurvey.questions.map((question, idx) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-bold">
+                            {idx + 1}
+                          </span>
+                          <p className="text-sm text-gray-700">{question}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {selectedSurvey.status === 'Open' && (
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-900">
+                        <strong>Note:</strong> Your responses are anonymous and will help improve the quality of education and services at HSB.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                  <div className="flex gap-3 justify-end">
+                    <button 
+                      onClick={() => setShowSurveyModal(false)}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    >
+                      Close
+                    </button>
+                    {selectedSurvey.status === 'Open' && (
+                      <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2">
+                        <MessageSquare size={20} />
+                        Start Survey
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}  
 
 const Calendars = () => (
     <div className="space-y-6">
@@ -5173,9 +5619,6 @@ const OneStop = () => (
     </div>
   </div>
 );
-
-
-
 
 
 const Documents = () => {
@@ -6359,6 +6802,7 @@ const ScholarshipManagement = () => {
 };
 
 
+
 {/*Student Card*/}
 const Matriculation = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
@@ -6566,6 +7010,7 @@ return (
         { id: 'dashboard', icon: Home, label: 'Dashboard' },
         { id: 'profile', icon: User, label: 'My Profile' },
         { id: 'academic', icon: BookOpen, label: 'Academic' },
+        { id: 'feedback', icon: Send, label: 'Feedback' },
         { id: 'finance', icon: DollarSign, label: 'Finance' },
         { id: 'activities', icon: Activity, label: 'Activities' },
         { id: 'calendar', icon: Calendar, label: 'Calendar' },
@@ -6624,6 +7069,7 @@ return (
       {activePage === 'dashboard' && <Dashboard />}
       {activePage === 'profile' && <Profile />}
       {activePage === 'academic' && <Academic />}
+      {activePage === 'feedback' && <StudentFeedbackPortal />}
       {activePage === 'finance' && <Finance />}
       {activePage === 'activities' && <Activities />}
       {activePage === 'calendar' && <Calendars />}
