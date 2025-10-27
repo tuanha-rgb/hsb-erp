@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo} from "react";
 import Student from "./student";
 import Lecturer from "./lecturer";
-import './Project.css';
+import './project.css';
 import './index.css';  // <-- make sure this is here
 
 import type { LucideIcon } from "lucide-react";   // ✅ Import type for icons
