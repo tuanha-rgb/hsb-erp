@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo} from "react";
 import Student from "./student";
 import Lecturer from "./lecturer";
+import './Project.css';
 import './index.css';  // <-- make sure this is here
 
 import type { LucideIcon } from "lucide-react";   // ✅ Import type for icons
@@ -15,7 +16,8 @@ import {
   Search, Plus, ArrowRight, Bell, AlertTriangle, TrendingDown, 
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
-  Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus 
+  Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus, Folder,
+  Kanban, BarChart2, FolderOpen 
 } from "lucide-react";
 
 
@@ -596,485 +598,7 @@ const FacultyDashboard = () => (
     </div>
   );
 
-const DepartmentOverview = () => {
-  const [selectedDepartment, setSelectedDepartment] = useState('all');
-  const [timeRange, setTimeRange] = useState('month');
 
-  const departments = [
-    {
-      id: 'hr',
-      name: 'Human Resources',
-      head: 'Ms. Nguyen Thi Mai',
-      faculty: 12,
-      students: 0,
-      courses: 0,
-      budget: '$450,000',
-      utilization: 88,
-      satisfaction: 4.3,
-      research: 0,
-      status: 'good',
-      color: 'blue'
-    },
-    {
-      id: 'irs',
-      name: 'International Relation & Science',
-      head: 'Dr. Tran Van Minh',
-      faculty: 15,
-      students: 0,
-      courses: 0,
-      budget: '$520,000',
-      utilization: 85,
-      satisfaction: 4.4,
-      research: 45,
-      status: 'good',
-      color: 'green'
-    },
-    {
-      id: 'admin-it',
-      name: 'Admin & IT',
-      head: 'Mr. Le Duc Anh',
-      faculty: 18,
-      students: 0,
-      courses: 0,
-      budget: '$680,000',
-      utilization: 92,
-      satisfaction: 4.5,
-      research: 0,
-      status: 'excellent',
-      color: 'purple'
-    },
-    {
-      id: 'academic',
-      name: 'Academic Affairs',
-      head: 'Dr. Pham Thi Lan',
-      faculty: 22,
-      students: 0,
-      courses: 0,
-      budget: '$590,000',
-      utilization: 90,
-      satisfaction: 4.6,
-      research: 12,
-      status: 'excellent',
-      color: 'orange'
-    },
-    {
-      id: 'finance',
-      name: 'Finance & Accounting',
-      head: 'Mr. Hoang Van Tuan',
-      faculty: 16,
-      students: 0,
-      courses: 0,
-      budget: '$540,000',
-      utilization: 87,
-      satisfaction: 4.2,
-      research: 0,
-      status: 'good',
-      color: 'pink'
-    },
-    {
-      id: 'fom',
-      name: 'FOM',
-      head: 'Dr. Nguyen Van Hung',
-      faculty: 38,
-      students: 980,
-      courses: 42,
-      budget: '$1,120,000',
-      utilization: 89,
-      satisfaction: 4.4,
-      research: 98,
-      status: 'good',
-      color: 'blue'
-    },
-    {
-      id: 'fomac',
-      name: 'FOMAC',
-      head: 'Dr. Bui Thi Ngoc',
-      faculty: 35,
-      students: 850,
-      courses: 38,
-      budget: '$1,050,000',
-      utilization: 86,
-      satisfaction: 4.3,
-      research: 87,
-      status: 'good',
-      color: 'green'
-    },
-    {
-      id: 'fons',
-      name: 'FONS',
-      head: 'Dr. Le Van Cuong',
-      faculty: 45,
-      students: 1200,
-      courses: 48,
-      budget: '$1,280,000',
-      utilization: 93,
-      satisfaction: 4.7,
-      research: 156,
-      status: 'excellent',
-      color: 'purple'
-    },
-    {
-      id: 'ins',
-      name: 'INS',
-      head: 'Dr. Dao Van Hai',
-      faculty: 28,
-      students: 720,
-      courses: 32,
-      budget: '$890,000',
-      utilization: 84,
-      satisfaction: 4.2,
-      research: 72,
-      status: 'good',
-      color: 'orange'
-    },
-    {
-      id: 'itm',
-      name: 'ITM',
-      head: 'Dr. Tran Thi Hoa',
-      faculty: 32,
-      students: 820,
-      courses: 36,
-      budget: '$980,000',
-      utilization: 88,
-      satisfaction: 4.5,
-      research: 94,
-      status: 'good',
-      color: 'pink'
-    },
-    {
-      id: 'cei',
-      name: 'CEI',
-      head: 'Dr. Pham Van Long',
-      faculty: 25,
-      students: 640,
-      courses: 28,
-      budget: '$820,000',
-      utilization: 82,
-      satisfaction: 4.1,
-      research: 58,
-      status: 'good',
-      color: 'blue'
-    }
-  ];
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'excellent': return 'bg-green-100 text-green-700 border-green-300';
-      case 'good': return 'bg-blue-100 text-blue-700 border-blue-300';
-      case 'warning': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-      case 'critical': return 'bg-red-100 text-red-700 border-red-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
-    }
-  };
-
-  const getDepartmentColor = (color) => {
-    switch(color) {
-      case 'blue': return 'from-blue-400 to-blue-600';
-      case 'green': return 'from-green-400 to-green-600';
-      case 'purple': return 'from-purple-400 to-purple-600';
-      case 'orange': return 'from-orange-400 to-orange-600';
-      case 'pink': return 'from-pink-400 to-pink-600';
-      default: return 'from-gray-400 to-gray-600';
-    }
-  };
-
-  const totalFaculty = departments.reduce((sum, dept) => sum + dept.faculty, 0);
-  const totalStudents = departments.reduce((sum, dept) => sum + dept.students, 0);
-  const totalCourses = departments.reduce((sum, dept) => sum + dept.courses, 0);
-  const avgSatisfaction = (departments.reduce((sum, dept) => sum + dept.satisfaction, 0) / departments.length).toFixed(1);
-
-  const filteredDepartments = selectedDepartment === 'all' 
-    ? departments 
-    : departments.filter(d => d.id === selectedDepartment);
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="max-w- mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Department Overview</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and performance metrics across all departments</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <select 
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="all">All Departments</option>
-              {departments.map(dept => (
-                <option key={dept.id} value={dept.id}>{dept.name}</option>
-              ))}
-            </select>
-            <select 
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="quarter">This Quarter</option>
-              <option value="year">This Year</option>
-            </select>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-              Export Report
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Building className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Total Departments</p>
-            <p className="text-3xl font-bold text-gray-900">11</p>
-            <p className="text-xs text-green-600 mt-2">All active</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Total Personnels</p>
-            <p className="text-3xl font-bold text-gray-900">120</p>
-            <p className="text-xs text-gray-600 mt-2">Faculty and staff</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Total Students</p>
-            <p className="text-3xl font-bold text-gray-900">2,600</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Full-time: 2,300</p>
-              <p className="text-xs text-gray-600">Part-time: 300</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mb-1">Avg Satisfaction</p>
-            <p className="text-3xl font-bold text-gray-900">{avgSatisfaction}<span className="text-lg text-gray-500">/5.0</span></p>
-            <p className="text-xs text-green-600 mt-2">↑ 0.3 vs last period</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Department Performance</h3>
-              <BarChart3 className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="space-y-4">
-              {departments.slice(0, 5).map((dept) => (
-                <div key={dept.id}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">{dept.name}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
-                      {dept.status}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
-                      style={{width: `${dept.utilization}%`}}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{dept.utilization}% utilization</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Key Metrics Overview</h3>
-              <span className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total Courses</span>
-                  <span className="text-2xl font-bold text-gray-900">{totalCourses}</span>
-                </div>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Research Projects</span>
-                  <span className="text-2xl font-bold text-gray-900">587</span>
-                </div>
-              </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Faculty-Student Ratio</span>
-                  <span className="text-2xl font-bold text-gray-900">1:{Math.round(totalStudents/totalFaculty)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Faculties and Centers</h3>
-              <Building className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="space-y-4">
-              {departments.filter(d => ['fom', 'fomac', 'fons', 'ins', 'itm'].includes(d.id)).map((dept) => (
-                <div key={dept.id}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">{dept.name}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
-                      {dept.status}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
-                      style={{width: `${dept.utilization}%`}}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{dept.utilization}% utilization</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900">Department Details</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department Head</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Faculty</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Students</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Courses</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Budget</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Research</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredDepartments.map((dept) => (
-                  <tr key={dept.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 bg-gradient-to-br ${getDepartmentColor(dept.color)} rounded-lg flex items-center justify-center`}>
-                          <Building className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{dept.name}</p>
-                          <p className="text-xs text-gray-500">{dept.utilization}% utilization</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-gray-900">{dept.head}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{dept.faculty}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{dept.students}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{dept.courses}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{dept.budget}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-semibold text-gray-900">{dept.research}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        <span className="text-sm font-semibold text-gray-900">{dept.satisfaction}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
-                        {dept.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-900 mb-6">Budget Distribution</h3>
-            <div className="space-y-4">
-              {departments.map((dept, i) => {
-                const budgetAmount = parseInt(dept.budget.replace(/[^0-9]/g, ''));
-                const maxBudget = 1300000;
-                const percentage = (budgetAmount / maxBudget) * 100;
-                return (
-                  <div key={i}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">{dept.name}</span>
-                      <span className="text-sm font-bold text-gray-900">{dept.budget}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
-                        style={{width: `${Math.min(percentage, 100)}%`}}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-900 mb-6">Research Output Comparison</h3>
-            <div className="space-y-4">
-              {departments.filter(d => ['fons', 'fom', 'fomac', 'ins'].includes(d.id)).map((dept, i) => {
-                const maxResearch = 160;
-                const percentage = (dept.research / maxResearch) * 100;
-                return (
-                  <div key={i}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">{dept.name}</span>
-                      <span className="text-sm font-bold text-gray-900">{dept.research}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className={`h-2.5 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
-                        style={{width: `${percentage}%`}}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const DepartmentDashboard = () => (
     <div className="space-y-6">
@@ -4590,8 +4114,6 @@ const CourseFeedback =() => {
 }
 
 
-
-
 const ClassOverview = () => {
   const [selectedSemester, setSelectedSemester] = useState('current');
   const [selectedFaculty, setSelectedFaculty] = useState('all');
@@ -5128,7 +4650,7 @@ const LecturersOverview = () => {
 
     return (
       <div className="min-h-screen bg-gray-50 p-3">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Lecturers Overview</h1>
             <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and insights on faculty performance and development</p>
@@ -5204,7 +4726,7 @@ const LecturersOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
           {categories.map((category) => (
             <div
               key={category.id}
@@ -5232,7 +4754,7 @@ const LecturersOverview = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mt-3">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Department Distribution</h3>
             <div className="space-y-4">
@@ -7795,7 +7317,7 @@ const ViewRankings = () => {
         </div>
 
         <div className="grid grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Users className="w-5 h-5 text-blue-600" />
@@ -7840,7 +7362,7 @@ const ViewRankings = () => {
           </div>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-lg">
           <div className="flex items-start gap-3">
             <Award className="w-6 h-6 text-yellow-600 mt-1" />
             <div className="flex-1">
@@ -7982,6 +7504,2015 @@ const ViewRankings = () => {
     </div>
   );
 };  
+
+const DepartmentOverview = () => {
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [timeRange, setTimeRange] = useState('month');
+
+  const departments = [
+    {
+      id: 'hr',
+      name: 'Human Resources',
+      head: 'Ms. Nguyen Thi Mai',
+      faculty: 12,
+      students: 0,
+      courses: 0,
+      budget: '$450,000',
+      utilization: 88,
+      satisfaction: 4.3,
+      research: 0,
+      status: 'good',
+      color: 'blue'
+    },
+    {
+      id: 'irs',
+      name: 'International Relation & Science',
+      head: 'Dr. Tran Van Minh',
+      faculty: 15,
+      students: 0,
+      courses: 0,
+      budget: '$520,000',
+      utilization: 85,
+      satisfaction: 4.4,
+      research: 45,
+      status: 'good',
+      color: 'green'
+    },
+    {
+      id: 'admin-it',
+      name: 'Admin & IT',
+      head: 'Mr. Le Duc Anh',
+      faculty: 18,
+      students: 0,
+      courses: 0,
+      budget: '$680,000',
+      utilization: 92,
+      satisfaction: 4.5,
+      research: 0,
+      status: 'excellent',
+      color: 'purple'
+    },
+    {
+      id: 'academic',
+      name: 'Academic Affairs',
+      head: 'Dr. Pham Thi Lan',
+      faculty: 22,
+      students: 0,
+      courses: 0,
+      budget: '$590,000',
+      utilization: 90,
+      satisfaction: 4.6,
+      research: 12,
+      status: 'excellent',
+      color: 'orange'
+    },
+    {
+      id: 'finance',
+      name: 'Finance & Accounting',
+      head: 'Mr. Hoang Van Tuan',
+      faculty: 16,
+      students: 0,
+      courses: 0,
+      budget: '$540,000',
+      utilization: 87,
+      satisfaction: 4.2,
+      research: 0,
+      status: 'good',
+      color: 'pink'
+    },
+    {
+      id: 'fom',
+      name: 'FOM',
+      head: 'Dr. Nguyen Van Hung',
+      faculty: 38,
+      students: 980,
+      courses: 42,
+      budget: '$1,120,000',
+      utilization: 89,
+      satisfaction: 4.4,
+      research: 98,
+      status: 'good',
+      color: 'blue'
+    },
+    {
+      id: 'fomac',
+      name: 'FOMAC',
+      head: 'Dr. Bui Thi Ngoc',
+      faculty: 35,
+      students: 850,
+      courses: 38,
+      budget: '$1,050,000',
+      utilization: 86,
+      satisfaction: 4.3,
+      research: 87,
+      status: 'good',
+      color: 'green'
+    },
+    {
+      id: 'fons',
+      name: 'FONS',
+      head: 'Dr. Le Van Cuong',
+      faculty: 45,
+      students: 1200,
+      courses: 48,
+      budget: '$1,280,000',
+      utilization: 93,
+      satisfaction: 4.7,
+      research: 156,
+      status: 'excellent',
+      color: 'purple'
+    },
+    {
+      id: 'ins',
+      name: 'INS',
+      head: 'Dr. Dao Van Hai',
+      faculty: 28,
+      students: 720,
+      courses: 32,
+      budget: '$890,000',
+      utilization: 84,
+      satisfaction: 4.2,
+      research: 72,
+      status: 'good',
+      color: 'orange'
+    },
+    {
+      id: 'itm',
+      name: 'ITM',
+      head: 'Dr. Tran Thi Hoa',
+      faculty: 32,
+      students: 820,
+      courses: 36,
+      budget: '$980,000',
+      utilization: 88,
+      satisfaction: 4.5,
+      research: 94,
+      status: 'good',
+      color: 'pink'
+    },
+    {
+      id: 'cei',
+      name: 'CEI',
+      head: 'Dr. Pham Van Long',
+      faculty: 25,
+      students: 640,
+      courses: 28,
+      budget: '$820,000',
+      utilization: 82,
+      satisfaction: 4.1,
+      research: 58,
+      status: 'good',
+      color: 'blue'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'excellent': return 'bg-green-100 text-green-700 border-green-300';
+      case 'good': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'warning': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+      case 'critical': return 'bg-red-100 text-red-700 border-red-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+    }
+  };
+
+  const getDepartmentColor = (color) => {
+    switch(color) {
+      case 'blue': return 'from-blue-400 to-blue-600';
+      case 'green': return 'from-green-400 to-green-600';
+      case 'purple': return 'from-purple-400 to-purple-600';
+      case 'orange': return 'from-orange-400 to-orange-600';
+      case 'pink': return 'from-pink-400 to-pink-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  const totalFaculty = departments.reduce((sum, dept) => sum + dept.faculty, 0);
+  const totalStudents = departments.reduce((sum, dept) => sum + dept.students, 0);
+  const totalCourses = departments.reduce((sum, dept) => sum + dept.courses, 0);
+  const avgSatisfaction = (departments.reduce((sum, dept) => sum + dept.satisfaction, 0) / departments.length).toFixed(1);
+
+  const filteredDepartments = selectedDepartment === 'all' 
+    ? departments 
+    : departments.filter(d => d.id === selectedDepartment);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w- mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Department Overview</h1>
+            <p className="text-sm text-gray-500 mt-1">Comprehensive analytics and performance metrics across all departments</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">All Departments</option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>{dept.name}</option>
+              ))}
+            </select>
+            <select 
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="quarter">This Quarter</option>
+              <option value="year">This Year</option>
+            </select>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Building className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Departments</p>
+            <p className="text-3xl font-bold text-gray-900">11</p>
+            <p className="text-xs text-green-600 mt-2">All active</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Personnels</p>
+            <p className="text-3xl font-bold text-gray-900">120</p>
+            <p className="text-xs text-gray-600 mt-2">Faculty and staff</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Total Students</p>
+            <p className="text-3xl font-bold text-gray-900">2,600</p>
+            <div className="mt-2 space-y-0.5">
+              <p className="text-xs text-gray-600">Full-time: 2,300</p>
+              <p className="text-xs text-gray-600">Part-time: 300</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Avg Satisfaction</p>
+            <p className="text-3xl font-bold text-gray-900">{avgSatisfaction}<span className="text-lg text-gray-500">/5.0</span></p>
+            <p className="text-xs text-green-600 mt-2">↑ 0.3 vs last period</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Department Performance</h3>
+              <BarChart3 className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {departments.slice(0, 5).map((dept) => (
+                <div key={dept.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{dept.name}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
+                      {dept.status}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                      style={{width: `${dept.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{dept.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Key Metrics Overview</h3>
+              <span className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Total Courses</span>
+                  <span className="text-2xl font-bold text-gray-900">{totalCourses}</span>
+                </div>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Research Projects</span>
+                  <span className="text-2xl font-bold text-gray-900">587</span>
+                </div>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Faculty-Student Ratio</span>
+                  <span className="text-2xl font-bold text-gray-900">1:{Math.round(totalStudents/totalFaculty)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Faculties and Centers</h3>
+              <Building className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="space-y-4">
+              {departments.filter(d => ['fom', 'fomac', 'fons', 'ins', 'itm'].includes(d.id)).map((dept) => (
+                <div key={dept.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{dept.name}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
+                      {dept.status}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                      style={{width: `${dept.utilization}%`}}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{dept.utilization}% utilization</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <h3 className="font-semibold text-gray-900">Department Details</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department Head</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Students</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Courses</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Budget</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Research</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Satisfaction</th>
+                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredDepartments.map((dept) => (
+                  <tr key={dept.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 bg-gradient-to-br ${getDepartmentColor(dept.color)} rounded-lg flex items-center justify-center`}>
+                          <Building className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{dept.name}</p>
+                          <p className="text-xs text-gray-500">{dept.utilization}% utilization</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <p className="text-sm text-gray-900">{dept.head}</p>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.faculty}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.students}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.courses}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.budget}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-sm font-semibold text-gray-900">{dept.research}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Award className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm font-semibold text-gray-900">{dept.satisfaction}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(dept.status)}`}>
+                        {dept.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Budget Distribution</h3>
+            <div className="space-y-4">
+              {departments.map((dept, i) => {
+                const budgetAmount = parseInt(dept.budget.replace(/[^0-9]/g, ''));
+                const maxBudget = 1300000;
+                const percentage = (budgetAmount / maxBudget) * 100;
+                return (
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">{dept.name}</span>
+                      <span className="text-sm font-bold text-gray-900">{dept.budget}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                        style={{width: `${Math.min(percentage, 100)}%`}}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 mb-6">Research Output Comparison</h3>
+            <div className="space-y-4">
+              {departments.filter(d => ['fons', 'fom', 'fomac', 'ins'].includes(d.id)).map((dept, i) => {
+                const maxResearch = 160;
+                const percentage = (dept.research / maxResearch) * 100;
+                return (
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">{dept.name}</span>
+                      <span className="text-sm font-bold text-gray-900">{dept.research}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className={`h-2.5 rounded-full bg-gradient-to-r ${getDepartmentColor(dept.color)}`}
+                        style={{width: `${percentage}%`}}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+{/*HR Profile start */}
+const HRProfileManagement = () => {
+  const [activeView, setActiveView] = useState('overview');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterPosition, setFilterPosition] = useState('all');
+  const [filterDepartment, setFilterDepartment] = useState('all');
+  const [filterContractStatus, setFilterContractStatus] = useState('all');
+  const [selectedStaff, setSelectedStaff] = useState(null);
+
+  const staffData = [
+    {
+      id: 'STF001',
+      name: 'Dr. Nguyen Van A',
+      position: 'Department Head',
+      type: 'Academic Staff',
+      department: 'Faculty of Nontraditional Security',
+      email: 'nguyenvana@university.edu.vn',
+      phone: '+84 24 1234 5678',
+      joinDate: '2015-03-15',
+      education: 'Ph.D. in International Relations',
+      specialization: 'Security Studies',
+      politicalTraining: {
+        completed: true,
+        level: 'Advanced',
+        completionDate: '2020-06-30',
+        certificate: 'Certificate No. PT-2020-456'
+      },
+      academicRank: 'Associate Professor',
+      publications: 45,
+      projects: 12,
+      teachingHours: 240,
+      status: 'Active',
+      eligibleForPromotion: true,
+      contract: {
+        type: 'Permanent',
+        startDate: '2015-03-15',
+        endDate: null,
+        salary: '$4,500/month',
+        benefits: ['Health Insurance', 'Pension Fund', 'Annual Leave: 24 days'],
+        status: 'Active',
+        lastRenewal: '2023-03-15',
+        nextReview: '2026-03-15'
+      }
+    },
+    {
+      id: 'STF002',
+      name: 'Prof. Tran Thi B',
+      position: 'Faculty Dean',
+      type: 'Academic Staff',
+      department: 'Faculty of Management',
+      email: 'tranthib@university.edu.vn',
+      phone: '+84 24 2234 5678',
+      joinDate: '2012-09-01',
+      education: 'Ph.D. in Business Administration',
+      specialization: 'Strategic Management',
+      politicalTraining: {
+        completed: true,
+        level: 'Advanced',
+        completionDate: '2019-12-15',
+        certificate: 'Certificate No. PT-2019-123'
+      },
+      academicRank: 'Professor',
+      publications: 78,
+      projects: 18,
+      teachingHours: 180,
+      status: 'Active',
+      eligibleForPromotion: false,
+      contract: {
+        type: 'Permanent',
+        startDate: '2012-09-01',
+        endDate: null,
+        salary: '$6,200/month',
+        benefits: ['Health Insurance', 'Pension Fund', 'Housing Allowance', 'Annual Leave: 28 days'],
+        status: 'Active',
+        lastRenewal: '2022-09-01',
+        nextReview: '2025-09-01'
+      }
+    },
+    {
+      id: 'STF003',
+      name: 'Dr. Le Van C',
+      position: 'Senior Lecturer',
+      type: 'Academic Staff',
+      department: 'Faculty of Nontraditional Security',
+      email: 'levanc@university.edu.vn',
+      phone: '+84 24 3234 5678',
+      joinDate: '2018-01-10',
+      education: 'Ph.D. in Computer Science',
+      specialization: 'Artificial Intelligence',
+      politicalTraining: {
+        completed: true,
+        level: 'Intermediate',
+        completionDate: '2021-08-20',
+        certificate: 'Certificate No. PT-2021-789'
+      },
+      academicRank: 'Lecturer',
+      publications: 23,
+      projects: 8,
+      teachingHours: 320,
+      status: 'Active',
+      eligibleForPromotion: true,
+      contract: {
+        type: 'Fixed-Term',
+        startDate: '2018-01-10',
+        endDate: '2025-01-09',
+        salary: '$3,800/month',
+        benefits: ['Health Insurance', 'Annual Leave: 20 days'],
+        status: 'Expiring Soon',
+        lastRenewal: '2022-01-10',
+        nextReview: '2024-12-01'
+      }
+    },
+    {
+      id: 'STF004',
+      name: 'Dr. Pham Thi D',
+      position: 'Lecturer',
+      type: 'Academic Staff',
+      department: 'Faculty of Marketing and Communication',
+      email: 'phamthid@university.edu.vn',
+      phone: '+84 24 4234 5678',
+      joinDate: '2019-08-01',
+      education: 'Ph.D. in Marketing',
+      specialization: 'Digital Marketing',
+      politicalTraining: {
+        completed: false,
+        level: null,
+        completionDate: null,
+        certificate: null
+      },
+      academicRank: 'Lecturer',
+      publications: 12,
+      projects: 5,
+      teachingHours: 280,
+      status: 'Active',
+      eligibleForPromotion: false,
+      contract: {
+        type: 'Fixed-Term',
+        startDate: '2019-08-01',
+        endDate: '2024-12-31',
+        salary: '$3,200/month',
+        benefits: ['Health Insurance', 'Annual Leave: 18 days'],
+        status: 'Expiring Soon',
+        lastRenewal: null,
+        nextReview: '2024-11-01'
+      }
+    },
+    {
+      id: 'STF005',
+      name: 'Ms. Hoang Thi E',
+      position: 'HR Manager',
+      type: 'Administrative Staff',
+      department: 'Human Resources Department',
+      email: 'hoangthie@university.edu.vn',
+      phone: '+84 24 5234 5678',
+      joinDate: '2016-05-20',
+      education: 'Master in Human Resource Management',
+      specialization: 'Recruitment & Development',
+      politicalTraining: {
+        completed: true,
+        level: 'Intermediate',
+        completionDate: '2022-03-10',
+        certificate: 'Certificate No. PT-2022-345'
+      },
+      academicRank: null,
+      publications: 0,
+      projects: 0,
+      teachingHours: 0,
+      status: 'Active',
+      eligibleForPromotion: true,
+      contract: {
+        type: 'Permanent',
+        startDate: '2016-05-20',
+        endDate: null,
+        salary: '$3,500/month',
+        benefits: ['Health Insurance', 'Pension Fund', 'Annual Leave: 22 days'],
+        status: 'Active',
+        lastRenewal: '2022-05-20',
+        nextReview: '2025-05-20'
+      }
+    },
+    {
+      id: 'STF006',
+      name: 'Mr. Vo Van F',
+      position: 'Administrative Officer',
+      type: 'Administrative Staff',
+      department: 'Faculty of Nontraditional Security',
+      email: 'vovanf@university.edu.vn',
+      phone: '+84 24 6234 5678',
+      joinDate: '2020-02-15',
+      education: 'Bachelor in Public Administration',
+      specialization: 'Office Management',
+      politicalTraining: {
+        completed: false,
+        level: null,
+        completionDate: null,
+        certificate: null
+      },
+      academicRank: null,
+      publications: 0,
+      projects: 0,
+      teachingHours: 0,
+      status: 'Active',
+      eligibleForPromotion: false,
+      contract: {
+        type: 'Fixed-Term',
+        startDate: '2020-02-15',
+        endDate: '2025-02-14',
+        salary: '$2,400/month',
+        benefits: ['Health Insurance', 'Annual Leave: 15 days'],
+        status: 'Active',
+        lastRenewal: null,
+        nextReview: '2024-12-15'
+      }
+    },
+    {
+      id: 'STF007',
+      name: 'Dr. Bui Van G',
+      position: 'Vice Rector',
+      type: 'Academic Staff',
+      department: 'Board of Rectors',
+      email: 'buivang@university.edu.vn',
+      phone: '+84 24 7234 5678',
+      joinDate: '2010-07-01',
+      education: 'Ph.D. in Education Management',
+      specialization: 'Higher Education Administration',
+      politicalTraining: {
+        completed: true,
+        level: 'Advanced',
+        completionDate: '2018-11-25',
+        certificate: 'Certificate No. PT-2018-987'
+      },
+      academicRank: 'Professor',
+      publications: 92,
+      projects: 25,
+      teachingHours: 120,
+      status: 'Active',
+      eligibleForPromotion: false,
+      contract: {
+        type: 'Permanent',
+        startDate: '2010-07-01',
+        endDate: null,
+        salary: '$7,500/month',
+        benefits: ['Health Insurance', 'Pension Fund', 'Housing Allowance', 'Car Allowance', 'Annual Leave: 30 days'],
+        status: 'Active',
+        lastRenewal: '2023-07-01',
+        nextReview: '2026-07-01'
+      }
+    },
+    {
+      id: 'STF008',
+      name: 'Ms. Cao Thi H',
+      position: 'Finance Officer',
+      type: 'Administrative Staff',
+      department: 'Finance Department',
+      email: 'caothih@university.edu.vn',
+      phone: '+84 24 8234 5678',
+      joinDate: '2017-11-10',
+      education: 'Bachelor in Accounting',
+      specialization: 'Financial Management',
+      politicalTraining: {
+        completed: true,
+        level: 'Intermediate',
+        completionDate: '2021-05-18',
+        certificate: 'Certificate No. PT-2021-456'
+      },
+      academicRank: null,
+      publications: 0,
+      projects: 0,
+      teachingHours: 0,
+      status: 'Active',
+      eligibleForPromotion: true,
+      contract: {
+        type: 'Permanent',
+        startDate: '2017-11-10',
+        endDate: null,
+        salary: '$2,800/month',
+        benefits: ['Health Insurance', 'Pension Fund', 'Annual Leave: 20 days'],
+        status: 'Active',
+        lastRenewal: '2022-11-10',
+        nextReview: '2025-11-10'
+      }
+    }
+  ];
+
+  const getPositionColor = (position) => {
+    if (position.includes('Rector') || position.includes('Dean')) return 'bg-purple-100 text-purple-700 border-purple-300';
+    if (position.includes('Head')) return 'bg-blue-100 text-blue-700 border-blue-300';
+    if (position.includes('Professor') || position.includes('Lecturer')) return 'bg-green-100 text-green-700 border-green-300';
+    return 'bg-gray-100 text-gray-700 border-gray-300';
+  };
+
+  const getPoliticalTrainingBadge = (training) => {
+    if (!training.completed) {
+      return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full border border-red-300">Not Completed</span>;
+    }
+    if (training.level === 'Advanced') {
+      return <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full border border-purple-300">Advanced Level</span>;
+    }
+    return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full border border-blue-300">Intermediate Level</span>;
+  };
+
+  const filteredStaff = staffData.filter(staff => {
+    const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         staff.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPosition = filterPosition === 'all' || staff.type === filterPosition;
+    const matchesDepartment = filterDepartment === 'all' || staff.department === filterDepartment;
+    return matchesSearch && matchesPosition && matchesDepartment;
+  });
+
+  const OverviewDashboard = () => {
+    const totalStaff = staffData.length;
+    const academicStaff = staffData.filter(s => s.type === 'Academic Staff').length;
+    const adminStaff = staffData.filter(s => s.type === 'Administrative Staff').length;
+    const withPoliticalTraining = staffData.filter(s => s.politicalTraining.completed).length;
+    const eligibleForPromotion = staffData.filter(s => s.eligibleForPromotion).length;
+    const needsTraining = staffData.filter(s => !s.politicalTraining.completed).length;
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Total Staff</p>
+            <p className="text-3xl font-bold text-gray-900">{totalStaff}</p>
+            <p className="text-xs text-gray-600 mt-2">{academicStaff} Academic / {adminStaff} Admin</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+              <ShieldCheck className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Political Training</p>
+            <p className="text-3xl font-bold text-gray-900">{withPoliticalTraining}</p>
+            <p className="text-xs text-green-600 mt-2">{Math.round((withPoliticalTraining/totalStaff)*100)}% completion rate</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+              <TrendingUp className="w-6 h-6 text-purple-600" />
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Eligible for Promotion</p>
+            <p className="text-3xl font-bold text-gray-900">{eligibleForPromotion}</p>
+            <p className="text-xs text-purple-600 mt-2">Ready for advancement</p>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+              <AlertCircle className="w-6 h-6 text-orange-600" />
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Needs Training</p>
+            <p className="text-3xl font-bold text-gray-900">{needsTraining}</p>
+            <p className="text-xs text-orange-600 mt-2">Action required</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Staff by Department</h3>
+            <div className="space-y-4">
+              {[
+                { name: 'Nontraditional Security', count: 3 },
+                { name: 'Management', count: 1 },
+                { name: 'Marketing & Communication', count: 1 },
+                { name: 'Board of Rectors', count: 1 },
+                { name: 'HR Department', count: 1 },
+                { name: 'Finance Department', count: 1 }
+              ].map((dept, i) => (
+                <div key={i}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{dept.name}</span>
+                    <span className="text-sm font-semibold text-gray-900">{dept.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 rounded-full bg-blue-500" style={{width: `${(dept.count/totalStaff)*100}%`}}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Political Training Levels</h3>
+            <div className="space-y-3">
+              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Advanced Level</span>
+                    <p className="text-xs text-gray-500 mt-1">Required for Board of Rectors & Deans</p>
+                  </div>
+                  <span className="text-2xl font-bold text-purple-700">3</span>
+                </div>
+              </div>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Intermediate Level</span>
+                    <p className="text-xs text-gray-500 mt-1">Suitable for Department Heads</p>
+                  </div>
+                  <span className="text-2xl font-bold text-blue-700">3</span>
+                </div>
+              </div>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Not Completed</span>
+                    <p className="text-xs text-gray-500 mt-1">Training enrollment needed</p>
+                  </div>
+                  <span className="text-2xl font-bold text-red-700">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Leadership Positions</h3>
+            <div className="space-y-3">
+              <div className="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                <p className="text-sm font-semibold text-gray-900">Board of Rectors</p>
+                <p className="text-xs text-gray-600 mt-1">1 position • Political Training Required</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <p className="text-sm font-semibold text-gray-900">Faculty Deans</p>
+                <p className="text-xs text-gray-600 mt-1">1 position • Political Training Required</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                <p className="text-sm font-semibold text-gray-900">Department Heads</p>
+                <p className="text-xs text-gray-600 mt-1">1 position • Political Training Required</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-6 rounded-lg">
+          <div className="flex items-start gap-4">
+            <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Political Training Requirement Notice</h4>
+              <p className="text-sm text-gray-700 mb-3">
+                Staff members aspiring for leadership positions (Department Head, Faculty Dean, or Board of Rectors) 
+                must complete the required level of Political Training to be eligible for promotion.
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">2 staff members</span> currently need to complete their political training 
+                to be considered for future leadership roles.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const StaffListView = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <select 
+              value={filterPosition}
+              onChange={(e) => setFilterPosition(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Staff Types</option>
+              <option value="Academic Staff">Academic Staff</option>
+              <option value="Administrative Staff">Administrative Staff</option>
+            </select>
+
+            <select 
+              value={filterDepartment}
+              onChange={(e) => setFilterDepartment(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Departments</option>
+              <option value="Faculty of Nontraditional Security">Nontraditional Security</option>
+              <option value="Faculty of Management">Management</option>
+              <option value="Faculty of Marketing and Communication">Marketing & Communication</option>
+              <option value="Board of Rectors">Board of Rectors</option>
+              <option value="Human Resources Department">HR Department</option>
+              <option value="Finance Department">Finance Department</option>
+            </select>
+
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
+              <Plus size={18} />
+              Add Staff
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {filteredStaff.map((staff) => (
+            <div key={staff.id} className="border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold text-gray-900">{staff.name}</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
+                        {staff.position}
+                      </span>
+                      {staff.type === 'Academic Staff' && staff.academicRank && (
+                        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold border border-indigo-300">
+                          {staff.academicRank}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{staff.department}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1.5">
+                        <Mail size={14} />
+                        {staff.email}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Phone size={14} />
+                        {staff.phone}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Calendar size={14} />
+                        Joined: {new Date(staff.joinDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Education</p>
+                  <p className="text-sm font-bold text-gray-900">{staff.education}</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Specialization</p>
+                  <p className="text-sm font-bold text-gray-900">{staff.specialization}</p>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Political Training</p>
+                  {getPoliticalTrainingBadge(staff.politicalTraining)}
+                </div>
+                <div className="p-3 bg-orange-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Promotion Status</p>
+                  {staff.eligibleForPromotion ? (
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Eligible</span>
+                  ) : (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">Not Eligible</span>
+                  )}
+                </div>
+              </div>
+
+              {staff.type === 'Academic Staff' && (
+                <div className="grid grid-cols-3 gap-3 mb-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">{staff.publications}</p>
+                    <p className="text-xs text-gray-600">Publications</p>
+                  </div>
+                  <div className="text-center border-x border-gray-200">
+                    <p className="text-2xl font-bold text-green-600">{staff.projects}</p>
+                    <p className="text-xs text-gray-600">Research Projects</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">{staff.teachingHours}</p>
+                    <p className="text-xs text-gray-600">Teaching Hours</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setSelectedStaff(staff)}
+                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium"
+                >
+                  View Full Profile
+                </button>
+                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                  <Edit size={16} className="inline mr-2" />
+                  Edit
+                </button>
+                {!staff.politicalTraining.completed && (
+                  <button className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium">
+                    Enroll in Training
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+          {filteredStaff.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No staff members found matching your criteria
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-2">
+      <div className="max-w mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">HR Profile Management</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage all staff profiles, qualifications, and political training status</p>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="border-b border-gray-200">
+            <div className="flex gap-1 p-2">
+              <button
+                onClick={() => setActiveView('overview')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveView('staff')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'staff' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                All Staff
+              </button>
+              <button
+                onClick={() => setActiveView('training')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'training' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                Political Training
+              </button>
+              <button
+                onClick={() => setActiveView('promotion')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'promotion' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                Promotion Tracking
+              </button>
+              <button
+                onClick={() => setActiveView('contracts')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'contracts' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                Contract Management
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {activeView === 'overview' && <OverviewDashboard />}
+        {activeView === 'staff' && <StaffListView />}
+        {activeView === 'training' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                  <ShieldCheck className="w-6 h-6 text-green-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Completed Training</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.politicalTraining.completed).length}</p>
+                <p className="text-xs text-green-600 mt-2">{Math.round((staffData.filter(s => s.politicalTraining.completed).length / staffData.length) * 100)}% completion rate</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                  <Award className="w-6 h-6 text-purple-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Advanced Level</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.politicalTraining.level === 'Advanced').length}</p>
+                <p className="text-xs text-purple-600 mt-2">Leadership qualified</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                  <BookOpen className="w-6 h-6 text-blue-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Intermediate Level</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.politicalTraining.level === 'Intermediate').length}</p>
+                <p className="text-xs text-blue-600 mt-2">Mid-level qualified</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-3">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Not Completed</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => !s.politicalTraining.completed).length}</p>
+                <p className="text-xs text-red-600 mt-2">Enrollment required</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">Advanced Level Training (Board of Rectors & Faculty Deans)</h3>
+                <p className="text-sm text-gray-500 mt-1">Staff who have completed the highest level of political training</p>
+              </div>
+              <div className="p-6 space-y-4">
+                {staffData.filter(s => s.politicalTraining.level === 'Advanced').map((staff) => (
+                  <div key={staff.id} className="border-2 border-purple-200 bg-purple-50 rounded-xl p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
+                              {staff.position}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{staff.department}</p>
+                          
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="p-3 bg-white rounded-lg border border-purple-200">
+                              <p className="text-xs text-gray-600 mb-1">Training Level</p>
+                              <p className="text-sm font-bold text-purple-700">Advanced</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg border border-purple-200">
+                              <p className="text-xs text-gray-600 mb-1">Completion Date</p>
+                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.politicalTraining.completionDate).toLocaleDateString()}</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg border border-purple-200">
+                              <p className="text-xs text-gray-600 mb-1">Certificate</p>
+                              <p className="text-xs font-mono text-gray-900">{staff.politicalTraining.certificate}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button className="px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 text-sm font-medium">
+                          View Certificate
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">Intermediate Level Training (Department Heads)</h3>
+                <p className="text-sm text-gray-500 mt-1">Staff who have completed intermediate political training</p>
+              </div>
+              <div className="p-6 space-y-4">
+                {staffData.filter(s => s.politicalTraining.level === 'Intermediate').map((staff) => (
+                  <div key={staff.id} className="border-2 border-blue-200 bg-blue-50 rounded-xl p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
+                              {staff.position}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{staff.department}</p>
+                          
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="p-3 bg-white rounded-lg border border-blue-200">
+                              <p className="text-xs text-gray-600 mb-1">Training Level</p>
+                              <p className="text-sm font-bold text-blue-700">Intermediate</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg border border-blue-200">
+                              <p className="text-xs text-gray-600 mb-1">Completion Date</p>
+                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.politicalTraining.completionDate).toLocaleDateString()}</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg border border-blue-200">
+                              <p className="text-xs text-gray-600 mb-1">Certificate</p>
+                              <p className="text-xs font-mono text-gray-900">{staff.politicalTraining.certificate}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium">
+                          View Certificate
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Not Completed - Enrollment Required</h3>
+                    <p className="text-sm text-gray-500 mt-1">Staff members who need to complete political training</p>
+                  </div>
+                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
+                    Enroll All
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                {staffData.filter(s => !s.politicalTraining.completed).map((staff) => (
+                  <div key={staff.id} className="border-2 border-red-200 bg-red-50 rounded-xl p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
+                              {staff.position}
+                            </span>
+                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold border border-red-300">
+                              Not Completed
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{staff.department} • {staff.type}</p>
+                          
+                          <div className="bg-white border border-red-200 rounded-lg p-3">
+                            <div className="flex items-start gap-3">
+                              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-sm font-semibold text-red-700 mb-1">Training Required for Promotion</p>
+                                <p className="text-xs text-gray-600">
+                                  Political training must be completed before this staff member can be considered for leadership positions 
+                                  such as Department Head, Faculty Dean, or Board of Rectors.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium whitespace-nowrap">
+                          Enroll in Training
+                        </button>
+                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          View Profile
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 p-6 rounded-lg">
+                <div className="flex items-start gap-4">
+                  <Award className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Political Training Levels Explained</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <div>
+                        <p className="font-semibold text-purple-700">Advanced Level:</p>
+                        <p className="text-xs">Required for Board of Rectors and Faculty Deans. Comprehensive leadership and political theory training.</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-blue-700">Intermediate Level:</p>
+                        <p className="text-xs">Suitable for Department Heads and senior positions. Foundational political training and management principles.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Training Completion Timeline</h3>
+                <div className="space-y-3">
+                  {staffData.filter(s => s.politicalTraining.completed) .sort((a, b) =>
+  (new Date(b.politicalTraining?.completionDate ?? 0).getTime()) -
+  (new Date(a.politicalTraining?.completionDate ?? 0).getTime())
+)
+                .slice(0, 5).map((staff, i) => (
+                    <div key={staff.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 ${staff.politicalTraining.level === 'Advanced' ? 'bg-purple-100' : 'bg-blue-100'} rounded-full flex items-center justify-center text-xs font-bold ${staff.politicalTraining.level === 'Advanced' ? 'text-purple-700' : 'text-blue-700'}`}>
+                          {i + 1}
+                        </div>
+                       
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{staff.name}</p>
+                          <p className="text-xs text-gray-500">{staff.politicalTraining.level}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600">{new Date(staff.politicalTraining.completionDate).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'contracts' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Total Contracts</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.length}</p>
+                <p className="text-xs text-blue-600 mt-2">All staff contracts</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                  <Award className="w-6 h-6 text-green-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Permanent Contracts</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.contract.type === 'Permanent').length}</p>
+                <p className="text-xs text-green-600 mt-2">Long-term staff</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                  <Calendar className="w-6 h-6 text-purple-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Fixed-Term Contracts</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.contract.type === 'Fixed-Term').length}</p>
+                <p className="text-xs text-purple-600 mt-2">Temporary staff</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                  <AlertCircle className="w-6 h-6 text-orange-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Expiring Soon</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.contract.status === 'Expiring Soon').length}</p>
+                <p className="text-xs text-orange-600 mt-2">Renewal needed</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      placeholder="Search by staff name..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <select 
+                    value={filterContractStatus}
+                    onChange={(e) => setFilterContractStatus(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Expiring Soon">Expiring Soon</option>
+                  </select>
+
+                  <select 
+                    value={filterPosition}
+                    onChange={(e) => setFilterPosition(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Contract Types</option>
+                    <option value="Permanent">Permanent</option>
+                    <option value="Fixed-Term">Fixed-Term</option>
+                  </select>
+
+                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
+                    <Download size={18} />
+                    Export Report
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {staffData.filter(staff => {
+                  const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesStatus = filterContractStatus === 'all' || staff.contract.status === filterContractStatus;
+                  const matchesType = filterPosition === 'all' || staff.contract.type === filterPosition;
+                  return matchesSearch && matchesStatus && matchesType;
+                }).map((staff) => (
+                  <div key={staff.id} className={`border-2 rounded-xl p-6 ${staff.contract.status === 'Expiring Soon' ? 'border-orange-200 bg-orange-50' : 'border-gray-200 bg-white'}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className={`w-14 h-14 ${staff.contract.status === 'Expiring Soon' ? 'bg-gradient-to-br from-orange-400 to-orange-600' : 'bg-gradient-to-br from-blue-400 to-purple-500'} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
+                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${staff.contract.type === 'Permanent' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-purple-100 text-purple-700 border-purple-300'}`}>
+                              {staff.contract.type}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${staff.contract.status === 'Expiring Soon' ? 'bg-orange-100 text-orange-700 border-orange-300' : 'bg-green-100 text-green-700 border-green-300'}`}>
+                              {staff.contract.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{staff.position} • {staff.department}</p>
+                          
+                          <div className="grid grid-cols-4 gap-4 mb-3">
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <p className="text-xs text-gray-600 mb-1">Start Date</p>
+                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.contract.startDate).toLocaleDateString()}</p>
+                            </div>
+                            <div className="p-3 bg-green-50 rounded-lg">
+                              <p className="text-xs text-gray-600 mb-1">End Date</p>
+                              <p className="text-sm font-semibold text-gray-900">{staff.contract.endDate ? new Date(staff.contract.endDate).toLocaleDateString() : 'Permanent'}</p>
+                            </div>
+                            <div className="p-3 bg-purple-50 rounded-lg">
+                              <p className="text-xs text-gray-600 mb-1">Salary</p>
+                              <p className="text-sm font-semibold text-gray-900">{staff.contract.salary}</p>
+                            </div>
+                            <div className="p-3 bg-orange-50 rounded-lg">
+                              <p className="text-xs text-gray-600 mb-1">Next Review</p>
+                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.contract.nextReview).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs font-semibold text-gray-600 mb-2">Benefits</p>
+                            <div className="flex flex-wrap gap-2">
+                              {staff.contract.benefits.map((benefit, i) => (
+                                <span key={i} className="px-2 py-1 bg-white border border-gray-200 rounded text-xs text-gray-700">
+                                  {benefit}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right space-y-2">
+                        <button className="block w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium">
+                          View Contract
+                        </button>
+                        <button className="block w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          Edit Details
+                        </button>
+                        {staff.contract.status === 'Expiring Soon' && (
+                          <button className="block w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium">
+                            Renew Contract
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Contracts Expiring in Next 6 Months</h3>
+                <div className="space-y-3">
+                  {staffData.filter(s => s.contract.status === 'Expiring Soon').map((staff) => (
+                    <div key={staff.id} className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-gray-900">{staff.name}</p>
+                          <p className="text-sm text-gray-600">{staff.position}</p>
+                          <p className="text-xs text-orange-700 mt-1 font-medium">
+                            Expires: {new Date(staff.contract.endDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <button className="px-3 py-1 bg-orange-600 text-white rounded text-xs font-medium hover:bg-orange-700">
+                          Renew
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Contract Type Distribution</h3>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Permanent Contracts</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {staffData.filter(s => s.contract.type === 'Permanent').length} ({Math.round((staffData.filter(s => s.contract.type === 'Permanent').length / staffData.length) * 100)}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="h-2 rounded-full bg-green-500" style={{width: `${(staffData.filter(s => s.contract.type === 'Permanent').length / staffData.length) * 100}%`}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Fixed-Term Contracts</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {staffData.filter(s => s.contract.type === 'Fixed-Term').length} ({Math.round((staffData.filter(s => s.contract.type === 'Fixed-Term').length / staffData.length) * 100)}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="h-2 rounded-full bg-purple-500" style={{width: `${(staffData.filter(s => s.contract.type === 'Fixed-Term').length / staffData.length) * 100}%`}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeView === 'promotion' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Eligible for Promotion</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.eligibleForPromotion).length}</p>
+                <p className="text-xs text-green-600 mt-2">Ready for advancement</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                  <AlertCircle className="w-6 h-6 text-orange-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Pending Requirements</p>
+                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => !s.eligibleForPromotion).length}</p>
+                <p className="text-xs text-orange-600 mt-2">Action needed</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                  <Award className="w-6 h-6 text-purple-600" />
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Leadership Positions</p>
+                <p className="text-3xl font-bold text-gray-900">3</p>
+                <p className="text-xs text-purple-600 mt-2">Require advanced training</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">Eligible for Promotion</h3>
+                <p className="text-sm text-gray-500 mt-1">Staff members who meet all requirements including political training</p>
+              </div>
+              <div className="p-6 space-y-4">
+                {staffData.filter(s => s.eligibleForPromotion).map((staff) => (
+                  <div key={staff.id} className="border-2 border-green-200 bg-green-50 rounded-xl p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPositionColor(staff.position)}`}>
+                              {staff.position}
+                            </span>
+                            {getPoliticalTrainingBadge(staff.politicalTraining)}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{staff.department}</p>
+                          
+                          <div className="grid grid-cols-3 gap-4 mt-3">
+                            <div>
+                              <p className="text-xs text-gray-500">Political Training</p>
+                              <p className="text-sm font-semibold text-green-700">✓ {staff.politicalTraining.level}</p>
+                            </div>
+                            {staff.type === 'Academic Staff' && (
+                              <>
+                                <div>
+                                  <p className="text-xs text-gray-500">Publications</p>
+                                  <p className="text-sm font-semibold text-gray-900">{staff.publications} papers</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500">Experience</p>
+                                  <p className="text-sm font-semibold text-gray-900">
+                                    Math.floor(
+  (new Date().getTime() - new Date(staff.joinDate).getTime()) /
+  (365 * 24 * 60 * 60 * 1000)
+) years
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                            {staff.type === 'Administrative Staff' && (
+                              <div>
+                                <p className="text-xs text-gray-500">Experience</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  Math.floor(
+  (new Date().getTime() - new Date(staff.joinDate).getTime()) /
+  (365 * 24 * 60 * 60 * 1000)
+) years
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold mb-2">
+                          ELIGIBLE
+                        </span>
+                        <button className="block w-full px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 text-sm font-medium">
+                          Review Application
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">Pending Requirements</h3>
+                <p className="text-sm text-gray-500 mt-1">Staff members who need to complete requirements before promotion eligibility</p>
+              </div>
+              <div className="p-6 space-y-4">
+                {staffData.filter(s => !s.eligibleForPromotion).map((staff) => (
+                  <div key={staff.id} className="border-2 border-orange-200 bg-orange-50 rounded-xl p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPositionColor(staff.position)}`}>
+                              {staff.position}
+                            </span>
+                            {getPoliticalTrainingBadge(staff.politicalTraining)}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{staff.department}</p>
+                          
+                          <div className="bg-white border border-orange-200 rounded-lg p-3">
+                            <p className="text-sm font-semibold text-orange-700 mb-2">Missing Requirements:</p>
+                            <ul className="space-y-1">
+                              {!staff.politicalTraining.completed && (
+                                <li className="text-sm text-gray-700 flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                  Political Training not completed
+                                </li>
+                              )}
+                              {staff.type === 'Academic Staff' && staff.publications < 20 && (
+                                <li className="text-sm text-gray-700 flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                  Minimum publications requirement (Current: {staff.publications}, Required: 20)
+                                </li>
+                              )}
+                             { Math.floor(
+                                  (Date.now() - new Date(staff.joinDate).getTime()) /
+                                  (365 * 24 * 60 * 60 * 1000)
+                                ) < 5 && (
+                                  <li className="text-sm text-gray-700 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                                    Minimum experience requirement (Current: {
+                                      Math.floor(
+                                        (Date.now() - new Date(staff.joinDate).getTime()) /
+                                        (365 * 24 * 60 * 60 * 1000)
+                                      )
+                                    } years, Required: 5 years)
+                                  </li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="inline-block px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold mb-2">
+                          NOT ELIGIBLE
+                        </span>
+                        {!staff.politicalTraining.completed && (
+                          <button className="block w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium">
+                            Enroll in Training
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-6 rounded-lg">
+              <div className="flex items-start gap-4">
+                <Award className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Promotion Requirements</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div>
+                      <p className="font-semibold mb-1">For Academic Staff:</p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• Political Training: Advanced (for Deans/Rectors) or Intermediate (for Heads)</li>
+                        <li>• Minimum 20 publications</li>
+                        <li>• Minimum 5 years experience</li>
+                        <li>• Active research projects</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold mb-1">For Administrative Staff:</p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• Political Training: Intermediate or Advanced</li>
+                        <li>• Minimum 5 years experience</li>
+                        <li>• Performance evaluation score above 85%</li>
+                        <li>• Relevant certifications</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedStaff && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedStaff(null)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="h-40 bg-gradient-to-br from-blue-500 to-purple-600 p-6 flex flex-col justify-between">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl shadow-lg">
+                      {selectedStaff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">{selectedStaff.name}</h2>
+                      <p className="text-white text-opacity-90">{selectedStaff.position}</p>
+                      <p className="text-white text-opacity-75 text-sm">{selectedStaff.department}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedStaff(null)}
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white text-xl font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-xs text-gray-500">Email</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedStaff.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-xs text-gray-500">Phone</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedStaff.phone}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-xs text-gray-500">Join Date</p>
+                          <p className="text-sm font-medium text-gray-900">{new Date(selectedStaff.joinDate).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Details</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <GraduationCap className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-xs text-gray-500">Education</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedStaff.education}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-xs text-gray-500">Specialization</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedStaff.specialization}</p>
+                        </div>
+                      </div>
+                      {selectedStaff.academicRank && (
+                        <div className="flex items-center gap-3">
+                          <Award className="w-5 h-5 text-gray-400" />
+                          <div>
+                            <p className="text-xs text-gray-500">Academic Rank</p>
+                            <p className="text-sm font-medium text-gray-900">{selectedStaff.academicRank}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-blue-600" />
+                    Political Training Status
+                  </h3>
+                  
+                  {selectedStaff.politicalTraining.completed ? (
+                    <div className="p-6 bg-green-50 border-2 border-green-300 rounded-lg">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-sm font-bold text-green-700 uppercase mb-1">Training Completed</p>
+                          <p className="text-2xl font-bold text-green-700">{selectedStaff.politicalTraining.level}</p>
+                        </div>
+                        <ShieldCheck size={48} className="text-green-600" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <p className="text-xs text-gray-600">Completion Date</p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {new Date(selectedStaff.politicalTraining.completionDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-600">Certificate Number</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStaff.politicalTraining.certificate}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 bg-red-50 border-2 border-red-300 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <AlertCircle size={48} className="text-red-600" />
+                        <div className="flex-1">
+                          <p className="text-lg font-bold text-red-700 mb-2">Political Training Not Completed</p>
+                          <p className="text-sm text-gray-700 mb-3">
+                            This staff member has not completed the required political training. 
+                            Completion is necessary for eligibility in leadership positions.
+                          </p>
+                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
+                            Enroll in Training Program
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {selectedStaff.type === 'Academic Staff' && (
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Performance</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="p-5 bg-blue-50 rounded-lg border border-blue-200 text-center">
+                        <BookOpen className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                        <p className="text-3xl font-bold text-blue-700">{selectedStaff.publications}</p>
+                        <p className="text-sm text-gray-600">Publications</p>
+                      </div>
+                      <div className="p-5 bg-green-50 rounded-lg border border-green-200 text-center">
+                        <Briefcase className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                        <p className="text-3xl font-bold text-green-700">{selectedStaff.projects}</p>
+                        <p className="text-sm text-gray-600">Research Projects</p>
+                      </div>
+                      <div className="p-5 bg-purple-50 rounded-lg border border-purple-200 text-center">
+                        <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                        <p className="text-3xl font-bold text-purple-700">{selectedStaff.teachingHours}</p>
+                        <p className="text-sm text-gray-600">Teaching Hours</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Promotion Eligibility</h3>
+                  {selectedStaff.eligibleForPromotion ? (
+                    <div className="p-5 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <TrendingUp className="w-6 h-6 text-green-600" />
+                        <div>
+                          <p className="font-semibold text-green-700">Eligible for Promotion</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            This staff member meets all requirements for promotion consideration, including political training completion.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <AlertCircle className="w-6 h-6 text-orange-600" />
+                        <div>
+                          <p className="font-semibold text-orange-700">Not Eligible for Promotion</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {!selectedStaff.politicalTraining.completed 
+                              ? "Political training must be completed before promotion eligibility."
+                              : "Additional requirements need to be met for promotion eligibility."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    Edit Profile
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    <Download size={16} className="inline mr-2" />
+                    Download CV
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+                    View Documents
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 
 const EventsDashboard = () => {
@@ -9820,1534 +11351,824 @@ const OneStopService = () => {
 
 
 
-{/*HR Profile start */}
-const HRProfileManagement = () => {
-  const [activeView, setActiveView] = useState('overview');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterPosition, setFilterPosition] = useState('all');
-  const [filterDepartment, setFilterDepartment] = useState('all');
-  const [filterContractStatus, setFilterContractStatus] = useState('all');
-  const [selectedStaff, setSelectedStaff] = useState(null);
 
-  const staffData = [
-    {
-      id: 'STF001',
-      name: 'Dr. Nguyen Van A',
-      position: 'Department Head',
-      type: 'Academic Staff',
-      department: 'Faculty of Nontraditional Security',
-      email: 'nguyenvana@university.edu.vn',
-      phone: '+84 24 1234 5678',
-      joinDate: '2015-03-15',
-      education: 'Ph.D. in International Relations',
-      specialization: 'Security Studies',
-      politicalTraining: {
-        completed: true,
-        level: 'Advanced',
-        completionDate: '2020-06-30',
-        certificate: 'Certificate No. PT-2020-456'
-      },
-      academicRank: 'Associate Professor',
-      publications: 45,
-      projects: 12,
-      teachingHours: 240,
-      status: 'Active',
-      eligibleForPromotion: true,
-      contract: {
-        type: 'Permanent',
-        startDate: '2015-03-15',
-        endDate: null,
-        salary: '$4,500/month',
-        benefits: ['Health Insurance', 'Pension Fund', 'Annual Leave: 24 days'],
-        status: 'Active',
-        lastRenewal: '2023-03-15',
-        nextReview: '2026-03-15'
-      }
-    },
-    {
-      id: 'STF002',
-      name: 'Prof. Tran Thi B',
-      position: 'Faculty Dean',
-      type: 'Academic Staff',
-      department: 'Faculty of Management',
-      email: 'tranthib@university.edu.vn',
-      phone: '+84 24 2234 5678',
-      joinDate: '2012-09-01',
-      education: 'Ph.D. in Business Administration',
-      specialization: 'Strategic Management',
-      politicalTraining: {
-        completed: true,
-        level: 'Advanced',
-        completionDate: '2019-12-15',
-        certificate: 'Certificate No. PT-2019-123'
-      },
-      academicRank: 'Professor',
-      publications: 78,
-      projects: 18,
-      teachingHours: 180,
-      status: 'Active',
-      eligibleForPromotion: false,
-      contract: {
-        type: 'Permanent',
-        startDate: '2012-09-01',
-        endDate: null,
-        salary: '$6,200/month',
-        benefits: ['Health Insurance', 'Pension Fund', 'Housing Allowance', 'Annual Leave: 28 days'],
-        status: 'Active',
-        lastRenewal: '2022-09-01',
-        nextReview: '2025-09-01'
-      }
-    },
-    {
-      id: 'STF003',
-      name: 'Dr. Le Van C',
-      position: 'Senior Lecturer',
-      type: 'Academic Staff',
-      department: 'Faculty of Nontraditional Security',
-      email: 'levanc@university.edu.vn',
-      phone: '+84 24 3234 5678',
-      joinDate: '2018-01-10',
-      education: 'Ph.D. in Computer Science',
-      specialization: 'Artificial Intelligence',
-      politicalTraining: {
-        completed: true,
-        level: 'Intermediate',
-        completionDate: '2021-08-20',
-        certificate: 'Certificate No. PT-2021-789'
-      },
-      academicRank: 'Lecturer',
-      publications: 23,
-      projects: 8,
-      teachingHours: 320,
-      status: 'Active',
-      eligibleForPromotion: true,
-      contract: {
-        type: 'Fixed-Term',
-        startDate: '2018-01-10',
-        endDate: '2025-01-09',
-        salary: '$3,800/month',
-        benefits: ['Health Insurance', 'Annual Leave: 20 days'],
-        status: 'Expiring Soon',
-        lastRenewal: '2022-01-10',
-        nextReview: '2024-12-01'
-      }
-    },
-    {
-      id: 'STF004',
-      name: 'Dr. Pham Thi D',
-      position: 'Lecturer',
-      type: 'Academic Staff',
-      department: 'Faculty of Marketing and Communication',
-      email: 'phamthid@university.edu.vn',
-      phone: '+84 24 4234 5678',
-      joinDate: '2019-08-01',
-      education: 'Ph.D. in Marketing',
-      specialization: 'Digital Marketing',
-      politicalTraining: {
-        completed: false,
-        level: null,
-        completionDate: null,
-        certificate: null
-      },
-      academicRank: 'Lecturer',
-      publications: 12,
-      projects: 5,
-      teachingHours: 280,
-      status: 'Active',
-      eligibleForPromotion: false,
-      contract: {
-        type: 'Fixed-Term',
-        startDate: '2019-08-01',
-        endDate: '2024-12-31',
-        salary: '$3,200/month',
-        benefits: ['Health Insurance', 'Annual Leave: 18 days'],
-        status: 'Expiring Soon',
-        lastRenewal: null,
-        nextReview: '2024-11-01'
-      }
-    },
-    {
-      id: 'STF005',
-      name: 'Ms. Hoang Thi E',
-      position: 'HR Manager',
-      type: 'Administrative Staff',
-      department: 'Human Resources Department',
-      email: 'hoangthie@university.edu.vn',
-      phone: '+84 24 5234 5678',
-      joinDate: '2016-05-20',
-      education: 'Master in Human Resource Management',
-      specialization: 'Recruitment & Development',
-      politicalTraining: {
-        completed: true,
-        level: 'Intermediate',
-        completionDate: '2022-03-10',
-        certificate: 'Certificate No. PT-2022-345'
-      },
-      academicRank: null,
-      publications: 0,
-      projects: 0,
-      teachingHours: 0,
-      status: 'Active',
-      eligibleForPromotion: true,
-      contract: {
-        type: 'Permanent',
-        startDate: '2016-05-20',
-        endDate: null,
-        salary: '$3,500/month',
-        benefits: ['Health Insurance', 'Pension Fund', 'Annual Leave: 22 days'],
-        status: 'Active',
-        lastRenewal: '2022-05-20',
-        nextReview: '2025-05-20'
-      }
-    },
-    {
-      id: 'STF006',
-      name: 'Mr. Vo Van F',
-      position: 'Administrative Officer',
-      type: 'Administrative Staff',
-      department: 'Faculty of Nontraditional Security',
-      email: 'vovanf@university.edu.vn',
-      phone: '+84 24 6234 5678',
-      joinDate: '2020-02-15',
-      education: 'Bachelor in Public Administration',
-      specialization: 'Office Management',
-      politicalTraining: {
-        completed: false,
-        level: null,
-        completionDate: null,
-        certificate: null
-      },
-      academicRank: null,
-      publications: 0,
-      projects: 0,
-      teachingHours: 0,
-      status: 'Active',
-      eligibleForPromotion: false,
-      contract: {
-        type: 'Fixed-Term',
-        startDate: '2020-02-15',
-        endDate: '2025-02-14',
-        salary: '$2,400/month',
-        benefits: ['Health Insurance', 'Annual Leave: 15 days'],
-        status: 'Active',
-        lastRenewal: null,
-        nextReview: '2024-12-15'
-      }
-    },
-    {
-      id: 'STF007',
-      name: 'Dr. Bui Van G',
-      position: 'Vice Rector',
-      type: 'Academic Staff',
-      department: 'Board of Rectors',
-      email: 'buivang@university.edu.vn',
-      phone: '+84 24 7234 5678',
-      joinDate: '2010-07-01',
-      education: 'Ph.D. in Education Management',
-      specialization: 'Higher Education Administration',
-      politicalTraining: {
-        completed: true,
-        level: 'Advanced',
-        completionDate: '2018-11-25',
-        certificate: 'Certificate No. PT-2018-987'
-      },
-      academicRank: 'Professor',
-      publications: 92,
-      projects: 25,
-      teachingHours: 120,
-      status: 'Active',
-      eligibleForPromotion: false,
-      contract: {
-        type: 'Permanent',
-        startDate: '2010-07-01',
-        endDate: null,
-        salary: '$7,500/month',
-        benefits: ['Health Insurance', 'Pension Fund', 'Housing Allowance', 'Car Allowance', 'Annual Leave: 30 days'],
-        status: 'Active',
-        lastRenewal: '2023-07-01',
-        nextReview: '2026-07-01'
-      }
-    },
-    {
-      id: 'STF008',
-      name: 'Ms. Cao Thi H',
-      position: 'Finance Officer',
-      type: 'Administrative Staff',
-      department: 'Finance Department',
-      email: 'caothih@university.edu.vn',
-      phone: '+84 24 8234 5678',
-      joinDate: '2017-11-10',
-      education: 'Bachelor in Accounting',
-      specialization: 'Financial Management',
-      politicalTraining: {
-        completed: true,
-        level: 'Intermediate',
-        completionDate: '2021-05-18',
-        certificate: 'Certificate No. PT-2021-456'
-      },
-      academicRank: null,
-      publications: 0,
-      projects: 0,
-      teachingHours: 0,
-      status: 'Active',
-      eligibleForPromotion: true,
-      contract: {
-        type: 'Permanent',
-        startDate: '2017-11-10',
-        endDate: null,
-        salary: '$2,800/month',
-        benefits: ['Health Insurance', 'Pension Fund', 'Annual Leave: 20 days'],
-        status: 'Active',
-        lastRenewal: '2022-11-10',
-        nextReview: '2025-11-10'
-      }
-    }
+
+
+{/*project tab*/}
+
+
+
+// Types
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  type: 'student' | 'staff' | 'mixed';
+  startDate: string;
+  endDate: string;
+  progress: number;
+  members: Member[];
+  status: 'active' | 'planning' | 'completed';
+  department: string;
+  priority: 'low' | 'medium' | 'high';
+}
+
+interface Member {
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  projectId: string;
+  labels: Label[];
+  assignee?: Member;
+  startDate: string;
+  endDate: string;
+  column: 'todo' | 'inprogress' | 'review' | 'done';
+  description?: string;
+}
+
+interface Label {
+  type: 'bug' | 'feature' | 'urgent' | 'devops' | 'documentation' | 'design' | 'backend' | 'performance' | 'setup' | 'uiux';
+  text: string;
+}
+
+type ViewMode = 'kanban' | 'gantt';
+
+const ProjectsTab = () => {
+  const [viewMode, setViewMode] = useState<ViewMode>('kanban');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'student' | 'staff' | 'mixed'>('all');
+
+  // Sample Members
+  const members: Member[] = [
+    { id: '1', name: 'John Doe', initials: 'JD', color: 'blue' },
+    { id: '2', name: 'Sarah Miller', initials: 'SM', color: 'green' },
+    { id: '3', name: 'Alex Kim', initials: 'AK', color: 'purple' },
+    { id: '4', name: 'Dr. Roberts', initials: 'DR', color: 'red' },
+    { id: '5', name: 'Mary Johnson', initials: 'MJ', color: 'blue' },
+    { id: '6', name: 'Lisa White', initials: 'LW', color: 'pink' },
+    { id: '7', name: 'Prof. Smith', initials: 'PS', color: 'purple' },
+    { id: '8', name: 'Tom Kelly', initials: 'TK', color: 'green' },
+    { id: '9', name: 'Rachel Brown', initials: 'RB', color: 'orange' },
+    { id: '10', name: 'Nina Kumar', initials: 'NK', color: 'pink' },
   ];
 
-  const getPositionColor = (position) => {
-    if (position.includes('Rector') || position.includes('Dean')) return 'bg-purple-100 text-purple-700 border-purple-300';
-    if (position.includes('Head')) return 'bg-blue-100 text-blue-700 border-blue-300';
-    if (position.includes('Professor') || position.includes('Lecturer')) return 'bg-green-100 text-green-700 border-green-300';
-    return 'bg-gray-100 text-gray-700 border-gray-300';
+  // Sample Projects
+  const projects: Project[] = [
+    {
+      id: '1',
+      title: 'Research Web Portal',
+      description: 'Developing a comprehensive web portal for research paper management',
+      type: 'student',
+      startDate: '2025-10-01',
+      endDate: '2025-11-15',
+      progress: 65,
+      members: [members[0], members[1], members[2]],
+      status: 'active',
+      department: 'Computer Science',
+      priority: 'high'
+    },
+    {
+      id: '2',
+      title: 'Curriculum Redesign 2025',
+      description: 'Complete overhaul of Computer Science curriculum',
+      type: 'staff',
+      startDate: '2025-09-15',
+      endDate: '2025-12-20',
+      progress: 42,
+      members: [members[3], members[4], members[5]],
+      status: 'active',
+      department: 'Administration',
+      priority: 'high'
+    },
+    {
+      id: '3',
+      title: 'AI Research Initiative',
+      description: 'Joint research project exploring machine learning applications',
+      type: 'mixed',
+      startDate: '2025-09-01',
+      endDate: '2026-01-30',
+      progress: 78,
+      members: [members[6], members[7], members[8]],
+      status: 'active',
+      department: 'Computer Science',
+      priority: 'medium'
+    },
+    {
+      id: '4',
+      title: 'Mobile App Development',
+      description: 'Creating a campus navigation and event management app',
+      type: 'student',
+      startDate: '2025-10-15',
+      endDate: '2025-11-30',
+      progress: 34,
+      members: [members[9], members[0]],
+      status: 'planning',
+      department: 'Computer Science',
+      priority: 'medium'
+    },
+    {
+      id: '5',
+      title: 'Digital Library System',
+      description: 'Modernizing the library management system',
+      type: 'mixed',
+      startDate: '2025-10-01',
+      endDate: '2025-12-15',
+      progress: 56,
+      members: [members[1], members[3]],
+      status: 'active',
+      department: 'Library',
+      priority: 'high'
+    },
+    {
+      id: '6',
+      title: 'Faculty Development Program',
+      description: 'Organizing training workshops and seminars',
+      type: 'staff',
+      startDate: '2025-10-20',
+      endDate: '2025-11-10',
+      progress: 89,
+      members: [members[4], members[5]],
+      status: 'active',
+      department: 'HR',
+      priority: 'low'
+    },
+  ];
+
+  // Sample Tasks
+  const [tasks, setTasks] = useState<Task[]>([
+    {
+      id: 't1',
+      title: 'Design database schema',
+      projectId: '1',
+      labels: [{ type: 'feature', text: 'Feature' }, { type: 'urgent', text: 'High Priority' }],
+      assignee: members[0],
+      startDate: '2025-10-26',
+      endDate: '2025-11-02',
+      column: 'todo'
+    },
+    {
+      id: 't2',
+      title: 'Create user authentication module',
+      projectId: '1',
+      labels: [{ type: 'feature', text: 'Feature' }],
+      assignee: members[1],
+      startDate: '2025-10-28',
+      endDate: '2025-11-05',
+      column: 'todo'
+    },
+    {
+      id: 't3',
+      title: 'Setup CI/CD pipeline',
+      projectId: '1',
+      labels: [{ type: 'devops', text: 'DevOps' }],
+      assignee: members[2],
+      startDate: '2025-10-27',
+      endDate: '2025-11-03',
+      column: 'todo'
+    },
+    {
+      id: 't4',
+      title: 'Write API documentation',
+      projectId: '1',
+      labels: [{ type: 'documentation', text: 'Documentation' }],
+      assignee: members[0],
+      startDate: '2025-11-01',
+      endDate: '2025-11-08',
+      column: 'todo'
+    },
+    {
+      id: 't5',
+      title: 'Design landing page mockups',
+      projectId: '1',
+      labels: [{ type: 'design', text: 'Design' }],
+      assignee: members[1],
+      startDate: '2025-10-29',
+      endDate: '2025-11-04',
+      column: 'todo'
+    },
+    {
+      id: 't6',
+      title: 'Implement search functionality',
+      projectId: '1',
+      labels: [{ type: 'feature', text: 'Feature' }, { type: 'urgent', text: 'High Priority' }],
+      assignee: members[0],
+      startDate: '2025-10-20',
+      endDate: '2025-10-30',
+      column: 'inprogress'
+    },
+    {
+      id: 't7',
+      title: 'Build responsive dashboard',
+      projectId: '1',
+      labels: [{ type: 'uiux', text: 'UI/UX' }],
+      assignee: members[2],
+      startDate: '2025-10-18',
+      endDate: '2025-10-28',
+      column: 'inprogress'
+    },
+    {
+      id: 't8',
+      title: 'Integrate payment gateway',
+      projectId: '1',
+      labels: [{ type: 'backend', text: 'Backend' }],
+      assignee: members[0],
+      startDate: '2025-10-22',
+      endDate: '2025-11-01',
+      column: 'inprogress'
+    },
+    {
+      id: 't9',
+      title: 'Fix login page responsiveness',
+      projectId: '1',
+      labels: [{ type: 'bug', text: 'Bug' }],
+      assignee: members[1],
+      startDate: '2025-10-20',
+      endDate: '2025-10-26',
+      column: 'review'
+    },
+    {
+      id: 't10',
+      title: 'Add email notifications',
+      projectId: '1',
+      labels: [{ type: 'feature', text: 'Feature' }],
+      assignee: members[1],
+      startDate: '2025-10-18',
+      endDate: '2025-10-25',
+      column: 'review'
+    },
+    {
+      id: 't11',
+      title: 'Optimize database queries',
+      projectId: '1',
+      labels: [{ type: 'performance', text: 'Performance' }],
+      assignee: members[0],
+      startDate: '2025-10-19',
+      endDate: '2025-10-27',
+      column: 'review'
+    },
+    {
+      id: 't12',
+      title: 'Update user guide',
+      projectId: '1',
+      labels: [{ type: 'documentation', text: 'Documentation' }],
+      assignee: members[0],
+      startDate: '2025-10-17',
+      endDate: '2025-10-24',
+      column: 'review'
+    },
+    {
+      id: 't13',
+      title: 'Setup project repository',
+      projectId: '1',
+      labels: [{ type: 'setup', text: 'Setup' }],
+      assignee: members[2],
+      startDate: '2025-10-01',
+      endDate: '2025-10-15',
+      column: 'done'
+    },
+    {
+      id: 't14',
+      title: 'Create wireframes',
+      projectId: '1',
+      labels: [{ type: 'design', text: 'Design' }],
+      assignee: members[1],
+      startDate: '2025-10-05',
+      endDate: '2025-10-18',
+      column: 'done'
+    },
+    {
+      id: 't15',
+      title: 'Initialize database',
+      projectId: '1',
+      labels: [{ type: 'backend', text: 'Backend' }],
+      assignee: members[0],
+      startDate: '2025-10-08',
+      endDate: '2025-10-20',
+      column: 'done'
+    },
+  ]);
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      if (activeFilter === 'all') return true;
+      return project.type === activeFilter;
+    });
+  }, [activeFilter]);
+
+  const getTasksByColumn = (column: Task['column']) => {
+    if (!selectedProject) return [];
+    return tasks.filter(task => task.column === column && task.projectId === selectedProject.id);
   };
 
-  const getPoliticalTrainingBadge = (training) => {
-    if (!training.completed) {
-      return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full border border-red-300">Not Completed</span>;
-    }
-    if (training.level === 'Advanced') {
-      return <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full border border-purple-300">Advanced Level</span>;
-    }
-    return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full border border-blue-300">Intermediate Level</span>;
+  const handleDragStart = (task: Task) => {
+    setDraggedTask(task);
   };
 
-  const filteredStaff = staffData.filter(staff => {
-    const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         staff.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPosition = filterPosition === 'all' || staff.type === filterPosition;
-    const matchesDepartment = filterDepartment === 'all' || staff.department === filterDepartment;
-    return matchesSearch && matchesPosition && matchesDepartment;
-  });
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
-  const OverviewDashboard = () => {
-    const totalStaff = staffData.length;
-    const academicStaff = staffData.filter(s => s.type === 'Academic Staff').length;
-    const adminStaff = staffData.filter(s => s.type === 'Administrative Staff').length;
-    const withPoliticalTraining = staffData.filter(s => s.politicalTraining.completed).length;
-    const eligibleForPromotion = staffData.filter(s => s.eligibleForPromotion).length;
-    const needsTraining = staffData.filter(s => !s.politicalTraining.completed).length;
+  const handleDrop = (column: Task['column']) => {
+    if (draggedTask) {
+      setTasks(tasks.map(task =>
+        task.id === draggedTask.id ? { ...task, column } : task
+      ));
+      setDraggedTask(null);
+    }
+  };
+
+  // Gantt Chart Helpers
+  const getDatePosition = (date: string, minDate: Date, maxDate: Date) => {
+    const dateObj = new Date(date);
+    const totalDays = (maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
+    const daysPassed = (dateObj.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
+    return (daysPassed / totalDays) * 100;
+  };
+
+  const getDuration = (startDate: string, endDate: string, minDate: Date, maxDate: Date) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const totalDays = (maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
+    const projectDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+    return (projectDays / totalDays) * 100;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Get min and max dates for Gantt chart
+  const getDateRange = () => {
+    const allDates = filteredProjects.flatMap(p => [new Date(p.startDate), new Date(p.endDate)]);
+    const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
+    
+    // Add padding
+    minDate.setDate(minDate.getDate() - 7);
+    maxDate.setDate(maxDate.getDate() + 7);
+    
+    return { minDate, maxDate };
+  };
+
+  // Generate month markers for Gantt
+  const generateMonthMarkers = (minDate: Date, maxDate: Date) => {
+    const markers = [];
+    const current = new Date(minDate);
+    current.setDate(1);
+    
+    while (current <= maxDate) {
+      const position = getDatePosition(current.toISOString(), minDate, maxDate);
+      markers.push({
+        position,
+        label: current.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      });
+      current.setMonth(current.getMonth() + 1);
+    }
+    
+    return markers;
+  };
+
+  // Components
+  const TaskCard: React.FC<{ task: Task }> = ({ task }) => (
+    <div
+      className="task-card"
+      draggable
+      onDragStart={() => handleDragStart(task)}
+    >
+      <div className="task-title">{task.title}</div>
+      <div className="task-labels">
+        {task.labels.map((label, index) => (
+          <span key={index} className={`task-label label-${label.type}`}>
+            {label.text}
+          </span>
+        ))}
+      </div>
+      <div className="task-footer">
+        {task.assignee && (
+          <div className="task-members">
+            <div className={`member-avatar avatar-${task.assignee.color}`}>
+              {task.assignee.initials}
+            </div>
+          </div>
+        )}
+        <span className="task-date">
+          <Calendar size={12} style={{ display: 'inline', marginRight: '4px' }} />
+          {formatDate(task.endDate)}
+        </span>
+      </div>
+    </div>
+  );
+
+  const KanbanColumn: React.FC<{
+    title: string;
+    icon: LucideIcon;
+    column: Task['column'];
+    tasks: Task[];
+  }> = ({ title, icon: Icon, column, tasks }) => (
+    <div
+      className="kanban-column"
+      onDragOver={handleDragOver}
+      onDrop={() => handleDrop(column)}
+    >
+      <div className="column-header">
+        <div className="column-title">
+          <Icon size={16} />
+          <span>{title}</span>
+          <span className="column-count">{tasks.length}</span>
+        </div>
+      </div>
+      <div className="column-cards">
+        {tasks.map(task => (
+          <TaskCard key={task.id} task={task} />
+        ))}
+      </div>
+      <button className="add-card-btn">
+        <Plus size={16} />
+        <span>Add Task</span>
+      </button>
+    </div>
+  );
+
+  const KanbanView: React.FC = () => {
+    if (!selectedProject) {
+      return (
+        <div className="no-selection">
+          <div className="no-selection-icon">
+            <Folder size={64} color="#cbd5e1" />
+          </div>
+          <h3>Select a project to view tasks</h3>
+          <p>Choose a project from the list to see its Kanban board</p>
+        </div>
+      );
+    }
 
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-              <Users className="w-6 h-6 text-blue-600" />
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Total Staff</p>
-            <p className="text-3xl font-bold text-gray-900">{totalStaff}</p>
-            <p className="text-xs text-gray-600 mt-2">{academicStaff} Academic / {adminStaff} Admin</p>
+      <div className="kanban-view">
+        <div className="project-header-info">
+          <div className="project-header-main">
+            <h2>{selectedProject.title}</h2>
+            <span className={`project-type type-${selectedProject.type}`}>
+              {selectedProject.type === 'student' ? 'Student' : 
+               selectedProject.type === 'staff' ? 'Staff' : 'Student-Staff'}
+            </span>
           </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-              <ShieldCheck className="w-6 h-6 text-green-600" />
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Political Training</p>
-            <p className="text-3xl font-bold text-gray-900">{withPoliticalTraining}</p>
-            <p className="text-xs text-green-600 mt-2">{Math.round((withPoliticalTraining/totalStaff)*100)}% completion rate</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-              <TrendingUp className="w-6 h-6 text-purple-600" />
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Eligible for Promotion</p>
-            <p className="text-3xl font-bold text-gray-900">{eligibleForPromotion}</p>
-            <p className="text-xs text-purple-600 mt-2">Ready for advancement</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-              <AlertCircle className="w-6 h-6 text-orange-600" />
-            </div>
-            <p className="text-sm text-gray-500 mb-1">Needs Training</p>
-            <p className="text-3xl font-bold text-gray-900">{needsTraining}</p>
-            <p className="text-xs text-orange-600 mt-2">Action required</p>
+          <p className="project-description-header">{selectedProject.description}</p>
+          <div className="project-meta-header">
+            <span>
+              <Building size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              {selectedProject.department}
+            </span>
+            <span>
+              <Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              {formatDate(selectedProject.startDate)} - {formatDate(selectedProject.endDate)}
+            </span>
+            <span>
+              <Users size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              {selectedProject.members.length} members
+            </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Staff by Department</h3>
-            <div className="space-y-4">
-              {[
-                { name: 'Nontraditional Security', count: 3 },
-                { name: 'Management', count: 1 },
-                { name: 'Marketing & Communication', count: 1 },
-                { name: 'Board of Rectors', count: 1 },
-                { name: 'HR Department', count: 1 },
-                { name: 'Finance Department', count: 1 }
-              ].map((dept, i) => (
-                <div key={i}>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">{dept.name}</span>
-                    <span className="text-sm font-semibold text-gray-900">{dept.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full bg-blue-500" style={{width: `${(dept.count/totalStaff)*100}%`}}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Political Training Levels</h3>
-            <div className="space-y-3">
-              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Advanced Level</span>
-                    <p className="text-xs text-gray-500 mt-1">Required for Board of Rectors & Deans</p>
-                  </div>
-                  <span className="text-2xl font-bold text-purple-700">3</span>
-                </div>
-              </div>
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Intermediate Level</span>
-                    <p className="text-xs text-gray-500 mt-1">Suitable for Department Heads</p>
-                  </div>
-                  <span className="text-2xl font-bold text-blue-700">3</span>
-                </div>
-              </div>
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Not Completed</span>
-                    <p className="text-xs text-gray-500 mt-1">Training enrollment needed</p>
-                  </div>
-                  <span className="text-2xl font-bold text-red-700">2</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Leadership Positions</h3>
-            <div className="space-y-3">
-              <div className="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
-                <p className="text-sm font-semibold text-gray-900">Board of Rectors</p>
-                <p className="text-xs text-gray-600 mt-1">1 position • Political Training Required</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                <p className="text-sm font-semibold text-gray-900">Faculty Deans</p>
-                <p className="text-xs text-gray-600 mt-1">1 position • Political Training Required</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-                <p className="text-sm font-semibold text-gray-900">Department Heads</p>
-                <p className="text-xs text-gray-600 mt-1">1 position • Political Training Required</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 p-6 rounded-lg">
-          <div className="flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Political Training Requirement Notice</h4>
-              <p className="text-sm text-gray-700 mb-3">
-                Staff members aspiring for leadership positions (Department Head, Faculty Dean, or Board of Rectors) 
-                must complete the required level of Political Training to be eligible for promotion.
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">2 staff members</span> currently need to complete their political training 
-                to be considered for future leadership roles.
-              </p>
-            </div>
-          </div>
+        <div className="kanban-board">
+          <KanbanColumn
+            title="To Do"
+            icon={FileText}
+            column="todo"
+            tasks={getTasksByColumn('todo')}
+          />
+          <KanbanColumn
+            title="In Progress"
+            icon={Clock}
+            column="inprogress"
+            tasks={getTasksByColumn('inprogress')}
+          />
+          <KanbanColumn
+            title="Review"
+            icon={Eye}
+            column="review"
+            tasks={getTasksByColumn('review')}
+          />
+          <KanbanColumn
+            title="Done"
+            icon={CheckCircle}
+            column="done"
+            tasks={getTasksByColumn('done')}
+          />
         </div>
       </div>
     );
   };
 
-  const StaffListView = () => (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Search by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+  const GanttView: React.FC = () => {
+    const { minDate, maxDate } = getDateRange();
+    const monthMarkers = generateMonthMarkers(minDate, maxDate);
+
+    return (
+      <div className="gantt-view">
+        <div className="gantt-header">
+          <div className="gantt-sidebar-header">Project</div>
+          <div className="gantt-timeline-header">
+            <div className="timeline-months">
+              {monthMarkers.map((marker, index) => (
+                <div
+                  key={index}
+                  className="timeline-month"
+                  style={{ left: `${marker.position}%` }}
+                >
+                  {marker.label}
+                </div>
+              ))}
             </div>
-            
-            <select 
-              value={filterPosition}
-              onChange={(e) => setFilterPosition(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Staff Types</option>
-              <option value="Academic Staff">Academic Staff</option>
-              <option value="Administrative Staff">Administrative Staff</option>
-            </select>
-
-            <select 
-              value={filterDepartment}
-              onChange={(e) => setFilterDepartment(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Departments</option>
-              <option value="Faculty of Nontraditional Security">Nontraditional Security</option>
-              <option value="Faculty of Management">Management</option>
-              <option value="Faculty of Marketing and Communication">Marketing & Communication</option>
-              <option value="Board of Rectors">Board of Rectors</option>
-              <option value="Human Resources Department">HR Department</option>
-              <option value="Finance Department">Finance Department</option>
-            </select>
-
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
-              <Plus size={18} />
-              Add Staff
-            </button>
           </div>
         </div>
 
-        <div className="p-6 space-y-4">
-          {filteredStaff.map((staff) => (
-            <div key={staff.id} className="border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">{staff.name}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
-                        {staff.position}
+        <div className="gantt-body">
+          {filteredProjects.map((project) => {
+            const startPos = getDatePosition(project.startDate, minDate, maxDate);
+            const width = getDuration(project.startDate, project.endDate, minDate, maxDate);
+            
+            return (
+              <div
+                key={project.id}
+                className={`gantt-row ${selectedProject?.id === project.id ? 'selected' : ''}`}
+                onClick={() => setSelectedProject(project)}
+              >
+                <div className="gantt-sidebar">
+                  <div className="gantt-project-info">
+                    <div className="gantt-project-title">{project.title}</div>
+                    <div className="gantt-project-meta">
+                      <span className={`project-type-small type-${project.type}`}>
+                        {project.type === 'student' ? 'Student' : 
+                         project.type === 'staff' ? 'Staff' : 'Mixed'}
                       </span>
-                      {staff.type === 'Academic Staff' && staff.academicRank && (
-                        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold border border-indigo-300">
-                          {staff.academicRank}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{staff.department}</p>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1.5">
-                        <Mail size={14} />
-                        {staff.email}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Phone size={14} />
-                        {staff.phone}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Calendar size={14} />
-                        Joined: {new Date(staff.joinDate).toLocaleDateString()}
-                      </span>
+                      <span className="gantt-project-department">{project.department}</span>
                     </div>
                   </div>
                 </div>
+                <div className="gantt-timeline">
+                  <div className="gantt-grid">
+                    {monthMarkers.map((_, index) => (
+                      <div key={index} className="gantt-grid-line"></div>
+                    ))}
+                  </div>
+                  <div
+                    className={`gantt-bar priority-${project.priority}`}
+                    style={{
+                      left: `${startPos}%`,
+                      width: `${width}%`
+                    }}
+                  >
+                    <div className="gantt-bar-progress" style={{ width: `${project.progress}%` }}></div>
+                    <div className="gantt-bar-content">
+                      <span className="gantt-bar-text">{project.progress}%</span>
+                      <div className="gantt-bar-members">
+                        {project.members.slice(0, 3).map((member) => (
+                          <div key={member.id} className={`member-avatar-small avatar-${member.color}`}>
+                            {member.initials}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="gantt-dates">
+                    <span className="gantt-start-date">{formatDate(project.startDate)}</span>
+                    <span className="gantt-end-date">{formatDate(project.endDate)}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const NewProjectModal: React.FC = () => (
+    <div
+      className={`modal ${showNewProjectModal ? 'active' : ''}`}
+      onClick={() => setShowNewProjectModal(false)}
+    >
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Create New Project</h2>
+          <button className="close-modal" onClick={() => setShowNewProjectModal(false)}>
+            <X size={20} />
+          </button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={(e) => { e.preventDefault(); setShowNewProjectModal(false); }}>
+            <div className="form-group">
+              <label>Project Name</label>
+              <input type="text" placeholder="Enter project name" required />
+            </div>
+
+            <div className="form-group">
+              <label>Description</label>
+              <textarea placeholder="Describe your project" required></textarea>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Project Type</label>
+                <select required>
+                  <option value="">Select type</option>
+                  <option value="student">Student Project</option>
+                  <option value="staff">Staff Project</option>
+                  <option value="mixed">Student-Staff Project</option>
+                </select>
               </div>
 
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Education</p>
-                  <p className="text-sm font-bold text-gray-900">{staff.education}</p>
-                </div>
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Specialization</p>
-                  <p className="text-sm font-bold text-gray-900">{staff.specialization}</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Political Training</p>
-                  {getPoliticalTrainingBadge(staff.politicalTraining)}
-                </div>
-                <div className="p-3 bg-orange-50 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Promotion Status</p>
-                  {staff.eligibleForPromotion ? (
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Eligible</span>
-                  ) : (
-                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">Not Eligible</span>
-                  )}
-                </div>
-              </div>
-
-              {staff.type === 'Academic Staff' && (
-                <div className="grid grid-cols-3 gap-3 mb-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">{staff.publications}</p>
-                    <p className="text-xs text-gray-600">Publications</p>
-                  </div>
-                  <div className="text-center border-x border-gray-200">
-                    <p className="text-2xl font-bold text-green-600">{staff.projects}</p>
-                    <p className="text-xs text-gray-600">Research Projects</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">{staff.teachingHours}</p>
-                    <p className="text-xs text-gray-600">Teaching Hours</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setSelectedStaff(staff)}
-                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium"
-                >
-                  View Full Profile
-                </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                  <Edit size={16} className="inline mr-2" />
-                  Edit
-                </button>
-                {!staff.politicalTraining.completed && (
-                  <button className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium">
-                    Enroll in Training
-                  </button>
-                )}
+              <div className="form-group">
+                <label>Department</label>
+                <select required>
+                  <option value="">Select department</option>
+                  <option value="cs">Computer Science</option>
+                  <option value="eng">Engineering</option>
+                  <option value="business">Business</option>
+                  <option value="arts">Arts & Design</option>
+                </select>
               </div>
             </div>
-          ))}
-          {filteredStaff.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              No staff members found matching your criteria
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Start Date</label>
+                <input type="date" required />
+              </div>
+
+              <div className="form-group">
+                <label>End Date</label>
+                <input type="date" required />
+              </div>
             </div>
-          )}
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Priority</label>
+                <select required>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Status</label>
+                <select required>
+                  <option value="planning">Planning</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Team Members</label>
+              <input type="text" placeholder="Search and add team members" />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '30px' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowNewProjectModal(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                <Plus size={16} />
+                <span>Create Project</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="max-w mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">HR Profile Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage all staff profiles, qualifications, and political training status</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="border-b border-gray-200">
-            <div className="flex gap-1 p-2">
-              <button
-                onClick={() => setActiveView('overview')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveView('staff')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'staff' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              >
-                All Staff
-              </button>
-              <button
-                onClick={() => setActiveView('training')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'training' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              >
-                Political Training
-              </button>
-              <button
-                onClick={() => setActiveView('promotion')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'promotion' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              >
-                Promotion Tracking
-              </button>
-              <button
-                onClick={() => setActiveView('contracts')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium ${activeView === 'contracts' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              >
-                Contract Management
-              </button>
-            </div>
+    <div className="projects-tab">
+      {/* Header */}
+      <div className="projects-header">
+        <div className="projects-header-left">
+          <h1>Projects</h1>
+          <div className="view-switcher">
+            <button
+              className={`view-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+              onClick={() => setViewMode('kanban')}
+            >
+              <Kanban size={18} />
+              <span>Kanban</span>
+            </button>
+            <button
+              className={`view-btn ${viewMode === 'gantt' ? 'active' : ''}`}
+              onClick={() => setViewMode('gantt')}
+            >
+              <BarChart2 size={18} />
+              <span>Gantt</span>
+            </button>
           </div>
         </div>
-
-        {activeView === 'overview' && <OverviewDashboard />}
-        {activeView === 'staff' && <StaffListView />}
-        {activeView === 'training' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                  <ShieldCheck className="w-6 h-6 text-green-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Completed Training</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.politicalTraining.completed).length}</p>
-                <p className="text-xs text-green-600 mt-2">{Math.round((staffData.filter(s => s.politicalTraining.completed).length / staffData.length) * 100)}% completion rate</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                  <Award className="w-6 h-6 text-purple-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Advanced Level</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.politicalTraining.level === 'Advanced').length}</p>
-                <p className="text-xs text-purple-600 mt-2">Leadership qualified</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                  <BookOpen className="w-6 h-6 text-blue-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Intermediate Level</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.politicalTraining.level === 'Intermediate').length}</p>
-                <p className="text-xs text-blue-600 mt-2">Mid-level qualified</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-3">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Not Completed</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => !s.politicalTraining.completed).length}</p>
-                <p className="text-xs text-red-600 mt-2">Enrollment required</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">Advanced Level Training (Board of Rectors & Faculty Deans)</h3>
-                <p className="text-sm text-gray-500 mt-1">Staff who have completed the highest level of political training</p>
-              </div>
-              <div className="p-6 space-y-4">
-                {staffData.filter(s => s.politicalTraining.level === 'Advanced').map((staff) => (
-                  <div key={staff.id} className="border-2 border-purple-200 bg-purple-50 rounded-xl p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
-                              {staff.position}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{staff.department}</p>
-                          
-                          <div className="grid grid-cols-3 gap-4">
-                            <div className="p-3 bg-white rounded-lg border border-purple-200">
-                              <p className="text-xs text-gray-600 mb-1">Training Level</p>
-                              <p className="text-sm font-bold text-purple-700">Advanced</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg border border-purple-200">
-                              <p className="text-xs text-gray-600 mb-1">Completion Date</p>
-                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.politicalTraining.completionDate).toLocaleDateString()}</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg border border-purple-200">
-                              <p className="text-xs text-gray-600 mb-1">Certificate</p>
-                              <p className="text-xs font-mono text-gray-900">{staff.politicalTraining.certificate}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button className="px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 text-sm font-medium">
-                          View Certificate
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                          Download
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">Intermediate Level Training (Department Heads)</h3>
-                <p className="text-sm text-gray-500 mt-1">Staff who have completed intermediate political training</p>
-              </div>
-              <div className="p-6 space-y-4">
-                {staffData.filter(s => s.politicalTraining.level === 'Intermediate').map((staff) => (
-                  <div key={staff.id} className="border-2 border-blue-200 bg-blue-50 rounded-xl p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
-                              {staff.position}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{staff.department}</p>
-                          
-                          <div className="grid grid-cols-3 gap-4">
-                            <div className="p-3 bg-white rounded-lg border border-blue-200">
-                              <p className="text-xs text-gray-600 mb-1">Training Level</p>
-                              <p className="text-sm font-bold text-blue-700">Intermediate</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg border border-blue-200">
-                              <p className="text-xs text-gray-600 mb-1">Completion Date</p>
-                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.politicalTraining.completionDate).toLocaleDateString()}</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg border border-blue-200">
-                              <p className="text-xs text-gray-600 mb-1">Certificate</p>
-                              <p className="text-xs font-mono text-gray-900">{staff.politicalTraining.certificate}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium">
-                          View Certificate
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                          Download
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Not Completed - Enrollment Required</h3>
-                    <p className="text-sm text-gray-500 mt-1">Staff members who need to complete political training</p>
-                  </div>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
-                    Enroll All
-                  </button>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                {staffData.filter(s => !s.politicalTraining.completed).map((staff) => (
-                  <div key={staff.id} className="border-2 border-red-200 bg-red-50 rounded-xl p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPositionColor(staff.position)}`}>
-                              {staff.position}
-                            </span>
-                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold border border-red-300">
-                              Not Completed
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{staff.department} • {staff.type}</p>
-                          
-                          <div className="bg-white border border-red-200 rounded-lg p-3">
-                            <div className="flex items-start gap-3">
-                              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="text-sm font-semibold text-red-700 mb-1">Training Required for Promotion</p>
-                                <p className="text-xs text-gray-600">
-                                  Political training must be completed before this staff member can be considered for leadership positions 
-                                  such as Department Head, Faculty Dean, or Board of Rectors.
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium whitespace-nowrap">
-                          Enroll in Training
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                          View Profile
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 p-6 rounded-lg">
-                <div className="flex items-start gap-4">
-                  <Award className="w-8 h-8 text-purple-600 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Political Training Levels Explained</h4>
-                    <div className="space-y-2 text-sm text-gray-700">
-                      <div>
-                        <p className="font-semibold text-purple-700">Advanced Level:</p>
-                        <p className="text-xs">Required for Board of Rectors and Faculty Deans. Comprehensive leadership and political theory training.</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-blue-700">Intermediate Level:</p>
-                        <p className="text-xs">Suitable for Department Heads and senior positions. Foundational political training and management principles.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Training Completion Timeline</h3>
-                <div className="space-y-3">
-                  {staffData.filter(s => s.politicalTraining.completed) .sort((a, b) =>
-  (new Date(b.politicalTraining?.completionDate ?? 0).getTime()) -
-  (new Date(a.politicalTraining?.completionDate ?? 0).getTime())
-)
-                .slice(0, 5).map((staff, i) => (
-                    <div key={staff.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 ${staff.politicalTraining.level === 'Advanced' ? 'bg-purple-100' : 'bg-blue-100'} rounded-full flex items-center justify-center text-xs font-bold ${staff.politicalTraining.level === 'Advanced' ? 'text-purple-700' : 'text-blue-700'}`}>
-                          {i + 1}
-                        </div>
-                       
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">{staff.name}</p>
-                          <p className="text-xs text-gray-500">{staff.politicalTraining.level}</p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-600">{new Date(staff.politicalTraining.completionDate).toLocaleDateString()}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeView === 'contracts' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Total Contracts</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.length}</p>
-                <p className="text-xs text-blue-600 mt-2">All staff contracts</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                  <Award className="w-6 h-6 text-green-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Permanent Contracts</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.contract.type === 'Permanent').length}</p>
-                <p className="text-xs text-green-600 mt-2">Long-term staff</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                  <Calendar className="w-6 h-6 text-purple-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Fixed-Term Contracts</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.contract.type === 'Fixed-Term').length}</p>
-                <p className="text-xs text-purple-600 mt-2">Temporary staff</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-                  <AlertCircle className="w-6 h-6 text-orange-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Expiring Soon</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.contract.status === 'Expiring Soon').length}</p>
-                <p className="text-xs text-orange-600 mt-2">Renewal needed</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      placeholder="Search by staff name..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <select 
-                    value={filterContractStatus}
-                    onChange={(e) => setFilterContractStatus(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Expiring Soon">Expiring Soon</option>
-                  </select>
-
-                  <select 
-                    value={filterPosition}
-                    onChange={(e) => setFilterPosition(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Contract Types</option>
-                    <option value="Permanent">Permanent</option>
-                    <option value="Fixed-Term">Fixed-Term</option>
-                  </select>
-
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap">
-                    <Download size={18} />
-                    Export Report
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-4">
-                {staffData.filter(staff => {
-                  const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase());
-                  const matchesStatus = filterContractStatus === 'all' || staff.contract.status === filterContractStatus;
-                  const matchesType = filterPosition === 'all' || staff.contract.type === filterPosition;
-                  return matchesSearch && matchesStatus && matchesType;
-                }).map((staff) => (
-                  <div key={staff.id} className={`border-2 rounded-xl p-6 ${staff.contract.status === 'Expiring Soon' ? 'border-orange-200 bg-orange-50' : 'border-gray-200 bg-white'}`}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className={`w-14 h-14 ${staff.contract.status === 'Expiring Soon' ? 'bg-gradient-to-br from-orange-400 to-orange-600' : 'bg-gradient-to-br from-blue-400 to-purple-500'} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
-                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${staff.contract.type === 'Permanent' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-purple-100 text-purple-700 border-purple-300'}`}>
-                              {staff.contract.type}
-                            </span>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${staff.contract.status === 'Expiring Soon' ? 'bg-orange-100 text-orange-700 border-orange-300' : 'bg-green-100 text-green-700 border-green-300'}`}>
-                              {staff.contract.status}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{staff.position} • {staff.department}</p>
-                          
-                          <div className="grid grid-cols-4 gap-4 mb-3">
-                            <div className="p-3 bg-blue-50 rounded-lg">
-                              <p className="text-xs text-gray-600 mb-1">Start Date</p>
-                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.contract.startDate).toLocaleDateString()}</p>
-                            </div>
-                            <div className="p-3 bg-green-50 rounded-lg">
-                              <p className="text-xs text-gray-600 mb-1">End Date</p>
-                              <p className="text-sm font-semibold text-gray-900">{staff.contract.endDate ? new Date(staff.contract.endDate).toLocaleDateString() : 'Permanent'}</p>
-                            </div>
-                            <div className="p-3 bg-purple-50 rounded-lg">
-                              <p className="text-xs text-gray-600 mb-1">Salary</p>
-                              <p className="text-sm font-semibold text-gray-900">{staff.contract.salary}</p>
-                            </div>
-                            <div className="p-3 bg-orange-50 rounded-lg">
-                              <p className="text-xs text-gray-600 mb-1">Next Review</p>
-                              <p className="text-sm font-semibold text-gray-900">{new Date(staff.contract.nextReview).toLocaleDateString()}</p>
-                            </div>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs font-semibold text-gray-600 mb-2">Benefits</p>
-                            <div className="flex flex-wrap gap-2">
-                              {staff.contract.benefits.map((benefit, i) => (
-                                <span key={i} className="px-2 py-1 bg-white border border-gray-200 rounded text-xs text-gray-700">
-                                  {benefit}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right space-y-2">
-                        <button className="block w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium">
-                          View Contract
-                        </button>
-                        <button className="block w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                          Edit Details
-                        </button>
-                        {staff.contract.status === 'Expiring Soon' && (
-                          <button className="block w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium">
-                            Renew Contract
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Contracts Expiring in Next 6 Months</h3>
-                <div className="space-y-3">
-                  {staffData.filter(s => s.contract.status === 'Expiring Soon').map((staff) => (
-                    <div key={staff.id} className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-semibold text-gray-900">{staff.name}</p>
-                          <p className="text-sm text-gray-600">{staff.position}</p>
-                          <p className="text-xs text-orange-700 mt-1 font-medium">
-                            Expires: {new Date(staff.contract.endDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <button className="px-3 py-1 bg-orange-600 text-white rounded text-xs font-medium hover:bg-orange-700">
-                          Renew
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Contract Type Distribution</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Permanent Contracts</span>
-                      <span className="text-sm font-semibold text-gray-900">
-                        {staffData.filter(s => s.contract.type === 'Permanent').length} ({Math.round((staffData.filter(s => s.contract.type === 'Permanent').length / staffData.length) * 100)}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="h-2 rounded-full bg-green-500" style={{width: `${(staffData.filter(s => s.contract.type === 'Permanent').length / staffData.length) * 100}%`}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Fixed-Term Contracts</span>
-                      <span className="text-sm font-semibold text-gray-900">
-                        {staffData.filter(s => s.contract.type === 'Fixed-Term').length} ({Math.round((staffData.filter(s => s.contract.type === 'Fixed-Term').length / staffData.length) * 100)}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="h-2 rounded-full bg-purple-500" style={{width: `${(staffData.filter(s => s.contract.type === 'Fixed-Term').length / staffData.length) * 100}%`}}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeView === 'promotion' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Eligible for Promotion</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => s.eligibleForPromotion).length}</p>
-                <p className="text-xs text-green-600 mt-2">Ready for advancement</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-                  <AlertCircle className="w-6 h-6 text-orange-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Pending Requirements</p>
-                <p className="text-3xl font-bold text-gray-900">{staffData.filter(s => !s.eligibleForPromotion).length}</p>
-                <p className="text-xs text-orange-600 mt-2">Action needed</p>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                  <Award className="w-6 h-6 text-purple-600" />
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Leadership Positions</p>
-                <p className="text-3xl font-bold text-gray-900">3</p>
-                <p className="text-xs text-purple-600 mt-2">Require advanced training</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">Eligible for Promotion</h3>
-                <p className="text-sm text-gray-500 mt-1">Staff members who meet all requirements including political training</p>
-              </div>
-              <div className="p-6 space-y-4">
-                {staffData.filter(s => s.eligibleForPromotion).map((staff) => (
-                  <div key={staff.id} className="border-2 border-green-200 bg-green-50 rounded-xl p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPositionColor(staff.position)}`}>
-                              {staff.position}
-                            </span>
-                            {getPoliticalTrainingBadge(staff.politicalTraining)}
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{staff.department}</p>
-                          
-                          <div className="grid grid-cols-3 gap-4 mt-3">
-                            <div>
-                              <p className="text-xs text-gray-500">Political Training</p>
-                              <p className="text-sm font-semibold text-green-700">✓ {staff.politicalTraining.level}</p>
-                            </div>
-                            {staff.type === 'Academic Staff' && (
-                              <>
-                                <div>
-                                  <p className="text-xs text-gray-500">Publications</p>
-                                  <p className="text-sm font-semibold text-gray-900">{staff.publications} papers</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-gray-500">Experience</p>
-                                  <p className="text-sm font-semibold text-gray-900">
-                                    Math.floor(
-  (new Date().getTime() - new Date(staff.joinDate).getTime()) /
-  (365 * 24 * 60 * 60 * 1000)
-) years
-                                  </p>
-                                </div>
-                              </>
-                            )}
-                            {staff.type === 'Administrative Staff' && (
-                              <div>
-                                <p className="text-xs text-gray-500">Experience</p>
-                                <p className="text-sm font-semibold text-gray-900">
-                                  Math.floor(
-  (new Date().getTime() - new Date(staff.joinDate).getTime()) /
-  (365 * 24 * 60 * 60 * 1000)
-) years
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold mb-2">
-                          ELIGIBLE
-                        </span>
-                        <button className="block w-full px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 text-sm font-medium">
-                          Review Application
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">Pending Requirements</h3>
-                <p className="text-sm text-gray-500 mt-1">Staff members who need to complete requirements before promotion eligibility</p>
-              </div>
-              <div className="p-6 space-y-4">
-                {staffData.filter(s => !s.eligibleForPromotion).map((staff) => (
-                  <div key={staff.id} className="border-2 border-orange-200 bg-orange-50 rounded-xl p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {staff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-lg font-bold text-gray-900">{staff.name}</h4>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPositionColor(staff.position)}`}>
-                              {staff.position}
-                            </span>
-                            {getPoliticalTrainingBadge(staff.politicalTraining)}
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{staff.department}</p>
-                          
-                          <div className="bg-white border border-orange-200 rounded-lg p-3">
-                            <p className="text-sm font-semibold text-orange-700 mb-2">Missing Requirements:</p>
-                            <ul className="space-y-1">
-                              {!staff.politicalTraining.completed && (
-                                <li className="text-sm text-gray-700 flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                                  Political Training not completed
-                                </li>
-                              )}
-                              {staff.type === 'Academic Staff' && staff.publications < 20 && (
-                                <li className="text-sm text-gray-700 flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                                  Minimum publications requirement (Current: {staff.publications}, Required: 20)
-                                </li>
-                              )}
-                             { Math.floor(
-                                  (Date.now() - new Date(staff.joinDate).getTime()) /
-                                  (365 * 24 * 60 * 60 * 1000)
-                                ) < 5 && (
-                                  <li className="text-sm text-gray-700 flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                    Minimum experience requirement (Current: {
-                                      Math.floor(
-                                        (Date.now() - new Date(staff.joinDate).getTime()) /
-                                        (365 * 24 * 60 * 60 * 1000)
-                                      )
-                                    } years, Required: 5 years)
-                                  </li>
-                              )}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold mb-2">
-                          NOT ELIGIBLE
-                        </span>
-                        {!staff.politicalTraining.completed && (
-                          <button className="block w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium">
-                            Enroll in Training
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-6 rounded-lg">
-              <div className="flex items-start gap-4">
-                <Award className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Promotion Requirements</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-                    <div>
-                      <p className="font-semibold mb-1">For Academic Staff:</p>
-                      <ul className="space-y-1 text-xs">
-                        <li>• Political Training: Advanced (for Deans/Rectors) or Intermediate (for Heads)</li>
-                        <li>• Minimum 20 publications</li>
-                        <li>• Minimum 5 years experience</li>
-                        <li>• Active research projects</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-1">For Administrative Staff:</p>
-                      <ul className="space-y-1 text-xs">
-                        <li>• Political Training: Intermediate or Advanced</li>
-                        <li>• Minimum 5 years experience</li>
-                        <li>• Performance evaluation score above 85%</li>
-                        <li>• Relevant certifications</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {selectedStaff && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedStaff(null)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="h-40 bg-gradient-to-br from-blue-500 to-purple-600 p-6 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl shadow-lg">
-                      {selectedStaff.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">{selectedStaff.name}</h2>
-                      <p className="text-white text-opacity-90">{selectedStaff.position}</p>
-                      <p className="text-white text-opacity-75 text-sm">{selectedStaff.department}</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setSelectedStaff(null)}
-                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white text-xl font-bold"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-              
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Mail className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500">Email</p>
-                          <p className="text-sm font-medium text-gray-900">{selectedStaff.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Phone className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500">Phone</p>
-                          <p className="text-sm font-medium text-gray-900">{selectedStaff.phone}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500">Join Date</p>
-                          <p className="text-sm font-medium text-gray-900">{new Date(selectedStaff.joinDate).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Details</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <GraduationCap className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500">Education</p>
-                          <p className="text-sm font-medium text-gray-900">{selectedStaff.education}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <BookOpen className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500">Specialization</p>
-                          <p className="text-sm font-medium text-gray-900">{selectedStaff.specialization}</p>
-                        </div>
-                      </div>
-                      {selectedStaff.academicRank && (
-                        <div className="flex items-center gap-3">
-                          <Award className="w-5 h-5 text-gray-400" />
-                          <div>
-                            <p className="text-xs text-gray-500">Academic Rank</p>
-                            <p className="text-sm font-medium text-gray-900">{selectedStaff.academicRank}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-blue-600" />
-                    Political Training Status
-                  </h3>
-                  
-                  {selectedStaff.politicalTraining.completed ? (
-                    <div className="p-6 bg-green-50 border-2 border-green-300 rounded-lg">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <p className="text-sm font-bold text-green-700 uppercase mb-1">Training Completed</p>
-                          <p className="text-2xl font-bold text-green-700">{selectedStaff.politicalTraining.level}</p>
-                        </div>
-                        <ShieldCheck size={48} className="text-green-600" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                          <p className="text-xs text-gray-600">Completion Date</p>
-                          <p className="text-sm font-semibold text-gray-900">
-                            {new Date(selectedStaff.politicalTraining.completionDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600">Certificate Number</p>
-                          <p className="text-sm font-semibold text-gray-900">{selectedStaff.politicalTraining.certificate}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-6 bg-red-50 border-2 border-red-300 rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <AlertCircle size={48} className="text-red-600" />
-                        <div className="flex-1">
-                          <p className="text-lg font-bold text-red-700 mb-2">Political Training Not Completed</p>
-                          <p className="text-sm text-gray-700 mb-3">
-                            This staff member has not completed the required political training. 
-                            Completion is necessary for eligibility in leadership positions.
-                          </p>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
-                            Enroll in Training Program
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {selectedStaff.type === 'Academic Staff' && (
-                  <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Performance</h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="p-5 bg-blue-50 rounded-lg border border-blue-200 text-center">
-                        <BookOpen className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                        <p className="text-3xl font-bold text-blue-700">{selectedStaff.publications}</p>
-                        <p className="text-sm text-gray-600">Publications</p>
-                      </div>
-                      <div className="p-5 bg-green-50 rounded-lg border border-green-200 text-center">
-                        <Briefcase className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                        <p className="text-3xl font-bold text-green-700">{selectedStaff.projects}</p>
-                        <p className="text-sm text-gray-600">Research Projects</p>
-                      </div>
-                      <div className="p-5 bg-purple-50 rounded-lg border border-purple-200 text-center">
-                        <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                        <p className="text-3xl font-bold text-purple-700">{selectedStaff.teachingHours}</p>
-                        <p className="text-sm text-gray-600">Teaching Hours</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Promotion Eligibility</h3>
-                  {selectedStaff.eligibleForPromotion ? (
-                    <div className="p-5 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <TrendingUp className="w-6 h-6 text-green-600" />
-                        <div>
-                          <p className="font-semibold text-green-700">Eligible for Promotion</p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            This staff member meets all requirements for promotion consideration, including political training completion.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-5 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <AlertCircle className="w-6 h-6 text-orange-600" />
-                        <div>
-                          <p className="font-semibold text-orange-700">Not Eligible for Promotion</p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {!selectedStaff.politicalTraining.completed 
-                              ? "Political training must be completed before promotion eligibility."
-                              : "Additional requirements need to be met for promotion eligibility."}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t">
-                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-                    Edit Profile
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    <Download size={16} className="inline mr-2" />
-                    Download CV
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
-                    View Documents
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="projects-header-right">
+          <button className="btn btn-secondary">
+            <Search size={16} />
+            <span>Search</span>
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowNewProjectModal(true)}>
+            <Plus size={16} />
+            <span>New Project</span>
+          </button>
+        </div>
       </div>
+
+      {/* Filter Tabs */}
+      <div className="filter-tabs">
+        {(['all', 'student', 'staff', 'mixed'] as const).map(filter => (
+          <div
+            key={filter}
+            className={`tab ${activeFilter === filter ? 'active' : ''}`}
+            onClick={() => setActiveFilter(filter)}
+          >
+            {filter === 'all' ? 'All Projects' :
+              filter === 'student' ? 'Student Projects' :
+                filter === 'staff' ? 'Staff Projects' :
+                  'Student-Staff Projects'}
+          </div>
+        ))}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="projects-content">
+        {/* Projects List Sidebar */}
+        <div className="projects-list">
+          <div className="projects-list-header">
+            <h3>
+              <FolderOpen size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Projects ({filteredProjects.length})
+            </h3>
+          </div>
+          <div className="projects-list-items">
+            {filteredProjects.map(project => (
+              <div
+                key={project.id}
+                className={`project-list-item ${selectedProject?.id === project.id ? 'selected' : ''}`}
+                onClick={() => setSelectedProject(project)}
+              >
+                <div className="project-list-item-header">
+                  <div className="project-list-item-title">{project.title}</div>
+                  <span className={`project-type-small type-${project.type}`}>
+                    {project.type === 'student' ? 'S' : project.type === 'staff' ? 'F' : 'M'}
+                  </span>
+                </div>
+                <div className="project-list-item-meta">
+                  <span className="project-list-item-department">{project.department}</span>
+                </div>
+                <div className="project-list-item-progress">
+                  <div className="progress-bar-small">
+                    <div className="progress-fill-small" style={{ width: `${project.progress}%` }}></div>
+                  </div>
+                  <span className="progress-text-small">{project.progress}%</span>
+                </div>
+                <div className="project-list-item-footer">
+                  <div className="project-members-small">
+                    {project.members.slice(0, 3).map(member => (
+                      <div key={member.id} className={`member-avatar-tiny avatar-${member.color}`}>
+                        {member.initials}
+                      </div>
+                    ))}
+                    {project.members.length > 3 && (
+                      <span className="member-count-tiny">+{project.members.length - 3}</span>
+                    )}
+                  </div>
+                  <span className={`status-badge-small status-${project.status}`}>
+                    {project.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* View Area */}
+        <div className="view-area">
+          {viewMode === 'kanban' ? <KanbanView /> : <GanttView />}
+        </div>
+      </div>
+
+      {/* Modal */}
+      <NewProjectModal />
     </div>
   );
 };
+
+
+
+
 
 {/*render nav*/}
 
@@ -11417,6 +12238,9 @@ const HRProfileManagement = () => {
     }
     if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
       return <TimetableCalendar />;
+    }
+    if (activeTab == 'projects'){
+      return <ProjectsTab/>;
     }
     return (
       <div className="bg-white p-6 rounded-lg shadow">
