@@ -17,7 +17,7 @@ import {
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
   Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus, Folder,
-  Kanban, BarChart2, FolderOpen, List 
+  Kanban, BarChart2, FolderOpen, List, Package, Boxes, ShoppingCart, CreditCard, AlertOctagon, RotateCcw,  Footprints
 } from "lucide-react";
 
 
@@ -139,11 +139,11 @@ const AdminDashboard = () => {
 
   // Department Performance
   const departmentPerformance = [
-    { name: 'Faculty of Management', publication: 28, budget: 12500000, utilization: 78, performance: 92 },
-    { name: 'Faculty of Marketing & Communication', publication: 18, budget: 15800000, utilization: 85, performance: 88 },
-    { name: 'Faculty of Nontraditonal Security', publication: 38, budget: 9800000, utilization: 72, performance: 90 },
-    { name: 'Institute of Nontraditional Security ', publication: 8, budget: 11200000, utilization: 81, performance: 87 },
-    { name: 'Institute of Trainging & Management', publication: 3, budget: 6400000, utilization: 68, performance: 85 }
+    { name: 'Faculty of Management', publication: 28, personnel: 28, utilization: 78, performance: 92 },
+    { name: 'Faculty of Marketing & Communication', publication: 18, personnel: 18, utilization: 85, performance: 88 },
+    { name: 'Faculty of Nontraditonal Security', publication: 38, personnel: 38, utilization: 72, performance: 90 },
+    { name: 'Institute of Nontraditional Security ', publication: 8, personnel: 11, utilization: 81, performance: 87 },
+    { name: 'Institute of Trainging & Management', publication: 3, personnel: 6, utilization: 68, performance: 85 }
   ];
 
   // Faculty Stats
@@ -459,7 +459,7 @@ const AdminDashboard = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Publications</th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Budget</th>
+                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Personnel</th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Utilization</th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Performance</th>
               </tr>
@@ -469,7 +469,7 @@ const AdminDashboard = () => {
                 <tr key={i} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 font-semibold text-gray-900">{dept.name}</td>
                   <td className="px-6 py-4 text-right text-gray-700">{formatNumber(dept.publication)}</td>
-                  <td className="px-6 py-4 text-right text-gray-700">{formatCurrency(dept.budget)}</td>
+                  <td className="px-6 py-4 text-right text-gray-700">{formatNumber(dept.personnel)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
@@ -2462,627 +2462,6 @@ const Scholarship = () => {
   );
 }
 
-const LibraryDashboard = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Library Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Hybrid Online + Offline Library Management</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
-            Export Report
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-            Add New Item
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Total Collection</p>
-          <p className="text-2xl font-bold text-gray-900">87,543</p>
-          <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">Physical: 45,230</p>
-            <p className="text-xs text-gray-600">Digital: 42,313</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Active Users</p>
-          <p className="text-2xl font-bold text-gray-900">5,892</p>
-          <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">Students: 5,100</p>
-            <p className="text-xs text-gray-600">Faculty: 792</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Offline Borrows</p>
-          <p className="text-2xl font-bold text-gray-900">1,247</p>
-          <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">This month</p>
-            <p className="text-xs text-green-600">↑ 12% vs last month</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Online Access</p>
-          <p className="text-2xl font-bold text-gray-900">48,392</p>
-          <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">This month</p>
-            <p className="text-xs text-green-600">↑ 18% vs last month</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Overdue Items</p>
-          <p className="text-2xl font-bold text-red-600">34</p>
-          <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">Requires follow-up</p>
-            <p className="text-xs text-gray-600">Avg: 5 days late</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Textbooks</h3>
-            <BookOpen className="w-5 h-5 text-blue-600" />
-          </div>
-          <p className="text-2xl font-bold text-gray-900 mb-2">12,450</p>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Physical</span>
-              <span className="font-semibold">8,230</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Digital</span>
-              <span className="font-semibold">4,220</span>
-            </div>
-            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
-              <span className="text-gray-600">Offline Borrows</span>
-              <span className="font-semibold text-blue-600">342/month</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Online Access</span>
-              <span className="font-semibold text-green-600">18,450/month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Reference Books</h3>
-            <BookOpen className="w-5 h-5 text-green-600" />
-          </div>
-          <p className="text-2xl font-bold text-gray-900 mb-2">8,920</p>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Physical</span>
-              <span className="font-semibold">5,680</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Digital</span>
-              <span className="font-semibold">3,240</span>
-            </div>
-            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
-              <span className="text-gray-600">Offline Borrows</span>
-              <span className="font-semibold text-blue-600">189/month</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Online Access</span>
-              <span className="font-semibold text-green-600">12,340/month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Thesis/Dissertations</h3>
-            <FileText className="w-5 h-5 text-purple-600" />
-          </div>
-          <p className="text-2xl font-bold text-gray-900 mb-2">3,847</p>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Physical</span>
-              <span className="font-semibold">2,120</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Digital</span>
-              <span className="font-semibold">1,727</span>
-            </div>
-            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
-              <span className="text-gray-600">Offline Borrows</span>
-              <span className="font-semibold text-blue-600">67/month</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Online Access</span>
-              <span className="font-semibold text-green-600">5,892/month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Journals & Periodicals</h3>
-            <Globe className="w-5 h-5 text-orange-600" />
-          </div>
-          <p className="text-2xl font-bold text-gray-900 mb-2">62,326</p>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Physical</span>
-              <span className="font-semibold">29,200</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Digital</span>
-              <span className="font-semibold">33,126</span>
-            </div>
-            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
-              <span className="text-gray-600">Offline Borrows</span>
-              <span className="font-semibold text-blue-600">649/month</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-600">Online Access</span>
-              <span className="font-semibold text-green-600">11,710/month</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 col-span-2">
-    <h3 className="text-lg font-semibold text-gray-900 mb-6">
-      Usage Trends (Last 6 Months)
-    </h3>
-
-    <div className="h-64 flex items-end justify-between gap-3">
-      {[
-        { month: 'May', offline: 920,  online: 38000 },
-        { month: 'Jun', offline: 1050, online: 41000 },
-        { month: 'Jul', offline: 980,  online: 39500 },
-        { month: 'Aug', offline: 1120, online: 43000 },
-        { month: 'Sep', offline: 1180, online: 45500 },
-        { month: 'Oct', offline: 1247, online: 48392 },
-      ].map((data, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center gap-2">
-          {/* Both bars share the same height context */}
-          <div className="w-full h-48 flex gap-1 items-end">
-            <div
-              className="flex-1 bg-blue-500 rounded-t hover:bg-blue-600 cursor-pointer transition-colors"
-              style={{ height: `${(data.offline / 1500) * 100}%` }}
-              title={`Offline: ${data.offline}`}
-            />
-            <div
-              className="flex-1 bg-green-500 rounded-t hover:bg-green-600 cursor-pointer transition-colors"
-              style={{ height: `${(data.online / 50000) * 100}%` }}
-              title={`Online: ${data.online}`}
-            />
-          </div>
-          <span className="text-xs text-gray-500">{data.month}</span>
-        </div>
-      ))}
-    </div>
-
-    <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
-      <div className="flex items-center gap-2">
-        <div className="w-4 h-4 bg-blue-500 rounded"></div>
-        <span className="text-sm text-gray-600">Offline Borrows</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="w-4 h-4 bg-green-500 rounded"></div>
-        <span className="text-sm text-gray-600">Online Access</span>
-      </div>
-    </div>
-  </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Popular Resources</h3>
-          <div className="space-y-4">
-            {[
-              {title: 'Introduction to Algorithms', type: 'Textbook', accesses: 1247},
-              {title: 'Machine Learning Basics', type: 'Reference', accesses: 892},
-              {title: 'Deep Learning Research', type: 'Journal', accesses: 756},
-              {title: 'FONS Fundamentals', type: 'Textbook', accesses: 643},
-              {title: 'AI Applications in Healthcare', type: 'Thesis', accesses: 521}
-            ].map((item, i) => (
-              <div key={i} className="pb-3 border-b last:border-b-0 border-gray-200">
-                <div className="flex justify-between items-start mb-1">
-                  <p className="text-sm font-semibold text-gray-900 flex-1 pr-2">{item.title}</p>
-                  <span className="text-xs font-bold text-blue-600">{item.accesses}</span>
-                </div>
-                <p className="text-xs text-gray-500">{item.type}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
-          <div className="space-y-3">
-            {[
-              {action: 'New textbook added', item: 'Advanced Database Systems', time: '2 hours ago', type: 'add'},
-              {action: 'Offline borrow', item: 'Machine Learning by Tom Mitchell', time: '3 hours ago', type: 'borrow'},
-              {action: 'Digital access', item: 'IEEE Journal - AI Research', time: '5 hours ago', type: 'access'},
-              {action: 'Item returned', item: 'Introduction to Algorithms', time: '6 hours ago', type: 'return'},
-              {action: 'Overdue reminder sent', item: 'Data Structures Book', time: '1 day ago', type: 'alert'}
-            ].map((activity, i) => (
-              <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0 border-gray-200">
-                <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                  activity.type === 'add' ? 'bg-green-500' :
-                  activity.type === 'borrow' ? 'bg-blue-500' :
-                  activity.type === 'access' ? 'bg-purple-500' :
-                  activity.type === 'return' ? 'bg-gray-500' :
-                  'bg-red-500'
-                }`}></div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
-                  <p className="text-xs text-gray-600">{activity.item}</p>
-                  <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Library Statistics</h3>
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">Capacity Utilization</span>
-                <span className="text-lg font-bold text-gray-900">78%</span>
-              </div>
-              <div className="w-full bg-blue-200 rounded-full h-2">
-                <div className="bg-blue-600 h-2 rounded-full" style={{width: '78%'}}></div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-green-50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">Digital vs Physical Usage</span>
-                <span className="text-lg font-bold text-gray-900">74:26</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 flex overflow-hidden">
-                <div className="bg-green-600 h-2" style={{width: '74%'}}></div>
-                <div className="bg-blue-600 h-2" style={{width: '26%'}}></div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 border border-gray-200 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Avg. Borrow Duration</p>
-                <p className="text-lg font-bold text-gray-900">14 days</p>
-              </div>
-              <div className="p-3 border border-gray-200 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Return Rate</p>
-                <p className="text-lg font-bold text-green-600">96%</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 border border-gray-200 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">New Additions (Month)</p>
-                <p className="text-lg font-bold text-gray-900">142</p>
-              </div>
-              <div className="p-3 border border-gray-200 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Database Subscriptions</p>
-                <p className="text-lg font-bold text-gray-900">28</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-const TimetableCalendar = () => {
-    const [viewMode, setViewMode] = useState('week');
-    const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 15)); // Oct 15, 2025
-    const [selectedRoom, setSelectedRoom] = useState('all');
-    const [selectedProgram, setSelectedProgram] = useState('all');
-
-    const sampleCourses = [
-      { id: 1, code: 'CS301', name: 'Data Structures', room: 'A101', time: '08:00-09:30', day: 1, instructor: 'Dr. Nguyen' },
-      { id: 2, code: 'CS302', name: 'Database Systems', room: 'A102', time: '10:00-11:30', day: 1, instructor: 'Dr. Tran' },
-      { id: 3, code: 'BA201', name: 'Marketing', room: 'B201', time: '13:00-14:30', day: 1, instructor: 'Dr. Le' },
-      { id: 4, code: 'CS401', name: 'AI Fundamentals', room: 'A101', time: '08:00-09:30', day: 2, instructor: 'Dr. Pham' },
-      { id: 5, code: 'CS303', name: 'FONS', room: 'A103', time: '10:00-11:30', day: 2, instructor: 'Dr. Hoang' },
-      { id: 6, code: 'BA301', name: 'Strategic Management', room: 'B202', time: '14:00-15:30', day: 2, instructor: 'Dr. Vo' },
-      { id: 7, code: 'CS501', name: 'Machine Learning', room: 'A201', time: '08:00-09:30', day: 3, instructor: 'Dr. Nguyen' },
-      { id: 8, code: 'CS304', name: 'Web Development', room: 'A104', time: '10:00-11:30', day: 3, instructor: 'Dr. Dinh' },
-      { id: 9, code: 'BA202', name: 'Finance', room: 'B203', time: '13:00-14:30', day: 3, instructor: 'Dr. Bui' },
-      { id: 10, code: 'CS305', name: 'Networks', room: 'A105', time: '08:00-09:30', day: 4, instructor: 'Dr. Ly' },
-      { id: 11, code: 'CS502', name: 'Deep Learning', room: 'A202', time: '10:00-11:30', day: 4, instructor: 'Dr. Nguyen' },
-      { id: 12, code: 'BA401', name: 'Business Analytics', room: 'B301', time: '14:00-15:30', day: 4, instructor: 'Dr. Cao' },
-      { id: 13, code: 'CS306', name: 'Mobile Dev', room: 'A106', time: '08:00-09:30', day: 5, instructor: 'Dr. Dang' },
-      { id: 14, code: 'CS307', name: 'Security', room: 'A107', time: '10:00-11:30', day: 5, instructor: 'Dr. Vu' },
-    ];
-
-    const getWeekDates = () => {
-      const startOfWeek = new Date(currentDate);
-      const day = startOfWeek.getDay();
-      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
-      startOfWeek.setDate(diff);
-      
-      return Array.from({ length: 7 }, (_, i) => {
-        const date = new Date(startOfWeek);
-        date.setDate(startOfWeek.getDate() + i);
-        return date;
-      });
-    };
-
-    const getMonthDates = () => {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const startDay = firstDay.getDay();
-      const daysInMonth = lastDay.getDate();
-      
-      const dates = [];
-      for (let i = 0; i < startDay; i++) {
-        dates.push(null);
-      }
-      for (let i = 1; i <= daysInMonth; i++) {
-        dates.push(new Date(year, month, i));
-      }
-      return dates;
-    };
-
-    const navigateDate = (direction) => {
-      const newDate = new Date(currentDate);
-      if (viewMode === 'day') {
-        newDate.setDate(currentDate.getDate() + direction);
-      } else if (viewMode === 'week') {
-        newDate.setDate(currentDate.getDate() + (direction * 7));
-      } else {
-        newDate.setMonth(currentDate.getMonth() + direction);
-      }
-      setCurrentDate(newDate);
-    };
-
-    const DayView = () => {
-      const dayOfWeek = currentDate.getDay();
-      const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
-      
-      return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-bold text-lg">{currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
-          </div>
-          <div className="p-4 space-y-3">
-            {coursesForDay.length > 0 ? coursesForDay.map(course => (
-              <div key={course.id} className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-bold text-gray-900">{course.code}</h4>
-                    <p className="text-sm text-gray-600">{course.name}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Clock size={14} />
-                        {course.time}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Building size={14} />
-                        Room {course.room}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-500">{course.instructor}</span>
-                </div>
-              </div>
-            )) : (
-              <p className="text-center text-gray-500 py-8">No classes scheduled for this day</p>
-            )}
-          </div>
-        </div>
-      );
-    };
-
-    const WeekView = () => {
-      const weekDates = getWeekDates();
-      
-      return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-gray-200">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-              <div key={day} className="p-4 text-center border-r border-gray-200 last:border-r-0">
-                <p className="text-sm font-semibold text-gray-600">{day}</p>
-                <p className="text-lg font-bold text-gray-900 mt-1">{weekDates[index].getDate()}</p>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {weekDates.map((date, index) => {
-              const dayOfWeek = date.getDay() || 7;
-              const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
-              
-              return (
-                <div key={index} className="border-r border-gray-200 last:border-r-0 min-h-[400px] p-2">
-                  <div className="space-y-2">
-                    {coursesForDay.map(course => (
-                      <div key={course.id} className="p-2 bg-blue-50 border-l-2 border-blue-500 rounded text-xs">
-                        <p className="font-bold text-blue-900">{course.code}</p>
-                        <p className="text-gray-600 text-xs mt-1">{course.time}</p>
-                        <p className="text-gray-500 text-xs flex items-center gap-1 mt-1">
-                          <Building size={10} />
-                          {course.room}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    };
-
-    const MonthView = () => {
-      const monthDates = getMonthDates();
-      
-      return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-gray-200">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-              <div key={day} className="p-3 text-center border-r border-gray-200 last:border-r-0">
-                <p className="text-sm font-semibold text-gray-600">{day}</p>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {monthDates.map((date, index) => {
-              if (!date) {
-                return <div key={index} className="border-r border-b border-gray-200 min-h-[120px] bg-gray-50"></div>;
-              }
-              
-              const dayOfWeek = date.getDay() || 7;
-              const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
-              const isToday = date.toDateString() === new Date(2025, 9, 15).toDateString();
-              
-              return (
-                <div key={index} className={`border-r border-b border-gray-200 min-h-[120px] p-2 ${isToday ? 'bg-blue-50' : ''}`}>
-                  <p className={`text-sm font-semibold mb-2 ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
-                    {date.getDate()}
-                  </p>
-                  <div className="space-y-1">
-                    {coursesForDay.slice(0, 3).map(course => (
-                      <div key={course.id} className="text-xs bg-blue-100 text-blue-900 px-1 py-0.5 rounded truncate">
-                        {course.code} - {course.room}
-                      </div>
-                    ))}
-                    {coursesForDay.length > 3 && (
-                      <p className="text-xs text-gray-500">+{coursesForDay.length - 3} more</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    };
-
-    return (
-      <div className="space-y-6 p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Timetable Calendar</h1>
-            <p className="text-sm text-gray-500 mt-1">View and manage course schedules</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigateDate(-1)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ChevronRight className="rotate-180" size={20} />
-              </button>
-              <button
-                onClick={() => setCurrentDate(new Date(2025, 9, 15))}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-              >
-                Today
-              </button>
-              <button
-                onClick={() => navigateDate(1)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ChevronRight size={20} />
-              </button>
-              <h2 className="text-xl font-bold text-gray-900 ml-4">
-                {viewMode === 'month' 
-                  ? currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                  : currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                }
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <select 
-                value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All Rooms</option>
-                <option value="A101">Room A101</option>
-                <option value="A102">Room A102</option>
-                <option value="B201">Room B201</option>
-              </select>
-
-              <select 
-                value={selectedProgram}
-                onChange={(e) => setSelectedProgram(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All Programs</option>
-                <option value="cs">FONS</option>
-                <option value="ba">Business Admin</option>
-              </select>
-
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('day')}
-                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'day' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Day
-                </button>
-                <button
-                  onClick={() => setViewMode('week')}
-                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'week' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => setViewMode('month')}
-                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
-                    viewMode === 'month' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Month
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {viewMode === 'day' && <DayView />}
-        {viewMode === 'week' && <WeekView />}
-        {viewMode === 'month' && <MonthView />}
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-4">Legend</h3>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded"></div>
-              <span className="text-sm text-gray-600">Regular Classes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-sm text-gray-600">Labs</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-orange-500 rounded"></div>
-              <span className="text-sm text-gray-600">Exams</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
 
 
@@ -7557,7 +6936,7 @@ const DepartmentOverview = () => {
       name: 'Academic Affairs',
       head: 'Dr. Pham Thi Lan',
       faculty: 22,
-      KPI_percentage: 0,
+      students: 0,
       courses: 0,
       budget: '$590,000',
       utilization: 90,
@@ -7571,7 +6950,7 @@ const DepartmentOverview = () => {
       name: 'Finance & Accounting',
       head: 'Mr. Hoang Van Tuan',
       faculty: 16,
-      KPI_percentage: 0,
+      students: 0,
       courses: 0,
       budget: '$540,000',
       utilization: 87,
@@ -7585,7 +6964,7 @@ const DepartmentOverview = () => {
       name: 'FOM',
       head: 'Dr. Nguyen Van Hung',
       faculty: 38,
-      KPI_percentage: 980,
+      students: 980,
       courses: 42,
       budget: '$1,120,000',
       utilization: 89,
@@ -7599,7 +6978,7 @@ const DepartmentOverview = () => {
       name: 'FOMAC',
       head: 'Dr. Bui Thi Ngoc',
       faculty: 35,
-      KPI_percentage: 850,
+      students: 850,
       courses: 38,
       budget: '$1,050,000',
       utilization: 86,
@@ -7613,7 +6992,7 @@ const DepartmentOverview = () => {
       name: 'FONS',
       head: 'Dr. Le Van Cuong',
       faculty: 45,
-      KPI_percentage: 1200,
+      students: 1200,
       courses: 48,
       budget: '$1,280,000',
       utilization: 93,
@@ -7627,7 +7006,7 @@ const DepartmentOverview = () => {
       name: 'INS',
       head: 'Dr. Dao Van Hai',
       faculty: 28,
-      KPI_percentage: 720,
+      students: 720,
       courses: 32,
       budget: '$890,000',
       utilization: 84,
@@ -7641,7 +7020,7 @@ const DepartmentOverview = () => {
       name: 'ITM',
       head: 'Dr. Tran Thi Hoa',
       faculty: 32,
-      KPI_percentage: 820,
+      students: 820,
       courses: 36,
       budget: '$980,000',
       utilization: 88,
@@ -7655,7 +7034,7 @@ const DepartmentOverview = () => {
       name: 'CEI',
       head: 'Dr. Pham Van Long',
       faculty: 25,
-      KPI_percentage: 640,
+      students: 640,
       courses: 28,
       budget: '$820,000',
       utilization: 82,
@@ -7760,7 +7139,7 @@ const DepartmentOverview = () => {
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mb-1">Current KPI (%)</p>
+            <p className="text-xs text-gray-500 mb-1">Total Students</p>
             <p className="text-3xl font-bold text-gray-900">2,600</p>
             <div className="mt-2 space-y-0.5">
               <p className="text-xs text-gray-600">Full-time: 2,300</p>
@@ -10421,6 +9800,628 @@ const TimetableOverview = () => {
   );
 };
 
+const LibraryDashboard = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Library Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Hybrid Online + Offline Library Management</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+            Export Report
+          </button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+            Add New Item
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Total Collection</p>
+          <p className="text-2xl font-bold text-gray-900">87,543</p>
+          <div className="mt-2 space-y-0.5">
+            <p className="text-xs text-gray-600">Physical: 45,230</p>
+            <p className="text-xs text-gray-600">Digital: 42,313</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Active Users</p>
+          <p className="text-2xl font-bold text-gray-900">5,892</p>
+          <div className="mt-2 space-y-0.5">
+            <p className="text-xs text-gray-600">Students: 5,100</p>
+            <p className="text-xs text-gray-600">Faculty: 792</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Offline Borrows</p>
+          <p className="text-2xl font-bold text-gray-900">1,247</p>
+          <div className="mt-2 space-y-0.5">
+            <p className="text-xs text-gray-600">This month</p>
+            <p className="text-xs text-green-600">↑ 12% vs last month</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Online Access</p>
+          <p className="text-2xl font-bold text-gray-900">48,392</p>
+          <div className="mt-2 space-y-0.5">
+            <p className="text-xs text-gray-600">This month</p>
+            <p className="text-xs text-green-600">↑ 18% vs last month</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Overdue Items</p>
+          <p className="text-2xl font-bold text-red-600">34</p>
+          <div className="mt-2 space-y-0.5">
+            <p className="text-xs text-gray-600">Requires follow-up</p>
+            <p className="text-xs text-gray-600">Avg: 5 days late</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Textbooks</h3>
+            <BookOpen className="w-5 h-5 text-blue-600" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900 mb-2">12,450</p>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Physical</span>
+              <span className="font-semibold">8,230</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Digital</span>
+              <span className="font-semibold">4,220</span>
+            </div>
+            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
+              <span className="text-gray-600">Offline Borrows</span>
+              <span className="font-semibold text-blue-600">342/month</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Online Access</span>
+              <span className="font-semibold text-green-600">18,450/month</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Reference Books</h3>
+            <BookOpen className="w-5 h-5 text-green-600" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900 mb-2">8,920</p>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Physical</span>
+              <span className="font-semibold">5,680</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Digital</span>
+              <span className="font-semibold">3,240</span>
+            </div>
+            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
+              <span className="text-gray-600">Offline Borrows</span>
+              <span className="font-semibold text-blue-600">189/month</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Online Access</span>
+              <span className="font-semibold text-green-600">12,340/month</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Thesis/Dissertations</h3>
+            <FileText className="w-5 h-5 text-purple-600" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900 mb-2">3,847</p>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Physical</span>
+              <span className="font-semibold">2,120</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Digital</span>
+              <span className="font-semibold">1,727</span>
+            </div>
+            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
+              <span className="text-gray-600">Offline Borrows</span>
+              <span className="font-semibold text-blue-600">67/month</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Online Access</span>
+              <span className="font-semibold text-green-600">5,892/month</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Journals & Periodicals</h3>
+            <Globe className="w-5 h-5 text-orange-600" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900 mb-2">62,326</p>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Physical</span>
+              <span className="font-semibold">29,200</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Digital</span>
+              <span className="font-semibold">33,126</span>
+            </div>
+            <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
+              <span className="text-gray-600">Offline Borrows</span>
+              <span className="font-semibold text-blue-600">649/month</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Online Access</span>
+              <span className="font-semibold text-green-600">11,710/month</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 col-span-2">
+    <h3 className="text-lg font-semibold text-gray-900 mb-6">
+      Usage Trends (Last 6 Months)
+    </h3>
+
+    <div className="h-64 flex items-end justify-between gap-3">
+      {[
+        { month: 'May', offline: 920,  online: 38000 },
+        { month: 'Jun', offline: 1050, online: 41000 },
+        { month: 'Jul', offline: 980,  online: 39500 },
+        { month: 'Aug', offline: 1120, online: 43000 },
+        { month: 'Sep', offline: 1180, online: 45500 },
+        { month: 'Oct', offline: 1247, online: 48392 },
+      ].map((data, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-2">
+          {/* Both bars share the same height context */}
+          <div className="w-full h-48 flex gap-1 items-end">
+            <div
+              className="flex-1 bg-blue-500 rounded-t hover:bg-blue-600 cursor-pointer transition-colors"
+              style={{ height: `${(data.offline / 1500) * 100}%` }}
+              title={`Offline: ${data.offline}`}
+            />
+            <div
+              className="flex-1 bg-green-500 rounded-t hover:bg-green-600 cursor-pointer transition-colors"
+              style={{ height: `${(data.online / 50000) * 100}%` }}
+              title={`Online: ${data.online}`}
+            />
+          </div>
+          <span className="text-xs text-gray-500">{data.month}</span>
+        </div>
+      ))}
+    </div>
+
+    <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 bg-blue-500 rounded"></div>
+        <span className="text-sm text-gray-600">Offline Borrows</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 bg-green-500 rounded"></div>
+        <span className="text-sm text-gray-600">Online Access</span>
+      </div>
+    </div>
+  </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Popular Resources</h3>
+          <div className="space-y-4">
+            {[
+              {title: 'Introduction to Algorithms', type: 'Textbook', accesses: 1247},
+              {title: 'Machine Learning Basics', type: 'Reference', accesses: 892},
+              {title: 'Deep Learning Research', type: 'Journal', accesses: 756},
+              {title: 'FONS Fundamentals', type: 'Textbook', accesses: 643},
+              {title: 'AI Applications in Healthcare', type: 'Thesis', accesses: 521}
+            ].map((item, i) => (
+              <div key={i} className="pb-3 border-b last:border-b-0 border-gray-200">
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-sm font-semibold text-gray-900 flex-1 pr-2">{item.title}</p>
+                  <span className="text-xs font-bold text-blue-600">{item.accesses}</span>
+                </div>
+                <p className="text-xs text-gray-500">{item.type}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activities</h3>
+          <div className="space-y-3">
+            {[
+              {action: 'New textbook added', item: 'Advanced Database Systems', time: '2 hours ago', type: 'add'},
+              {action: 'Offline borrow', item: 'Machine Learning by Tom Mitchell', time: '3 hours ago', type: 'borrow'},
+              {action: 'Digital access', item: 'IEEE Journal - AI Research', time: '5 hours ago', type: 'access'},
+              {action: 'Item returned', item: 'Introduction to Algorithms', time: '6 hours ago', type: 'return'},
+              {action: 'Overdue reminder sent', item: 'Data Structures Book', time: '1 day ago', type: 'alert'}
+            ].map((activity, i) => (
+              <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0 border-gray-200">
+                <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                  activity.type === 'add' ? 'bg-green-500' :
+                  activity.type === 'borrow' ? 'bg-blue-500' :
+                  activity.type === 'access' ? 'bg-purple-500' :
+                  activity.type === 'return' ? 'bg-gray-500' :
+                  'bg-red-500'
+                }`}></div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">{activity.action}</p>
+                  <p className="text-xs text-gray-600">{activity.item}</p>
+                  <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Library Statistics</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">Capacity Utilization</span>
+                <span className="text-lg font-bold text-gray-900">78%</span>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full" style={{width: '78%'}}></div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-green-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">Digital vs Physical Usage</span>
+                <span className="text-lg font-bold text-gray-900">74:26</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 flex overflow-hidden">
+                <div className="bg-green-600 h-2" style={{width: '74%'}}></div>
+                <div className="bg-blue-600 h-2" style={{width: '26%'}}></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 border border-gray-200 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Avg. Borrow Duration</p>
+                <p className="text-lg font-bold text-gray-900">14 days</p>
+              </div>
+              <div className="p-3 border border-gray-200 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Return Rate</p>
+                <p className="text-lg font-bold text-green-600">96%</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 border border-gray-200 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">New Additions (Month)</p>
+                <p className="text-lg font-bold text-gray-900">142</p>
+              </div>
+              <div className="p-3 border border-gray-200 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Database Subscriptions</p>
+                <p className="text-lg font-bold text-gray-900">28</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+const TimetableCalendar = () => {
+    const [viewMode, setViewMode] = useState('week');
+    const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 15)); // Oct 15, 2025
+    const [selectedRoom, setSelectedRoom] = useState('all');
+    const [selectedProgram, setSelectedProgram] = useState('all');
+
+    const sampleCourses = [
+      { id: 1, code: 'CS301', name: 'Data Structures', room: 'A101', time: '08:00-09:30', day: 1, instructor: 'Dr. Nguyen' },
+      { id: 2, code: 'CS302', name: 'Database Systems', room: 'A102', time: '10:00-11:30', day: 1, instructor: 'Dr. Tran' },
+      { id: 3, code: 'BA201', name: 'Marketing', room: 'B201', time: '13:00-14:30', day: 1, instructor: 'Dr. Le' },
+      { id: 4, code: 'CS401', name: 'AI Fundamentals', room: 'A101', time: '08:00-09:30', day: 2, instructor: 'Dr. Pham' },
+      { id: 5, code: 'CS303', name: 'FONS', room: 'A103', time: '10:00-11:30', day: 2, instructor: 'Dr. Hoang' },
+      { id: 6, code: 'BA301', name: 'Strategic Management', room: 'B202', time: '14:00-15:30', day: 2, instructor: 'Dr. Vo' },
+      { id: 7, code: 'CS501', name: 'Machine Learning', room: 'A201', time: '08:00-09:30', day: 3, instructor: 'Dr. Nguyen' },
+      { id: 8, code: 'CS304', name: 'Web Development', room: 'A104', time: '10:00-11:30', day: 3, instructor: 'Dr. Dinh' },
+      { id: 9, code: 'BA202', name: 'Finance', room: 'B203', time: '13:00-14:30', day: 3, instructor: 'Dr. Bui' },
+      { id: 10, code: 'CS305', name: 'Networks', room: 'A105', time: '08:00-09:30', day: 4, instructor: 'Dr. Ly' },
+      { id: 11, code: 'CS502', name: 'Deep Learning', room: 'A202', time: '10:00-11:30', day: 4, instructor: 'Dr. Nguyen' },
+      { id: 12, code: 'BA401', name: 'Business Analytics', room: 'B301', time: '14:00-15:30', day: 4, instructor: 'Dr. Cao' },
+      { id: 13, code: 'CS306', name: 'Mobile Dev', room: 'A106', time: '08:00-09:30', day: 5, instructor: 'Dr. Dang' },
+      { id: 14, code: 'CS307', name: 'Security', room: 'A107', time: '10:00-11:30', day: 5, instructor: 'Dr. Vu' },
+    ];
+
+    const getWeekDates = () => {
+      const startOfWeek = new Date(currentDate);
+      const day = startOfWeek.getDay();
+      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+      startOfWeek.setDate(diff);
+      
+      return Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(startOfWeek);
+        date.setDate(startOfWeek.getDate() + i);
+        return date;
+      });
+    };
+
+    const getMonthDates = () => {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDay = firstDay.getDay();
+      const daysInMonth = lastDay.getDate();
+      
+      const dates = [];
+      for (let i = 0; i < startDay; i++) {
+        dates.push(null);
+      }
+      for (let i = 1; i <= daysInMonth; i++) {
+        dates.push(new Date(year, month, i));
+      }
+      return dates;
+    };
+
+    const navigateDate = (direction) => {
+      const newDate = new Date(currentDate);
+      if (viewMode === 'day') {
+        newDate.setDate(currentDate.getDate() + direction);
+      } else if (viewMode === 'week') {
+        newDate.setDate(currentDate.getDate() + (direction * 7));
+      } else {
+        newDate.setMonth(currentDate.getMonth() + direction);
+      }
+      setCurrentDate(newDate);
+    };
+
+    const DayView = () => {
+      const dayOfWeek = currentDate.getDay();
+      const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
+      
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="font-bold text-lg">{currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+          </div>
+          <div className="p-4 space-y-3">
+            {coursesForDay.length > 0 ? coursesForDay.map(course => (
+              <div key={course.id} className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-bold text-gray-900">{course.code}</h4>
+                    <p className="text-sm text-gray-600">{course.name}</p>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Clock size={14} />
+                        {course.time}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Building size={14} />
+                        Room {course.room}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500">{course.instructor}</span>
+                </div>
+              </div>
+            )) : (
+              <p className="text-center text-gray-500 py-8">No classes scheduled for this day</p>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    const WeekView = () => {
+      const weekDates = getWeekDates();
+      
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="grid grid-cols-7 border-b border-gray-200">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
+              <div key={day} className="p-4 text-center border-r border-gray-200 last:border-r-0">
+                <p className="text-sm font-semibold text-gray-600">{day}</p>
+                <p className="text-lg font-bold text-gray-900 mt-1">{weekDates[index].getDate()}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {weekDates.map((date, index) => {
+              const dayOfWeek = date.getDay() || 7;
+              const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
+              
+              return (
+                <div key={index} className="border-r border-gray-200 last:border-r-0 min-h-[400px] p-2">
+                  <div className="space-y-2">
+                    {coursesForDay.map(course => (
+                      <div key={course.id} className="p-2 bg-blue-50 border-l-2 border-blue-500 rounded text-xs">
+                        <p className="font-bold text-blue-900">{course.code}</p>
+                        <p className="text-gray-600 text-xs mt-1">{course.time}</p>
+                        <p className="text-gray-500 text-xs flex items-center gap-1 mt-1">
+                          <Building size={10} />
+                          {course.room}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    };
+
+    const MonthView = () => {
+      const monthDates = getMonthDates();
+      
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="grid grid-cols-7 border-b border-gray-200">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+              <div key={day} className="p-3 text-center border-r border-gray-200 last:border-r-0">
+                <p className="text-sm font-semibold text-gray-600">{day}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {monthDates.map((date, index) => {
+              if (!date) {
+                return <div key={index} className="border-r border-b border-gray-200 min-h-[120px] bg-gray-50"></div>;
+              }
+              
+              const dayOfWeek = date.getDay() || 7;
+              const coursesForDay = sampleCourses.filter(c => c.day === dayOfWeek);
+              const isToday = date.toDateString() === new Date(2025, 9, 15).toDateString();
+              
+              return (
+                <div key={index} className={`border-r border-b border-gray-200 min-h-[120px] p-2 ${isToday ? 'bg-blue-50' : ''}`}>
+                  <p className={`text-sm font-semibold mb-2 ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                    {date.getDate()}
+                  </p>
+                  <div className="space-y-1">
+                    {coursesForDay.slice(0, 3).map(course => (
+                      <div key={course.id} className="text-xs bg-blue-100 text-blue-900 px-1 py-0.5 rounded truncate">
+                        {course.code} - {course.room}
+                      </div>
+                    ))}
+                    {coursesForDay.length > 3 && (
+                      <p className="text-xs text-gray-500">+{coursesForDay.length - 3} more</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    };
+
+    return (
+      <div className="space-y-6 p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Timetable Calendar</h1>
+            <p className="text-sm text-gray-500 mt-1">View and manage course schedules</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigateDate(-1)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <ChevronRight className="rotate-180" size={20} />
+              </button>
+              <button
+                onClick={() => setCurrentDate(new Date(2025, 9, 15))}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+              >
+                Today
+              </button>
+              <button
+                onClick={() => navigateDate(1)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <ChevronRight size={20} />
+              </button>
+              <h2 className="text-xl font-bold text-gray-900 ml-4">
+                {viewMode === 'month' 
+                  ? currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                  : currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                }
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <select 
+                value={selectedRoom}
+                onChange={(e) => setSelectedRoom(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Rooms</option>
+                <option value="A101">Room A101</option>
+                <option value="A102">Room A102</option>
+                <option value="B201">Room B201</option>
+              </select>
+
+              <select 
+                value={selectedProgram}
+                onChange={(e) => setSelectedProgram(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="all">All Programs</option>
+                <option value="cs">FONS</option>
+                <option value="ba">Business Admin</option>
+              </select>
+
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('day')}
+                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'day' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Day
+                </button>
+                <button
+                  onClick={() => setViewMode('week')}
+                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'week' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Week
+                </button>
+                <button
+                  onClick={() => setViewMode('month')}
+                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                    viewMode === 'month' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Month
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {viewMode === 'day' && <DayView />}
+        {viewMode === 'week' && <WeekView />}
+        {viewMode === 'month' && <MonthView />}
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-900 mb-4">Legend</h3>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+              <span className="text-sm text-gray-600">Regular Classes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500 rounded"></div>
+              <span className="text-sm text-gray-600">Labs</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-orange-500 rounded"></div>
+              <span className="text-sm text-gray-600">Exams</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
 
 const AlumniOverview = () => {
   const [selectedYear, setSelectedYear] = useState('all');
@@ -11349,6 +11350,823 @@ const OneStopService = () => {
 };
 
 
+
+const HSBShop = () => {
+  const [activeView, setActiveView] = useState('dashboard'); // dashboard, inventory, sales, add-product
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [notification, setNotification] = useState(null);
+
+  // Sample merchandise data
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      name: "HSB University T-Shirt",
+      category: "Apparel",
+      price: 25.99,
+      stock: 150,
+      sold: 89,
+      image: "🎽",
+      sku: "HSB-TS-001",
+      status: "in-stock",
+      reorderLevel: 50,
+      supplier: "UniWear Co.",
+      lastRestocked: "2025-10-15",
+      sizes: ["S", "M", "L", "XL"]
+    },
+    {
+      id: 2,
+      name: "HSB Hoodie Navy",
+      category: "Apparel",
+      price: 45.99,
+      stock: 12,
+      sold: 134,
+      image: "👕",
+      sku: "HSB-HD-002",
+      status: "low-stock",
+      reorderLevel: 30,
+      supplier: "UniWear Co.",
+      lastRestocked: "2025-10-01",
+      sizes: ["S", "M", "L", "XL", "XXL"]
+    },
+    {
+      id: 3,
+      name: "University Notebook Set",
+      category: "Stationery",
+      price: 12.99,
+      stock: 0,
+      sold: 245,
+      image: "📒",
+      sku: "HSB-NB-003",
+      status: "out-of-stock",
+      reorderLevel: 100,
+      supplier: "StudySupplies Inc.",
+      lastRestocked: "2025-09-20",
+      sizes: []
+    },
+    {
+      id: 4,
+      name: "HSB Baseball Cap",
+      category: "Accessories",
+      price: 18.99,
+      stock: 85,
+      sold: 67,
+      image: "🧢",
+      sku: "HSB-CAP-004",
+      status: "in-stock",
+      reorderLevel: 40,
+      supplier: "HeadGear Pro",
+      lastRestocked: "2025-10-10",
+      sizes: ["One Size"]
+    },
+    {
+      id: 5,
+      name: "University Backpack",
+      category: "Accessories",
+      price: 59.99,
+      stock: 34,
+      sold: 112,
+      image: "🎒",
+      sku: "HSB-BP-005",
+      status: "in-stock",
+      reorderLevel: 25,
+      supplier: "BagMasters Ltd.",
+      lastRestocked: "2025-10-12",
+      sizes: []
+    },
+    {
+      id: 6,
+      name: "HSB Water Bottle",
+      category: "Accessories",
+      price: 15.99,
+      stock: 8,
+      sold: 178,
+      image: "💧",
+      sku: "HSB-WB-006",
+      status: "low-stock",
+      reorderLevel: 60,
+      supplier: "HydroGoods",
+      lastRestocked: "2025-09-28",
+      sizes: []
+    },
+    {
+      id: 7,
+      name: "Premium Pen Set",
+      category: "Stationery",
+      price: 8.99,
+      stock: 156,
+      sold: 203,
+      image: "🖊️",
+      sku: "HSB-PS-007",
+      status: "in-stock",
+      reorderLevel: 80,
+      supplier: "StudySupplies Inc.",
+      lastRestocked: "2025-10-18",
+      sizes: []
+    },
+    {
+      id: 8,
+      name: "HSB Sweatpants",
+      category: "Apparel",
+      price: 38.99,
+      stock: 45,
+      sold: 91,
+      image: "👖",
+      sku: "HSB-SP-008",
+      status: "in-stock",
+      reorderLevel: 35,
+      supplier: "UniWear Co.",
+      lastRestocked: "2025-10-05",
+      sizes: ["S", "M", "L", "XL"]
+    }
+  ]);
+
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: 'Apparel',
+    price: '',
+    stock: '',
+    image: '📦',
+    sku: '',
+    reorderLevel: '',
+    supplier: '',
+    sizes: []
+  });
+
+  // Calculate dashboard statistics
+  const stats = useMemo(() => {
+    const totalRevenue = products.reduce((sum, p) => sum + (p.price * p.sold), 0);
+    const totalProducts = products.length;
+    const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
+    const totalSold = products.reduce((sum, p) => sum + p.sold, 0);
+    const lowStockCount = products.filter(p => p.status === 'low-stock').length;
+    const outOfStockCount = products.filter(p => p.status === 'out-of-stock').length;
+
+    return {
+      totalRevenue,
+      totalProducts,
+      totalStock,
+      totalSold,
+      lowStockCount,
+      outOfStockCount
+    };
+  }, [products]);
+
+  // Filter products based on search and category
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, filterCategory]);
+
+  const categories = ['all', 'Apparel', 'Stationery', 'Accessories'];
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleAddProduct = () => {
+    if (!newProduct.name || !newProduct.price || !newProduct.stock || !newProduct.sku) {
+      showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+
+    const product = {
+      ...newProduct,
+      id: products.length + 1,
+      price: parseFloat(newProduct.price),
+      stock: parseInt(newProduct.stock),
+      reorderLevel: parseInt(newProduct.reorderLevel) || 20,
+      sold: 0,
+      status: parseInt(newProduct.stock) > parseInt(newProduct.reorderLevel || '20') ? 'in-stock' : 'low-stock',
+      lastRestocked: new Date().toISOString().split('T')[0]
+    };
+
+    setProducts([...products, product]);
+    setNewProduct({
+      name: '',
+      category: 'Apparel',
+      price: '',
+      stock: '',
+      image: '📦',
+      sku: '',
+      reorderLevel: '',
+      supplier: '',
+      sizes: []
+    });
+    setActiveView('inventory');
+    showNotification('Product added successfully!');
+  };
+
+  const handleUpdateStock = (productId, newStock) => {
+    setProducts(products.map(p => {
+      if (p.id === productId) {
+        const status = newStock > p.reorderLevel ? 'in-stock' : 
+                      newStock > 0 ? 'low-stock' : 'out-of-stock';
+        return { ...p, stock: newStock, status };
+      }
+      return p;
+    }));
+    showNotification('Stock updated successfully!');
+  };
+
+  const handleDeleteProduct = (productId) => {
+    setProducts(products.filter(p => p.id !== productId));
+    setShowModal(false);
+    showNotification('Product deleted successfully!');
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'in-stock': return 'text-green-600 bg-green-50';
+      case 'low-stock': return 'text-orange-600 bg-orange-50';
+      case 'out-of-stock': return 'text-red-600 bg-red-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'in-stock': return <CheckCircle className="w-4 h-4" />;
+      case 'low-stock': return <AlertTriangle className="w-4 h-4" />;
+      case 'out-of-stock': return <XCircle className="w-4 h-4" />;
+      default: return null;
+    }
+  };
+
+  // Dashboard View
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 mb-1">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900">${stats.totalRevenue.toFixed(2)}</p>
+              <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                <ArrowUpRight className="w-3 h-3" />
+                +15.7% vs last year
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+              <Package className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 mb-1">Total Products</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
+              <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                <TrendingUp className="w-3 h-3" />
+                +8% vs last month
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+              <Boxes className="w-6 h-6 text-purple-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 mb-1">Total Stock</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalStock}</p>
+              <p className="text-xs text-gray-600 mt-1">Across all items</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
+              <ShoppingCart className="w-6 h-6 text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 mb-1">Items Sold</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalSold}</p>
+              <p className="text-xs text-orange-600 flex items-center gap-1 mt-1">
+                <ArrowUpRight className="w-3 h-3" />
+                +12% vs last month
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts Section */}
+      {(stats.lowStockCount > 0 || stats.outOfStockCount > 0) && (
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <AlertOctagon className="w-5 h-5 text-orange-600" />
+            Stock Alerts
+          </h3>
+          <div className="space-y-3">
+            {stats.outOfStockCount > 0 && (
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100">
+                <div className="flex items-center gap-3">
+                  <XCircle className="w-5 h-5 text-red-600" />
+                  <div>
+                    <p className="font-semibold text-red-900">Out of Stock</p>
+                    <p className="text-sm text-red-700">{stats.outOfStockCount} product(s) need immediate restocking</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setActiveView('inventory')}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  View Items
+                </button>
+              </div>
+            )}
+            {stats.lowStockCount > 0 && (
+              <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-100">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-600" />
+                  <div>
+                    <p className="font-semibold text-orange-900">Low Stock</p>
+                    <p className="text-sm text-orange-700">{stats.lowStockCount} product(s) running low</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setActiveView('inventory')}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
+                >
+                  Review
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Top Selling Products */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-bold text-gray-900">Top Selling Products</h3>
+          <button 
+            onClick={() => setActiveView('sales')}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+          >
+            View All <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {[...products].sort((a, b) => b.sold - a.sold).slice(0, 5).map((product, index) => (
+            <div key={product.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-2xl">
+                {product.image}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">{product.name}</p>
+                <p className="text-sm text-gray-600">{product.sold} units sold</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-gray-900">${(product.price * product.sold).toFixed(2)}</p>
+                <p className="text-sm text-gray-600">${product.price} each</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Inventory View
+  const renderInventory = () => (
+    <div className="space-y-6">
+      {/* Search and Filter Bar */}
+      <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search by name or SKU..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilterCategory(cat)}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-colors ${
+                  filterCategory === cat
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProducts.map(product => (
+          <div key={product.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center text-4xl">
+                  {product.image}
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getStatusColor(product.status)}`}>
+                  {getStatusIcon(product.status)}
+                  {product.status.split('-').join(' ').toUpperCase()}
+                </span>
+              </div>
+              
+              <h4 className="font-bold text-gray-900 mb-1">{product.name}</h4>
+              <p className="text-sm text-gray-600 mb-3">SKU: {product.sku}</p>
+              
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Price:</span>
+                  <span className="font-bold text-gray-900">${product.price}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Stock:</span>
+                  <span className={`font-bold ${product.stock === 0 ? 'text-red-600' : product.stock < product.reorderLevel ? 'text-orange-600' : 'text-green-600'}`}>
+                    {product.stock} units
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Sold:</span>
+                  <span className="font-semibold text-gray-900">{product.sold} units</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedProduct(product);
+                    setShowModal(true);
+                  }}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleUpdateStock(product.id, product.stock + 10)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filteredProducts.length === 0 && (
+        <div className="bg-white rounded-2xl shadow-sm p-12 border border-gray-100 text-center">
+          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-gray-900 mb-2">No Products Found</h3>
+          <p className="text-gray-600">Try adjusting your search or filters</p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Add Product View
+  const renderAddProduct = () => (
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Product</h2>
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Product Name *
+              </label>
+              <input
+                type="text"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter product name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                value={newProduct.category}
+                onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Apparel">Apparel</option>
+                <option value="Stationery">Stationery</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                SKU *
+              </label>
+              <input
+                type="text"
+                value={newProduct.sku}
+                onChange={(e) => setNewProduct({...newProduct, sku: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="HSB-XXX-000"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Supplier
+              </label>
+              <input
+                type="text"
+                value={newProduct.supplier}
+                onChange={(e) => setNewProduct({...newProduct, supplier: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter supplier name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Price ($) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={newProduct.price}
+                onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Initial Stock *
+              </label>
+              <input
+                type="number"
+                value={newProduct.stock}
+                onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Reorder Level
+              </label>
+              <input
+                type="number"
+                value={newProduct.reorderLevel}
+                onChange={(e) => setNewProduct({...newProduct, reorderLevel: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="20"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Product Icon (Emoji)
+              </label>
+              <input
+                type="text"
+                value={newProduct.image}
+                onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="📦"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-6">
+            <button
+              onClick={handleAddProduct}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Product
+            </button>
+            <button
+              onClick={() => setActiveView('inventory')}
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-semibold"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Sales View
+  const renderSales = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Sales Performance</h3>
+        
+        <div className="space-y-3">
+          {[...products].sort((a, b) => (b.price * b.sold) - (a.price * a.sold)).map((product, index) => (
+            <div key={product.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center font-bold text-blue-600">
+                {index + 1}
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-2xl">
+                {product.image}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">{product.name}</p>
+                <p className="text-sm text-gray-600">{product.category}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-gray-900">${(product.price * product.sold).toFixed(2)}</p>
+                <p className="text-sm text-gray-600">{product.sold} units × ${product.price}</p>
+              </div>
+              <div className="w-24">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, (product.sold / Math.max(...products.map(p => p.sold))) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Edit Product Modal
+  const renderModal = () => {
+    if (!showModal || !selectedProduct) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900">Edit Product</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Stock Quantity</label>
+                <input
+                  type="number"
+                  defaultValue={selectedProduct.stock}
+                  onChange={(e) => setSelectedProduct({...selectedProduct, stock: parseInt(e.target.value)})}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  defaultValue={selectedProduct.price}
+                  onChange={(e) => setSelectedProduct({...selectedProduct, price: parseFloat(e.target.value)})}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => {
+                  handleUpdateStock(selectedProduct.id, selectedProduct.stock);
+                  setShowModal(false);
+                }}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={() => handleDeleteProduct(selectedProduct.id)}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                <ShoppingCart className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">HSB Shop</h1>
+                <p className="text-sm text-gray-600">Merchandise Management System</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setActiveView('add-product')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Product
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex gap-8">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: Home },
+              { id: 'inventory', label: 'Inventory', icon: Package },
+              { id: 'sales', label: 'Sales', icon: TrendingUp },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveView(tab.id)}
+                className={`flex items-center gap-2 px-4 py-4 border-b-2 transition-colors font-medium ${
+                  activeView === tab.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {activeView === 'dashboard' && renderDashboard()}
+        {activeView === 'inventory' && renderInventory()}
+        {activeView === 'add-product' && renderAddProduct()}
+        {activeView === 'sales' && renderSales()}
+      </div>
+
+      {/* Modal */}
+      {renderModal()}
+
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed bottom-6 right-6 px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 z-50 ${
+          notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        } text-white`}>
+          {notification.type === 'success' ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            <XCircle className="w-5 h-5" />
+          )}
+          <span className="font-medium">{notification.message}</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 {/*project tab*/}
 
@@ -12507,6 +13325,9 @@ const ProjectsTab: React.FC = () => {
     }
     if (activeTab == 'projects'){
       return <ProjectsTab/>;
+    }
+    if (activeTab == 'shopping'){
+      return <HSBShop/>;
     }
     return (
       <div className="bg-white p-6 rounded-lg shadow">

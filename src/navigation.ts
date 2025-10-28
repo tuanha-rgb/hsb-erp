@@ -114,6 +114,8 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
           },
           { id: 'one-stop-service', label: 'One-Stop Service', icon: UserCheck },
           { id: 'projects', label: 'Projects', icon: Briefcase },
+          { id: 'shopping', label: 'HSB-Shop', icon: UserCheck },
+
           {
             id: 'alumni', label: 'Alumni', icon: Award,
             submenu: [
