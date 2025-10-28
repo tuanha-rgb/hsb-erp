@@ -22,12 +22,15 @@
   align-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .projects-header-left {
   display: flex;
   align-items: center;
   gap: 30px;
+  flex: 1;
 }
 
 .projects-header h1 {
@@ -67,6 +70,12 @@
 .view-btn.active {
   background: #3b82f6;
   color: white;
+}
+
+.projects-header-middle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .projects-header-right {
@@ -110,9 +119,7 @@
 .filter-tabs {
   display: flex;
   gap: 10px;
-  padding: 15px 30px;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
+  align-items: center;
 }
 
 .tab {
@@ -448,6 +455,9 @@
 
 .column-header {
   margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .column-title {
@@ -457,6 +467,25 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+}
+
+.column-delete-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.column-delete-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .column-count {
@@ -600,6 +629,89 @@
   background: #f8fafc;
   border-color: #3b82f6;
   color: #3b82f6;
+}
+
+/* Add Column Button */
+.add-column-btn {
+  flex: 0 0 300px;
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.add-column-btn:hover {
+  background: white;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* New Column Input */
+.new-column-input {
+  flex: 0 0 300px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  min-height: auto;
+}
+
+.new-column-name-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.new-column-name-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.new-column-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.btn-icon:hover {
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 /* Gantt View */
@@ -1008,6 +1120,12 @@
   .kanban-column {
     flex: 0 0 280px;
   }
+  
+  .projects-header-middle {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 10px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1021,6 +1139,15 @@
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+  }
+  
+  .projects-header-middle {
+    order: 2;
+    width: 100%;
+  }
+  
+  .projects-header-right {
+    order: 3;
   }
 
   .view-switcher {
@@ -1046,6 +1173,7 @@
   .filter-tabs {
     overflow-x: auto;
     white-space: nowrap;
+    width: 100%;
   }
 
   .kanban-board {

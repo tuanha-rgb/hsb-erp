@@ -17,7 +17,7 @@ import {
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
   Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus, Folder,
-  Kanban, BarChart2, FolderOpen 
+  Kanban, BarChart2, FolderOpen, List 
 } from "lucide-react";
 
 
@@ -139,11 +139,11 @@ const AdminDashboard = () => {
 
   // Department Performance
   const departmentPerformance = [
-    { name: 'Faculty of Management', students: 800, budget: 12500000, utilization: 78, performance: 92 },
-    { name: 'Faculty of Marketing & Communication', students: 800, budget: 15800000, utilization: 85, performance: 88 },
-    { name: 'Faculty of Nontraditonal Security', students: 800, budget: 9800000, utilization: 72, performance: 90 },
-    { name: 'Institute of Nontraditional Security ', students: 1089, budget: 11200000, utilization: 81, performance: 87 },
-    { name: 'Institute of Trainging & Management', students: 623, budget: 6400000, utilization: 68, performance: 85 }
+    { name: 'Faculty of Management', publication: 28, budget: 12500000, utilization: 78, performance: 92 },
+    { name: 'Faculty of Marketing & Communication', publication: 18, budget: 15800000, utilization: 85, performance: 88 },
+    { name: 'Faculty of Nontraditonal Security', publication: 38, budget: 9800000, utilization: 72, performance: 90 },
+    { name: 'Institute of Nontraditional Security ', publication: 8, budget: 11200000, utilization: 81, performance: 87 },
+    { name: 'Institute of Trainging & Management', publication: 3, budget: 6400000, utilization: 68, performance: 85 }
   ];
 
   // Faculty Stats
@@ -458,7 +458,7 @@ const AdminDashboard = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Students</th>
+                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Publications</th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Budget</th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Utilization</th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Performance</th>
@@ -468,7 +468,7 @@ const AdminDashboard = () => {
               {departmentPerformance.map((dept, i) => (
                 <tr key={i} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 font-semibold text-gray-900">{dept.name}</td>
-                  <td className="px-6 py-4 text-right text-gray-700">{formatNumber(dept.students)}</td>
+                  <td className="px-6 py-4 text-right text-gray-700">{formatNumber(dept.publication)}</td>
                   <td className="px-6 py-4 text-right text-gray-700">{formatCurrency(dept.budget)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
@@ -7557,7 +7557,7 @@ const DepartmentOverview = () => {
       name: 'Academic Affairs',
       head: 'Dr. Pham Thi Lan',
       faculty: 22,
-      students: 0,
+      KPI_percentage: 0,
       courses: 0,
       budget: '$590,000',
       utilization: 90,
@@ -7571,7 +7571,7 @@ const DepartmentOverview = () => {
       name: 'Finance & Accounting',
       head: 'Mr. Hoang Van Tuan',
       faculty: 16,
-      students: 0,
+      KPI_percentage: 0,
       courses: 0,
       budget: '$540,000',
       utilization: 87,
@@ -7585,7 +7585,7 @@ const DepartmentOverview = () => {
       name: 'FOM',
       head: 'Dr. Nguyen Van Hung',
       faculty: 38,
-      students: 980,
+      KPI_percentage: 980,
       courses: 42,
       budget: '$1,120,000',
       utilization: 89,
@@ -7599,7 +7599,7 @@ const DepartmentOverview = () => {
       name: 'FOMAC',
       head: 'Dr. Bui Thi Ngoc',
       faculty: 35,
-      students: 850,
+      KPI_percentage: 850,
       courses: 38,
       budget: '$1,050,000',
       utilization: 86,
@@ -7613,7 +7613,7 @@ const DepartmentOverview = () => {
       name: 'FONS',
       head: 'Dr. Le Van Cuong',
       faculty: 45,
-      students: 1200,
+      KPI_percentage: 1200,
       courses: 48,
       budget: '$1,280,000',
       utilization: 93,
@@ -7627,7 +7627,7 @@ const DepartmentOverview = () => {
       name: 'INS',
       head: 'Dr. Dao Van Hai',
       faculty: 28,
-      students: 720,
+      KPI_percentage: 720,
       courses: 32,
       budget: '$890,000',
       utilization: 84,
@@ -7641,7 +7641,7 @@ const DepartmentOverview = () => {
       name: 'ITM',
       head: 'Dr. Tran Thi Hoa',
       faculty: 32,
-      students: 820,
+      KPI_percentage: 820,
       courses: 36,
       budget: '$980,000',
       utilization: 88,
@@ -7655,7 +7655,7 @@ const DepartmentOverview = () => {
       name: 'CEI',
       head: 'Dr. Pham Van Long',
       faculty: 25,
-      students: 640,
+      KPI_percentage: 640,
       courses: 28,
       budget: '$820,000',
       utilization: 82,
@@ -7760,7 +7760,7 @@ const DepartmentOverview = () => {
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mb-1">Total Students</p>
+            <p className="text-xs text-gray-500 mb-1">Current KPI (%)</p>
             <p className="text-3xl font-bold text-gray-900">2,600</p>
             <div className="mt-2 space-y-0.5">
               <p className="text-xs text-gray-600">Full-time: 2,300</p>
@@ -11350,12 +11350,7 @@ const OneStopService = () => {
 
 
 
-
-
-
-
 {/*project tab*/}
-
 
 
 // Types
@@ -11388,7 +11383,7 @@ interface Task {
   assignee?: Member;
   startDate: string;
   endDate: string;
-  column: 'todo' | 'inprogress' | 'review' | 'done';
+  column: string; // Changed to string to support custom columns
   description?: string;
 }
 
@@ -11397,14 +11392,31 @@ interface Label {
   text: string;
 }
 
+interface KanbanColumn {
+  id: string;
+  title: string;
+  icon?: LucideIcon;
+  order: number;
+}
+
 type ViewMode = 'kanban' | 'gantt';
 
-const ProjectsTab = () => {
+const ProjectsTab: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'student' | 'staff' | 'mixed'>('all');
+  const [showNewColumnInput, setShowNewColumnInput] = useState(false);
+  const [newColumnName, setNewColumnName] = useState('');
+  
+  // Default columns
+  const [columns, setColumns] = useState<KanbanColumn[]>([
+    { id: 'todo', title: 'To Do', icon: FileText, order: 0 },
+    { id: 'inprogress', title: 'In Progress', icon: Clock, order: 1 },
+    { id: 'review', title: 'Review', icon: Eye, order: 2 },
+    { id: 'done', title: 'Done', icon: CheckCircle, order: 3 },
+  ]);
 
   // Sample Members
   const members: Member[] = [
@@ -11498,6 +11510,188 @@ const ProjectsTab = () => {
       members: [members[4], members[5]],
       status: 'active',
       department: 'HR',
+      priority: 'low'
+    },
+    {
+      id: '7',
+      title: 'Student Feedback System',
+      description: 'Building an automated system for collecting and analyzing student feedback',
+      type: 'mixed',
+      startDate: '2025-09-20',
+      endDate: '2025-12-01',
+      progress: 45,
+      members: [members[2], members[6], members[8]],
+      status: 'active',
+      department: 'Administration',
+      priority: 'high'
+    },
+    {
+      id: '8',
+      title: 'Blockchain Research Lab',
+      description: 'Establishing a research lab for blockchain and cryptocurrency studies',
+      type: 'staff',
+      startDate: '2025-10-01',
+      endDate: '2026-02-28',
+      progress: 28,
+      members: [members[3], members[7]],
+      status: 'planning',
+      department: 'Computer Science',
+      priority: 'medium'
+    },
+    {
+      id: '9',
+      title: 'E-Learning Platform',
+      description: 'Developing an interactive online learning platform with video streaming',
+      type: 'student',
+      startDate: '2025-09-10',
+      endDate: '2025-12-10',
+      progress: 72,
+      members: [members[0], members[2], members[9]],
+      status: 'active',
+      department: 'Computer Science',
+      priority: 'high'
+    },
+    {
+      id: '10',
+      title: 'Campus Sustainability Initiative',
+      description: 'Implementing green technologies and sustainable practices across campus',
+      type: 'mixed',
+      startDate: '2025-08-15',
+      endDate: '2026-03-30',
+      progress: 38,
+      members: [members[1], members[4], members[6], members[8]],
+      status: 'active',
+      department: 'Facilities',
+      priority: 'medium'
+    },
+    {
+      id: '11',
+      title: 'Alumni Network Platform',
+      description: 'Creating a digital platform to connect alumni and current students',
+      type: 'staff',
+      startDate: '2025-10-05',
+      endDate: '2025-12-31',
+      progress: 51,
+      members: [members[5], members[7]],
+      status: 'active',
+      department: 'Alumni Relations',
+      priority: 'medium'
+    },
+    {
+      id: '12',
+      title: 'Virtual Reality Lab Setup',
+      description: 'Setting up a VR lab for immersive learning experiences',
+      type: 'mixed',
+      startDate: '2025-09-25',
+      endDate: '2025-11-20',
+      progress: 62,
+      members: [members[2], members[3], members[9]],
+      status: 'active',
+      department: 'Engineering',
+      priority: 'high'
+    },
+    {
+      id: '13',
+      title: 'Smart Classroom Integration',
+      description: 'Upgrading classrooms with IoT devices and smart technology',
+      type: 'staff',
+      startDate: '2025-10-10',
+      endDate: '2026-01-15',
+      progress: 15,
+      members: [members[4], members[6]],
+      status: 'planning',
+      department: 'IT',
+      priority: 'high'
+    },
+    {
+      id: '14',
+      title: 'Student Hackathon 2025',
+      description: 'Organizing and managing the annual student hackathon event',
+      type: 'student',
+      startDate: '2025-10-20',
+      endDate: '2025-11-05',
+      progress: 85,
+      members: [members[0], members[1], members[9]],
+      status: 'active',
+      department: 'Computer Science',
+      priority: 'medium'
+    },
+    {
+      id: '15',
+      title: 'Research Publication Portal',
+      description: 'Platform for faculty to publish and share research papers',
+      type: 'mixed',
+      startDate: '2025-09-01',
+      endDate: '2025-12-20',
+      progress: 54,
+      members: [members[3], members[5], members[7]],
+      status: 'active',
+      department: 'Research',
+      priority: 'medium'
+    },
+    {
+      id: '16',
+      title: 'Cybersecurity Awareness Program',
+      description: 'Comprehensive cybersecurity training for staff and students',
+      type: 'staff',
+      startDate: '2025-10-01',
+      endDate: '2025-11-30',
+      progress: 68,
+      members: [members[2], members[8]],
+      status: 'active',
+      department: 'IT',
+      priority: 'high'
+    },
+    {
+      id: '17',
+      title: 'Student Mental Health App',
+      description: 'Mobile application for mental health support and counseling services',
+      type: 'student',
+      startDate: '2025-09-15',
+      endDate: '2025-12-01',
+      progress: 47,
+      members: [members[1], members[9]],
+      status: 'active',
+      department: 'Student Services',
+      priority: 'high'
+    },
+    {
+      id: '18',
+      title: 'Data Analytics Dashboard',
+      description: 'Creating centralized analytics dashboard for institutional data',
+      type: 'mixed',
+      startDate: '2025-10-08',
+      endDate: '2026-01-10',
+      progress: 31,
+      members: [members[0], members[4], members[6]],
+      status: 'active',
+      department: 'Administration',
+      priority: 'medium'
+    },
+    {
+      id: '19',
+      title: 'International Student Onboarding',
+      description: 'Streamlining the onboarding process for international students',
+      type: 'staff',
+      startDate: '2025-09-20',
+      endDate: '2025-11-25',
+      progress: 76,
+      members: [members[5], members[7], members[8]],
+      status: 'active',
+      department: 'International Office',
+      priority: 'high'
+    },
+    {
+      id: '20',
+      title: 'Open Source Contribution Initiative',
+      description: 'Encouraging students to contribute to open source projects',
+      type: 'student',
+      startDate: '2025-10-01',
+      endDate: '2026-03-31',
+      progress: 22,
+      members: [members[0], members[2], members[9]],
+      status: 'planning',
+      department: 'Computer Science',
       priority: 'low'
     },
   ];
@@ -11663,9 +11857,9 @@ const ProjectsTab = () => {
     });
   }, [activeFilter]);
 
-  const getTasksByColumn = (column: Task['column']) => {
+  const getTasksByColumn = (columnId: string) => {
     if (!selectedProject) return [];
-    return tasks.filter(task => task.column === column && task.projectId === selectedProject.id);
+    return tasks.filter(task => task.column === columnId && task.projectId === selectedProject.id);
   };
 
   const handleDragStart = (task: Task) => {
@@ -11676,13 +11870,42 @@ const ProjectsTab = () => {
     e.preventDefault();
   };
 
-  const handleDrop = (column: Task['column']) => {
+  const handleDrop = (columnId: string) => {
     if (draggedTask) {
       setTasks(tasks.map(task =>
-        task.id === draggedTask.id ? { ...task, column } : task
+        task.id === draggedTask.id ? { ...task, column: columnId } : task
       ));
       setDraggedTask(null);
     }
+  };
+
+  const handleAddColumn = () => {
+    if (newColumnName.trim()) {
+      const newColumn: KanbanColumn = {
+        id: `custom-${Date.now()}`,
+        title: newColumnName.trim(),
+        order: columns.length
+      };
+      setColumns([...columns, newColumn]);
+      setNewColumnName('');
+      setShowNewColumnInput(false);
+    }
+  };
+
+  const handleDeleteColumn = (columnId: string) => {
+    // Don't allow deleting default columns
+    const defaultColumns = ['todo', 'inprogress', 'review', 'done'];
+    if (defaultColumns.includes(columnId)) {
+      alert('Cannot delete default columns');
+      return;
+    }
+    
+    // Move tasks from deleted column to 'todo'
+    setTasks(tasks.map(task =>
+      task.column === columnId ? { ...task, column: 'todo' } : task
+    ));
+    
+    setColumns(columns.filter(col => col.id !== columnId));
   };
 
   // Gantt Chart Helpers
@@ -11769,34 +11992,48 @@ const ProjectsTab = () => {
   );
 
   const KanbanColumn: React.FC<{
-    title: string;
-    icon: LucideIcon;
-    column: Task['column'];
+    column: KanbanColumn;
     tasks: Task[];
-  }> = ({ title, icon: Icon, column, tasks }) => (
-    <div
-      className="kanban-column"
-      onDragOver={handleDragOver}
-      onDrop={() => handleDrop(column)}
-    >
-      <div className="column-header">
-        <div className="column-title">
-          <Icon size={16} />
-          <span>{title}</span>
-          <span className="column-count">{tasks.length}</span>
+    onDelete?: (columnId: string) => void;
+  }> = ({ column, tasks, onDelete }) => {
+    const defaultColumns = ['todo', 'inprogress', 'review', 'done'];
+    const isDefaultColumn = defaultColumns.includes(column.id);
+    const Icon = column.icon || List;
+
+    return (
+      <div
+        className="kanban-column"
+        onDragOver={handleDragOver}
+        onDrop={() => handleDrop(column.id)}
+      >
+        <div className="column-header">
+          <div className="column-title">
+            <Icon size={16} />
+            <span>{column.title}</span>
+            <span className="column-count">{tasks.length}</span>
+          </div>
+          {!isDefaultColumn && onDelete && (
+            <button 
+              className="column-delete-btn"
+              onClick={() => onDelete(column.id)}
+              title="Delete column"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
+        <div className="column-cards">
+          {tasks.map(task => (
+            <TaskCard key={task.id} task={task} />
+          ))}
+        </div>
+        <button className="add-card-btn">
+          <Plus size={16} />
+          <span>Add Task</span>
+        </button>
       </div>
-      <div className="column-cards">
-        {tasks.map(task => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </div>
-      <button className="add-card-btn">
-        <Plus size={16} />
-        <span>Add Task</span>
-      </button>
-    </div>
-  );
+    );
+  };
 
   const KanbanView: React.FC = () => {
     if (!selectedProject) {
@@ -11839,30 +12076,57 @@ const ProjectsTab = () => {
         </div>
 
         <div className="kanban-board">
-          <KanbanColumn
-            title="To Do"
-            icon={FileText}
-            column="todo"
-            tasks={getTasksByColumn('todo')}
-          />
-          <KanbanColumn
-            title="In Progress"
-            icon={Clock}
-            column="inprogress"
-            tasks={getTasksByColumn('inprogress')}
-          />
-          <KanbanColumn
-            title="Review"
-            icon={Eye}
-            column="review"
-            tasks={getTasksByColumn('review')}
-          />
-          <KanbanColumn
-            title="Done"
-            icon={CheckCircle}
-            column="done"
-            tasks={getTasksByColumn('done')}
-          />
+          {columns.sort((a, b) => a.order - b.order).map(column => (
+            <KanbanColumn
+              key={column.id}
+              column={column}
+              tasks={getTasksByColumn(column.id)}
+              onDelete={handleDeleteColumn}
+            />
+          ))}
+          
+          {/* Add New Column */}
+          {showNewColumnInput ? (
+            <div className="kanban-column new-column-input">
+              <div className="column-header">
+                <input
+                  type="text"
+                  className="new-column-name-input"
+                  placeholder="Enter list name..."
+                  value={newColumnName}
+                  onChange={(e) => setNewColumnName(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddColumn();
+                    } else if (e.key === 'Escape') {
+                      setShowNewColumnInput(false);
+                      setNewColumnName('');
+                    }
+                  }}
+                  autoFocus
+                />
+              </div>
+              <div className="new-column-actions">
+                <button className="btn btn-primary btn-sm" onClick={handleAddColumn}>
+                  Add list
+                </button>
+                <button 
+                  className="btn-icon" 
+                  onClick={() => {
+                    setShowNewColumnInput(false);
+                    setNewColumnName('');
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button className="add-column-btn" onClick={() => setShowNewColumnInput(true)}>
+              <Plus size={16} />
+              <span>Add another list</span>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -12074,6 +12338,25 @@ const ProjectsTab = () => {
             </button>
           </div>
         </div>
+        
+        {/* Filter Tabs - Now in header */}
+        <div className="projects-header-middle">
+          <div className="filter-tabs">
+            {(['all', 'student', 'staff', 'mixed'] as const).map(filter => (
+              <div
+                key={filter}
+                className={`tab ${activeFilter === filter ? 'active' : ''}`}
+                onClick={() => setActiveFilter(filter)}
+              >
+                {filter === 'all' ? 'All Projects' :
+                  filter === 'student' ? 'Student Projects' :
+                    filter === 'staff' ? 'Staff Projects' :
+                      'Student-Staff Projects'}
+              </div>
+            ))}
+          </div>
+        </div>
+        
         <div className="projects-header-right">
           <button className="btn btn-secondary">
             <Search size={16} />
@@ -12084,22 +12367,6 @@ const ProjectsTab = () => {
             <span>New Project</span>
           </button>
         </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="filter-tabs">
-        {(['all', 'student', 'staff', 'mixed'] as const).map(filter => (
-          <div
-            key={filter}
-            className={`tab ${activeFilter === filter ? 'active' : ''}`}
-            onClick={() => setActiveFilter(filter)}
-          >
-            {filter === 'all' ? 'All Projects' :
-              filter === 'student' ? 'Student Projects' :
-                filter === 'staff' ? 'Staff Projects' :
-                  'Student-Staff Projects'}
-          </div>
-        ))}
       </div>
 
       {/* Main Content Area */}
@@ -12165,7 +12432,6 @@ const ProjectsTab = () => {
     </div>
   );
 };
-
 
 
 
