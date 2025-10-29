@@ -23,6 +23,8 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
               { id: 'party-union-clubs', label: 'Party/Union/Clubs' },
               { id: 'achievements', label: 'Achievements' },
               { id: 'discipline', label: 'Discipline' },
+              { id: 'thesis-dissertation', label: 'Thesis/Dissertation Management' },
+
               
             ]
           },
@@ -82,7 +84,6 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
             id: 'library', label: 'Library', icon: BookOpen,
             submenu: [
               { id: 'library-dashboard', label: 'Library Dashboard' },
-              { id: 'thesis-dissertation', label: 'Thesis/Dissertation Management' },
               { id: 'textbook-management', label: 'Textbook Management' },
               { id: 'reference-book', label: 'Reference Book Management' },
               { id: 'scientific-journals', label: 'Scientific Journals' },

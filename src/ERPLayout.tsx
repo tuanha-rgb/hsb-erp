@@ -18,7 +18,8 @@ import {
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check, X, MessageCircle,
   Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus, Folder,
   Kanban, BarChart2, FolderOpen, List, Package, Boxes, ShoppingCart, CreditCard, 
-  AlertOctagon, RotateCcw, Footprints, RefreshCw
+  AlertOctagon, RotateCcw, Footprints, RefreshCw, Shield, Key, Upload, Scroll, FileCheck, Send,
+  Banknote, 
 } from "lucide-react";
 
 // Utility renderer for dynamic values
@@ -10189,6 +10190,1593 @@ const LibraryDashboard = () => (
     </div>
   );
 
+
+
+
+// Types
+type ThesisStatus = "draft" | "submitted" | "under_review" | "revision_required" | "approved" | "rejected" | "published";
+type ThesisCategory = "thesis" | "dissertation" | "final_project";
+type ThesisLevel = "bachelor" | "master" | "phd";
+
+interface Publication {
+  id: string;
+  title: string;
+  journalName: string;
+  publicationDate: string;
+  doi?: string;
+  status: "published" | "accepted" | "submitted" | "in_review";
+  impactFactor?: number;
+  citations?: number;
+}
+
+interface Grant {
+  id: string;
+  grantName: string;
+  fundingAgency: string;
+  amount: number;
+  currency: string;
+  startDate: string;
+  endDate: string;
+  status: "active" | "completed" | "pending" | "rejected";
+  principalInvestigator: string;
+}
+
+interface Funding {
+  id: string;
+  sourceName: string;
+  fundingType: "research" | "scholarship" | "travel" | "equipment" | "other";
+  amount: number;
+  currency: string;
+  receivedDate: string;
+  purpose: string;
+  status: "received" | "pending" | "declined";
+}
+
+interface Patent {
+  id: string;
+  patentTitle: string;
+  patentNumber?: string;
+  applicationDate: string;
+  grantDate?: string;
+  status: "granted" | "pending" | "rejected" | "expired";
+  inventors: string[];
+  country: string;
+  patentOffice: string;
+}
+
+interface AssociatedItems {
+  publications: Publication[];
+  grants: Grant[];
+  funding: Funding[];
+  patents: Patent[];
+}
+type ReviewStatus = "pending" | "in_progress" | "completed";
+
+interface Supervisor {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  expertise: string[];
+}
+
+interface Student {
+  id: string;
+  name: string;
+  studentId: string;
+  email: string;
+  phone: string;
+  program: string;
+  year: number;
+}
+
+interface Review {
+  id: string;
+  reviewerName: string;
+  reviewerEmail: string;
+  status: ReviewStatus;
+  rating: number | null;
+  comments: string;
+  submittedDate: string | null;
+}
+
+interface Thesis {
+  id: string;
+  title: string;
+  titleVietnamese: string;
+  student: Student;
+  supervisor: Supervisor;
+  coSupervisor?: Supervisor;
+  category: ThesisCategory;
+  level: ThesisLevel;
+  status: ThesisStatus;
+  submissionDate: string;
+  defenseDate: string | null;
+  approvalDate: string | null;
+  abstract: string;
+  keywords: string[];
+  department: string;
+  fieldOfStudy: string;
+  academicYear: string;
+  reviews: Review[];
+  documents: {
+    proposal?: string;
+    fullThesis?: string;
+    presentation?: string;
+    plagiarismReport?: string;
+  };
+  plagiarismScore: number | null;
+  finalGrade: string | null;
+  defense: {
+    committee: string[];
+    location: string;
+    date: string;
+    time: string;
+  } | null;
+  associatedItems: AssociatedItems;
+}
+
+// Sample data
+const sampleSupervisors: Supervisor[] = [
+  {
+    id: "1",
+    name: "Dr. Nguyen Van Minh",
+    email: "nguyen.minh@hsb.edu.vn",
+    department: "Faculty of Business Administration",
+    expertise: ["Strategic Management", "Business Analytics", "Innovation"]
+  },
+  {
+    id: "2",
+    name: "Prof. Tran Thi Lan",
+    email: "tran.lan@hsb.edu.vn",
+    department: "Faculty of Economics",
+    expertise: ["Macroeconomics", "Development Economics", "International Trade"]
+  },
+  {
+    id: "3",
+    name: "Dr. Le Van Hoang",
+    email: "le.hoang@hsb.edu.vn",
+    department: "Faculty of Marketing & Communication",
+    expertise: ["Digital Marketing", "Consumer Behavior", "Brand Management"]
+  }
+];
+
+const sampleTheses: Thesis[] = [
+  {
+    id: "TH2024001",
+    title: "The Impact of Digital Transformation on SME Performance in Vietnam",
+    titleVietnamese: "Tác động của chuyển đổi số đến hiệu quả hoạt động của doanh nghiệp vừa và nhỏ tại Việt Nam",
+    student: {
+      id: "ST001",
+      name: "Nguyen Minh Quan",
+      studentId: "2021001234",
+      email: "quan.nguyen@student.hsb.edu.vn",
+      phone: "+84 912 345 678",
+      program: "Business Administration",
+      year: 4
+    },
+    supervisor: sampleSupervisors[0],
+    category: "thesis",
+    level: "bachelor",
+    status: "under_review",
+    submissionDate: "2024-10-15",
+    defenseDate: "2024-11-20",
+    approvalDate: null,
+    abstract: "This thesis examines the relationship between digital transformation initiatives and performance outcomes in Vietnamese SMEs. Using a mixed-methods approach combining surveys and case studies, the research identifies key success factors and challenges in digital adoption.",
+    keywords: ["Digital Transformation", "SMEs", "Performance", "Vietnam", "Technology Adoption"],
+    department: "Faculty of Business Administration",
+    fieldOfStudy: "Strategic Management",
+    academicYear: "2023-2024",
+    reviews: [
+      {
+        id: "R001",
+        reviewerName: "Dr. Pham Van Khanh",
+        reviewerEmail: "pham.khanh@hsb.edu.vn",
+        status: "completed",
+        rating: 8.5,
+        comments: "Well-structured research with solid methodology. Some minor improvements needed in literature review.",
+        submittedDate: "2024-10-25"
+      },
+      {
+        id: "R002",
+        reviewerName: "Prof. Hoang Thi Mai",
+        reviewerEmail: "hoang.mai@hsb.edu.vn",
+        status: "in_progress",
+        rating: null,
+        comments: "",
+        submittedDate: null
+      }
+    ],
+    documents: {
+      proposal: "proposal_TH2024001.pdf",
+      fullThesis: "thesis_TH2024001.pdf",
+      plagiarismReport: "plagiarism_TH2024001.pdf"
+    },
+    plagiarismScore: 12,
+    finalGrade: null,
+    defense: {
+      committee: ["Dr. Nguyen Van Minh", "Dr. Pham Van Khanh", "Prof. Hoang Thi Mai"],
+      location: "Room 501, Building A",
+      date: "2024-11-20",
+      time: "14:00"
+    },
+    associatedItems: {
+      publications: [
+        {
+          id: "PUB001",
+          title: "Digital Adoption Patterns in Vietnamese SMEs: A Preliminary Study",
+          journalName: "Journal of Business Research",
+          publicationDate: "2024-09-15",
+          doi: "10.1016/j.jbusres.2024.123456",
+          status: "published",
+          impactFactor: 2.8,
+          citations: 3
+        }
+      ],
+      grants: [],
+      funding: [
+        {
+          id: "FND001",
+          sourceName: "HSB Research Support Fund",
+          fundingType: "research",
+          amount: 5000000,
+          currency: "VND",
+          receivedDate: "2024-03-01",
+          purpose: "Data collection and survey distribution",
+          status: "received"
+        }
+      ],
+      patents: []
+    }
+  },
+  {
+    id: "DIS2024001",
+    title: "Machine Learning Applications in Financial Risk Management",
+    titleVietnamese: "Ứng dụng học máy trong quản lý rủi ro tài chính",
+    student: {
+      id: "ST002",
+      name: "Tran Thi Bich Ngoc",
+      studentId: "2020005678",
+      email: "ngoc.tran@student.hsb.edu.vn",
+      phone: "+84 913 456 789",
+      program: "Finance & Banking",
+      year: 2
+    },
+    supervisor: sampleSupervisors[1],
+    category: "dissertation",
+    level: "master",
+    status: "submitted",
+    submissionDate: "2024-10-28",
+    defenseDate: null,
+    approvalDate: null,
+    abstract: "This dissertation explores the application of machine learning algorithms in predicting and managing financial risks. The research focuses on credit risk assessment using supervised learning techniques and proposes a novel ensemble model for improved prediction accuracy.",
+    keywords: ["Machine Learning", "Financial Risk", "Credit Risk", "Predictive Analytics", "Banking"],
+    department: "Faculty of Economics",
+    fieldOfStudy: "Finance & Banking",
+    academicYear: "2023-2024",
+    reviews: [],
+    documents: {
+      proposal: "proposal_DIS2024001.pdf",
+      fullThesis: "dissertation_DIS2024001.pdf"
+    },
+    plagiarismScore: null,
+    finalGrade: null,
+    defense: null,
+    associatedItems: {
+      publications: [
+        {
+          id: "PUB002",
+          title: "Ensemble Learning for Credit Risk Assessment: A Vietnamese Banking Case Study",
+          journalName: "Expert Systems with Applications",
+          publicationDate: "2024-08-20",
+          doi: "10.1016/j.eswa.2024.234567",
+          status: "published",
+          impactFactor: 6.5,
+          citations: 8
+        },
+        {
+          id: "PUB003",
+          title: "Machine Learning in Vietnamese Banking: Current State and Future Directions",
+          journalName: "International Journal of Banking & Finance",
+          publicationDate: "2024-11-30",
+          status: "accepted",
+          impactFactor: 1.9,
+          citations: 0
+        }
+      ],
+      grants: [
+        {
+          id: "GRT001",
+          grantName: "AI Research Excellence Grant",
+          fundingAgency: "Ministry of Science and Technology",
+          amount: 50000000,
+          currency: "VND",
+          startDate: "2024-01-01",
+          endDate: "2024-12-31",
+          status: "active",
+          principalInvestigator: "Prof. Tran Thi Lan"
+        }
+      ],
+      funding: [
+        {
+          id: "FND002",
+          sourceName: "Vietnam National Foundation for Science",
+          fundingType: "research",
+          amount: 30000000,
+          currency: "VND",
+          receivedDate: "2024-02-15",
+          purpose: "Computing resources and data acquisition",
+          status: "received"
+        }
+      ],
+      patents: [
+        {
+          id: "PAT001",
+          patentTitle: "Intelligent Credit Risk Assessment System Using Ensemble Machine Learning",
+          patentNumber: "VN1234567",
+          applicationDate: "2024-09-01",
+          status: "pending",
+          inventors: ["Tran Thi Bich Ngoc", "Prof. Tran Thi Lan"],
+          country: "Vietnam",
+          patentOffice: "National Office of Intellectual Property of Vietnam"
+        }
+      ]
+    }
+  },
+  {
+    id: "FP2024001",
+    title: "Social Media Marketing Strategies for Generation Z Consumers",
+    titleVietnamese: "Chiến lược marketing truyền thông xã hội hướng tới người tiêu dùng thế hệ Z",
+    student: {
+      id: "ST003",
+      name: "Le Van Thanh",
+      studentId: "2021009012",
+      email: "thanh.le@student.hsb.edu.vn",
+      phone: "+84 914 567 890",
+      program: "Marketing",
+      year: 4
+    },
+    supervisor: sampleSupervisors[2],
+    category: "final_project",
+    level: "bachelor",
+    status: "approved",
+    submissionDate: "2024-09-10",
+    defenseDate: "2024-10-15",
+    approvalDate: "2024-10-20",
+    abstract: "This final project investigates effective social media marketing strategies targeting Generation Z consumers in Vietnam. Through surveys and social media analysis, the research identifies key engagement drivers and content preferences.",
+    keywords: ["Social Media Marketing", "Generation Z", "Consumer Behavior", "Digital Strategy", "Vietnam"],
+    department: "Faculty of Marketing & Communication",
+    fieldOfStudy: "Marketing",
+    academicYear: "2023-2024",
+    reviews: [
+      {
+        id: "R003",
+        reviewerName: "Dr. Le Van Hoang",
+        reviewerEmail: "le.hoang@hsb.edu.vn",
+        status: "completed",
+        rating: 9.0,
+        comments: "Excellent research with practical implications. Well-executed methodology and clear findings.",
+        submittedDate: "2024-09-25"
+      },
+      {
+        id: "R004",
+        reviewerName: "Dr. Nguyen Thi Phuong",
+        reviewerEmail: "nguyen.phuong@hsb.edu.vn",
+        status: "completed",
+        rating: 8.5,
+        comments: "Strong project with good insights. Minor improvements suggested in conclusion section.",
+        submittedDate: "2024-09-28"
+      }
+    ],
+    documents: {
+      proposal: "proposal_FP2024001.pdf",
+      fullThesis: "finalproject_FP2024001.pdf",
+      presentation: "presentation_FP2024001.pptx",
+      plagiarismReport: "plagiarism_FP2024001.pdf"
+    },
+    plagiarismScore: 8,
+    finalGrade: "A",
+    defense: {
+      committee: ["Dr. Le Van Hoang", "Dr. Nguyen Thi Phuong", "Prof. Tran Van Duc"],
+      location: "Room 302, Building B",
+      date: "2024-10-15",
+      time: "09:00"
+    },
+    associatedItems: {
+      publications: [],
+      grants: [],
+      funding: [],
+      patents: []
+    }
+  },
+  {
+    id: "DIS2024002",
+    title: "Sustainable Supply Chain Management in Vietnamese Manufacturing",
+    titleVietnamese: "Quản lý chuỗi cung ứng bền vững trong sản xuất tại Việt Nam",
+    student: {
+      id: "ST004",
+      name: "Pham Minh Duc",
+      studentId: "2019012345",
+      email: "duc.pham@student.hsb.edu.vn",
+      phone: "+84 915 678 901",
+      program: "Operations Management",
+      year: 2
+    },
+    supervisor: sampleSupervisors[0],
+    category: "dissertation",
+    level: "master",
+    status: "revision_required",
+    submissionDate: "2024-10-05",
+    defenseDate: null,
+    approvalDate: null,
+    abstract: "This dissertation examines sustainable supply chain practices in Vietnamese manufacturing firms. The study analyzes the adoption barriers and benefits of green supply chain management through case studies and quantitative analysis.",
+    keywords: ["Supply Chain", "Sustainability", "Manufacturing", "Green Management", "Vietnam"],
+    department: "Faculty of Business Administration",
+    fieldOfStudy: "Operations Management",
+    academicYear: "2023-2024",
+    reviews: [
+      {
+        id: "R005",
+        reviewerName: "Dr. Tran Van Hoang",
+        reviewerEmail: "tran.hoang@hsb.edu.vn",
+        status: "completed",
+        rating: 7.0,
+        comments: "Good topic but methodology needs strengthening. Please revise research design and expand data analysis section.",
+        submittedDate: "2024-10-18"
+      }
+    ],
+    documents: {
+      proposal: "proposal_DIS2024002.pdf",
+      fullThesis: "dissertation_DIS2024002_v1.pdf"
+    },
+    plagiarismScore: 15,
+    finalGrade: null,
+    defense: null,
+    associatedItems: {
+      publications: [
+        {
+          id: "PUB004",
+          title: "Green Supply Chain Practices in Vietnamese Manufacturing: A Survey Study",
+          journalName: "Journal of Cleaner Production",
+          publicationDate: "2024-12-15",
+          status: "in_review",
+          impactFactor: 9.3
+        }
+      ],
+      grants: [],
+      funding: [
+        {
+          id: "FND003",
+          sourceName: "Environmental Research Fund",
+          fundingType: "research",
+          amount: 15000000,
+          currency: "VND",
+          receivedDate: "2024-04-10",
+          purpose: "Field research and case study data collection",
+          status: "received"
+        }
+      ],
+      patents: []
+    }
+  }
+];
+
+const ThesisManagement: React.FC = () => {
+  const [theses, setTheses] = useState<Thesis[]>(sampleTheses);
+  const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<ThesisStatus | "all">("all");
+  const [filterCategory, setFilterCategory] = useState<ThesisCategory | "all">("all");
+  const [filterLevel, setFilterLevel] = useState<ThesisLevel | "all">("all");
+  const [activeTab, setActiveTab] = useState<"overview" | "documents" | "reviews" | "defense" | "timeline" | "associated">("overview");
+
+  // Statistics
+  const stats = useMemo(() => {
+    return {
+      total: theses.length,
+      submitted: theses.filter(t => t.status === "submitted").length,
+      underReview: theses.filter(t => t.status === "under_review").length,
+      approved: theses.filter(t => t.status === "approved").length,
+      withPublications: theses.filter(t => t.associatedItems.publications.length > 0).length,
+      withPatents: theses.filter(t => t.associatedItems.patents.length > 0).length,
+      avgPlagiarism: theses.filter(t => t.plagiarismScore !== null)
+        .reduce((acc, t) => acc + (t.plagiarismScore || 0), 0) / theses.filter(t => t.plagiarismScore !== null).length || 0,
+      upcomingDefenses: theses.filter(t => t.defenseDate && new Date(t.defenseDate) > new Date()).length
+    };
+  }, [theses]);
+
+  // Filter theses
+  const filteredTheses = useMemo(() => {
+    return theses.filter(thesis => {
+      const matchesSearch = 
+        thesis.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.student.studentId.includes(searchTerm) ||
+        thesis.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = filterStatus === "all" || thesis.status === filterStatus;
+      const matchesCategory = filterCategory === "all" || thesis.category === filterCategory;
+      const matchesLevel = filterLevel === "all" || thesis.level === filterLevel;
+      return matchesSearch && matchesStatus && matchesCategory && matchesLevel;
+    });
+  }, [theses, searchTerm, filterStatus, filterCategory, filterLevel]);
+
+  const getStatusColor = (status: ThesisStatus) => {
+    switch (status) {
+      case "draft": return "bg-gray-100 text-gray-700";
+      case "submitted": return "bg-blue-100 text-blue-700";
+      case "under_review": return "bg-yellow-100 text-yellow-700";
+      case "revision_required": return "bg-orange-100 text-orange-700";
+      case "approved": return "bg-green-100 text-green-700";
+      case "rejected": return "bg-red-100 text-red-700";
+      case "published": return "bg-purple-100 text-purple-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getStatusIcon = (status: ThesisStatus) => {
+    switch (status) {
+      case "draft": return <Edit className="w-4 h-4" />;
+      case "submitted": return <Upload className="w-4 h-4" />;
+      case "under_review": return <Clock className="w-4 h-4" />;
+      case "revision_required": return <AlertCircle className="w-4 h-4" />;
+      case "approved": return <CheckCircle className="w-4 h-4" />;
+      case "rejected": return <XCircle className="w-4 h-4" />;
+      case "published": return <Award className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
+    }
+  };
+
+  const getTypeLabel = (category: ThesisCategory, level: ThesisLevel) => {
+    const categoryLabel = category === "thesis" ? "Thesis" : 
+                         category === "dissertation" ? "Dissertation" : "Final Project";
+    const levelLabel = level === "bachelor" ? "Bachelor's" : 
+                      level === "master" ? "Master's" : "PhD";
+    return `${levelLabel} ${categoryLabel}`;
+  };
+
+  const getCategoryColor = (category: ThesisCategory) => {
+    switch (category) {
+      case "thesis": return "bg-blue-100 text-blue-700";
+      case "dissertation": return "bg-purple-100 text-purple-700";
+      case "final_project": return "bg-green-100 text-green-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getLevelColor = (level: ThesisLevel) => {
+    switch (level) {
+      case "bachelor": return "bg-cyan-100 text-cyan-700";
+      case "master": return "bg-indigo-100 text-indigo-700";
+      case "phd": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const formatStatus = (status: ThesisStatus) => {
+    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+            <span>Digital Library</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-gray-900 font-medium">Library: Thesis Management</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Thesis/Dissertation Management</h1>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => {/* Export report */}}
+            className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export Report
+          </button>
+          <button
+            onClick={() => setViewMode("create")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Thesis
+          </button>
+        </div>
+      </div>
+
+      {viewMode === "list" ? (
+        <>
+          {/* Statistics Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Total Works</p>
+                <FileText className="w-5 h-5 text-blue-600" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-xs text-gray-500 mt-1">All categories</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Submitted</p>
+                <Upload className="w-5 h-5 text-blue-600" />
+              </div>
+              <p className="text-2xl font-bold text-blue-600">{stats.submitted}</p>
+              <p className="text-xs text-gray-500 mt-1">Awaiting review</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Under Review</p>
+                <Clock className="w-5 h-5 text-yellow-600" />
+              </div>
+              <p className="text-2xl font-bold text-yellow-600">{stats.underReview}</p>
+              <p className="text-xs text-gray-500 mt-1">In review process</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Approved</p>
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+              <p className="text-xs text-gray-500 mt-1">Completed works</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">With Publications</p>
+                <FileCheck className="w-5 h-5 text-purple-600" />
+              </div>
+              <p className="text-2xl font-bold text-purple-600">{stats.withPublications}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {stats.total > 0 ? `${Math.round((stats.withPublications / stats.total) * 100)}% of total` : '0% of total'}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">With Patents</p>
+                <Scroll className="w-5 h-5 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold text-orange-600">{stats.withPatents}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {stats.total > 0 ? `${Math.round((stats.withPatents / stats.total) * 100)}% of total` : '0% of total'}
+              </p>
+            </div>
+          </div>
+
+          {/* Filters & Search */}
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search by title, student name, ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value as ThesisCategory | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="thesis">Thesis</option>
+                  <option value="dissertation">Dissertation</option>
+                  <option value="final_project">Final Project</option>
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={filterLevel}
+                  onChange={(e) => setFilterLevel(e.target.value as ThesisLevel | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Levels</option>
+                  <option value="bachelor">Bachelor&apos;s</option>
+                  <option value="master">Master&apos;s</option>
+                  <option value="phd">PhD</option>
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as ThesisStatus | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="submitted">Submitted</option>
+                  <option value="under_review">Under Review</option>
+                  <option value="revision_required">Revision Required</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Theses List */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title & Student</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Defense</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredTheses.map(thesis => (
+                    <tr key={thesis.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm font-medium text-gray-900">{thesis.id}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          <div className="text-sm font-medium text-gray-900 truncate">{thesis.title}</div>
+                          <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                            <GraduationCap className="w-4 h-4" />
+                            {thesis.student.name} ({thesis.student.studentId})
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(thesis.category)}`}>
+                          {thesis.category === "thesis" ? "Thesis" : 
+                           thesis.category === "dissertation" ? "Dissertation" : "Final Project"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(thesis.level)}`}>
+                          {thesis.level === "bachelor" ? "Bachelor's" : 
+                           thesis.level === "master" ? "Master's" : "PhD"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{thesis.supervisor.name}</div>
+                        <div className="text-xs text-gray-500 truncate max-w-[150px]">{thesis.supervisor.department}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(thesis.status)}`}>
+                          {getStatusIcon(thesis.status)}
+                          {formatStatus(thesis.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {thesis.defenseDate ? (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {thesis.defenseDate}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 italic">Not scheduled</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            setSelectedThesis(thesis);
+                            setViewMode("detail");
+                          }}
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : viewMode === "detail" && selectedThesis ? (
+        /* Detail View */
+        <div className="space-y-6">
+          {/* Back Button */}
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to Thesis List
+          </button>
+
+          {/* Thesis Header */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-sm font-medium text-gray-500">{selectedThesis.id}</span>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedThesis.status)}`}>
+                    {getStatusIcon(selectedThesis.status)}
+                    {formatStatus(selectedThesis.status)}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(selectedThesis.category)}`}>
+                    {selectedThesis.category === "thesis" ? "Thesis" : 
+                     selectedThesis.category === "dissertation" ? "Dissertation" : "Final Project"}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(selectedThesis.level)}`}>
+                    {selectedThesis.level === "bachelor" ? "Bachelor's" : 
+                     selectedThesis.level === "master" ? "Master's" : "PhD"}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedThesis.title}</h2>
+                <p className="text-gray-600 italic mb-4">{selectedThesis.titleVietnamese}</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <GraduationCap className="w-5 h-5 text-blue-600 mt-1" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Student</p>
+                      <p className="text-sm text-gray-900">{selectedThesis.student.name}</p>
+                      <p className="text-xs text-gray-500">{selectedThesis.student.studentId} • {selectedThesis.student.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <UserCheck className="w-5 h-5 text-green-600 mt-1" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Supervisor</p>
+                      <p className="text-sm text-gray-900">{selectedThesis.supervisor.name}</p>
+                      <p className="text-xs text-gray-500">{selectedThesis.supervisor.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
+                <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="border-b border-gray-200">
+              <nav className="flex">
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "overview"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab("documents")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "documents"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Documents
+                </button>
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "reviews"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Reviews ({selectedThesis.reviews.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab("defense")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "defense"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Defense
+                </button>
+                <button
+                  onClick={() => setActiveTab("timeline")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "timeline"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Timeline
+                </button>
+                <button
+                  onClick={() => setActiveTab("associated")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "associated"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Associated Items
+                </button>
+              </nav>
+            </div>
+
+            <div className="p-6">
+              {/* Overview Tab */}
+              {activeTab === "overview" && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Abstract</h3>
+                    <p className="text-gray-700 leading-relaxed">{selectedThesis.abstract}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Details</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Department</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.department}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Field of Study</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.fieldOfStudy}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Academic Year</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.academicYear}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Submission Date</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.submissionDate}</span>
+                        </div>
+                        {selectedThesis.plagiarismScore !== null && (
+                          <div className="flex justify-between py-2 border-b border-gray-100">
+                            <span className="text-sm text-gray-600">Plagiarism Score</span>
+                            <span className={`text-sm font-medium ${selectedThesis.plagiarismScore <= 15 ? 'text-green-600' : 'text-red-600'}`}>
+                              {selectedThesis.plagiarismScore}%
+                            </span>
+                          </div>
+                        )}
+                        {selectedThesis.finalGrade && (
+                          <div className="flex justify-between py-2 border-b border-gray-100">
+                            <span className="text-sm text-gray-600">Final Grade</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedThesis.finalGrade}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Keywords</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedThesis.keywords.map((keyword, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Documents Tab */}
+              {activeTab === "documents" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Uploaded Documents</h3>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      Upload Document
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {selectedThesis.documents.proposal && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Thesis Proposal</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.proposal}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedThesis.documents.fullThesis && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Full Thesis Document</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.fullThesis}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedThesis.documents.presentation && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Defense Presentation</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.presentation}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedThesis.documents.plagiarismReport && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <BarChart3 className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Plagiarism Report</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.plagiarismReport}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Reviews Tab */}
+              {activeTab === "reviews" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Thesis Reviews</h3>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Assign Reviewer
+                    </button>
+                  </div>
+
+                  {selectedThesis.reviews.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedThesis.reviews.map(review => (
+                        <div key={review.id} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                {review.reviewerName.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{review.reviewerName}</p>
+                                <p className="text-xs text-gray-500">{review.reviewerEmail}</p>
+                              </div>
+                            </div>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              review.status === "completed" ? "bg-green-100 text-green-700" :
+                              review.status === "in_progress" ? "bg-yellow-100 text-yellow-700" :
+                              "bg-gray-100 text-gray-700"
+                            }`}>
+                              {review.status === "completed" ? "Completed" :
+                               review.status === "in_progress" ? "In Progress" : "Pending"}
+                            </span>
+                          </div>
+
+                          {review.rating !== null && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm text-gray-600">Rating:</span>
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-4 h-4 ${i < Math.floor(review.rating! / 2) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                  />
+                                ))}
+                                <span className="text-sm font-medium text-gray-900 ml-2">{review.rating}/10</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {review.comments && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                              <p className="text-sm text-gray-700">{review.comments}</p>
+                            </div>
+                          )}
+
+                          {review.submittedDate && (
+                            <p className="text-xs text-gray-500 mt-2">Submitted on {review.submittedDate}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600">No reviews yet</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Defense Tab */}
+              {activeTab === "defense" && (
+                <div className="space-y-6">
+                  {selectedThesis.defense ? (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <h3 className="font-semibold text-gray-900">Defense Schedule</h3>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Date</span>
+                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.date}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Time</span>
+                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.time}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Location</span>
+                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.location}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Users className="w-5 h-5 text-green-600" />
+                            <h3 className="font-semibold text-gray-900">Defense Committee</h3>
+                          </div>
+                          <div className="space-y-2">
+                            {selectedThesis.defense.committee.map((member, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <span className="text-sm text-gray-900">{member}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                          <Edit className="w-4 h-4" />
+                          Reschedule Defense
+                        </button>
+                        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2">
+                          <Send className="w-4 h-4" />
+                          Send Notifications
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600 mb-4">Defense not scheduled yet</p>
+                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 mx-auto">
+                        <Plus className="w-4 h-4" />
+                        Schedule Defense
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Timeline Tab */}
+              {activeTab === "timeline" && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thesis Progress Timeline</h3>
+                  <div className="relative space-y-6">
+                    {/* Timeline items */}
+                    <div className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                      </div>
+                      <div className="flex-1 pb-6">
+                        <p className="text-sm font-medium text-gray-900">Thesis Submitted</p>
+                        <p className="text-xs text-gray-500">{selectedThesis.submissionDate}</p>
+                        <p className="text-sm text-gray-600 mt-1">Full thesis document uploaded to the system</p>
+                      </div>
+                    </div>
+
+                    {selectedThesis.reviews.length > 0 && (
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <Clock className="w-5 h-5 text-yellow-600" />
+                          </div>
+                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                        </div>
+                        <div className="flex-1 pb-6">
+                          <p className="text-sm font-medium text-gray-900">Under Review</p>
+                          <p className="text-xs text-gray-500">Current Status</p>
+                          <p className="text-sm text-gray-600 mt-1">{selectedThesis.reviews.length} reviewer(s) assigned</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedThesis.defenseDate && (
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Defense Scheduled</p>
+                          <p className="text-xs text-gray-500">{selectedThesis.defenseDate}</p>
+                          <p className="text-sm text-gray-600 mt-1">Defense presentation scheduled</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Associated Items Tab */}
+              {activeTab === "associated" && (
+                <div className="space-y-6">
+                  {/* Publications */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <FileCheck className="w-5 h-5 text-blue-600" />
+                        Publications ({selectedThesis.associatedItems.publications.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Publication
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.publications.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.publications.map(pub => (
+                          <div key={pub.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900 mb-1">{pub.title}</h4>
+                                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                                  <span className="flex items-center gap-1">
+                                    <BookOpen className="w-3 h-3" />
+                                    {pub.journalName}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {pub.publicationDate}
+                                  </span>
+                                  {pub.impactFactor && (
+                                    <span className="flex items-center gap-1">
+                                      <TrendingUp className="w-3 h-3" />
+                                      IF: {pub.impactFactor}
+                                    </span>
+                                  )}
+                                  {pub.citations !== undefined && (
+                                    <span className="flex items-center gap-1">
+                                      <Award className="w-3 h-3" />
+                                      {pub.citations} citations
+                                    </span>
+                                  )}
+                                </div>
+                                {pub.doi && (
+                                  <p className="text-xs text-gray-500">DOI: {pub.doi}</p>
+                                )}
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                pub.status === "published" ? "bg-green-100 text-green-700" :
+                                pub.status === "accepted" ? "bg-blue-100 text-blue-700" :
+                                pub.status === "submitted" ? "bg-yellow-100 text-yellow-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
+                                {pub.status.charAt(0).toUpperCase() + pub.status.slice(1)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <FileCheck className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No publications associated yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Grants */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Award className="w-5 h-5 text-purple-600" />
+                        Grants ({selectedThesis.associatedItems.grants.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Grant
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.grants.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.grants.map(grant => (
+                          <div key={grant.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900">{grant.grantName}</h4>
+                                <p className="text-xs text-gray-600 mt-1">{grant.fundingAgency}</p>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                grant.status === "active" ? "bg-green-100 text-green-700" :
+                                grant.status === "completed" ? "bg-blue-100 text-blue-700" :
+                                grant.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                                "bg-red-100 text-red-700"
+                              }`}>
+                                {grant.status.charAt(0).toUpperCase() + grant.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 mt-3 text-xs">
+                              <div>
+                                <span className="text-gray-600">Amount:</span>
+                                <span className="font-medium text-gray-900 ml-1">
+                                  {grant.amount.toLocaleString()} {grant.currency}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Period:</span>
+                                <span className="font-medium text-gray-900 ml-1">
+                                  {grant.startDate} - {grant.endDate}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">PI:</span>
+                                <span className="font-medium text-gray-900 ml-1">{grant.principalInvestigator}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Award className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No grants associated yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Funding */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Banknote className="w-5 h-5 text-green-600" />
+                        Funding ({selectedThesis.associatedItems.funding.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Funding
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.funding.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.funding.map(fund => (
+                          <div key={fund.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900">{fund.sourceName}</h4>
+                                <p className="text-xs text-gray-600 mt-1">{fund.purpose}</p>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                fund.status === "received" ? "bg-green-100 text-green-700" :
+                                fund.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                                "bg-red-100 text-red-700"
+                              }`}>
+                                {fund.status.charAt(0).toUpperCase() + fund.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-6 mt-3 text-xs">
+                              <div>
+                                <span className="text-gray-600">Type:</span>
+                                <span className="font-medium text-gray-900 ml-1 capitalize">
+                                  {fund.fundingType.replace('_', ' ')}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Amount:</span>
+                                <span className="font-medium text-gray-900 ml-1">
+                                  {fund.amount.toLocaleString()} {fund.currency}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Received:</span>
+                                <span className="font-medium text-gray-900 ml-1">{fund.receivedDate}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Banknote className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No funding sources associated yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Patents */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Scroll className="w-5 h-5 text-orange-600" />
+                        Patents ({selectedThesis.associatedItems.patents.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Patent
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.patents.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.patents.map(patent => (
+                          <div key={patent.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900">{patent.patentTitle}</h4>
+                                {patent.patentNumber && (
+                                  <p className="text-xs text-gray-600 mt-1">Patent No: {patent.patentNumber}</p>
+                                )}
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                patent.status === "granted" ? "bg-green-100 text-green-700" :
+                                patent.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                                patent.status === "rejected" ? "bg-red-100 text-red-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
+                                {patent.status.charAt(0).toUpperCase() + patent.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="mt-3 text-xs space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-600">Inventors:</span>
+                                <span className="font-medium text-gray-900">{patent.inventors.join(', ')}</span>
+                              </div>
+                              <div className="flex items-center gap-6">
+                                <div>
+                                  <span className="text-gray-600">Application:</span>
+                                  <span className="font-medium text-gray-900 ml-1">{patent.applicationDate}</span>
+                                </div>
+                                {patent.grantDate && (
+                                  <div>
+                                    <span className="text-gray-600">Granted:</span>
+                                    <span className="font-medium text-gray-900 ml-1">{patent.grantDate}</span>
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="text-gray-600">Country:</span>
+                                  <span className="font-medium text-gray-900 ml-1">{patent.country}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Scroll className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No patents associated yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Create/Add New Thesis Form */
+        <div className="space-y-6">
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to Thesis List
+          </button>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Register New Thesis</h2>
+              <p className="text-sm text-gray-600 mt-1">Complete the form below to register a new thesis/dissertation</p>
+            </div>
+
+            <div className="p-6">
+              <div className="text-center py-12 text-gray-500">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p>Thesis registration form would go here</p>
+                <p className="text-sm mt-2">Include fields for student info, supervisor, title, abstract, etc.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
 const TimetableCalendar = () => {
     const [viewMode, setViewMode] = useState('week');
     const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 15)); // Oct 15, 2025
@@ -11522,8 +13110,8 @@ const OneStopService = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-2">
-      <div className="max-w- mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="max-w- mx-auto space-y-3">
+        <div className="flex items-center justify-between mt-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">One-Stop Service Center</h1>
             <p className="text-sm text-gray-500 mt-1">Student requests and service management portal</p>
@@ -12151,7 +13739,7 @@ const HSBShop = () => {
 
   // Dashboard View
   const renderDashboard = () => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
@@ -12358,7 +13946,7 @@ const HSBShop = () => {
 
       {/* Grid View */}
       {inventoryViewMode === 'grid' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredProducts.map(product => (
             <div key={product.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
               <div className="p-6">
@@ -13964,10 +15552,1141 @@ const ProjectsTab: React.FC = () => {
 
 
 
+
+
+// Role hierarchy definition
+type RoleLevel = "admin" | "rector" | "head" | "dean" | "lead_staff" | "staff" | "lecturer" | "student";
+
+interface Role {
+  id: RoleLevel;
+  name: string;
+  level: number;
+  color: string;
+  icon: React.ReactNode;
+  hasDepartment: boolean;
+}
+
+const roleHierarchy: Role[] = [
+  { id: "admin", name: "Administrator", level: 1, color: "#dc2626", icon: <Shield className="w-4 h-4" />, hasDepartment: false },
+  { id: "rector", name: "Rector", level: 2, color: "#ea580c", icon: <Award className="w-4 h-4" />, hasDepartment: false },
+  { id: "head", name: "Department Head", level: 3, color: "#d97706", icon: <Building className="w-4 h-4" />, hasDepartment: true },
+  { id: "dean", name: "Dean", level: 4, color: "#16a34a", icon: <UserCheck className="w-4 h-4" />, hasDepartment: true },
+  { id: "lead_staff", name: "Lead Staff", level: 5, color: "#2563eb", icon: <Users className="w-4 h-4" />, hasDepartment: true },
+  { id: "staff", name: "Staff", level: 6, color: "#7c3aed", icon: <User className="w-4 h-4" />, hasDepartment: true },
+  { id: "lecturer", name: "Lecturer", level: 7, color: "#0891b2", icon: <GraduationCap className="w-4 h-4" />, hasDepartment: true },
+  { id: "student", name: "Student", level: 8, color: "#84cc16", icon: <BookOpen className="w-4 h-4" />, hasDepartment: true },
+];
+
+interface Permission {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+}
+
+interface TabAccess {
+  tabId: string;
+  tabName: string;
+  canView: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canExport: boolean;
+}
+
+interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: RoleLevel;
+  department: string;
+  status: "active" | "inactive" | "suspended";
+  lastLogin: string;
+  createdAt: string;
+  permissions: string[];
+  tabAccess: TabAccess[];
+}
+
+const permissionsList: Permission[] = [
+  // Dashboard
+  { id: "dashboard_view", name: "View Dashboard", category: "Dashboard", description: "Access main dashboard" },
+  { id: "dashboard_analytics", name: "Dashboard Analytics", category: "Dashboard", description: "View advanced analytics" },
+  
+  // Student Management
+  { id: "students_view", name: "View Students", category: "Students", description: "View student records and profiles" },
+  { id: "students_create", name: "Create Students", category: "Students", description: "Add new students" },
+  { id: "students_edit", name: "Edit Students", category: "Students", description: "Modify student information" },
+  { id: "students_delete", name: "Delete Students", category: "Students", description: "Remove student records" },
+  { id: "students_ec_score", name: "Manage EC Score", category: "Students", description: "View and manage extracurricular scores" },
+  { id: "students_scholarships", name: "Manage Scholarships", category: "Students", description: "Handle scholarship applications" },
+  { id: "students_attendance", name: "Track Attendance", category: "Students", description: "Monitor student attendance" },
+  { id: "students_achievements", name: "Manage Achievements", category: "Students", description: "Record student achievements" },
+  { id: "students_discipline", name: "Manage Discipline", category: "Students", description: "Handle disciplinary records" },
+  
+  // Lecturer/Faculty Management
+  { id: "lecturers_view", name: "View Lecturers", category: "Lecturers/Faculty", description: "View faculty records" },
+  { id: "lecturers_create", name: "Create Lecturers", category: "Lecturers/Faculty", description: "Add new faculty" },
+  { id: "lecturers_edit", name: "Edit Lecturers", category: "Lecturers/Faculty", description: "Modify faculty information" },
+  { id: "lecturers_delete", name: "Delete Lecturers", category: "Lecturers/Faculty", description: "Remove faculty records" },
+  { id: "lecturers_research", name: "Manage Research", category: "Lecturers/Faculty", description: "Access research management" },
+  { id: "lecturers_grades", name: "Manage Grades", category: "Lecturers/Faculty", description: "Input and modify grades" },
+  { id: "lecturers_syllabus", name: "Manage Syllabus", category: "Lecturers/Faculty", description: "Create and edit syllabi" },
+  { id: "lecturers_rankings", name: "View Rankings", category: "Lecturers/Faculty", description: "Access faculty rankings" },
+  
+  // Department Management
+  { id: "departments_view", name: "View Departments", category: "Departments", description: "View department data" },
+  { id: "departments_manage", name: "Manage Departments", category: "Departments", description: "Create/edit departments" },
+  { id: "departments_operations", name: "Manage Operations", category: "Departments", description: "Handle department operations" },
+  { id: "departments_schedule", name: "Manage Work Schedule", category: "Departments", description: "Create work schedules" },
+  { id: "departments_hr", name: "Access HR Profile", category: "Departments", description: "View HR information" },
+  { id: "departments_kpis", name: "Manage KPIs", category: "Departments", description: "Track and manage KPIs" },
+  { id: "departments_facilities", name: "Manage Facilities", category: "Departments", description: "Handle facility management" },
+  
+  // Classes
+  { id: "classes_view", name: "View Classes", category: "Classes", description: "View class information" },
+  { id: "classes_manage", name: "Manage Classes", category: "Classes", description: "Create and edit classes" },
+  { id: "classes_courses", name: "Manage Courses", category: "Classes", description: "Handle course management" },
+  { id: "classes_activities", name: "Manage Activities", category: "Classes", description: "Organize class activities" },
+  { id: "classes_rooms", name: "Manage Rooms", category: "Classes", description: "Allocate and manage rooms" },
+  
+  // Events
+  { id: "events_view", name: "View Events", category: "Events", description: "View events and calendar" },
+  { id: "events_create", name: "Create Events", category: "Events", description: "Create new events" },
+  { id: "events_edit", name: "Edit Events", category: "Events", description: "Modify event details" },
+  { id: "events_delete", name: "Delete Events", category: "Events", description: "Remove events" },
+  { id: "events_registration", name: "Manage Registration", category: "Events", description: "Handle event registrations" },
+  { id: "events_checkin", name: "Manage Check-in", category: "Events", description: "Control event check-in" },
+  { id: "events_analytics", name: "View Analytics", category: "Events", description: "Access event analytics" },
+  
+  // Timetable
+  { id: "timetable_view", name: "View Timetable", category: "Timetable", description: "View schedules" },
+  { id: "timetable_manage", name: "Manage Timetable", category: "Timetable", description: "Create and edit schedules" },
+  { id: "timetable_rooms", name: "Manage Room Schedule", category: "Timetable", description: "Schedule room usage" },
+  { id: "timetable_exams", name: "Manage Exam Schedule", category: "Timetable", description: "Schedule examinations" },
+  
+  // Library
+  { id: "library_view", name: "View Library", category: "Library", description: "Access library resources" },
+  { id: "library_manage", name: "Manage Library", category: "Library", description: "Manage library items" },
+  { id: "library_thesis", name: "Manage Thesis/Dissertation", category: "Library", description: "Handle academic papers" },
+  { id: "library_textbooks", name: "Manage Textbooks", category: "Library", description: "Manage textbook inventory" },
+  { id: "library_journals", name: "Manage Journals", category: "Library", description: "Handle journal subscriptions" },
+  
+  // Finance
+  { id: "finance_view", name: "View Finance", category: "Finance", description: "View financial records" },
+  { id: "finance_manage", name: "Manage Finance", category: "Finance", description: "Manage transactions" },
+  { id: "finance_tuition", name: "Manage Tuition Fees", category: "Finance", description: "Handle tuition payments" },
+  { id: "finance_costs", name: "Manage Costs", category: "Finance", description: "Track operational costs" },
+  { id: "finance_salary", name: "Manage Salary", category: "Finance", description: "Process salary payments" },
+  { id: "finance_bonus", name: "Manage Bonus", category: "Finance", description: "Distribute bonuses" },
+  { id: "finance_tax", name: "Manage Tax", category: "Finance", description: "Handle tax matters" },
+  { id: "finance_approve", name: "Approve Transactions", category: "Finance", description: "Approve financial transactions" },
+  
+  // Documents
+  { id: "documents_view", name: "View Documents", category: "Documents", description: "Access documents" },
+  { id: "documents_upload", name: "Upload Documents", category: "Documents", description: "Upload new documents" },
+  { id: "documents_edit", name: "Edit Documents", category: "Documents", description: "Modify documents" },
+  { id: "documents_signature", name: "Digital Signature", category: "Documents", description: "Use digital signatures" },
+  { id: "documents_processes", name: "Manage Processes", category: "Documents", description: "Handle administrative processes" },
+  
+  // One-Stop Service
+  { id: "onestop_view", name: "View One-Stop Service", category: "One-Stop Service", description: "Access service center" },
+  { id: "onestop_manage", name: "Manage Requests", category: "One-Stop Service", description: "Handle service requests" },
+  
+  // Projects
+  { id: "projects_view", name: "View Projects", category: "Projects", description: "View project information" },
+  { id: "projects_create", name: "Create Projects", category: "Projects", description: "Create new projects" },
+  { id: "projects_edit", name: "Edit Projects", category: "Projects", description: "Modify project details" },
+  { id: "projects_delete", name: "Delete Projects", category: "Projects", description: "Remove projects" },
+  
+  // HSB Shop
+  { id: "shop_view", name: "View Shop", category: "HSB-Shop", description: "Access shop interface" },
+  { id: "shop_manage", name: "Manage Shop", category: "HSB-Shop", description: "Manage shop items and orders" },
+  
+  // Alumni
+  { id: "alumni_view", name: "View Alumni", category: "Alumni", description: "Access alumni information" },
+  { id: "alumni_manage", name: "Manage Alumni", category: "Alumni", description: "Update alumni records" },
+  { id: "alumni_statistics", name: "View Statistics", category: "Alumni", description: "Access alumni statistics" },
+  { id: "alumni_employment", name: "Track Employment", category: "Alumni", description: "Monitor employment data" },
+  
+  // Canvas/LMS
+  { id: "canvas_view", name: "View Canvas/LMS", category: "Canvas/LMS", description: "Access learning management system" },
+  { id: "canvas_lectures", name: "Manage Lectures", category: "Canvas/LMS", description: "Upload and manage lectures" },
+  { id: "canvas_assignments", name: "Manage Assignments", category: "Canvas/LMS", description: "Create and grade assignments" },
+  { id: "canvas_projects", name: "Manage Projects", category: "Canvas/LMS", description: "Supervise student projects" },
+  { id: "canvas_thesis", name: "Manage Thesis", category: "Canvas/LMS", description: "Supervise thesis work" },
+  
+  // System Administration
+  { id: "users_view", name: "View Users", category: "Administration", description: "View user accounts" },
+  { id: "users_create", name: "Create Users", category: "Administration", description: "Add new user accounts" },
+  { id: "users_edit", name: "Edit Users", category: "Administration", description: "Modify user information" },
+  { id: "users_delete", name: "Delete Users", category: "Administration", description: "Remove user accounts" },
+  { id: "roles_manage", name: "Manage Roles", category: "Administration", description: "Configure roles and permissions" },
+  { id: "system_settings", name: "System Settings", category: "Administration", description: "Access system configuration" },
+  { id: "audit_logs", name: "View Audit Logs", category: "Administration", description: "View system activity logs" },
+];
+
+const availableTabs = [
+  "Dashboard", "Students", "Lecturers/Faculty", "Departments", "Classes", 
+  "Events", "Timetable", "Library", "Finance", "Documents", "Projects",
+  "HSB-Shop", "Alumni", "CanvasLMS", "Account"
+];
+
+// Sample data
+const sampleUsers: UserAccount[] = [
+  {
+    id: "1",
+    name: "Nguyen Thi Mai",
+    email: "nguyen.mai@hsb.edu.vn",
+    phone: "+84 912 345 678",
+    role: "rector",
+    department: "N/A",
+    status: "active",
+    lastLogin: "2025-10-29 09:15",
+    createdAt: "2024-01-15",
+    permissions: ["students_view", "lecturers_view", "departments_view", "departments_operations", "finance_view"],
+    tabAccess: []
+  },
+  {
+    id: "2",
+    name: "Tran Van Hoang",
+    email: "tran.hoang@hsb.edu.vn",
+    phone: "+84 903 456 789",
+    role: "dean",
+    department: "Faculty of Management",
+    status: "active",
+    lastLogin: "2025-10-29 08:30",
+    createdAt: "2024-03-20",
+    permissions: ["students_view", "students_edit", "lecturers_view", "events_view"],
+    tabAccess: []
+  },
+  {
+    id: "3",
+    name: "Le Thi Huong",
+    email: "le.huong@hsb.edu.vn",
+    phone: "+84 918 765 432",
+    role: "head",
+    department: "Human Resources",
+    status: "active",
+    lastLogin: "2025-10-28 16:45",
+    createdAt: "2024-05-10",
+    permissions: ["lecturers_view", "lecturers_edit", "users_view"],
+    tabAccess: []
+  },
+  {
+    id: "4",
+    name: "Pham Van Khanh",
+    email: "pham.khanh@hsb.edu.vn",
+    phone: "+84 909 876 543",
+    role: "lead_staff",
+    department: "International Relations",
+    status: "active",
+    lastLogin: "2025-10-29 10:00",
+    createdAt: "2024-06-15",
+    permissions: ["students_view", "events_view", "documents_view"],
+    tabAccess: []
+  },
+  {
+    id: "5",
+    name: "Hoang Thi Lan",
+    email: "hoang.lan@hsb.edu.vn",
+    phone: "+84 916 234 567",
+    role: "staff",
+    department: "Academic Affairs",
+    status: "inactive",
+    lastLogin: "2025-10-15 14:20",
+    createdAt: "2024-08-01",
+    permissions: ["students_view", "timetable_manage"],
+    tabAccess: []
+  },
+  {
+    id: "6",
+    name: "Dr. Nguyen Van Minh",
+    email: "nguyen.minh@hsb.edu.vn",
+    phone: "+84 905 123 456",
+    role: "lecturer",
+    department: "Faculty of Business Administration",
+    status: "active",
+    lastLogin: "2025-10-29 07:45",
+    createdAt: "2024-02-10",
+    permissions: ["students_view", "classes_view", "timetable_manage", "documents_view"],
+    tabAccess: []
+  },
+  {
+    id: "7",
+    name: "Pham Thi Anh",
+    email: "pham.anh@hsb.edu.vn",
+    phone: "+84 907 654 321",
+    role: "lecturer",
+    department: "Faculty of Marketing & Communication",
+    status: "active",
+    lastLogin: "2025-10-28 18:30",
+    createdAt: "2024-04-25",
+    permissions: ["students_view", "classes_view", "events_view"],
+    tabAccess: []
+  },
+  {
+    id: "8",
+    name: "Tran Minh Quan",
+    email: "tran.quan.student@hsb.edu.vn",
+    phone: "+84 913 987 654",
+    role: "student",
+    department: "Faculty of Information Technology",
+    status: "active",
+    lastLogin: "2025-10-29 10:30",
+    createdAt: "2024-09-01",
+    permissions: ["students_view", "classes_view", "library_view"],
+    tabAccess: []
+  },
+  {
+    id: "9",
+    name: "Le Thi Bich Ngoc",
+    email: "le.ngoc.student@hsb.edu.vn",
+    phone: "+84 914 321 098",
+    role: "student",
+    department: "Faculty of Economics",
+    status: "active",
+    lastLogin: "2025-10-29 09:00",
+    createdAt: "2024-09-01",
+    permissions: ["students_view", "events_view"],
+    tabAccess: []
+  },
+];
+
+const AccountManagement: React.FC = () => {
+  const [users, setUsers] = useState<UserAccount[]>(sampleUsers);
+  const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterRole, setFilterRole] = useState<RoleLevel | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive" | "suspended">("all");
+  const [activeTab, setActiveTab] = useState<"info" | "permissions" | "tabs" | "activity">("info");
+  
+  // Editing states
+  const [editingPermissions, setEditingPermissions] = useState<string[]>([]);
+  const [editingTabAccess, setEditingTabAccess] = useState<TabAccess[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Filter users
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          user.department.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRole = filterRole === "all" || user.role === filterRole;
+      const matchesStatus = filterStatus === "all" || user.status === filterStatus;
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [users, searchTerm, filterRole, filterStatus]);
+
+  // Group permissions by category
+  const groupedPermissions = useMemo(() => {
+    const groups: Record<string, Permission[]> = {};
+    permissionsList.forEach(perm => {
+      if (!groups[perm.category]) {
+        groups[perm.category] = [];
+      }
+      groups[perm.category].push(perm);
+    });
+    return groups;
+  }, []);
+
+  const handleUserSelect = (user: UserAccount) => {
+    setSelectedUser(user);
+    setEditingPermissions(user.permissions);
+    setEditingTabAccess(
+      availableTabs.map(tab => ({
+        tabId: tab.toLowerCase().replace(/\//g, "_"),
+        tabName: tab,
+        canView: true,
+        canEdit: false,
+        canDelete: false,
+        canExport: false
+      }))
+    );
+    setViewMode("detail");
+    setIsEditing(false);
+  };
+
+  const handleSavePermissions = () => {
+    if (selectedUser) {
+      const updatedUsers = users.map(u => 
+        u.id === selectedUser.id 
+          ? { ...u, permissions: editingPermissions, tabAccess: editingTabAccess }
+          : u
+      );
+      setUsers(updatedUsers);
+      setSelectedUser({ ...selectedUser, permissions: editingPermissions, tabAccess: editingTabAccess });
+      setIsEditing(false);
+    }
+  };
+
+  const togglePermission = (permId: string) => {
+    if (editingPermissions.includes(permId)) {
+      setEditingPermissions(editingPermissions.filter(p => p !== permId));
+    } else {
+      setEditingPermissions([...editingPermissions, permId]);
+    }
+  };
+
+  const updateTabAccess = (tabId: string, field: keyof TabAccess, value: boolean) => {
+    setEditingTabAccess(editingTabAccess.map(tab =>
+      tab.tabId === tabId ? { ...tab, [field]: value } : tab
+    ));
+  };
+
+  const getRoleInfo = (roleId: RoleLevel) => {
+    return roleHierarchy.find(r => r.id === roleId);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active": return "bg-green-100 text-green-700";
+      case "inactive": return "bg-gray-100 text-gray-700";
+      case "suspended": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "active": return <CheckCircle className="w-4 h-4" />;
+      case "inactive": return <XCircle className="w-4 h-4" />;
+      case "suspended": return <AlertCircle className="w-4 h-4" />;
+      default: return <XCircle className="w-4 h-4" />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Management</h1>
+          <p className="text-gray-600">Manage user accounts, roles, and access permissions</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => {/* TODO: Implement import functionality */}}
+            className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Import List
+          </button>
+          <button
+            onClick={() => setViewMode("create")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Create User
+          </button>
+        </div>
+      </div>
+
+      {viewMode === "list" ? (
+        <>
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Users</p>
+                  <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Active Users</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {users.filter(u => u.status === "active").length}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UserCheck className="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Roles</p>
+                  <p className="text-2xl font-bold text-gray-900">{roleHierarchy.length}</p>
+                </div>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-purple-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Permissions</p>
+                  <p className="text-2xl font-bold text-gray-900">{permissionsList.length}</p>
+                </div>
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Key className="w-6 h-6 text-orange-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters & Search */}
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, or department..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value as RoleLevel | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Roles</option>
+                  {roleHierarchy.map(role => (
+                    <option key={role.id} value={role.id}>{role.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* User List */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Permissions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredUsers.map(user => {
+                    const roleInfo = getRoleInfo(user.role);
+                    return (
+                      <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                              <div className="text-sm text-gray-500">{user.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+                              style={{ backgroundColor: `${roleInfo?.color}20`, color: roleInfo?.color }}
+                            >
+                              {roleInfo?.icon}
+                              {roleInfo?.name}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.role === "rector" ? (
+                            <span className="text-gray-400 italic">No Department</span>
+                          ) : (
+                            user.department
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
+                            {getStatusIcon(user.status)}
+                            {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {user.lastLogin}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {user.permissions.length} assigned
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleUserSelect(user)}
+                            className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                          >
+                            <Eye className="w-4 h-4" />
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : viewMode === "create" ? (
+        /* Create User Form */
+        <div className="space-y-6">
+          {/* Back Button */}
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to User List
+          </button>
+
+          {/* Form Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Create New User</h2>
+              <p className="text-sm text-gray-600 mt-1">Fill in the information below to create a new user account</p>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Basic Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <User className="w-5 h-5 text-blue-600" />
+                  Basic Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter full name"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="email@hsb.edu.vn"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="+84 XXX XXX XXX"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Role <span className="text-red-500">*</span>
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                      <option value="">Select a role</option>
+                      {roleHierarchy.map(role => (
+                        <option key={role.id} value={role.id}>{role.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Department <span className="text-red-500">*</span>
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                      <option value="">Select a department</option>
+                      <option value="administration">Administration</option>
+                      <option value="business">Faculty of Business Administration</option>
+                      <option value="marketing">Faculty of Marketing & Communication</option>
+                      <option value="it">Faculty of Information Technology</option>
+                      <option value="economics">Faculty of Economics</option>
+                      <option value="accounting">Faculty of Accounting & Finance</option>
+                      <option value="hr">Human Resources</option>
+                      <option value="international">International Relations</option>
+                      <option value="academic">Academic Affairs</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Account Status <span className="text-red-500">*</span>
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="suspended">Suspended</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Permissions Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Key className="w-5 h-5 text-blue-600" />
+                  Quick Permissions Assignment
+                </h3>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-800 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    Select a permission template based on the user&#39;s role, or customize permissions after creation
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <button className="p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div className="font-semibold text-gray-900 mb-1">Basic Access</div>
+                    <div className="text-xs text-gray-600">View-only permissions for most modules</div>
+                  </button>
+                  <button className="p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div className="font-semibold text-gray-900 mb-1">Standard Access</div>
+                    <div className="text-xs text-gray-600">View and edit permissions for assigned modules</div>
+                  </button>
+                  <button className="p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div className="font-semibold text-gray-900 mb-1">Full Access</div>
+                    <div className="text-xs text-gray-600">Complete access to all system features</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    // TODO: Implement create user logic
+                    setViewMode("list");
+                  }}
+                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium"
+                >
+                  <Plus className="w-5 h-5" />
+                  Create User Account
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center justify-center gap-2 font-medium"
+                >
+                  <X className="w-5 h-5" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Detail View */
+        <div className="space-y-6">
+          {/* Back Button */}
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to User List
+          </button>
+
+          {selectedUser && (
+            <>
+              {/* User Header Card */}
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                      {selectedUser.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">{selectedUser.name}</h2>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="flex items-center gap-1 text-gray-600">
+                          <Mail className="w-4 h-4" />
+                          {selectedUser.email}
+                        </span>
+                        <span className="flex items-center gap-1 text-gray-600">
+                          <Phone className="w-4 h-4" />
+                          {selectedUser.phone}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        {(() => {
+                          const roleInfo = getRoleInfo(selectedUser.role);
+                          return (
+                            <span
+                              className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+                              style={{ backgroundColor: `${roleInfo?.color}20`, color: roleInfo?.color }}
+                            >
+                              {roleInfo?.icon}
+                              {roleInfo?.name}
+                            </span>
+                          );
+                        })()}
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedUser.status)}`}>
+                          {getStatusIcon(selectedUser.status)}
+                          {selectedUser.status.charAt(0).toUpperCase() + selectedUser.status.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {!isEditing ? (
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit Access
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handleSavePermissions}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsEditing(false);
+                            setEditingPermissions(selectedUser.permissions);
+                          }}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
+                        >
+                          <X className="w-4 h-4" />
+                          Cancel
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="border-b border-gray-200">
+                  <nav className="flex">
+                    <button
+                      onClick={() => setActiveTab("info")}
+                      className={`px-6 py-3 text-sm font-medium ${
+                        activeTab === "info"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Basic Information
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("permissions")}
+                      className={`px-6 py-3 text-sm font-medium ${
+                        activeTab === "permissions"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Permissions
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("tabs")}
+                      className={`px-6 py-3 text-sm font-medium ${
+                        activeTab === "tabs"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Tab Access
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("activity")}
+                      className={`px-6 py-3 text-sm font-medium ${
+                        activeTab === "activity"
+                          ? "border-b-2 border-blue-600 text-blue-600"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Activity Log
+                    </button>
+                  </nav>
+                </div>
+
+                <div className="p-6">
+                  {/* Basic Information Tab */}
+                  {activeTab === "info" && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                          <input
+                            type="text"
+                            value={selectedUser.name}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                          <input
+                            type="email"
+                            value={selectedUser.email}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                          <input
+                            type="tel"
+                            value={selectedUser.phone}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                          <input
+                            type="text"
+                            value={selectedUser.role === "rector" ? "N/A - University Level" : selectedUser.department}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                          <input
+                            type="text"
+                            value={getRoleInfo(selectedUser.role)?.name || ""}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+                          <input
+                            type="text"
+                            value={selectedUser.status.charAt(0).toUpperCase() + selectedUser.status.slice(1)}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Last Login</label>
+                          <input
+                            type="text"
+                            value={selectedUser.lastLogin}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Account Created</label>
+                          <input
+                            type="text"
+                            value={selectedUser.createdAt}
+                            disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Permissions Tab */}
+                  {activeTab === "permissions" && (
+                    <div className="space-y-4">
+                      {Object.entries(groupedPermissions).map(([category, perms]) => (
+                        <div key={category} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                            <h3 className="text-sm font-semibold text-gray-900">{category}</h3>
+                          </div>
+                          <div className="p-4 space-y-2">
+                            {perms.map(perm => (
+                              <label
+                                key={perm.id}
+                                className={`flex items-center justify-between p-3 rounded-lg border ${
+                                  isEditing ? "cursor-pointer hover:bg-gray-50" : ""
+                                } ${
+                                  editingPermissions.includes(perm.id)
+                                    ? "border-blue-300 bg-blue-50"
+                                    : "border-gray-200"
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="checkbox"
+                                    checked={editingPermissions.includes(perm.id)}
+                                    onChange={() => isEditing && togglePermission(perm.id)}
+                                    disabled={!isEditing}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                  />
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">{perm.name}</div>
+                                    <div className="text-xs text-gray-500">{perm.description}</div>
+                                  </div>
+                                </div>
+                                {editingPermissions.includes(perm.id) && (
+                                  <CheckCircle className="w-5 h-5 text-blue-600" />
+                                )}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tab Access Tab */}
+                  {activeTab === "tabs" && (
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tab Name</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">View</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Edit</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Delete</th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Export</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {editingTabAccess.map(tab => (
+                              <tr key={tab.tabId} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{tab.tabName}</td>
+                                <td className="px-4 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={tab.canView}
+                                    onChange={(e) => isEditing && updateTabAccess(tab.tabId, "canView", e.target.checked)}
+                                    disabled={!isEditing}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                  />
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={tab.canEdit}
+                                    onChange={(e) => isEditing && updateTabAccess(tab.tabId, "canEdit", e.target.checked)}
+                                    disabled={!isEditing || !tab.canView}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                  />
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={tab.canDelete}
+                                    onChange={(e) => isEditing && updateTabAccess(tab.tabId, "canDelete", e.target.checked)}
+                                    disabled={!isEditing || !tab.canView}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                  />
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={tab.canExport}
+                                    onChange={(e) => isEditing && updateTabAccess(tab.tabId, "canExport", e.target.checked)}
+                                    disabled={!isEditing || !tab.canView}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                  />
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Activity Log Tab */}
+                  {activeTab === "activity" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <AlertCircle className="w-5 h-5 text-blue-600" />
+                        <span>Activity logs show recent account actions and system events</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {[
+                          { action: "Logged in", time: "2025-10-29 09:15", icon: <User className="w-4 h-4" />, color: "bg-green-100 text-green-700" },
+                          { action: "Updated permissions", time: "2025-10-28 14:30", icon: <Key className="w-4 h-4" />, color: "bg-blue-100 text-blue-700" },
+                          { action: "Accessed Finance module", time: "2025-10-28 11:20", icon: <Eye className="w-4 h-4" />, color: "bg-purple-100 text-purple-700" },
+                          { action: "Exported student data", time: "2025-10-27 16:45", icon: <Download className="w-4 h-4" />, color: "bg-orange-100 text-orange-700" },
+                        ].map((log, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 ${log.color} rounded-full flex items-center justify-center`}>
+                                {log.icon}
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{log.action}</div>
+                                <div className="text-xs text-gray-500">{log.time}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+
+
 {/*render nav*/}
 
 {/*Show tab content*/}
-  {/*Show tab content*/}
+
   const renderContent = () => {
    
    if (activeTab === "dashboard") {
@@ -13998,9 +16717,7 @@ const ProjectsTab: React.FC = () => {
     if (activeTab == 'hr-profile'){
       return <HRProfileManagement/>;
     }
-    if (activeTab === 'library-dashboard') {
-      return <LibraryDashboard />;
-    }
+
     if (activeTab === 'events-dashboard') {
       return <EventsDashboard />;
     }
@@ -14010,15 +16727,11 @@ const ProjectsTab: React.FC = () => {
     if (activeTab === 'scholarships') {
       return <Scholarship />;
     }
-    if (activeTab === 'finance-overview') {
-      return <FinanceOverview />;
-    }
+    
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;
     } 
-    if (activeTab === 'timetable-overview') {
-      return <TimetableOverview />;
-    }
+  
     if (activeTab === 'departments-overview') {
       return <DepartmentOverview />;
     }
@@ -14028,20 +16741,37 @@ const ProjectsTab: React.FC = () => {
     if (activeTab === 'alumni-overview') {
       return <AlumniOverview />;
     }
-    if (activeTab == 'one-stop-service'){
-      return <OneStopService/>;
-    }
+    
     if (activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
       return <TimetableCalendar />;
     }
+    if (activeTab === 'timetable-overview') {
+      return <TimetableOverview />;
+    }
     if (activeTab === 'room-schedule' ) {
       return <RoomSchedule />;
+    }
+    
+    if (activeTab === 'library-dashboard') {
+      return <LibraryDashboard />;
+    }
+    if (activeTab === 'thesis-dissertation') {
+      return <ThesisManagement />;
+    }
+    if (activeTab === 'finance-overview') {
+      return <FinanceOverview />;
+    }
+   if (activeTab == 'one-stop-service'){
+      return <OneStopService/>;
     }
     if (activeTab == 'projects'){
       return <ProjectsTab/>;
     }
     if (activeTab == 'shopping'){
       return <HSBShop/>;
+    }
+      if (activeTab == 'account'){
+      return <AccountManagement/>;
     }
     return (
       <div className="bg-white p-6 rounded-lg shadow">
