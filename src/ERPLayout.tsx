@@ -10485,44 +10485,36 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     
     // Start from column C (index 2) onwards
     for (let i = 2; i < headerRow.length; i++) {
-      const roomName = (headerRow[i] || '').toString().trim();
-      if (roomName) {
-        let floor = 'Floor 1';
-        
-        // Floor 1
-        if (roomName.includes('Chu Văn An B1') || 
-            roomName.includes('Nguyễn Văn Đạo B1') || 
-            roomName.includes('Võ Nguyên Giáp T1 INS') || 
-            roomName.includes('Trần Quốc Hoàn T1 G5')) {
-          floor = 'Floor 1';
-        }
-        // Floor 2
-        else if (roomName.includes('Quang Trung 202 INS') || 
-                 roomName.includes('202 INS') ||
-                 roomName.includes('Lý Thái Tổ 201 INS') || 
-                 roomName.includes('201 INS') ||
-                 roomName.includes('Thăng Long T2 B1')) {
-          floor = 'Floor 2';
-        }
-        // Floor 3
-        else if (roomName.includes('Trần Hưng Đạo 301 INS') || 
-                 roomName.includes('301 INS') ||
-                 roomName.includes('Lý Thường Kiệt 302 INS') || 
-                 roomName.includes('302 INS') ||
-                 roomName.includes('HAT T3 B1') || 
-                 roomName.includes('MAS T3 B1') || 
-                 roomName.includes('Meeting Room T3 B1')) {
-          floor = 'Floor 3';
-        }
-        // Floor 4
-        else if (roomName.includes('Ngô Quyền 401 INS') || 
-                 roomName.includes('401 INS') ||
-                 roomName.includes('Lê Hoàn 402 INS') || 
-                 roomName.includes('402 INS') ||
-                 roomName.includes('MET T4 B1') || 
-                 roomName.includes('MAC T4 B1')) {
-          floor = 'Floor 4';
-        }
+  const roomName = (headerRow[i] || '').toString().trim();
+  if (roomName) {
+    let floor = 'Floor 1'; // Default
+    
+    // Floor identification based on T1, T2, T3, T4 pattern
+    // T1 = Floor 1, T2 = Floor 2, T3 = Floor 3, T4 = Floor 4
+    // B1 = Building 1 (not related to floor)
+    
+    if (roomName.includes('T1')) {
+      floor = 'Floor 1';
+    }
+    else if (roomName.includes('T2')) {
+      floor = 'Floor 2';
+    }
+    else if (roomName.includes('T3')) {
+      floor = 'Floor 3';
+    }
+    else if (roomName.includes('T4')) {
+      floor = 'Floor 4';
+    }
+    // Legacy room names with room numbers (201, 301, 401, etc.)
+    else if (roomName.includes('201') || roomName.includes('202')) {
+      floor = 'Floor 2';
+    }
+    else if (roomName.includes('301') || roomName.includes('302')) {
+      floor = 'Floor 3';
+    }
+    else if (roomName.includes('401') || roomName.includes('402')) {
+      floor = 'Floor 4';
+    }
         
         roomColumns[i] = { name: roomName, floor };
       }
@@ -10641,7 +10633,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       if (!match) throw new Error("Invalid URL");
       
       const spreadsheetId = match[1];
-      const range = "sheet1!A1:Q300"; // Increased range to capture more data
+      const range = "sheet1!A1:R300"; // Increased range to capture more data
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
       
       console.log('Fetching from sheet1...');
@@ -10780,14 +10772,14 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       </div>
 
       {/* Legend */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+      
         <div className="flex flex-wrap gap-4 items-center">
           <span className="text-sm font-medium text-gray-700">Legend:</span>
           <div className="flex items-center gap-2"><div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div><span className="text-sm">Morning (S)</span></div>
           <div className="flex items-center gap-2"><div className="w-4 h-4 bg-orange-100 border border-orange-300 rounded"></div><span className="text-sm">Afternoon (C)</span></div>
           <div className="flex items-center gap-2"><div className="w-4 h-4 bg-purple-100 border border-purple-300 rounded"></div><span className="text-sm">Evening (T)</span></div>
         </div>
-      </div>
+      
 
       {/* Schedule Grid */}
       {loading ? (
@@ -10797,7 +10789,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
         </div>
       ) : currentDaySchedule.length > 0 ? (
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mt-3">
             {currentDaySchedule.map((room, index) => (
               <div key={`${room.roomCode}-${index}`} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4">
                 <div className="mb-3 pb-3 border-b border-gray-200">
@@ -10838,7 +10830,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       )}
 
       <div className="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
-        © 2025 Hanoi School of Business and Management (HSB). All rights reserved
+        © 2025 Hanoi School of Business and Management (HSB). All rights reserved. Designed by Tuan.HA
       </div>
     </div>
   );
