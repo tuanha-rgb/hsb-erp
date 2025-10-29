@@ -10707,7 +10707,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
 
       {/* Date selector */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Select Date:
