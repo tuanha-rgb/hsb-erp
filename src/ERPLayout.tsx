@@ -10782,12 +10782,12 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     const badgeClass = type === 'morning' ? "bg-blue-100 text-blue-700" :
       type === 'afternoon' ? "bg-orange-100 text-orange-700" : "bg-purple-100 text-purple-700";
 
-    return <div className={`px-3 py-1.5 rounded-md text-xs font-medium ${badgeClass}`}>{session}</div>;
+    return <div className={`px-3 py-1.5 rounded-md text-s font-medium ${badgeClass}`}>{session}</div>;
   };
 
  return (
     <div className="h-full w-full bg-gray-50 overflow-auto">
-      <div className="p-4 max-w-[98%] mx-auto">
+      <div className="p-1 max-w mx-auto">
         {/* Header Section */}
         <div className="mb-4 flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div>
