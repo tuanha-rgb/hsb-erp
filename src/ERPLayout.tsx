@@ -10487,17 +10487,46 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     for (let i = 2; i < headerRow.length; i++) {
       const roomName = (headerRow[i] || '').toString().trim();
       if (roomName) {
-        let floor = 'Floor 2';
-        if (roomName.includes('T3') || roomName.includes('Floor 3') || roomName.includes('402') || roomName.includes('401') || roomName.includes('Meeting Room T3')) {
+        let floor = 'Floor 1';
+        
+        // Floor 1
+        if (roomName.includes('Chu Văn An B1') || 
+            roomName.includes('Nguyễn Văn Đạo B1') || 
+            roomName.includes('Võ Nguyên Giáp T1 INS') || 
+            roomName.includes('Trần Quốc Hoàn T1 G5')) {
+          floor = 'Floor 1';
+        }
+        // Floor 2
+        else if (roomName.includes('Quang Trung 202 INS') || 
+                 roomName.includes('202 INS') ||
+                 roomName.includes('Lý Thái Tổ 201 INS') || 
+                 roomName.includes('201 INS') ||
+                 roomName.includes('Thăng Long T2 B1')) {
+          floor = 'Floor 2';
+        }
+        // Floor 3
+        else if (roomName.includes('Trần Hưng Đạo 301 INS') || 
+                 roomName.includes('301 INS') ||
+                 roomName.includes('Lý Thường Kiệt 302 INS') || 
+                 roomName.includes('302 INS') ||
+                 roomName.includes('HAT T3 B1') || 
+                 roomName.includes('MAS T3 B1') || 
+                 roomName.includes('Meeting Room T3 B1')) {
           floor = 'Floor 3';
-        } else if (roomName.includes('T4') || roomName.includes('Floor 4') || roomName.includes('HAT') || roomName.includes('MAS') || roomName.includes('MET') || roomName.includes('MAC')) {
+        }
+        // Floor 4
+        else if (roomName.includes('Ngô Quyền 401 INS') || 
+                 roomName.includes('401 INS') ||
+                 roomName.includes('Lê Hoàn 402 INS') || 
+                 roomName.includes('402 INS') ||
+                 roomName.includes('MET T4 B1') || 
+                 roomName.includes('MAC T4 B1')) {
           floor = 'Floor 4';
         }
         
         roomColumns[i] = { name: roomName, floor };
       }
     }
-
     console.log('Found', Object.keys(roomColumns).length, 'room columns');
 
     // Track current date as we process rows
