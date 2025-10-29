@@ -17,7 +17,8 @@ import {
   AlertCircle, Download, Filter, PieChart, ArrowUpRight, ArrowDownRight, 
   Target, MapPin, Star, CheckCircle, XCircle, User, Eye, Check,X, MessageCircle,
   Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus, Folder,
-  Kanban, BarChart2, FolderOpen, List, Package, Boxes, ShoppingCart, CreditCard, AlertOctagon, RotateCcw,  Footprints
+  Kanban, BarChart2, FolderOpen, List, Package, Boxes, ShoppingCart, CreditCard, AlertOctagon, RotateCcw,  Footprints,
+  RefreshCw
 } from "lucide-react";
 
 
@@ -10423,6 +10424,372 @@ const TimetableCalendar = () => {
   };
 
 
+/*Room Schedule tab*/
+
+
+interface RoomSession {
+  morning: string;
+  afternoon: string;
+  evening: string;
+}
+
+interface RoomScheduleItem {
+  roomCode: string;
+  floor: string;
+  sessions: RoomSession;
+}
+
+interface WeeklyScheduleData {
+  [date: string]: RoomScheduleItem[];
+}
+
+interface RoomScheduleProps {
+  googleSheetUrl?: string;
+  apiKey?: string;
+}
+
+const getEnvVar = (key: string): string => {
+  try {
+    // @ts-ignore
+    return import.meta.env[key] || "";
+  } catch {
+    return "";
+  }
+};
+
+const RoomSchedule: React.FC<RoomScheduleProps> = ({ 
+  googleSheetUrl = getEnvVar('VITE_SHEET_URL'),
+  apiKey = getEnvVar('VITE_GOOGLE_API_KEY')
+}) => {
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
+  const [scheduleData, setScheduleData] = useState<WeeklyScheduleData>({});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [debugInfo, setDebugInfo] = useState<string>("");
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+
+  const parseGoogleSheetsData = (data: any[][]): WeeklyScheduleData => {
+    const weeklyData: WeeklyScheduleData = {};
+    
+    if (!data || data.length < 2) {
+      console.error('No data or insufficient rows');
+      return weeklyData;
+    }
+
+    const headerRow = data[0];
+    console.log('Header row:', headerRow);
+
+    const roomColumns: { [key: number]: { name: string; floor: string } } = {};
+    
+    for (let i = 2; i < headerRow.length; i++) {
+      const roomName = (headerRow[i] || '').toString().trim();
+      if (roomName) {
+        let floor = 'Floor 2';
+        if (roomName.includes('T3') || roomName.includes('Floor 3') || roomName.includes('402') || roomName.includes('401') || roomName.includes('Meeting Room T3')) {
+          floor = 'Floor 3';
+        } else if (roomName.includes('T4') || roomName.includes('Floor 4') || roomName.includes('HAT') || roomName.includes('MAS') || roomName.includes('MET') || roomName.includes('MAC')) {
+          floor = 'Floor 4';
+        }
+        
+        roomColumns[i] = { name: roomName, floor };
+      }
+    }
+
+    console.log('Room columns found:', Object.keys(roomColumns).length);
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (!row || row.length < 2) continue;
+
+      const dateCell = (row[0] || '').toString().trim();
+      const sessionType = (row[1] || '').toString().trim();
+
+      if (!dateCell || !sessionType) continue;
+
+      let formattedDate = '';
+      const dateMatch = dateCell.match(/ngày (\d+)\.(\d+)\.(\d+)/);
+      
+      if (dateMatch) {
+        const day = dateMatch[1].padStart(2, '0');
+        const month = dateMatch[2].padStart(2, '0');
+        const year = dateMatch[3];
+        formattedDate = `${year}-${month}-${day}`;
+      } else {
+        continue;
+      }
+
+      if (!weeklyData[formattedDate]) {
+        weeklyData[formattedDate] = [];
+      }
+
+      Object.entries(roomColumns).forEach(([colIndex, roomInfo]) => {
+        const idx = parseInt(colIndex);
+        const cellValue = (row[idx] || '').toString().trim();
+
+        let roomEntry = weeklyData[formattedDate].find(r => r.roomCode === roomInfo.name);
+        
+        if (!roomEntry) {
+          roomEntry = {
+            roomCode: roomInfo.name,
+            floor: roomInfo.floor,
+            sessions: { morning: '', afternoon: '', evening: '' }
+          };
+          weeklyData[formattedDate].push(roomEntry);
+        }
+
+        if (sessionType === 'S') {
+          roomEntry.sessions.morning = cellValue;
+        } else if (sessionType === 'C') {
+          roomEntry.sessions.afternoon = cellValue;
+        } else if (sessionType === 'T') {
+          roomEntry.sessions.evening = cellValue;
+        }
+      });
+    }
+
+    const dates = Object.keys(weeklyData).sort();
+    console.log('Parsed dates:', dates);
+    console.log('Total dates:', dates.length);
+    console.log('First date sample:', weeklyData[dates[0]]?.slice(0, 2));
+    
+    return weeklyData;
+  };
+
+  const loadDemoData = () => {
+    console.log('Loading demo data...');
+    const today = new Date().toISOString().split('T')[0];
+    
+    setScheduleData({
+      [today]: [
+        { roomCode: "Chu Văn An B1", floor: "Floor 2", sessions: { morning: "", afternoon: "MAS3", evening: "MET6 - Tiếng Hàn" } },
+        { roomCode: "Nguyễn Văn Đạo B1", floor: "Floor 2", sessions: { morning: "", afternoon: "", evening: "MET6 - Tiếng Trung" } },
+        { roomCode: "HAT T3 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "", evening: "" } },
+        { roomCode: "MAS T3 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "", evening: "" } },
+        { roomCode: "MET T4 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "MET7", evening: "" } }
+      ]
+    });
+    setAvailableDates([today]);
+    setError("Using demo data. Configure .env to connect to Google Sheets.");
+  };
+
+  const fetchScheduleData = async () => {
+    console.log('=== Starting fetch ===');
+    
+    if (!googleSheetUrl || !apiKey) {
+      console.log('Missing credentials');
+      loadDemoData();
+      return;
+    }
+    
+    setLoading(true);
+    setError("");
+    setDebugInfo("Connecting to Google Sheets...");
+    
+    try {
+      const match = googleSheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (!match) throw new Error("Invalid URL");
+      
+      const spreadsheetId = match[1];
+      const range = "sheet1!A1:Q200";
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+      
+      console.log('Fetching from sheet1...');
+      setDebugInfo("Loading data from Google Sheets...");
+      
+      const response = await fetch(url);
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', errorText);
+        throw new Error(`API Error (${response.status})`);
+      }
+      
+      const result = await response.json();
+      console.log('Received rows:', result.values?.length || 0);
+      
+      if (!result.values || result.values.length === 0) {
+        throw new Error("Empty sheet");
+      }
+      
+      setDebugInfo("Processing data...");
+      const parsedData = parseGoogleSheetsData(result.values);
+      
+      const dates = Object.keys(parsedData).sort();
+      const dateCount = dates.length;
+      console.log('Parsed dates count:', dateCount);
+      
+      if (dateCount === 0) {
+        throw new Error("No valid data found");
+      }
+      
+      setScheduleData(parsedData);
+      setAvailableDates(dates);
+      
+      // Set selected date to first available date if current date not found
+      if (!parsedData[selectedDate] && dates.length > 0) {
+        console.log('Setting date to:', dates[0]);
+        setSelectedDate(dates[0]);
+      }
+      
+      setDebugInfo(`Successfully loaded ${dateCount} days`);
+      setError("");
+      
+      setTimeout(() => setDebugInfo(""), 3000);
+      
+    } catch (err) {
+      console.error('Error:', err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(errorMessage);
+      setDebugInfo("");
+      loadDemoData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchScheduleData();
+  }, []);
+
+  const currentDaySchedule = useMemo(() => {
+    const schedule = scheduleData[selectedDate] || [];
+    console.log('Current day schedule for', selectedDate, ':', schedule.length, 'rooms');
+    return schedule;
+  }, [scheduleData, selectedDate]);
+
+  const getDayOfWeek = (dateStr: string) => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[new Date(dateStr).getDay()];
+  };
+
+  const SessionBadge: React.FC<{ session: string; type: 'morning' | 'afternoon' | 'evening' }> = ({ session, type }) => {
+    if (!session) return <div className="text-sm text-gray-400">-</div>;
+    
+    const badgeClass = type === 'morning' ? "bg-blue-100 text-blue-700" :
+      type === 'afternoon' ? "bg-orange-100 text-orange-700" : "bg-purple-100 text-purple-700";
+
+    return <div className={`px-3 py-1.5 rounded-md text-xs font-medium ${badgeClass}`}>{session}</div>;
+  };
+
+  return (
+    <div className="p-3 mx-auto">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <Building className="w-7 h-7 text-blue-600" />
+            HSB Class Schedule
+          </h1>
+          <p className="text-gray-600">{getDayOfWeek(selectedDate)}, {new Date(selectedDate).toLocaleDateString('en-US')}</p>
+          
+        </div>
+        <button onClick={fetchScheduleData} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 font-medium flex items-center gap-2">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Reload
+        </button>
+      </div>
+
+      {debugInfo && (
+        <div className="mb-6 flex items-start gap-2 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-800">{debugInfo}</div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 flex items-start gap-2 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-yellow-800">{error}</div>
+        </div>
+      )}
+
+      {/* Date selector */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Select Date:
+          </label>
+          <input 
+            type="date" 
+            value={selectedDate} 
+            onChange={(e) => setSelectedDate(e.target.value)} 
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+          />
+          {availableDates.length > 0 && (
+            <select 
+              value={selectedDate} 
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {availableDates.map(date => (
+                <option key={date} value={date}>
+                  {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+      
+
+      {/* Schedule Grid */}
+      {loading ? (
+        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+          <RefreshCw className="w-12 h-12 text-blue-600 mx-auto mb-3 animate-spin" />
+          <p className="text-gray-600">Loading data...</p>
+        </div>
+      ) : currentDaySchedule.length > 0 ? (
+        <div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            {currentDaySchedule.map((room, index) => (
+              <div key={`${room.roomCode}-${index}`} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4">
+                <div className="mb-3 pb-3 border-b border-gray-200">
+                  <h3 className="font-bold text-gray-900 text-base mb-1">{room.roomCode}</h3>
+                  <p className="text-xs text-gray-500">{room.floor}</p>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" />Morning</div>
+                    <SessionBadge session={room.sessions.morning} type="morning" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" />Afternoon</div>
+                    <SessionBadge session={room.sessions.afternoon} type="afternoon" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" />Evening</div>
+                    <SessionBadge session={room.sessions.evening} type="evening" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+          <Building className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+          <p className="text-gray-600 mb-2">No schedule for this day</p>
+          {availableDates.length > 0 && (
+            <p className="text-sm text-gray-500">Try selecting a date between {availableDates[0]} and {availableDates[availableDates.length - 1]}</p>
+          )}
+        </div>
+      )}
+
+      <div className="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
+        © 2025 Hanoi School of Business and Management (HSB). All rights reserved. Designed by TuanHA
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
 const AlumniOverview = () => {
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedFaculty, setSelectedFaculty] = useState('all');
@@ -11351,6 +11718,7 @@ const OneStopService = () => {
 
 
 
+
 const HSBShop = () => {
   const [activeView, setActiveView] = useState('dashboard'); // dashboard, inventory, sales, add-product
   const [searchTerm, setSearchTerm] = useState('');
@@ -11358,6 +11726,7 @@ const HSBShop = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [inventoryViewMode, setInventoryViewMode] = useState('grid'); // grid or list
 
   // Sample merchandise data
   const [products, setProducts] = useState([
@@ -11366,9 +11735,10 @@ const HSBShop = () => {
       name: "HSB University T-Shirt",
       category: "Apparel",
       price: 25.99,
+      hsbPoints: 250,
       stock: 150,
       sold: 89,
-      image: "🎽",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-TS-001",
       status: "in-stock",
       reorderLevel: 50,
@@ -11381,9 +11751,10 @@ const HSBShop = () => {
       name: "HSB Hoodie Navy",
       category: "Apparel",
       price: 45.99,
+      hsbPoints: 450,
       stock: 12,
       sold: 134,
-      image: "👕",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-HD-002",
       status: "low-stock",
       reorderLevel: 30,
@@ -11396,9 +11767,10 @@ const HSBShop = () => {
       name: "University Notebook Set",
       category: "Stationery",
       price: 12.99,
+      hsbPoints: 130,
       stock: 0,
       sold: 245,
-      image: "📒",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-NB-003",
       status: "out-of-stock",
       reorderLevel: 100,
@@ -11411,9 +11783,10 @@ const HSBShop = () => {
       name: "HSB Baseball Cap",
       category: "Accessories",
       price: 18.99,
+      hsbPoints: 190,
       stock: 85,
       sold: 67,
-      image: "🧢",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-CAP-004",
       status: "in-stock",
       reorderLevel: 40,
@@ -11426,9 +11799,10 @@ const HSBShop = () => {
       name: "University Backpack",
       category: "Accessories",
       price: 59.99,
+      hsbPoints: 600,
       stock: 34,
       sold: 112,
-      image: "🎒",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-BP-005",
       status: "in-stock",
       reorderLevel: 25,
@@ -11441,9 +11815,10 @@ const HSBShop = () => {
       name: "HSB Water Bottle",
       category: "Accessories",
       price: 15.99,
+      hsbPoints: 160,
       stock: 8,
       sold: 178,
-      image: "💧",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-WB-006",
       status: "low-stock",
       reorderLevel: 60,
@@ -11456,9 +11831,10 @@ const HSBShop = () => {
       name: "Premium Pen Set",
       category: "Stationery",
       price: 8.99,
+      hsbPoints: 90,
       stock: 156,
       sold: 203,
-      image: "🖊️",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-PS-007",
       status: "in-stock",
       reorderLevel: 80,
@@ -11471,15 +11847,32 @@ const HSBShop = () => {
       name: "HSB Sweatpants",
       category: "Apparel",
       price: 38.99,
+      hsbPoints: 390,
       stock: 45,
       sold: 91,
-      image: "👖",
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
       sku: "HSB-SP-008",
       status: "in-stock",
       reorderLevel: 35,
       supplier: "UniWear Co.",
       lastRestocked: "2025-10-05",
       sizes: ["S", "M", "L", "XL"]
+    },
+    {
+      id: 9,
+      name: "HSB-CLC Voucher",
+      category: "Vouchers",
+      price: 50.00,
+      hsbPoints: 500,
+      stock: 200,
+      sold: 45,
+      image: "https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg",
+      sku: "HSB-CLC-009",
+      status: "in-stock",
+      reorderLevel: 50,
+      supplier: "HSB Administration",
+      lastRestocked: "2025-10-20",
+      sizes: []
     }
   ]);
 
@@ -11487,8 +11880,9 @@ const HSBShop = () => {
     name: '',
     category: 'Apparel',
     price: '',
+    hsbPoints: '',
     stock: '',
-    image: '📦',
+    image: 'https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg',
     sku: '',
     reorderLevel: '',
     supplier: '',
@@ -11524,7 +11918,7 @@ const HSBShop = () => {
     });
   }, [products, searchTerm, filterCategory]);
 
-  const categories = ['all', 'Apparel', 'Stationery', 'Accessories'];
+  const categories = ['all', 'Apparel', 'Stationery', 'Accessories', 'Vouchers'];
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
@@ -11532,7 +11926,7 @@ const HSBShop = () => {
   };
 
   const handleAddProduct = () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.stock || !newProduct.sku) {
+    if (!newProduct.name || !newProduct.price || !newProduct.hsbPoints || !newProduct.stock || !newProduct.sku) {
       showNotification('Please fill in all required fields', 'error');
       return;
     }
@@ -11541,6 +11935,7 @@ const HSBShop = () => {
       ...newProduct,
       id: products.length + 1,
       price: parseFloat(newProduct.price),
+      hsbPoints: parseInt(newProduct.hsbPoints),
       stock: parseInt(newProduct.stock),
       reorderLevel: parseInt(newProduct.reorderLevel) || 20,
       sold: 0,
@@ -11553,8 +11948,9 @@ const HSBShop = () => {
       name: '',
       category: 'Apparel',
       price: '',
+      hsbPoints: '',
       stock: '',
-      image: '📦',
+      image: 'https://i.postimg.cc/tgHhXHK4/hsb-capibara.jpg',
       sku: '',
       reorderLevel: '',
       supplier: '',
@@ -11727,8 +12123,12 @@ const HSBShop = () => {
         <div className="space-y-4">
           {[...products].sort((a, b) => b.sold - a.sold).slice(0, 5).map((product, index) => (
             <div key={product.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-2xl">
-                {product.image}
+              <div className="w-12 h-12 rounded-full flex items-center justify-center font-semibold shrink-0">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-12 h-12 rounded-full border-4 border-white shadow-md object-cover"
+                />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-gray-900">{product.name}</p>
@@ -11736,7 +12136,8 @@ const HSBShop = () => {
               </div>
               <div className="text-right">
                 <p className="font-bold text-gray-900">${(product.price * product.sold).toFixed(2)}</p>
-                <p className="text-sm text-gray-600">${product.price} each</p>
+                <p className="text-xs text-blue-600">{product.hsbPoints * product.sold} HSB Points</p>
+                <p className="text-sm text-gray-600">${product.price} / {product.hsbPoints} pts</p>
               </div>
             </div>
           ))}
@@ -11761,7 +12162,7 @@ const HSBShop = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {categories.map(cat => (
               <button
                 key={cat}
@@ -11775,67 +12176,193 @@ const HSBShop = () => {
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
               </button>
             ))}
+            <div className="h-8 w-px bg-gray-300 mx-2" />
+            <button
+              onClick={() => setInventoryViewMode('grid')}
+              className={`p-2 rounded-lg transition-colors ${
+                inventoryViewMode === 'grid'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              title="Grid View"
+            >
+              <Kanban className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setInventoryViewMode('list')}
+              className={`p-2 rounded-lg transition-colors ${
+                inventoryViewMode === 'list'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              title="List View"
+            >
+              <List className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map(product => (
-          <div key={product.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center text-4xl">
-                  {product.image}
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getStatusColor(product.status)}`}>
-                  {getStatusIcon(product.status)}
-                  {product.status.split('-').join(' ').toUpperCase()}
-                </span>
-              </div>
-              
-              <h4 className="font-bold text-gray-900 mb-1">{product.name}</h4>
-              <p className="text-sm text-gray-600 mb-3">SKU: {product.sku}</p>
-              
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Price:</span>
-                  <span className="font-bold text-gray-900">${product.price}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Stock:</span>
-                  <span className={`font-bold ${product.stock === 0 ? 'text-red-600' : product.stock < product.reorderLevel ? 'text-orange-600' : 'text-green-600'}`}>
-                    {product.stock} units
+      {/* Grid View */}
+      {inventoryViewMode === 'grid' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.map(product => (
+            <div key={product.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center font-semibold shrink-0">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-16 h-16 rounded-full border-4 border-white shadow-md object-cover"
+                    />
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getStatusColor(product.status)}`}>
+                    {getStatusIcon(product.status)}
+                    {product.status.split('-').join(' ').toUpperCase()}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Sold:</span>
-                  <span className="font-semibold text-gray-900">{product.sold} units</span>
+                
+                <h4 className="font-bold text-gray-900 mb-1">{product.name}</h4>
+                <p className="text-sm text-gray-600 mb-3">SKU: {product.sku}</p>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Price:</span>
+                    <div className="text-right">
+                      <span className="font-bold text-gray-900">${product.price}</span>
+                      <span className="text-xs text-blue-600 ml-2">/ {product.hsbPoints} pts</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Stock:</span>
+                    <span className={`font-bold ${product.stock === 0 ? 'text-red-600' : product.stock < product.reorderLevel ? 'text-orange-600' : 'text-green-600'}`}>
+                      {product.stock} units
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Sold:</span>
+                    <span className="font-semibold text-gray-900">{product.sold} units</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setShowModal(true);
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStock(product.id, product.stock + 10)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedProduct(product);
-                    setShowModal(true);
-                  }}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center justify-center gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleUpdateStock(product.id, product.stock + 10)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </div>
             </div>
+          ))}
+        </div>
+      )}
+
+      {/* List View */}
+      {inventoryViewMode === 'list' && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
+            <div className="col-span-3">Product</div>
+            <div className="col-span-2">Category</div>
+            <div className="col-span-2">Price</div>
+            <div className="col-span-1 text-center">Stock</div>
+            <div className="col-span-1 text-center">Sold</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-1 text-right">Actions</div>
           </div>
-        ))}
-      </div>
+
+          {/* Table Rows */}
+          <div className="divide-y divide-gray-100">
+            {filteredProducts.map(product => (
+              <div key={product.id} className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-50 transition-colors items-center">
+                {/* Product Info */}
+                <div className="col-span-3 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-semibold shrink-0">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-12 h-12 rounded-full border-4 border-white shadow-md object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs text-gray-500">SKU: {product.sku}</p>
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div className="col-span-2">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    {product.category}
+                  </span>
+                </div>
+
+                {/* Price */}
+                <div className="col-span-2">
+                  <p className="font-bold text-gray-900">${product.price}</p>
+                  <p className="text-xs text-blue-600">{product.hsbPoints} pts</p>
+                </div>
+
+                {/* Stock */}
+                <div className="col-span-1 text-center">
+                  <p className={`font-bold ${product.stock === 0 ? 'text-red-600' : product.stock < product.reorderLevel ? 'text-orange-600' : 'text-green-600'}`}>
+                    {product.stock}
+                  </p>
+                  <p className="text-xs text-gray-500">units</p>
+                </div>
+
+                {/* Sold */}
+                <div className="col-span-1 text-center">
+                  <p className="font-semibold text-gray-900">{product.sold}</p>
+                  <p className="text-xs text-gray-500">units</p>
+                </div>
+
+                {/* Status */}
+                <div className="col-span-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${getStatusColor(product.status)}`}>
+                    {getStatusIcon(product.status)}
+                    {product.status.split('-').join(' ').toUpperCase()}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="col-span-1 flex justify-end gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setShowModal(true);
+                    }}
+                    className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    title="Edit"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStock(product.id, product.stock + 10)}
+                    className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    title="Restock +10"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {filteredProducts.length === 0 && (
         <div className="bg-white rounded-2xl shadow-sm p-12 border border-gray-100 text-center">
@@ -11880,6 +12407,7 @@ const HSBShop = () => {
                 <option value="Apparel">Apparel</option>
                 <option value="Stationery">Stationery</option>
                 <option value="Accessories">Accessories</option>
+                <option value="Vouchers">Vouchers</option>
               </select>
             </div>
 
@@ -11925,6 +12453,19 @@ const HSBShop = () => {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
+                HSB Points *
+              </label>
+              <input
+                type="number"
+                value={newProduct.hsbPoints}
+                onChange={(e) => setNewProduct({...newProduct, hsbPoints: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Initial Stock *
               </label>
               <input
@@ -11949,16 +12490,16 @@ const HSBShop = () => {
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Product Icon (Emoji)
+                Product Image URL
               </label>
               <input
                 type="text"
                 value={newProduct.image}
                 onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="📦"
+                placeholder="https://i.postimg.cc/..."
               />
             </div>
           </div>
@@ -11995,8 +12536,12 @@ const HSBShop = () => {
               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center font-bold text-blue-600">
                 {index + 1}
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-2xl">
-                {product.image}
+              <div className="w-12 h-12 rounded-full flex items-center justify-center font-semibold shrink-0">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-12 h-12 rounded-full border-4 border-white shadow-md object-cover"
+                />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-gray-900">{product.name}</p>
@@ -12004,7 +12549,8 @@ const HSBShop = () => {
               </div>
               <div className="text-right">
                 <p className="font-bold text-gray-900">${(product.price * product.sold).toFixed(2)}</p>
-                <p className="text-sm text-gray-600">{product.sold} units × ${product.price}</p>
+                <p className="text-xs text-blue-600">{product.hsbPoints * product.sold} HSB Points</p>
+                <p className="text-sm text-gray-600">{product.sold} units × ${product.price} / {product.hsbPoints} pts</p>
               </div>
               <div className="w-24">
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -12052,12 +12598,21 @@ const HSBShop = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Price ($)</label>
                 <input
                   type="number"
                   step="0.01"
                   defaultValue={selectedProduct.price}
                   onChange={(e) => setSelectedProduct({...selectedProduct, price: parseFloat(e.target.value)})}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">HSB Points</label>
+                <input
+                  type="number"
+                  defaultValue={selectedProduct.hsbPoints}
+                  onChange={(e) => setSelectedProduct({...selectedProduct, hsbPoints: parseInt(e.target.value)})}
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -12091,7 +12646,7 @@ const HSBShop = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w mx-auto p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
@@ -12116,7 +12671,7 @@ const HSBShop = () => {
 
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w mx-auto p-3">
           <div className="flex gap-8">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -12141,7 +12696,7 @@ const HSBShop = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w mx-auto p-3">
         {activeView === 'dashboard' && renderDashboard()}
         {activeView === 'inventory' && renderInventory()}
         {activeView === 'add-product' && renderAddProduct()}
@@ -12167,6 +12722,8 @@ const HSBShop = () => {
     </div>
   );
 };
+
+
 
 {/*project tab*/}
 
@@ -13320,8 +13877,11 @@ const ProjectsTab: React.FC = () => {
     if (activeTab == 'one-stop-service'){
       return <OneStopService/>;
     }
-    if (activeTab === 'room-schedule' || activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
+    if (activeTab === 'course-schedule' || activeTab === 'exam-schedule') {
       return <TimetableCalendar />;
+    }
+    if (activeTab === 'room-schedule' ) {
+      return <RoomSchedule />;
     }
     if (activeTab == 'projects'){
       return <ProjectsTab/>;
