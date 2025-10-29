@@ -10427,6 +10427,7 @@ const TimetableCalendar = () => {
 /*Room Schedule tab*/
 
 
+
 interface RoomSession {
   morning: string;
   afternoon: string;
@@ -10461,9 +10462,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
   googleSheetUrl = getEnvVar('VITE_SHEET_URL'),
   apiKey = getEnvVar('VITE_GOOGLE_API_KEY')
 }) => {
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
+  const [selectedDate, setSelectedDate] = useState<string>("");
   const [scheduleData, setScheduleData] = useState<WeeklyScheduleData>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -10478,11 +10477,13 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       return weeklyData;
     }
 
+    // Get room names from header row
     const headerRow = data[0];
-    console.log('Header row:', headerRow);
+    console.log('Header row (first 5):', headerRow.slice(0, 5));
 
     const roomColumns: { [key: number]: { name: string; floor: string } } = {};
     
+    // Start from column C (index 2) onwards
     for (let i = 2; i < headerRow.length; i++) {
       const roomName = (headerRow[i] || '').toString().trim();
       if (roomName) {
@@ -10497,38 +10498,51 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       }
     }
 
-    console.log('Room columns found:', Object.keys(roomColumns).length);
+    console.log('Found', Object.keys(roomColumns).length, 'room columns');
 
+    // Track current date as we process rows
+    let currentDate = '';
+    
+    // Process each data row
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       if (!row || row.length < 2) continue;
 
       const dateCell = (row[0] || '').toString().trim();
-      const sessionType = (row[1] || '').toString().trim();
+      const sessionType = (row[1] || '').toString().trim().toUpperCase();
 
-      if (!dateCell || !sessionType) continue;
-
-      let formattedDate = '';
-      const dateMatch = dateCell.match(/ngày (\d+)\.(\d+)\.(\d+)/);
-      
-      if (dateMatch) {
-        const day = dateMatch[1].padStart(2, '0');
-        const month = dateMatch[2].padStart(2, '0');
-        const year = dateMatch[3];
-        formattedDate = `${year}-${month}-${day}`;
-      } else {
-        continue;
+      // Update current date if this row has a date
+      if (dateCell) {
+        const dateMatch = dateCell.match(/ngày (\d+)\.(\d+)\.(\d+)/);
+        if (dateMatch) {
+          const day = dateMatch[1].padStart(2, '0');
+          const month = dateMatch[2].padStart(2, '0');
+          const year = dateMatch[3];
+          currentDate = `${year}-${month}-${day}`;
+          
+          // Initialize this date if not exists
+          if (!weeklyData[currentDate]) {
+            weeklyData[currentDate] = [];
+            console.log('Found new date:', currentDate);
+          }
+        }
       }
 
-      if (!weeklyData[formattedDate]) {
-        weeklyData[formattedDate] = [];
-      }
+      // Skip if we don't have a valid date yet
+      if (!currentDate) continue;
 
+      // Skip if not a valid session type
+      if (!['S', 'C', 'T'].includes(sessionType)) continue;
+
+      console.log(`Processing ${currentDate} - Session: ${sessionType}`);
+
+      // Process each room column for this session
       Object.entries(roomColumns).forEach(([colIndex, roomInfo]) => {
         const idx = parseInt(colIndex);
         const cellValue = (row[idx] || '').toString().trim();
 
-        let roomEntry = weeklyData[formattedDate].find(r => r.roomCode === roomInfo.name);
+        // Find or create room entry for this date
+        let roomEntry = weeklyData[currentDate].find(r => r.roomCode === roomInfo.name);
         
         if (!roomEntry) {
           roomEntry = {
@@ -10536,9 +10550,10 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
             floor: roomInfo.floor,
             sessions: { morning: '', afternoon: '', evening: '' }
           };
-          weeklyData[formattedDate].push(roomEntry);
+          weeklyData[currentDate].push(roomEntry);
         }
 
+        // Assign to appropriate session
         if (sessionType === 'S') {
           roomEntry.sessions.morning = cellValue;
         } else if (sessionType === 'C') {
@@ -10550,9 +10565,15 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     }
 
     const dates = Object.keys(weeklyData).sort();
-    console.log('Parsed dates:', dates);
-    console.log('Total dates:', dates.length);
-    console.log('First date sample:', weeklyData[dates[0]]?.slice(0, 2));
+    console.log('Total dates parsed:', dates.length);
+    console.log('Dates:', dates);
+    
+    // Log sample data for first date
+    if (dates.length > 0) {
+      const firstDate = dates[0];
+      const sampleRooms = weeklyData[firstDate].slice(0, 3);
+      console.log('Sample rooms for', firstDate, ':', sampleRooms);
+    }
     
     return weeklyData;
   };
@@ -10565,12 +10586,11 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       [today]: [
         { roomCode: "Chu Văn An B1", floor: "Floor 2", sessions: { morning: "", afternoon: "MAS3", evening: "MET6 - Tiếng Hàn" } },
         { roomCode: "Nguyễn Văn Đạo B1", floor: "Floor 2", sessions: { morning: "", afternoon: "", evening: "MET6 - Tiếng Trung" } },
-        { roomCode: "HAT T3 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "", evening: "" } },
-        { roomCode: "MAS T3 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "", evening: "" } },
         { roomCode: "MET T4 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "MET7", evening: "" } }
       ]
     });
     setAvailableDates([today]);
+    setSelectedDate(today);
     setError("Using demo data. Configure .env to connect to Google Sheets.");
   };
 
@@ -10592,11 +10612,11 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       if (!match) throw new Error("Invalid URL");
       
       const spreadsheetId = match[1];
-      const range = "sheet1!A1:Q200";
+      const range = "sheet1!A1:Q300"; // Increased range to capture more data
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
       
       console.log('Fetching from sheet1...');
-      setDebugInfo("Loading data from Google Sheets...");
+      setDebugInfo("Loading data...");
       
       const response = await fetch(url);
       console.log('Response status:', response.status);
@@ -10619,7 +10639,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       
       const dates = Object.keys(parsedData).sort();
       const dateCount = dates.length;
-      console.log('Parsed dates count:', dateCount);
+      console.log('Final parsed dates count:', dateCount);
       
       if (dateCount === 0) {
         throw new Error("No valid data found");
@@ -10628,13 +10648,12 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       setScheduleData(parsedData);
       setAvailableDates(dates);
       
-      // Set selected date to first available date if current date not found
-      if (!parsedData[selectedDate] && dates.length > 0) {
-        console.log('Setting date to:', dates[0]);
+      // Set to first available date
+      if (dates.length > 0) {
         setSelectedDate(dates[0]);
       }
       
-      setDebugInfo(`Successfully loaded ${dateCount} days`);
+      setDebugInfo(`Loaded ${dateCount} days`);
       setError("");
       
       setTimeout(() => setDebugInfo(""), 3000);
@@ -10656,11 +10675,12 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
 
   const currentDaySchedule = useMemo(() => {
     const schedule = scheduleData[selectedDate] || [];
-    console.log('Current day schedule for', selectedDate, ':', schedule.length, 'rooms');
+    console.log('Displaying schedule for', selectedDate, '- Rooms:', schedule.length);
     return schedule;
   }, [scheduleData, selectedDate]);
 
   const getDayOfWeek = (dateStr: string) => {
+    if (!dateStr) return '';
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days[new Date(dateStr).getDay()];
   };
@@ -10675,14 +10695,16 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
   };
 
   return (
-    <div className="p-3 mx-auto">
+    <div className="p-1 max-w mx-auto">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
             <Building className="w-7 h-7 text-blue-600" />
             HSB Class Schedule
           </h1>
-          <p className="text-gray-600">{getDayOfWeek(selectedDate)}, {new Date(selectedDate).toLocaleDateString('en-US')}</p>
+          {selectedDate && (
+            <p className="text-gray-600">{getDayOfWeek(selectedDate)}, {new Date(selectedDate).toLocaleDateString('en-US')}</p>
+          )}
           
         </div>
         <button onClick={fetchScheduleData} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 font-medium flex items-center gap-2">
@@ -10706,34 +10728,37 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       )}
 
       {/* Date selector */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-3">
-        <div className="flex items-center gap-3">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3">
+        <div className="flex items-center gap-4">
           <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Select Date:
           </label>
-          <input 
-            type="date" 
-            value={selectedDate} 
-            onChange={(e) => setSelectedDate(e.target.value)} 
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-          />
           {availableDates.length > 0 && (
             <select 
               value={selectedDate} 
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {availableDates.map(date => (
                 <option key={date} value={date}>
-                  {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </option>
               ))}
             </select>
           )}
         </div>
       </div>
-      
+
+      {/* Legend */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+        <div className="flex flex-wrap gap-4 items-center">
+          <span className="text-sm font-medium text-gray-700">Legend:</span>
+          <div className="flex items-center gap-2"><div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div><span className="text-sm">Morning (S)</span></div>
+          <div className="flex items-center gap-2"><div className="w-4 h-4 bg-orange-100 border border-orange-300 rounded"></div><span className="text-sm">Afternoon (C)</span></div>
+          <div className="flex items-center gap-2"><div className="w-4 h-4 bg-purple-100 border border-purple-300 rounded"></div><span className="text-sm">Evening (T)</span></div>
+        </div>
+      </div>
 
       {/* Schedule Grid */}
       {loading ? (
@@ -10743,12 +10768,11 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
         </div>
       ) : currentDaySchedule.length > 0 ? (
         <div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {currentDaySchedule.map((room, index) => (
               <div key={`${room.roomCode}-${index}`} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4">
                 <div className="mb-3 pb-3 border-b border-gray-200">
-                  <h3 className="font-bold text-gray-900 text-base mb-1">{room.roomCode}</h3>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1">{room.roomCode}</h3>
                   <p className="text-xs text-gray-500">{room.floor}</p>
                 </div>
                 <div className="space-y-2">
@@ -10774,17 +10798,23 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
           <Building className="w-12 h-12 text-gray-400 mx-auto mb-3" />
           <p className="text-gray-600 mb-2">No schedule for this day</p>
           {availableDates.length > 0 && (
-            <p className="text-sm text-gray-500">Try selecting a date between {availableDates[0]} and {availableDates[availableDates.length - 1]}</p>
+            <button 
+              onClick={() => setSelectedDate(availableDates[0])}
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Go to first available date
+            </button>
           )}
         </div>
       )}
 
       <div className="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
-        © 2025 Hanoi School of Business and Management (HSB). All rights reserved. Designed by TuanHA
+        © 2025 Hanoi School of Business and Management (HSB). All rights reserved
       </div>
     </div>
   );
 };
+
 
 
 
