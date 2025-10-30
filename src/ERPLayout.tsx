@@ -12377,27 +12377,28 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     <div className="h-full w-full bg-gray-50 overflow-auto">
       <div className="p-1 max-w mx-auto">
         {/* Header Section */}
-        <div className="mb-4 flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <Building className="w-8 h-8 text-blue-600" />
-              HSB Class Schedule
-            </h1>
-            {selectedDate && (
-              <p className="text-lg text-gray-600">
-                {getDayOfWeek(selectedDate)}, {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-            )}
-          </div>
-          <button 
-            onClick={fetchScheduleData} 
-            disabled={loading} 
-            className="px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 font-medium flex items-center gap-2 transition-colors"
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-            Reload
-          </button>
-        </div>
+      <div className="flex items-center justify-between mt-2">
+  <div>
+    <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+      <Building className="w-8 h-8 text-blue-600" />
+      HSB Class Schedule
+    </h1>
+    {selectedDate && (
+      <p className="text-lg text-gray-600">
+        {getDayOfWeek(selectedDate)}, {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      </p>
+    )}
+  </div>
+  
+  <button 
+    onClick={fetchScheduleData} 
+    disabled={loading} 
+    className="px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 font-medium flex items-center gap-2 transition-colors"
+  >
+    <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+    Reload
+  </button>
+</div>
 
         {/* Debug Info */}
         {debugInfo && (
@@ -12416,7 +12417,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
         )}
 
         {/* Date Selector & Legend Row */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg shadow-sm border border-gray-200 p-2">
           {/* Date Selector */}
           <div className="flex items-center gap-4 flex-1 min-w-[300px]">
             <label className="text-sm font-medium text-gray-700 flex items-center gap-2 whitespace-nowrap">
@@ -12467,7 +12468,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
             {currentDaySchedule.map((room, index) => (
               <div 
                 key={`${room.roomCode}-${index}`} 
-                className="bg-white rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all p-4"
+                className="bg-white rounded-lg border-2 border-gray-200 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all p-2"
               >
                 <div className="mb-3 pb-3 border-b-2 border-gray-200">
                   <h3 className="font-bold text-gray-900 text-base mb-1">{room.roomCode}</h3>

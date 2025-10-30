@@ -7018,7 +7018,7 @@ return (
         { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
         { id: 'documents', icon: Notebook, label: 'Documents' },
         { id: 'scholarship', icon: Gem, label: 'Scholarship' },
-        { id: 'matriculation', icon: User, label: 'Matriculation' },
+        { id: 'matriculation', icon: User, label: 'Identity' },
       ].map(item => (
         <button
           key={item.id}
