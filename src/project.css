@@ -153,7 +153,7 @@
 
 /* Projects List Sidebar */
 .projects-list {
-  width: 320px;
+  width: 200px;
   background: white;
   border-right: 1px solid #e2e8f0;
   display: flex;
@@ -179,7 +179,7 @@
 }
 
 .project-list-item {
-  padding: 15px;
+  padding: 8px;
   border-radius: 8px;
   margin-bottom: 8px;
   cursor: pointer;
@@ -1109,12 +1109,12 @@
 /* Responsive */
 @media (max-width: 1200px) {
   .projects-list {
-    width: 280px;
+    width: 270px;
   }
 
   .gantt-sidebar,
   .gantt-sidebar-header {
-    width: 280px;
+    width: 270px;
   }
 
   .kanban-column {

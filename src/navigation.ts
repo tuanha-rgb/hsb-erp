@@ -23,7 +23,7 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
               { id: 'party-union-clubs', label: 'Party/Union/Clubs' },
               { id: 'achievements', label: 'Achievements' },
               { id: 'discipline', label: 'Discipline' },
-              { id: 'thesis-dissertation', label: 'Thesis/Dissertation Management' },
+              { id: 'thesis-dissertation', label: 'Thesis Management' },
 
               
             ]
@@ -84,10 +84,10 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
             id: 'library', label: 'Library', icon: BookOpen,
             submenu: [
               { id: 'library-dashboard', label: 'Library Dashboard' },
-              { id: 'textbook-management', label: 'Textbook Management' },
-              { id: 'reference-book', label: 'Reference Book Management' },
-              { id: 'scientific-journals', label: 'Scientific Journals' },
-              { id: 'other-journals', label: 'Other Journals' }
+              { id: 'book-management', label: 'Book Management' },
+              { id: 'thesis-store', label: 'Thesis Storage' },
+              { id: 'journals', label: 'Journals' },
+              { id: 'other-type', label: 'Others' }
             ]
           },
           {
@@ -107,10 +107,11 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
           {
             id: 'documents', label: 'Documents', icon: FileText,
             submenu: [
+              { id: 'docu-manage', label: 'Documents management' },
               { id: 'digital-signature', label: 'Digital Signature' },
               { id: 'administrative-processes', label: 'Administrative Processes' },
               { id: 'regulations-decrees', label: 'Regulations & Decrees' },
-              { id: 'hsb-office', label: 'HSB Office' }
+              
             ]
           },
           { id: 'one-stop-service', label: 'One-Stop Service', icon: UserCheck },

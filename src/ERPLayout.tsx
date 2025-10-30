@@ -3,6 +3,22 @@ import Student from "./student";
 import Lecturer from "./lecturer";
 import './project.css';
 import './index.css';
+import {   bookRecords,   publishers,   catalogues,  type BookRecord,  type Publisher,
+  type BookType,  type CatalogueCategory} from './bookdata';
+
+import {  type Document,  type DocumentSource,  type DocumentType,  type DocumentStatus,  type PriorityLevel,
+  type Signatory,  type Attachment,  sampleDocuments,  getDocumentStatistics} from './documentdata';
+
+import {  Thesis,  ThesisStatus,  ThesisCategory,  ThesisLevel,  sampleTheses,} from "./thesis";
+
+import { sampleStudents, studentdata } from "./studentdata";
+
+import { researchProjects } from "./researchProjects";
+import { publications } from "./publications";
+import { patentData } from "./patent";
+
+import { ResearchProject, Publication, Patent } from "./research";
+import { getDisciplineColor, getStatusColor } from "./ResearchColors";
 
 import type { LucideIcon } from "lucide-react";
 import RoleDropdown, { type RoleValue } from "./RoleDropdown";
@@ -19,7 +35,8 @@ import {
   Edit, Save, ShieldCheck, Phone, Mail, Trash2, ThumbsUp, ThumbsDown, Minus, Folder,
   Kanban, BarChart2, FolderOpen, List, Package, Boxes, ShoppingCart, CreditCard, 
   AlertOctagon, RotateCcw, Footprints, RefreshCw, Shield, Key, Upload, Scroll, FileCheck, Send,
-  Banknote, 
+  Banknote, Archive, Grid, List as ListIcon, Library, Users as UsersIcon, Book, BookOpen as BookOpenIcon,
+  Building2, Copy, Layers, Hash, Cpu, Zap, Cloud, Database, HardDrive, Server, Terminal, Code, Bug, GitBranch, Paperclip,
 } from "lucide-react";
 
 // Utility renderer for dynamic values
@@ -2814,260 +2831,1370 @@ const StudentServicesOverview = () => {
     );
   };
 
+
+
 const StudentProfileAdmin = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterProgram, setFilterProgram] = useState('all');
-    const [filterLevel, setFilterLevel] = useState('all');
-    const [selectedStudent, setSelectedStudent] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterProgram, setFilterProgram] = useState("all");
+  const [filterLevel, setFilterLevel] = useState("all");
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
-    const sampleStudents = [
-      { id: 'S001234', name: 'Nguyen Van An', program: 'FONS', level: 'Bachelor', year: '3', gpa: '3.45', status: 'Active' },
-      { id: 'S001235', name: 'Tran Thi Binh', program: 'FOM', level: 'Bachelor', year: '2', gpa: '3.72', status: 'Active' },
-      { id: 'S001236', name: 'Le Van Cuong', program: 'FONS', level: 'Master', year: '1', gpa: '3.88', status: 'Active' },
-      { id: 'S001237', name: 'Pham Thi Dung', program: 'FONS', level: 'Master', year: '2', gpa: '3.91', status: 'Active' },
-      { id: 'S001238', name: 'Hoang Van Em', program: 'FONS', level: 'PhD', year: '3', gpa: '3.95', status: 'Active' },
-    ];
 
-    return (
-      <div className="min-h-screen bg-gray-50 p-3">
-        <div className="flex items-center justify-between  mb-3">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Student Profile Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Comprehensive student data and analytics</p>
+    const [students, setStudents] = useState<studentdata[]>(sampleStudents);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
+  // --- Filtering (basic, you can expand later)
+  const filtered = students.filter((student) => {
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesLevel =
+      filterLevel === "all" || student.level.toLowerCase() === filterLevel;
+
+    const matchesProgram =
+      filterProgram === "all" ||
+      student.program.toLowerCase() === filterProgram.toLowerCase();
+
+    return matchesSearch && matchesLevel && matchesProgram;
+  });
+
+  // --- Pagination
+  const totalStudents = filtered.length;
+  const totalPages = Math.ceil(totalStudents / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalStudents);
+  const pageStudents = filtered.slice(startIndex, endIndex);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Student Profile Management
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Comprehensive student data and analytics
+          </p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          + Add New Student
+        </button>
+      </div>
+
+      {/* Stats cards remain unchanged... */}
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search by student ID, name, email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-3 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <select
+              value={filterLevel}
+              onChange={(e) => {
+                setFilterLevel(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Levels</option>
+              <option value="bachelor">Bachelor</option>
+              <option value="master">Master</option>
+              <option value="phd">PhD</option>
+            </select>
+            <select
+              value={filterProgram}
+              onChange={(e) => {
+                setFilterProgram(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Programs</option>
+              <option value="met">MET</option>
+              <option value="mac">MAC</option>
+              <option value="hat">HAT</option>
+              <option value="mas">MAS</option>
+              <option value="bns">BNS</option>
+              <option value="has">HAS</option>
+              <option value="mba">MBA</option>
+              <option value="mns">MNS</option>
+              <option value="mote">MOTE</option>
+              <option value="dms">DMS</option>
+            </select>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <Plus size={18} />
-            Add New Student
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Student ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Full Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Program
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Level
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Year
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  GPA
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {pageStudents.map((student) => (
+                <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                    {student.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {student.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {student.program}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        student.level === "Bachelor"
+                          ? "bg-blue-100 text-blue-700"
+                          : student.level === "Master"
+                          ? "bg-purple-100 text-purple-700"
+                          : "bg-orange-100 text-orange-700"
+                      }`}
+                    >
+                      {student.level}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    Year {student.year}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {student.gpa}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">
+                      {student.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      onClick={() => setSelectedStudent(student)}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination footer */}
+        <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Showing {startIndex + 1}–{endIndex} of {totalStudents} students
+          </p>
+          <div className="flex items-center gap-3">
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="px-3 py-1 border border-gray-300 rounded"
+            >
+              <option value={20}>20 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
+            </select>
+            <div className="flex gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "border border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal (unchanged) */}
+      {selectedStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          {/* modal content ... */}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+// Types
+
+
+const ThesisManagement: React.FC = () => {
+  const [theses, setTheses] = useState<Thesis[]>(sampleTheses);
+  const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<ThesisStatus | "all">("all");
+  const [filterCategory, setFilterCategory] = useState<ThesisCategory | "all">("all");
+  const [filterLevel, setFilterLevel] = useState<ThesisLevel | "all">("all");
+  const [activeTab, setActiveTab] = useState<"overview" | "documents" | "reviews" | "defense" | "timeline" | "associated">("overview");
+
+  // Statistics
+  const stats = useMemo(() => {
+    return {
+      total: theses.length,
+      submitted: theses.filter(t => t.status === "submitted").length,
+      underReview: theses.filter(t => t.status === "under_review").length,
+      approved: theses.filter(t => t.status === "approved").length,
+      withPublications: theses.filter(t => t.associatedItems.publications.length > 0).length,
+      withPatents: theses.filter(t => t.associatedItems.patents.length > 0).length,
+      avgPlagiarism: theses.filter(t => t.plagiarismScore !== null)
+        .reduce((acc, t) => acc + (t.plagiarismScore || 0), 0) / theses.filter(t => t.plagiarismScore !== null).length || 0,
+      upcomingDefenses: theses.filter(t => t.defenseDate && new Date(t.defenseDate) > new Date()).length
+    };
+  }, [theses]);
+
+  // Filter theses
+  const filteredTheses = useMemo(() => {
+    return theses.filter(thesis => {
+      const matchesSearch = 
+        thesis.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.student.studentId.includes(searchTerm) ||
+        thesis.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = filterStatus === "all" || thesis.status === filterStatus;
+      const matchesCategory = filterCategory === "all" || thesis.category === filterCategory;
+      const matchesLevel = filterLevel === "all" || thesis.level === filterLevel;
+      return matchesSearch && matchesStatus && matchesCategory && matchesLevel;
+    });
+  }, [theses, searchTerm, filterStatus, filterCategory, filterLevel]);
+
+  const getStatusColor = (status: ThesisStatus) => {
+    switch (status) {
+      case "draft": return "bg-gray-100 text-gray-700";
+      case "submitted": return "bg-blue-100 text-blue-700";
+      case "under_review": return "bg-yellow-100 text-yellow-700";
+      case "revision_required": return "bg-orange-100 text-orange-700";
+      case "approved": return "bg-green-100 text-green-700";
+      case "rejected": return "bg-red-100 text-red-700";
+      case "published": return "bg-purple-100 text-purple-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getStatusIcon = (status: ThesisStatus) => {
+    switch (status) {
+      case "draft": return <Edit className="w-4 h-4" />;
+      case "submitted": return <Upload className="w-4 h-4" />;
+      case "under_review": return <Clock className="w-4 h-4" />;
+      case "revision_required": return <AlertCircle className="w-4 h-4" />;
+      case "approved": return <CheckCircle className="w-4 h-4" />;
+      case "rejected": return <XCircle className="w-4 h-4" />;
+      case "published": return <Award className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
+    }
+  };
+
+  const getTypeLabel = (category: ThesisCategory, level: ThesisLevel) => {
+    const categoryLabel = category === "thesis" ? "Thesis" : 
+                         category === "dissertation" ? "Dissertation" : "Final Project";
+    const levelLabel = level === "bachelor" ? "Bachelor's" : 
+                      level === "master" ? "Master's" : "PhD";
+    return `${levelLabel} ${categoryLabel}`;
+  };
+
+  const getCategoryColor = (category: ThesisCategory) => {
+    switch (category) {
+      case "thesis": return "bg-blue-100 text-blue-700";
+      case "dissertation": return "bg-purple-100 text-purple-700";
+      case "final_project": return "bg-green-100 text-green-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getLevelColor = (level: ThesisLevel) => {
+    switch (level) {
+      case "bachelor": return "bg-cyan-100 text-cyan-700";
+      case "master": return "bg-indigo-100 text-indigo-700";
+      case "phd": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const formatStatus = (status: ThesisStatus) => {
+    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+            <span>Digital Library</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-gray-900 font-medium">Library: Thesis Management</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Thesis/Dissertation Management</h1>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => {/* Export report */}}
+            className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export Report
+          </button>
+          <button
+            onClick={() => setViewMode("create")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Thesis
           </button>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Total Students</p>
-            <p className="text-2xl font-bold text-gray-900">2,000</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Bachelor: 1,700 (85%)</p>
-              <p className="text-xs text-gray-600">Master: 300 (15%)</p>
-              <p className="text-xs text-gray-600">PhD: 30 (1.5%)</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Bachelor Programs</p>
-            <p className="text-2xl font-bold text-gray-900">6</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">Domestic: 5 programs</p>
-              <p className="text-xs text-gray-600">International: 1 program</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Master Programs</p>
-            <p className="text-2xl font-bold text-gray-900">3</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">300 students enrolled</p>
-              <p className="text-xs text-gray-600">Avg. duration: 2 years</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">PhD Program</p>
-            <p className="text-2xl font-bold text-gray-900">1</p>
-            <div className="mt-2 space-y-0.5">
-              <p className="text-xs text-gray-600">30 doctoral students</p>
-              <p className="text-xs text-gray-600">Avg. duration: 4 years</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search by student ID, name, email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+      {viewMode === "list" ? (
+        <>
+          {/* Statistics Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Total Works</p>
+                <FileText className="w-5 h-5 text-blue-600" />
               </div>
-              <select 
-                value={filterLevel}
-                onChange={(e) => setFilterLevel(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Levels</option>
-                <option value="bachelor">Bachelor</option>
-                <option value="master">Master</option>
-                <option value="phd">PhD</option>
-              </select>
-              <select 
-                value={filterProgram}
-                onChange={(e) => setFilterProgram(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">Faculties</option>
-                <option value="cs">FONS</option>
-                <option value="ba">FOM</option>
-                <option value="se">FONS</option>
-                <option value="ds">FONS</option>
-              </select>
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-xs text-gray-500 mt-1">All categories</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Submitted</p>
+                <Upload className="w-5 h-5 text-blue-600" />
+              </div>
+              <p className="text-2xl font-bold text-blue-600">{stats.submitted}</p>
+              <p className="text-xs text-gray-500 mt-1">Awaiting review</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Under Review</p>
+                <Clock className="w-5 h-5 text-yellow-600" />
+              </div>
+              <p className="text-2xl font-bold text-yellow-600">{stats.underReview}</p>
+              <p className="text-xs text-gray-500 mt-1">In review process</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Approved</p>
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+              <p className="text-xs text-gray-500 mt-1">Completed works</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">With Publications</p>
+                <FileCheck className="w-5 h-5 text-purple-600" />
+              </div>
+              <p className="text-2xl font-bold text-purple-600">{stats.withPublications}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {stats.total > 0 ? `${Math.round((stats.withPublications / stats.total) * 100)}% of total` : '0% of total'}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">With Patents</p>
+                <Scroll className="w-5 h-5 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold text-orange-600">{stats.withPatents}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {stats.total > 0 ? `${Math.round((stats.withPatents / stats.total) * 100)}% of total` : '0% of total'}
+              </p>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Full Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Program</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">GPA</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {sampleStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{student.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.program}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        student.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
-                        student.level === 'Master' ? 'bg-purple-100 text-purple-700' :
-                        'bg-orange-100 text-orange-700'
-                      }`}>
-                        {student.level}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Year {student.year}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{student.gpa}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">{student.status}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button 
-                        onClick={() => setSelectedStudent(student)}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Filters & Search */}
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search by title, student name, ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
 
-          <div className="p-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-600">Showing 1-5 of 2,000 students</p>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Previous</button>
-              <button className="px-3 py-1 bg-blue-600 text-white rounded">1</button>
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">2</button>
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">3</button>
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Next</button>
-            </div>
-          </div>
-        </div>
-
-        {selectedStudent && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Student Profile Details</h2>
-                <button 
-                  onClick={() => setSelectedStudent(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+              <div>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value as ThesisCategory | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  ✕
+                  <option value="all">All Categories</option>
+                  <option value="thesis">Thesis</option>
+                  <option value="dissertation">Dissertation</option>
+                  <option value="final_project">Final Project</option>
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={filterLevel}
+                  onChange={(e) => setFilterLevel(e.target.value as ThesisLevel | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Levels</option>
+                  <option value="bachelor">Bachelor&apos;s</option>
+                  <option value="master">Master&apos;s</option>
+                  <option value="phd">PhD</option>
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as ThesisStatus | "all")}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="submitted">Submitted</option>
+                  <option value="under_review">Under Review</option>
+                  <option value="revision_required">Revision Required</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Theses List */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title & Student</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Defense</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredTheses.map(thesis => (
+                    <tr key={thesis.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm font-medium text-gray-900">{thesis.id}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          <div className="text-sm font-medium text-gray-900 truncate">{thesis.title}</div>
+                          <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                            <GraduationCap className="w-4 h-4" />
+                            {thesis.student.name} ({thesis.student.studentId})
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(thesis.category)}`}>
+                          {thesis.category === "thesis" ? "Thesis" : 
+                           thesis.category === "dissertation" ? "Dissertation" : "Final Project"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(thesis.level)}`}>
+                          {thesis.level === "bachelor" ? "Bachelor's" : 
+                           thesis.level === "master" ? "Master's" : "PhD"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{thesis.supervisor.name}</div>
+                        <div className="text-xs text-gray-500 truncate max-w-[150px]">{thesis.supervisor.department}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(thesis.status)}`}>
+                          {getStatusIcon(thesis.status)}
+                          {formatStatus(thesis.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {thesis.defenseDate ? (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {thesis.defenseDate}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 italic">Not scheduled</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            setSelectedThesis(thesis);
+                            setViewMode("detail");
+                          }}
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : viewMode === "detail" && selectedThesis ? (
+        /* Detail View */
+        <div className="space-y-6">
+          {/* Back Button */}
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to Thesis List
+          </button>
+
+          {/* Thesis Header */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-sm font-medium text-gray-500">{selectedThesis.id}</span>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedThesis.status)}`}>
+                    {getStatusIcon(selectedThesis.status)}
+                    {formatStatus(selectedThesis.status)}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(selectedThesis.category)}`}>
+                    {selectedThesis.category === "thesis" ? "Thesis" : 
+                     selectedThesis.category === "dissertation" ? "Dissertation" : "Final Project"}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(selectedThesis.level)}`}>
+                    {selectedThesis.level === "bachelor" ? "Bachelor's" : 
+                     selectedThesis.level === "master" ? "Master's" : "PhD"}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedThesis.title}</h2>
+                <p className="text-gray-600 italic mb-4">{selectedThesis.titleVietnamese}</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <GraduationCap className="w-5 h-5 text-blue-600 mt-1" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Student</p>
+                      <p className="text-sm text-gray-900">{selectedThesis.student.name}</p>
+                      <p className="text-xs text-gray-500">{selectedThesis.student.studentId} • {selectedThesis.student.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <UserCheck className="w-5 h-5 text-green-600 mt-1" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Supervisor</p>
+                      <p className="text-sm text-gray-900">{selectedThesis.supervisor.name}</p>
+                      <p className="text-xs text-gray-500">{selectedThesis.supervisor.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
+                <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  Download
                 </button>
               </div>
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="col-span-1 flex flex-col items-center">
-                    <div className="w-32 h-32 bg-gray-300 rounded-full mb-4"></div>
-                    <h3 className="text-xl font-bold text-gray-900">{selectedStudent.name}</h3>
-                    <p className="text-sm text-gray-500">{selectedStudent.id}</p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="border-b border-gray-200">
+              <nav className="flex">
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "overview"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab("documents")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "documents"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Documents
+                </button>
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "reviews"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Reviews ({selectedThesis.reviews.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab("defense")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "defense"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Defense
+                </button>
+                <button
+                  onClick={() => setActiveTab("timeline")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "timeline"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Timeline
+                </button>
+                <button
+                  onClick={() => setActiveTab("associated")}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === "associated"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Associated Items
+                </button>
+              </nav>
+            </div>
+
+            <div className="p-6">
+              {/* Overview Tab */}
+              {activeTab === "overview" && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Abstract</h3>
+                    <p className="text-gray-700 leading-relaxed">{selectedThesis.abstract}</p>
                   </div>
-                  <div className="col-span-2 grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Program</p>
-                      <p className="font-semibold text-gray-900">{selectedStudent.program}</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Details</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Department</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.department}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Field of Study</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.fieldOfStudy}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Academic Year</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.academicYear}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">Submission Date</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedThesis.submissionDate}</span>
+                        </div>
+                        {selectedThesis.plagiarismScore !== null && (
+                          <div className="flex justify-between py-2 border-b border-gray-100">
+                            <span className="text-sm text-gray-600">Plagiarism Score</span>
+                            <span className={`text-sm font-medium ${selectedThesis.plagiarismScore <= 15 ? 'text-green-600' : 'text-red-600'}`}>
+                              {selectedThesis.plagiarismScore}%
+                            </span>
+                          </div>
+                        )}
+                        {selectedThesis.finalGrade && (
+                          <div className="flex justify-between py-2 border-b border-gray-100">
+                            <span className="text-sm text-gray-600">Final Grade</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedThesis.finalGrade}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Level</p>
-                      <p className="font-semibold text-gray-900">{selectedStudent.level}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Current Year</p>
-                      <p className="font-semibold text-gray-900">Year {selectedStudent.year}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">GPA</p>
-                      <p className="font-semibold text-gray-900">{selectedStudent.gpa}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Status</p>
-                      <p className="font-semibold text-green-600">{selectedStudent.status}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">Email</p>
-                      <p className="font-semibold text-gray-900 text-sm">{selectedStudent.id.toLowerCase()}@hsb.edu.vn</p>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Keywords</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedThesis.keywords.map((keyword, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
+              )}
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Academic Performance</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Credits Completed</span>
-                        <span className="font-semibold">95/120</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Attendance Rate</span>
-                        <span className="font-semibold">94%</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Training Score</span>
-                        <span className="font-semibold">85/100</span>
-                      </div>
-                    </div>
+              {/* Documents Tab */}
+              {activeTab === "documents" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Uploaded Documents</h3>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      Upload Document
+                    </button>
                   </div>
 
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">Financial Status</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Tuition Paid</span>
-                        <span className="font-semibold text-green-600">Current</span>
+                  <div className="space-y-3">
+                    {selectedThesis.documents.proposal && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Thesis Proposal</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.proposal}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Scholarship</span>
-                        <span className="font-semibold">Merit-based 50%</span>
+                    )}
+
+                    {selectedThesis.documents.fullThesis && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Full Thesis Document</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.fullThesis}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Outstanding Balance</span>
-                        <span className="font-semibold">$0</span>
+                    )}
+
+                    {selectedThesis.documents.presentation && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Defense Presentation</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.presentation}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {selectedThesis.documents.plagiarismReport && (
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <BarChart3 className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Plagiarism Report</p>
+                            <p className="text-xs text-gray-500">{selectedThesis.documents.plagiarismReport}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-600 hover:text-blue-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
+              )}
+
+              {/* Reviews Tab */}
+              {activeTab === "reviews" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Thesis Reviews</h3>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Assign Reviewer
+                    </button>
+                  </div>
+
+                  {selectedThesis.reviews.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedThesis.reviews.map(review => (
+                        <div key={review.id} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                {review.reviewerName.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{review.reviewerName}</p>
+                                <p className="text-xs text-gray-500">{review.reviewerEmail}</p>
+                              </div>
+                            </div>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              review.status === "completed" ? "bg-green-100 text-green-700" :
+                              review.status === "in_progress" ? "bg-yellow-100 text-yellow-700" :
+                              "bg-gray-100 text-gray-700"
+                            }`}>
+                              {review.status === "completed" ? "Completed" :
+                               review.status === "in_progress" ? "In Progress" : "Pending"}
+                            </span>
+                          </div>
+
+                          {review.rating !== null && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm text-gray-600">Rating:</span>
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-4 h-4 ${i < Math.floor(review.rating! / 2) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                  />
+                                ))}
+                                <span className="text-sm font-medium text-gray-900 ml-2">{review.rating}/10</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {review.comments && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                              <p className="text-sm text-gray-700">{review.comments}</p>
+                            </div>
+                          )}
+
+                          {review.submittedDate && (
+                            <p className="text-xs text-gray-500 mt-2">Submitted on {review.submittedDate}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600">No reviews yet</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Defense Tab */}
+              {activeTab === "defense" && (
+                <div className="space-y-6">
+                  {selectedThesis.defense ? (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <h3 className="font-semibold text-gray-900">Defense Schedule</h3>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Date</span>
+                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.date}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Time</span>
+                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.time}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Location</span>
+                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.location}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Users className="w-5 h-5 text-green-600" />
+                            <h3 className="font-semibold text-gray-900">Defense Committee</h3>
+                          </div>
+                          <div className="space-y-2">
+                            {selectedThesis.defense.committee.map((member, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <span className="text-sm text-gray-900">{member}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                          <Edit className="w-4 h-4" />
+                          Reschedule Defense
+                        </button>
+                        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2">
+                          <Send className="w-4 h-4" />
+                          Send Notifications
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600 mb-4">Defense not scheduled yet</p>
+                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 mx-auto">
+                        <Plus className="w-4 h-4" />
+                        Schedule Defense
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Timeline Tab */}
+              {activeTab === "timeline" && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thesis Progress Timeline</h3>
+                  <div className="relative space-y-6">
+                    {/* Timeline items */}
+                    <div className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                      </div>
+                      <div className="flex-1 pb-6">
+                        <p className="text-sm font-medium text-gray-900">Thesis Submitted</p>
+                        <p className="text-xs text-gray-500">{selectedThesis.submissionDate}</p>
+                        <p className="text-sm text-gray-600 mt-1">Full thesis document uploaded to the system</p>
+                      </div>
+                    </div>
+
+                    {selectedThesis.reviews.length > 0 && (
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <Clock className="w-5 h-5 text-yellow-600" />
+                          </div>
+                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                        </div>
+                        <div className="flex-1 pb-6">
+                          <p className="text-sm font-medium text-gray-900">Under Review</p>
+                          <p className="text-xs text-gray-500">Current Status</p>
+                          <p className="text-sm text-gray-600 mt-1">{selectedThesis.reviews.length} reviewer(s) assigned</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedThesis.defenseDate && (
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Defense Scheduled</p>
+                          <p className="text-xs text-gray-500">{selectedThesis.defenseDate}</p>
+                          <p className="text-sm text-gray-600 mt-1">Defense presentation scheduled</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Associated Items Tab */}
+              {activeTab === "associated" && (
+                <div className="space-y-6">
+                  {/* Publications */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <FileCheck className="w-5 h-5 text-blue-600" />
+                        Publications ({selectedThesis.associatedItems.publications.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Publication
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.publications.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.publications.map(pub => (
+                          <div key={pub.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900 mb-1">{pub.title}</h4>
+                                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                                  <span className="flex items-center gap-1">
+                                    <BookOpen className="w-3 h-3" />
+                                    {pub.journalName}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {pub.publicationDate}
+                                  </span>
+                                  {pub.impactFactor && (
+                                    <span className="flex items-center gap-1">
+                                      <TrendingUp className="w-3 h-3" />
+                                      IF: {pub.impactFactor}
+                                    </span>
+                                  )}
+                                  {pub.citations !== undefined && (
+                                    <span className="flex items-center gap-1">
+                                      <Award className="w-3 h-3" />
+                                      {pub.citations} citations
+                                    </span>
+                                  )}
+                                </div>
+                                {pub.doi && (
+                                  <p className="text-xs text-gray-500">DOI: {pub.doi}</p>
+                                )}
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                pub.status === "published" ? "bg-green-100 text-green-700" :
+                                pub.status === "accepted" ? "bg-blue-100 text-blue-700" :
+                                pub.status === "submitted" ? "bg-yellow-100 text-yellow-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
+                                {pub.status.charAt(0).toUpperCase() + pub.status.slice(1)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <FileCheck className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No publications associated yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Grants */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Award className="w-5 h-5 text-purple-600" />
+                        Grants ({selectedThesis.associatedItems.grants.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Grant
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.grants.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.grants.map(grant => (
+                          <div key={grant.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900">{grant.grantName}</h4>
+                                <p className="text-xs text-gray-600 mt-1">{grant.fundingAgency}</p>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                grant.status === "active" ? "bg-green-100 text-green-700" :
+                                grant.status === "completed" ? "bg-blue-100 text-blue-700" :
+                                grant.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                                "bg-red-100 text-red-700"
+                              }`}>
+                                {grant.status.charAt(0).toUpperCase() + grant.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 mt-3 text-xs">
+                              <div>
+                                <span className="text-gray-600">Amount:</span>
+                                <span className="font-medium text-gray-900 ml-1">
+                                  {grant.amount.toLocaleString()} {grant.currency}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Period:</span>
+                                <span className="font-medium text-gray-900 ml-1">
+                                  {grant.startDate} - {grant.endDate}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">PI:</span>
+                                <span className="font-medium text-gray-900 ml-1">{grant.principalInvestigator}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Award className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No grants associated yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Funding */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Banknote className="w-5 h-5 text-green-600" />
+                        Funding ({selectedThesis.associatedItems.funding.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Funding
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.funding.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.funding.map(fund => (
+                          <div key={fund.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900">{fund.sourceName}</h4>
+                                <p className="text-xs text-gray-600 mt-1">{fund.purpose}</p>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                fund.status === "received" ? "bg-green-100 text-green-700" :
+                                fund.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                                "bg-red-100 text-red-700"
+                              }`}>
+                                {fund.status.charAt(0).toUpperCase() + fund.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-6 mt-3 text-xs">
+                              <div>
+                                <span className="text-gray-600">Type:</span>
+                                <span className="font-medium text-gray-900 ml-1 capitalize">
+                                  {fund.fundingType.replace('_', ' ')}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Amount:</span>
+                                <span className="font-medium text-gray-900 ml-1">
+                                  {fund.amount.toLocaleString()} {fund.currency}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Received:</span>
+                                <span className="font-medium text-gray-900 ml-1">{fund.receivedDate}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Banknote className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No funding sources associated yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Patents */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Scroll className="w-5 h-5 text-orange-600" />
+                        Patents ({selectedThesis.associatedItems.patents.length})
+                      </h3>
+                      <button className="px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 text-sm">
+                        <Plus className="w-4 h-4" />
+                        Add Patent
+                      </button>
+                    </div>
+                    
+                    {selectedThesis.associatedItems.patents.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedThesis.associatedItems.patents.map(patent => (
+                          <div key={patent.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-900">{patent.patentTitle}</h4>
+                                {patent.patentNumber && (
+                                  <p className="text-xs text-gray-600 mt-1">Patent No: {patent.patentNumber}</p>
+                                )}
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                patent.status === "granted" ? "bg-green-100 text-green-700" :
+                                patent.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                                patent.status === "rejected" ? "bg-red-100 text-red-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
+                                {patent.status.charAt(0).toUpperCase() + patent.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="mt-3 text-xs space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-600">Inventors:</span>
+                                <span className="font-medium text-gray-900">{patent.inventors.join(', ')}</span>
+                              </div>
+                              <div className="flex items-center gap-6">
+                                <div>
+                                  <span className="text-gray-600">Application:</span>
+                                  <span className="font-medium text-gray-900 ml-1">{patent.applicationDate}</span>
+                                </div>
+                                {patent.grantDate && (
+                                  <div>
+                                    <span className="text-gray-600">Granted:</span>
+                                    <span className="font-medium text-gray-900 ml-1">{patent.grantDate}</span>
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="text-gray-600">Country:</span>
+                                  <span className="font-medium text-gray-900 ml-1">{patent.country}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <Scroll className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No patents associated yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Create/Add New Thesis Form */
+        <div className="space-y-6">
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to Thesis List
+          </button>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Register New Thesis</h2>
+              <p className="text-sm text-gray-600 mt-1">Complete the form below to register a new thesis/dissertation</p>
+            </div>
+
+            <div className="p-6">
+              <div className="text-center py-12 text-gray-500">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p>Thesis registration form would go here</p>
+                <p className="text-sm mt-2">Include fields for student info, supervisor, title, abstract, etc.</p>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    );
-  };
+        </div>
+      )}
+    </div>
+  );
+};  
 
 const CourseFeedback =() => {
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -3198,8 +4325,8 @@ const CourseFeedback =() => {
   return (
     <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
-      <div className="bg-white border-b rounded-xl border-gray-200 sticky top-0 z-10">
-        <div className="max-w mx-auto px-6 py-6">
+      <div className="bg-white border-b rounded-xl border-gray-200 sticky">
+        <div className="max-w mx-auto p-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Course Feedback Management</h1>
@@ -3563,6 +4690,7 @@ const CourseFeedback =() => {
     </div>
   );
 }
+
 
 
 const ClassOverview = () => {
@@ -10192,996 +11320,549 @@ const LibraryDashboard = () => (
 
 
 
-
 // Types
-type ThesisStatus = "draft" | "submitted" | "under_review" | "revision_required" | "approved" | "rejected" | "published";
-type ThesisCategory = "thesis" | "dissertation" | "final_project";
-type ThesisLevel = "bachelor" | "master" | "phd";
+type ThesisType = 'thesis' | 'dissertation' | 'final_project';
+type DegreeLevel = 'bachelor' | 'master' | 'phd';
 
-interface Publication {
+interface ThesisArchive {
   id: string;
   title: string;
-  journalName: string;
-  publicationDate: string;
-  doi?: string;
-  status: "published" | "accepted" | "submitted" | "in_review";
-  impactFactor?: number;
-  citations?: number;
-}
-
-interface Grant {
-  id: string;
-  grantName: string;
-  fundingAgency: string;
-  amount: number;
-  currency: string;
-  startDate: string;
-  endDate: string;
-  status: "active" | "completed" | "pending" | "rejected";
-  principalInvestigator: string;
-}
-
-interface Funding {
-  id: string;
-  sourceName: string;
-  fundingType: "research" | "scholarship" | "travel" | "equipment" | "other";
-  amount: number;
-  currency: string;
-  receivedDate: string;
-  purpose: string;
-  status: "received" | "pending" | "declined";
-}
-
-interface Patent {
-  id: string;
-  patentTitle: string;
-  patentNumber?: string;
-  applicationDate: string;
-  grantDate?: string;
-  status: "granted" | "pending" | "rejected" | "expired";
-  inventors: string[];
-  country: string;
-  patentOffice: string;
-}
-
-interface AssociatedItems {
-  publications: Publication[];
-  grants: Grant[];
-  funding: Funding[];
-  patents: Patent[];
-}
-type ReviewStatus = "pending" | "in_progress" | "completed";
-
-interface Supervisor {
-  id: string;
-  name: string;
-  email: string;
-  department: string;
-  expertise: string[];
-}
-
-interface Student {
-  id: string;
-  name: string;
+  author: string;
   studentId: string;
-  email: string;
-  phone: string;
-  program: string;
-  year: number;
-}
-
-interface Review {
-  id: string;
-  reviewerName: string;
-  reviewerEmail: string;
-  status: ReviewStatus;
-  rating: number | null;
-  comments: string;
-  submittedDate: string | null;
-}
-
-interface Thesis {
-  id: string;
-  title: string;
-  titleVietnamese: string;
-  student: Student;
-  supervisor: Supervisor;
-  coSupervisor?: Supervisor;
-  category: ThesisCategory;
-  level: ThesisLevel;
-  status: ThesisStatus;
+  supervisor: string;
+  coSupervisor?: string;
+  department: string;
+  degreeLevel: DegreeLevel;
+  thesisType: ThesisType;
   submissionDate: string;
-  defenseDate: string | null;
-  approvalDate: string | null;
+  approvalDate: string;
+  defenseDate: string;
+  archiveDate: string;
   abstract: string;
   keywords: string[];
-  department: string;
-  fieldOfStudy: string;
-  academicYear: string;
-  reviews: Review[];
-  documents: {
-    proposal?: string;
-    fullThesis?: string;
-    presentation?: string;
-    plagiarismReport?: string;
-  };
-  plagiarismScore: number | null;
-  finalGrade: string | null;
-  defense: {
-    committee: string[];
-    location: string;
-    date: string;
-    time: string;
-  } | null;
-  associatedItems: AssociatedItems;
+  pages: number;
+  fileUrl: string;
+  fileSize: string;
+  doi?: string;
+  citations: number;
+  views: number;
+  rating: number;
+  language: string;
+  isPlagiarismChecked: boolean;
+  plagiarismScore: number;
+  isPublished: boolean;
+  embargoUntil?: string;
 }
 
-// Sample data
-const sampleSupervisors: Supervisor[] = [
-  {
-    id: "1",
-    name: "Dr. Nguyen Van Minh",
-    email: "nguyen.minh@hsb.edu.vn",
-    department: "Faculty of Business Administration",
-    expertise: ["Strategic Management", "Business Analytics", "Innovation"]
-  },
-  {
-    id: "2",
-    name: "Prof. Tran Thi Lan",
-    email: "tran.lan@hsb.edu.vn",
-    department: "Faculty of Economics",
-    expertise: ["Macroeconomics", "Development Economics", "International Trade"]
-  },
-  {
-    id: "3",
-    name: "Dr. Le Van Hoang",
-    email: "le.hoang@hsb.edu.vn",
-    department: "Faculty of Marketing & Communication",
-    expertise: ["Digital Marketing", "Consumer Behavior", "Brand Management"]
-  }
-];
+interface ThesisFilterOptions {
+  thesisType: ThesisType | 'all';
+  degreeLevel: DegreeLevel | 'all';
+  department: string;
+  yearFrom: string;
+  yearTo: string;
+  language: string;
+  isPublished: string;
+}
 
-const sampleTheses: Thesis[] = [
-  {
-    id: "TH2024001",
-    title: "The Impact of Digital Transformation on SME Performance in Vietnam",
-    titleVietnamese: "Tác động của chuyển đổi số đến hiệu quả hoạt động của doanh nghiệp vừa và nhỏ tại Việt Nam",
-    student: {
-      id: "ST001",
-      name: "Nguyen Minh Quan",
-      studentId: "2021001234",
-      email: "quan.nguyen@student.hsb.edu.vn",
-      phone: "+84 912 345 678",
-      program: "Business Administration",
-      year: 4
+const ThesisStorage: React.FC = () => {
+  // Sample data
+  const initialTheses: ThesisArchive[] = [
+    {
+      id: 'THS-2024-001',
+      title: 'Deep Learning Approaches for Natural Language Processing in Healthcare',
+      author: 'John Smith',
+      studentId: 'STD-2020-145',
+      supervisor: 'Dr. Sarah Johnson',
+      coSupervisor: 'Dr. Michael Chen',
+      department: 'Computer Science',
+      degreeLevel: 'phd',
+      thesisType: 'dissertation',
+      submissionDate: '2024-06-15',
+      approvalDate: '2024-07-20',
+      defenseDate: '2024-07-10',
+      archiveDate: '2024-07-25',
+      abstract: 'This dissertation explores advanced deep learning techniques for processing medical texts...',
+      keywords: ['Deep Learning', 'NLP', 'Healthcare', 'Machine Learning', 'Medical Informatics'],
+      pages: 245,
+      fileUrl: '/storage/thesis/THS-2024-001.pdf',
+      fileSize: '15.2 MB',
+      doi: '10.1234/hsb.2024.001',
+      citations: 12,
+      views: 345,
+      rating: 4.8,
+      language: 'English',
+      isPlagiarismChecked: true,
+      plagiarismScore: 3.2,
+      isPublished: true
     },
-    supervisor: sampleSupervisors[0],
-    category: "thesis",
-    level: "bachelor",
-    status: "under_review",
-    submissionDate: "2024-10-15",
-    defenseDate: "2024-11-20",
-    approvalDate: null,
-    abstract: "This thesis examines the relationship between digital transformation initiatives and performance outcomes in Vietnamese SMEs. Using a mixed-methods approach combining surveys and case studies, the research identifies key success factors and challenges in digital adoption.",
-    keywords: ["Digital Transformation", "SMEs", "Performance", "Vietnam", "Technology Adoption"],
-    department: "Faculty of Business Administration",
-    fieldOfStudy: "Strategic Management",
-    academicYear: "2023-2024",
-    reviews: [
-      {
-        id: "R001",
-        reviewerName: "Dr. Pham Van Khanh",
-        reviewerEmail: "pham.khanh@hsb.edu.vn",
-        status: "completed",
-        rating: 8.5,
-        comments: "Well-structured research with solid methodology. Some minor improvements needed in literature review.",
-        submittedDate: "2024-10-25"
-      },
-      {
-        id: "R002",
-        reviewerName: "Prof. Hoang Thi Mai",
-        reviewerEmail: "hoang.mai@hsb.edu.vn",
-        status: "in_progress",
-        rating: null,
-        comments: "",
-        submittedDate: null
-      }
-    ],
-    documents: {
-      proposal: "proposal_TH2024001.pdf",
-      fullThesis: "thesis_TH2024001.pdf",
-      plagiarismReport: "plagiarism_TH2024001.pdf"
+    {
+      id: 'THS-2024-002',
+      title: 'Sustainable Urban Planning: A Case Study of Smart Cities',
+      author: 'Emma Davis',
+      studentId: 'STD-2021-089',
+      supervisor: 'Prof. Robert Wilson',
+      department: 'Architecture',
+      degreeLevel: 'master',
+      thesisType: 'thesis',
+      submissionDate: '2024-08-20',
+      approvalDate: '2024-09-15',
+      defenseDate: '2024-09-05',
+      archiveDate: '2024-09-20',
+      abstract: 'This research examines sustainable urban planning strategies in modern smart cities...',
+      keywords: ['Urban Planning', 'Sustainability', 'Smart Cities', 'Architecture'],
+      pages: 156,
+      fileUrl: '/storage/thesis/THS-2024-002.pdf',
+      fileSize: '8.7 MB',
+      citations: 5,
+      views: 178,
+      rating: 4.5,
+      language: 'English',
+      isPlagiarismChecked: true,
+      plagiarismScore: 4.1,
+      isPublished: true
     },
-    plagiarismScore: 12,
-    finalGrade: null,
-    defense: {
-      committee: ["Dr. Nguyen Van Minh", "Dr. Pham Van Khanh", "Prof. Hoang Thi Mai"],
-      location: "Room 501, Building A",
-      date: "2024-11-20",
-      time: "14:00"
+    {
+      id: 'THS-2024-003',
+      title: 'E-Commerce Platform Development Using Microservices Architecture',
+      author: 'Michael Brown',
+      studentId: 'STD-2020-234',
+      supervisor: 'Dr. Lisa Anderson',
+      department: 'Information Technology',
+      degreeLevel: 'bachelor',
+      thesisType: 'final_project',
+      submissionDate: '2024-09-01',
+      approvalDate: '2024-09-25',
+      defenseDate: '2024-09-20',
+      archiveDate: '2024-09-28',
+      abstract: 'This project implements a scalable e-commerce platform using microservices...',
+      keywords: ['Microservices', 'E-Commerce', 'Software Architecture', 'Cloud Computing'],
+      pages: 98,
+      fileUrl: '/storage/thesis/THS-2024-003.pdf',
+      fileSize: '5.4 MB',
+      citations: 0,
+      views: 45,
+      rating: 4.2,
+      language: 'English',
+      isPlagiarismChecked: true,
+      plagiarismScore: 5.8,
+      isPublished: false
     },
-    associatedItems: {
-      publications: [
-        {
-          id: "PUB001",
-          title: "Digital Adoption Patterns in Vietnamese SMEs: A Preliminary Study",
-          journalName: "Journal of Business Research",
-          publicationDate: "2024-09-15",
-          doi: "10.1016/j.jbusres.2024.123456",
-          status: "published",
-          impactFactor: 2.8,
-          citations: 3
-        }
-      ],
-      grants: [],
-      funding: [
-        {
-          id: "FND001",
-          sourceName: "HSB Research Support Fund",
-          fundingType: "research",
-          amount: 5000000,
-          currency: "VND",
-          receivedDate: "2024-03-01",
-          purpose: "Data collection and survey distribution",
-          status: "received"
-        }
-      ],
-      patents: []
+    {
+      id: 'THS-2024-004',
+      title: 'Renewable Energy Integration in Industrial Manufacturing',
+      author: 'Sarah Williams',
+      studentId: 'STD-2019-167',
+      supervisor: 'Prof. David Martinez',
+      coSupervisor: 'Dr. Emily Taylor',
+      department: 'Mechanical Engineering',
+      degreeLevel: 'phd',
+      thesisType: 'dissertation',
+      submissionDate: '2024-05-10',
+      approvalDate: '2024-06-25',
+      defenseDate: '2024-06-15',
+      archiveDate: '2024-06-30',
+      abstract: 'This research investigates the integration of renewable energy sources in manufacturing...',
+      keywords: ['Renewable Energy', 'Manufacturing', 'Sustainability', 'Engineering'],
+      pages: 312,
+      fileUrl: '/storage/thesis/THS-2024-004.pdf',
+      fileSize: '22.1 MB',
+      citations: 18,
+      views: 567,
+      rating: 4.9,
+      language: 'English',
+      isPlagiarismChecked: true,
+      plagiarismScore: 2.1,
+      isPublished: true
+    },
+    {
+      id: 'THS-2023-045',
+      title: 'Artificial Intelligence in Financial Forecasting',
+      author: 'James Johnson',
+      studentId: 'STD-2020-312',
+      supervisor: 'Dr. Patricia Lee',
+      department: 'Business Administration',
+      degreeLevel: 'master',
+      thesisType: 'thesis',
+      submissionDate: '2023-12-15',
+      approvalDate: '2024-01-20',
+      defenseDate: '2024-01-10',
+      archiveDate: '2024-01-25',
+      abstract: 'This thesis explores AI applications in predicting financial market trends...',
+      keywords: ['AI', 'Finance', 'Forecasting', 'Machine Learning', 'Economics'],
+      pages: 189,
+      fileUrl: '/storage/thesis/THS-2023-045.pdf',
+      fileSize: '11.3 MB',
+      citations: 23,
+      views: 892,
+      rating: 4.7,
+      language: 'English',
+      isPlagiarismChecked: true,
+      plagiarismScore: 3.5,
+      isPublished: true
     }
-  },
-  {
-    id: "DIS2024001",
-    title: "Machine Learning Applications in Financial Risk Management",
-    titleVietnamese: "Ứng dụng học máy trong quản lý rủi ro tài chính",
-    student: {
-      id: "ST002",
-      name: "Tran Thi Bich Ngoc",
-      studentId: "2020005678",
-      email: "ngoc.tran@student.hsb.edu.vn",
-      phone: "+84 913 456 789",
-      program: "Finance & Banking",
-      year: 2
-    },
-    supervisor: sampleSupervisors[1],
-    category: "dissertation",
-    level: "master",
-    status: "submitted",
-    submissionDate: "2024-10-28",
-    defenseDate: null,
-    approvalDate: null,
-    abstract: "This dissertation explores the application of machine learning algorithms in predicting and managing financial risks. The research focuses on credit risk assessment using supervised learning techniques and proposes a novel ensemble model for improved prediction accuracy.",
-    keywords: ["Machine Learning", "Financial Risk", "Credit Risk", "Predictive Analytics", "Banking"],
-    department: "Faculty of Economics",
-    fieldOfStudy: "Finance & Banking",
-    academicYear: "2023-2024",
-    reviews: [],
-    documents: {
-      proposal: "proposal_DIS2024001.pdf",
-      fullThesis: "dissertation_DIS2024001.pdf"
-    },
-    plagiarismScore: null,
-    finalGrade: null,
-    defense: null,
-    associatedItems: {
-      publications: [
-        {
-          id: "PUB002",
-          title: "Ensemble Learning for Credit Risk Assessment: A Vietnamese Banking Case Study",
-          journalName: "Expert Systems with Applications",
-          publicationDate: "2024-08-20",
-          doi: "10.1016/j.eswa.2024.234567",
-          status: "published",
-          impactFactor: 6.5,
-          citations: 8
-        },
-        {
-          id: "PUB003",
-          title: "Machine Learning in Vietnamese Banking: Current State and Future Directions",
-          journalName: "International Journal of Banking & Finance",
-          publicationDate: "2024-11-30",
-          status: "accepted",
-          impactFactor: 1.9,
-          citations: 0
-        }
-      ],
-      grants: [
-        {
-          id: "GRT001",
-          grantName: "AI Research Excellence Grant",
-          fundingAgency: "Ministry of Science and Technology",
-          amount: 50000000,
-          currency: "VND",
-          startDate: "2024-01-01",
-          endDate: "2024-12-31",
-          status: "active",
-          principalInvestigator: "Prof. Tran Thi Lan"
-        }
-      ],
-      funding: [
-        {
-          id: "FND002",
-          sourceName: "Vietnam National Foundation for Science",
-          fundingType: "research",
-          amount: 30000000,
-          currency: "VND",
-          receivedDate: "2024-02-15",
-          purpose: "Computing resources and data acquisition",
-          status: "received"
-        }
-      ],
-      patents: [
-        {
-          id: "PAT001",
-          patentTitle: "Intelligent Credit Risk Assessment System Using Ensemble Machine Learning",
-          patentNumber: "VN1234567",
-          applicationDate: "2024-09-01",
-          status: "pending",
-          inventors: ["Tran Thi Bich Ngoc", "Prof. Tran Thi Lan"],
-          country: "Vietnam",
-          patentOffice: "National Office of Intellectual Property of Vietnam"
-        }
-      ]
-    }
-  },
-  {
-    id: "FP2024001",
-    title: "Social Media Marketing Strategies for Generation Z Consumers",
-    titleVietnamese: "Chiến lược marketing truyền thông xã hội hướng tới người tiêu dùng thế hệ Z",
-    student: {
-      id: "ST003",
-      name: "Le Van Thanh",
-      studentId: "2021009012",
-      email: "thanh.le@student.hsb.edu.vn",
-      phone: "+84 914 567 890",
-      program: "Marketing",
-      year: 4
-    },
-    supervisor: sampleSupervisors[2],
-    category: "final_project",
-    level: "bachelor",
-    status: "approved",
-    submissionDate: "2024-09-10",
-    defenseDate: "2024-10-15",
-    approvalDate: "2024-10-20",
-    abstract: "This final project investigates effective social media marketing strategies targeting Generation Z consumers in Vietnam. Through surveys and social media analysis, the research identifies key engagement drivers and content preferences.",
-    keywords: ["Social Media Marketing", "Generation Z", "Consumer Behavior", "Digital Strategy", "Vietnam"],
-    department: "Faculty of Marketing & Communication",
-    fieldOfStudy: "Marketing",
-    academicYear: "2023-2024",
-    reviews: [
-      {
-        id: "R003",
-        reviewerName: "Dr. Le Van Hoang",
-        reviewerEmail: "le.hoang@hsb.edu.vn",
-        status: "completed",
-        rating: 9.0,
-        comments: "Excellent research with practical implications. Well-executed methodology and clear findings.",
-        submittedDate: "2024-09-25"
-      },
-      {
-        id: "R004",
-        reviewerName: "Dr. Nguyen Thi Phuong",
-        reviewerEmail: "nguyen.phuong@hsb.edu.vn",
-        status: "completed",
-        rating: 8.5,
-        comments: "Strong project with good insights. Minor improvements suggested in conclusion section.",
-        submittedDate: "2024-09-28"
-      }
-    ],
-    documents: {
-      proposal: "proposal_FP2024001.pdf",
-      fullThesis: "finalproject_FP2024001.pdf",
-      presentation: "presentation_FP2024001.pptx",
-      plagiarismReport: "plagiarism_FP2024001.pdf"
-    },
-    plagiarismScore: 8,
-    finalGrade: "A",
-    defense: {
-      committee: ["Dr. Le Van Hoang", "Dr. Nguyen Thi Phuong", "Prof. Tran Van Duc"],
-      location: "Room 302, Building B",
-      date: "2024-10-15",
-      time: "09:00"
-    },
-    associatedItems: {
-      publications: [],
-      grants: [],
-      funding: [],
-      patents: []
-    }
-  },
-  {
-    id: "DIS2024002",
-    title: "Sustainable Supply Chain Management in Vietnamese Manufacturing",
-    titleVietnamese: "Quản lý chuỗi cung ứng bền vững trong sản xuất tại Việt Nam",
-    student: {
-      id: "ST004",
-      name: "Pham Minh Duc",
-      studentId: "2019012345",
-      email: "duc.pham@student.hsb.edu.vn",
-      phone: "+84 915 678 901",
-      program: "Operations Management",
-      year: 2
-    },
-    supervisor: sampleSupervisors[0],
-    category: "dissertation",
-    level: "master",
-    status: "revision_required",
-    submissionDate: "2024-10-05",
-    defenseDate: null,
-    approvalDate: null,
-    abstract: "This dissertation examines sustainable supply chain practices in Vietnamese manufacturing firms. The study analyzes the adoption barriers and benefits of green supply chain management through case studies and quantitative analysis.",
-    keywords: ["Supply Chain", "Sustainability", "Manufacturing", "Green Management", "Vietnam"],
-    department: "Faculty of Business Administration",
-    fieldOfStudy: "Operations Management",
-    academicYear: "2023-2024",
-    reviews: [
-      {
-        id: "R005",
-        reviewerName: "Dr. Tran Van Hoang",
-        reviewerEmail: "tran.hoang@hsb.edu.vn",
-        status: "completed",
-        rating: 7.0,
-        comments: "Good topic but methodology needs strengthening. Please revise research design and expand data analysis section.",
-        submittedDate: "2024-10-18"
-      }
-    ],
-    documents: {
-      proposal: "proposal_DIS2024002.pdf",
-      fullThesis: "dissertation_DIS2024002_v1.pdf"
-    },
-    plagiarismScore: 15,
-    finalGrade: null,
-    defense: null,
-    associatedItems: {
-      publications: [
-        {
-          id: "PUB004",
-          title: "Green Supply Chain Practices in Vietnamese Manufacturing: A Survey Study",
-          journalName: "Journal of Cleaner Production",
-          publicationDate: "2024-12-15",
-          status: "in_review",
-          impactFactor: 9.3
-        }
-      ],
-      grants: [],
-      funding: [
-        {
-          id: "FND003",
-          sourceName: "Environmental Research Fund",
-          fundingType: "research",
-          amount: 15000000,
-          currency: "VND",
-          receivedDate: "2024-04-10",
-          purpose: "Field research and case study data collection",
-          status: "received"
-        }
-      ],
-      patents: []
-    }
-  }
-];
+  ];
 
-const ThesisManagement: React.FC = () => {
-  const [theses, setTheses] = useState<Thesis[]>(sampleTheses);
-  const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<ThesisStatus | "all">("all");
-  const [filterCategory, setFilterCategory] = useState<ThesisCategory | "all">("all");
-  const [filterLevel, setFilterLevel] = useState<ThesisLevel | "all">("all");
-  const [activeTab, setActiveTab] = useState<"overview" | "documents" | "reviews" | "defense" | "timeline" | "associated">("overview");
+  const [theses, setTheses] = useState<ThesisArchive[]>(initialTheses);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedThesis, setSelectedThesis] = useState<ThesisArchive | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  
+const [filters, setFilters] = useState<ThesisFilterOptions>({
+  thesisType: 'all',
+  degreeLevel: 'all',
+  department: 'all',
+  yearFrom: '',
+  yearTo: '',
+  language: 'all',
+  isPublished: 'all'  // Keep this for ThesisStorage
+});
 
   // Statistics
-  const stats = useMemo(() => {
+  const statistics = useMemo(() => {
+    const total = theses.length;
+    const thisYear = theses.filter(t => 
+      new Date(t.archiveDate).getFullYear() === new Date().getFullYear()
+    ).length;
+    const published = theses.filter(t => t.isPublished).length;
+    const totalviews = theses.reduce((sum, t) => sum + t.views, 0);
+    const avgRating = theses.reduce((sum, t) => sum + t.rating, 0) / total;
+    const totalCitations = theses.reduce((sum, t) => sum + t.citations, 0);
+
     return {
-      total: theses.length,
-      submitted: theses.filter(t => t.status === "submitted").length,
-      underReview: theses.filter(t => t.status === "under_review").length,
-      approved: theses.filter(t => t.status === "approved").length,
-      withPublications: theses.filter(t => t.associatedItems.publications.length > 0).length,
-      withPatents: theses.filter(t => t.associatedItems.patents.length > 0).length,
-      avgPlagiarism: theses.filter(t => t.plagiarismScore !== null)
-        .reduce((acc, t) => acc + (t.plagiarismScore || 0), 0) / theses.filter(t => t.plagiarismScore !== null).length || 0,
-      upcomingDefenses: theses.filter(t => t.defenseDate && new Date(t.defenseDate) > new Date()).length
+      total,
+      published,
+      thisYear,
+      totalviews,
+      totalCitations,
+      avgRating: avgRating.toFixed(1)
     };
   }, [theses]);
 
-  // Filter theses
+  // Filtered theses
   const filteredTheses = useMemo(() => {
     return theses.filter(thesis => {
       const matchesSearch = 
         thesis.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        thesis.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        thesis.student.studentId.includes(searchTerm) ||
-        thesis.id.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus === "all" || thesis.status === filterStatus;
-      const matchesCategory = filterCategory === "all" || thesis.category === filterCategory;
-      const matchesLevel = filterLevel === "all" || thesis.level === filterLevel;
-      return matchesSearch && matchesStatus && matchesCategory && matchesLevel;
+        thesis.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.keywords.some(k => k.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        thesis.supervisor.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesType = filters.thesisType === 'all' || thesis.thesisType === filters.thesisType;
+      const matchesDegree = filters.degreeLevel === 'all' || thesis.degreeLevel === filters.degreeLevel;
+      const matchesDept = filters.department === 'all' || thesis.department === filters.department;
+      const matchesLanguage = filters.language === 'all' || thesis.language === filters.language;
+      const matchesPublished = filters.isPublished === 'all' || 
+        (filters.isPublished === 'published' && thesis.isPublished) ||
+        (filters.isPublished === 'unpublished' && !thesis.isPublished);
+
+      const thesisYear = new Date(thesis.archiveDate).getFullYear();
+      const matchesYearFrom = !filters.yearFrom || thesisYear >= parseInt(filters.yearFrom);
+      const matchesYearTo = !filters.yearTo || thesisYear <= parseInt(filters.yearTo);
+
+      return matchesSearch && matchesType && matchesDegree && 
+             matchesDept && matchesLanguage && matchesPublished && 
+             matchesYearFrom && matchesYearTo;
     });
-  }, [theses, searchTerm, filterStatus, filterCategory, filterLevel]);
+  }, [theses, searchTerm, filters]);
 
-  const getStatusColor = (status: ThesisStatus) => {
-    switch (status) {
-      case "draft": return "bg-gray-100 text-gray-700";
-      case "submitted": return "bg-blue-100 text-blue-700";
-      case "under_review": return "bg-yellow-100 text-yellow-700";
-      case "revision_required": return "bg-orange-100 text-orange-700";
-      case "approved": return "bg-green-100 text-green-700";
-      case "rejected": return "bg-red-100 text-red-700";
-      case "published": return "bg-purple-100 text-purple-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
+  // Helper functions
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
 
-  const getStatusIcon = (status: ThesisStatus) => {
-    switch (status) {
-      case "draft": return <Edit className="w-4 h-4" />;
-      case "submitted": return <Upload className="w-4 h-4" />;
-      case "under_review": return <Clock className="w-4 h-4" />;
-      case "revision_required": return <AlertCircle className="w-4 h-4" />;
-      case "approved": return <CheckCircle className="w-4 h-4" />;
-      case "rejected": return <XCircle className="w-4 h-4" />;
-      case "published": return <Award className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
-    }
+  const departments = useMemo(() => {
+    const depts = new Set(theses.map(t => t.department));
+    return ['all', ...Array.from(depts)];
+  }, [theses]);
+
+  const handleViewDetail = (thesis: ThesisArchive) => {
+    setSelectedThesis(thesis);
+    setShowDetailModal(true);
   };
 
-  const getTypeLabel = (category: ThesisCategory, level: ThesisLevel) => {
-    const categoryLabel = category === "thesis" ? "Thesis" : 
-                         category === "dissertation" ? "Dissertation" : "Final Project";
-    const levelLabel = level === "bachelor" ? "Bachelor's" : 
-                      level === "master" ? "Master's" : "PhD";
-    return `${levelLabel} ${categoryLabel}`;
-  };
-
-  const getCategoryColor = (category: ThesisCategory) => {
-    switch (category) {
-      case "thesis": return "bg-blue-100 text-blue-700";
-      case "dissertation": return "bg-purple-100 text-purple-700";
-      case "final_project": return "bg-green-100 text-green-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  const getLevelColor = (level: ThesisLevel) => {
-    switch (level) {
-      case "bachelor": return "bg-cyan-100 text-cyan-700";
-      case "master": return "bg-indigo-100 text-indigo-700";
-      case "phd": return "bg-red-100 text-red-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  const formatStatus = (status: ThesisStatus) => {
-    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  const handleDownload = (thesis: ThesisArchive) => {
+    console.log('Downloading:', thesis.title);
+    // In real app: window.open(thesis.fileUrl, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-3 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-            <span>Digital Library</span>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-gray-900 font-medium">Library: Thesis Management</span>
+      <div className="mb-6">
+        <div className="flex justify-between items-start mb-3">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Thesis Storage</h1>
+            <p className="text-gray-600 mt-1">
+              Completed thesis, dissertations, and final project reports repository
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Thesis/Dissertation Management</h1>
+          <button 
+            onClick={() => setShowUploadModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
+          >
+            <Upload className="w-4 h-4" />
+            Upload Thesis
+          </button>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => {/* Export report */}}
-            className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export Report
-          </button>
-          <button
-            onClick={() => setViewMode("create")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add New Thesis
-          </button>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+              <Archive className="w-4 h-4" />
+              Total Archived
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{statistics.total}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-green-600 text-sm mb-1">
+              <CheckCircle className="w-4 h-4" />
+              Published
+            </div>
+            <div className="text-2xl font-bold text-green-600">{statistics.published}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-blue-600 text-sm mb-1">
+              <Calendar className="w-4 h-4" />
+              This Year
+            </div>
+            <div className="text-2xl font-bold text-blue-600">{statistics.thisYear}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-purple-600 text-sm mb-1">
+              <Eye className="w-4 h-4" />
+              Views
+            </div>
+            <div className="text-2xl font-bold text-purple-600">{statistics.totalviews}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-orange-600 text-sm mb-1">
+              <BookOpen className="w-4 h-4" />
+              Citations
+            </div>
+            <div className="text-2xl font-bold text-orange-600">{statistics.totalCitations}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-yellow-600 text-sm mb-1">
+              <Star className="w-4 h-4" />
+              Avg Rating
+            </div>
+            <div className="text-2xl font-bold text-yellow-600">{statistics.avgRating}</div>
+          </div>
+        </div>
+
+        {/* Search and Controls */}
+        <div className="bg-white p-3 rounded-lg shadow-sm">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by title, author, keywords, or supervisor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
+                  showFilters ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+              </button>
+              <div className="flex bg-gray-200 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-white shadow' : ''}`}
+                >
+                  <ListIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow' : ''}`}
+                >
+                  <Grid className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <select
+                    value={filters.thesisType}
+                    onChange={(e) => setFilters({...filters, thesisType: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="thesis">Thesis</option>
+                    <option value="dissertation">Dissertation</option>
+                    <option value="final_project">Final Project</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Degree</label>
+                  <select
+                    value={filters.degreeLevel}
+                    onChange={(e) => setFilters({...filters, degreeLevel: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Degrees</option>
+                    <option value="bachelor">Bachelor</option>
+                    <option value="master">Master</option>
+                    <option value="phd">PhD</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                  <select
+                    value={filters.department}
+                    onChange={(e) => setFilters({...filters, department: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {departments.map(dept => (
+                      <option key={dept} value={dept}>
+                        {dept === 'all' ? 'All Departments' : dept}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Year From</label>
+                  <input
+                    type="number"
+                    placeholder="2020"
+                    value={filters.yearFrom}
+                    onChange={(e) => setFilters({...filters, yearFrom: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Year To</label>
+                  <input
+                    type="number"
+                    placeholder="2024"
+                    value={filters.yearTo}
+                    onChange={(e) => setFilters({...filters, yearTo: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                  <select
+                    value={filters.language}
+                    onChange={(e) => setFilters({...filters, language: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Languages</option>
+                    <option value="English">English</option>
+                    <option value="Indonesian">Indonesian</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Published</label>
+                  <select
+                    value={filters.isPublished}
+                    onChange={(e) => setFilters({...filters, isPublished: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All</option>
+                    <option value="published">Published</option>
+                    <option value="unpublished">Unpublished</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={() => setFilters({
+                    thesisType: 'all',
+                    degreeLevel: 'all',
+                    department: 'all',
+                    yearFrom: '',
+                    yearTo: '',
+                    language: 'all',
+                    isPublished: 'all'
+                  })}
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {viewMode === "list" ? (
-        <>
-          {/* Statistics Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">Total Works</p>
-                <FileText className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              <p className="text-xs text-gray-500 mt-1">All categories</p>
-            </div>
+      {/* Results Count */}
+      <div className="mb-3 text-sm text-gray-600">
+        Showing {filteredTheses.length} of {theses.length} theses
+      </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">Submitted</p>
-                <Upload className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-2xl font-bold text-blue-600">{stats.submitted}</p>
-              <p className="text-xs text-gray-500 mt-1">Awaiting review</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">Under Review</p>
-                <Clock className="w-5 h-5 text-yellow-600" />
-              </div>
-              <p className="text-2xl font-bold text-yellow-600">{stats.underReview}</p>
-              <p className="text-xs text-gray-500 mt-1">In review process</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">Approved</p>
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
-              <p className="text-xs text-gray-500 mt-1">Completed works</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">With Publications</p>
-                <FileCheck className="w-5 h-5 text-purple-600" />
-              </div>
-              <p className="text-2xl font-bold text-purple-600">{stats.withPublications}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {stats.total > 0 ? `${Math.round((stats.withPublications / stats.total) * 100)}% of total` : '0% of total'}
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">With Patents</p>
-                <Scroll className="w-5 h-5 text-orange-600" />
-              </div>
-              <p className="text-2xl font-bold text-orange-600">{stats.withPatents}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {stats.total > 0 ? `${Math.round((stats.withPatents / stats.total) * 100)}% of total` : '0% of total'}
-              </p>
-            </div>
-          </div>
-
-          {/* Filters & Search */}
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="md:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Search by title, student name, ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value as ThesisCategory | "all")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Categories</option>
-                  <option value="thesis">Thesis</option>
-                  <option value="dissertation">Dissertation</option>
-                  <option value="final_project">Final Project</option>
-                </select>
-              </div>
-
-              <div>
-                <select
-                  value={filterLevel}
-                  onChange={(e) => setFilterLevel(e.target.value as ThesisLevel | "all")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Levels</option>
-                  <option value="bachelor">Bachelor&apos;s</option>
-                  <option value="master">Master&apos;s</option>
-                  <option value="phd">PhD</option>
-                </select>
-              </div>
-
-              <div>
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as ThesisStatus | "all")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Status</option>
-                  <option value="draft">Draft</option>
-                  <option value="submitted">Submitted</option>
-                  <option value="under_review">Under Review</option>
-                  <option value="revision_required">Revision Required</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="published">Published</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Theses List */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title & Student</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Defense</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredTheses.map(thesis => (
-                    <tr key={thesis.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm font-medium text-gray-900">{thesis.id}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="max-w-xs">
-                          <div className="text-sm font-medium text-gray-900 truncate">{thesis.title}</div>
-                          <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                            <GraduationCap className="w-4 h-4" />
-                            {thesis.student.name} ({thesis.student.studentId})
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(thesis.category)}`}>
-                          {thesis.category === "thesis" ? "Thesis" : 
-                           thesis.category === "dissertation" ? "Dissertation" : "Final Project"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(thesis.level)}`}>
-                          {thesis.level === "bachelor" ? "Bachelor's" : 
-                           thesis.level === "master" ? "Master's" : "PhD"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{thesis.supervisor.name}</div>
-                        <div className="text-xs text-gray-500 truncate max-w-[150px]">{thesis.supervisor.department}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(thesis.status)}`}>
-                          {getStatusIcon(thesis.status)}
-                          {formatStatus(thesis.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {thesis.defenseDate ? (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {thesis.defenseDate}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 italic">Not scheduled</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => {
-                            setSelectedThesis(thesis);
-                            setViewMode("detail");
-                          }}
-                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      ) : viewMode === "detail" && selectedThesis ? (
-        /* Detail View */
-        <div className="space-y-6">
-          {/* Back Button */}
-          <button
-            onClick={() => setViewMode("list")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <ChevronRight className="w-4 h-4 rotate-180" />
-            Back to Thesis List
-          </button>
-
-          {/* Thesis Header */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-sm font-medium text-gray-500">{selectedThesis.id}</span>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedThesis.status)}`}>
-                    {getStatusIcon(selectedThesis.status)}
-                    {formatStatus(selectedThesis.status)}
-                  </span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(selectedThesis.category)}`}>
-                    {selectedThesis.category === "thesis" ? "Thesis" : 
-                     selectedThesis.category === "dissertation" ? "Dissertation" : "Final Project"}
-                  </span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(selectedThesis.level)}`}>
-                    {selectedThesis.level === "bachelor" ? "Bachelor's" : 
-                     selectedThesis.level === "master" ? "Master's" : "PhD"}
-                  </span>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedThesis.title}</h2>
-                <p className="text-gray-600 italic mb-4">{selectedThesis.titleVietnamese}</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* List View */}
+      {viewMode === 'list' && (
+        <div className="space-y-3">
+          {filteredTheses.map((thesis) => (
+            <div key={thesis.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
                   <div className="flex items-start gap-3">
-                    <GraduationCap className="w-5 h-5 text-blue-600 mt-1" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Student</p>
-                      <p className="text-sm text-gray-900">{selectedThesis.student.name}</p>
-                      <p className="text-xs text-gray-500">{selectedThesis.student.studentId} • {selectedThesis.student.email}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <UserCheck className="w-5 h-5 text-green-600 mt-1" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Supervisor</p>
-                      <p className="text-sm text-gray-900">{selectedThesis.supervisor.name}</p>
-                      <p className="text-xs text-gray-500">{selectedThesis.supervisor.email}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                  <Edit className="w-4 h-4" />
-                  Edit
-                </button>
-                <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  Download
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="border-b border-gray-200">
-              <nav className="flex">
-                <button
-                  onClick={() => setActiveTab("overview")}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === "overview"
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Overview
-                </button>
-                <button
-                  onClick={() => setActiveTab("documents")}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === "documents"
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Documents
-                </button>
-                <button
-                  onClick={() => setActiveTab("reviews")}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === "reviews"
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Reviews ({selectedThesis.reviews.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("defense")}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === "defense"
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Defense
-                </button>
-                <button
-                  onClick={() => setActiveTab("timeline")}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === "timeline"
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Timeline
-                </button>
-                <button
-                  onClick={() => setActiveTab("associated")}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === "associated"
-                      ? "border-b-2 border-blue-600 text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Associated Items
-                </button>
-              </nav>
-            </div>
-
-            <div className="p-6">
-              {/* Overview Tab */}
-              {activeTab === "overview" && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Abstract</h3>
-                    <p className="text-gray-700 leading-relaxed">{selectedThesis.abstract}</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Details</h3>
-                      <div className="space-y-2">
-                        <div className="flex justify-between py-2 border-b border-gray-100">
-                          <span className="text-sm text-gray-600">Department</span>
-                          <span className="text-sm font-medium text-gray-900">{selectedThesis.department}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-b border-gray-100">
-                          <span className="text-sm text-gray-600">Field of Study</span>
-                          <span className="text-sm font-medium text-gray-900">{selectedThesis.fieldOfStudy}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-b border-gray-100">
-                          <span className="text-sm text-gray-600">Academic Year</span>
-                          <span className="text-sm font-medium text-gray-900">{selectedThesis.academicYear}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-b border-gray-100">
-                          <span className="text-sm text-gray-600">Submission Date</span>
-                          <span className="text-sm font-medium text-gray-900">{selectedThesis.submissionDate}</span>
-                        </div>
-                        {selectedThesis.plagiarismScore !== null && (
-                          <div className="flex justify-between py-2 border-b border-gray-100">
-                            <span className="text-sm text-gray-600">Plagiarism Score</span>
-                            <span className={`text-sm font-medium ${selectedThesis.plagiarismScore <= 15 ? 'text-green-600' : 'text-red-600'}`}>
-                              {selectedThesis.plagiarismScore}%
-                            </span>
-                          </div>
-                        )}
-                        {selectedThesis.finalGrade && (
-                          <div className="flex justify-between py-2 border-b border-gray-100">
-                            <span className="text-sm text-gray-600">Final Grade</span>
-                            <span className="text-sm font-medium text-gray-900">{selectedThesis.finalGrade}</span>
-                          </div>
+                    <FileText className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{thesis.title}</h3>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
+                        <span className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          {thesis.author}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <GraduationCap className="w-4 h-4" />
+                          {thesis.supervisor}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {formatDate(thesis.submissionDate)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <BookOpen className="w-4 h-4" />
+                          {thesis.pages} pages
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                          {thesis.thesisType.replace('_', ' ').toUpperCase()}
+                        </span>
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                          {thesis.degreeLevel.toUpperCase()}
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
+                          {thesis.department}
+                        </span>
+                        {thesis.isPublished && (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Published
+                          </span>
                         )}
                       </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Keywords</h3>
                       <div className="flex flex-wrap gap-2">
-                        {selectedThesis.keywords.map((keyword, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                        {thesis.keywords.slice(0, 5).map((keyword, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-50 text-gray-600 rounded text-xs border border-gray-200">
                             {keyword}
                           </span>
                         ))}
@@ -11189,583 +11870,1159 @@ const ThesisManagement: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
-
-              {/* Documents Tab */}
-              {activeTab === "documents" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Uploaded Documents</h3>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Upload className="w-4 h-4" />
-                      Upload Document
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {selectedThesis.documents.proposal && (
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Thesis Proposal</p>
-                            <p className="text-xs text-gray-500">{selectedThesis.documents.proposal}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedThesis.documents.fullThesis && (
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-green-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Full Thesis Document</p>
-                            <p className="text-xs text-gray-500">{selectedThesis.documents.fullThesis}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedThesis.documents.presentation && (
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-purple-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Defense Presentation</p>
-                            <p className="text-xs text-gray-500">{selectedThesis.documents.presentation}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedThesis.documents.plagiarismReport && (
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                            <BarChart3 className="w-5 h-5 text-orange-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Plagiarism Report</p>
-                            <p className="text-xs text-gray-500">{selectedThesis.documents.plagiarismReport}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 text-gray-600 hover:text-blue-600">
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2 ml-4">
+                  <button
+                    onClick={() => handleViewDetail(thesis)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                    title="View Details"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDownload(thesis)}
+                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                    title="Download"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
                 </div>
-              )}
+              </div>
+              <div className="flex items-center gap-6 text-sm text-gray-600 pt-3 border-t border-gray-100">
+                <span className="flex items-center gap-1">
+                  <Download className="w-4 h-4" />
+                  {thesis.views} views
+                </span>
+                <span className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  {thesis.rating.toFixed(1)} rating
+                </span>
+                {thesis.isPlagiarismChecked && (
+                  <span className="flex items-center gap-1">
+                    <FileCheck className="w-4 h-4 text-green-600" />
+                    Plagiarism: {thesis.plagiarismScore}%
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  {thesis.fileSize}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-              {/* Reviews Tab */}
-              {activeTab === "reviews" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Thesis Reviews</h3>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      Assign Reviewer
-                    </button>
-                  </div>
+      {/* Grid View */}
+      {viewMode === 'grid' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTheses.map((thesis) => (
+            <div key={thesis.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition">
+              <div className="flex items-start justify-between mb-3">
+                <FileText className="w-8 h-8 text-blue-600 flex-shrink-0" />
+                {thesis.isPublished && (
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    Published
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{thesis.title}</h3>
+              <p className="text-sm text-gray-600 mb-3">{thesis.author}</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                  {thesis.degreeLevel.toUpperCase()}
+                </span>
+                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                  {thesis.department}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-4 text-xs text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Download className="w-3 h-3" />
+                    {thesis.views}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Star className="w-3 h-3" />
+                    {thesis.rating}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleViewDetail(thesis)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDownload(thesis)}
+                    className="p-2 text-green-600 hover:bg-green-50 rounded transition"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-                  {selectedThesis.reviews.length > 0 ? (
-                    <div className="space-y-4">
-                      {selectedThesis.reviews.map(review => (
-                        <div key={review.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                {review.reviewerName.charAt(0)}
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{review.reviewerName}</p>
-                                <p className="text-xs text-gray-500">{review.reviewerEmail}</p>
-                              </div>
-                            </div>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              review.status === "completed" ? "bg-green-100 text-green-700" :
-                              review.status === "in_progress" ? "bg-yellow-100 text-yellow-700" :
-                              "bg-gray-100 text-gray-700"
-                            }`}>
-                              {review.status === "completed" ? "Completed" :
-                               review.status === "in_progress" ? "In Progress" : "Pending"}
-                            </span>
-                          </div>
+      {/* Empty State */}
+      {filteredTheses.length === 0 && (
+        <div className="bg-white p-12 rounded-lg shadow-sm text-center">
+          <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No theses found</h3>
+          <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setFilters({
+                // Remove this line: status: 'all',
+                thesisType: 'all',
+                degreeLevel: 'all',
+                department: 'all',
+                yearFrom: '',
+                yearTo: '',
+                language: 'all',
+                isPublished: 'all'  // Add this line if it's missing
+              });
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Clear All Filters
+          </button>
+        </div>
+      )}
 
-                          {review.rating !== null && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm text-gray-600">Rating:</span>
-                              <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`w-4 h-4 ${i < Math.floor(review.rating! / 2) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                  />
-                                ))}
-                                <span className="text-sm font-medium text-gray-900 ml-2">{review.rating}/10</span>
-                              </div>
-                            </div>
-                          )}
-
-                          {review.comments && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                              <p className="text-sm text-gray-700">{review.comments}</p>
-                            </div>
-                          )}
-
-                          {review.submittedDate && (
-                            <p className="text-xs text-gray-500 mt-2">Submitted on {review.submittedDate}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                      <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-600">No reviews yet</p>
-                    </div>
+      {/* Detail Modal */}
+      {showDetailModal && selectedThesis && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Thesis Details</h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-6">
+                <div className="flex items-start gap-2 mb-4">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                    {selectedThesis.thesisType.replace('_', ' ').toUpperCase()}
+                  </span>
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                    {selectedThesis.degreeLevel.toUpperCase()}
+                  </span>
+                  {selectedThesis.isPublished && (
+                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      Published
+                    </span>
                   )}
                 </div>
-              )}
-
-              {/* Defense Tab */}
-              {activeTab === "defense" && (
-                <div className="space-y-6">
-                  {selectedThesis.defense ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Calendar className="w-5 h-5 text-blue-600" />
-                            <h3 className="font-semibold text-gray-900">Defense Schedule</h3>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-600">Date</span>
-                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.date}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-600">Time</span>
-                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.time}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-600">Location</span>
-                              <span className="text-sm font-medium text-gray-900">{selectedThesis.defense.location}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Users className="w-5 h-5 text-green-600" />
-                            <h3 className="font-semibold text-gray-900">Defense Committee</h3>
-                          </div>
-                          <div className="space-y-2">
-                            {selectedThesis.defense.committee.map((member, idx) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                                <span className="text-sm text-gray-900">{member}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                          <Edit className="w-4 h-4" />
-                          Reschedule Defense
-                        </button>
-                        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2">
-                          <Send className="w-4 h-4" />
-                          Send Notifications
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-600 mb-4">Defense not scheduled yet</p>
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 mx-auto">
-                        <Plus className="w-4 h-4" />
-                        Schedule Defense
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Timeline Tab */}
-              {activeTab === "timeline" && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thesis Progress Timeline</h3>
-                  <div className="relative space-y-6">
-                    {/* Timeline items */}
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                      </div>
-                      <div className="flex-1 pb-6">
-                        <p className="text-sm font-medium text-gray-900">Thesis Submitted</p>
-                        <p className="text-xs text-gray-500">{selectedThesis.submissionDate}</p>
-                        <p className="text-sm text-gray-600 mt-1">Full thesis document uploaded to the system</p>
-                      </div>
-                    </div>
-
-                    {selectedThesis.reviews.length > 0 && (
-                      <div className="flex gap-4">
-                        <div className="flex flex-col items-center">
-                          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                            <Clock className="w-5 h-5 text-yellow-600" />
-                          </div>
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                        </div>
-                        <div className="flex-1 pb-6">
-                          <p className="text-sm font-medium text-gray-900">Under Review</p>
-                          <p className="text-xs text-gray-500">Current Status</p>
-                          <p className="text-sm text-gray-600 mt-1">{selectedThesis.reviews.length} reviewer(s) assigned</p>
-                        </div>
-                      </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{selectedThesis.title}</h3>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Author</div>
+                    <div className="font-medium">{selectedThesis.author}</div>
+                    <div className="text-sm text-gray-600">ID: {selectedThesis.studentId}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Supervisor</div>
+                    <div className="font-medium">{selectedThesis.supervisor}</div>
+                    {selectedThesis.coSupervisor && (
+                      <div className="text-sm text-gray-600">Co-supervisor: {selectedThesis.coSupervisor}</div>
                     )}
-
-                    {selectedThesis.defenseDate && (
-                      <div className="flex gap-4">
-                        <div className="flex flex-col items-center">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <Calendar className="w-5 h-5 text-blue-600" />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">Defense Scheduled</p>
-                          <p className="text-xs text-gray-500">{selectedThesis.defenseDate}</p>
-                          <p className="text-sm text-gray-600 mt-1">Defense presentation scheduled</p>
-                        </div>
-                      </div>
-                    )}
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Department</div>
+                    <div className="font-medium">{selectedThesis.department}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Submission Date</div>
+                    <div className="font-medium">{formatDate(selectedThesis.submissionDate)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Defense Date</div>
+                    <div className="font-medium">{formatDate(selectedThesis.defenseDate)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Approval Date</div>
+                    <div className="font-medium">{formatDate(selectedThesis.approvalDate)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Archive Date</div>
+                    <div className="font-medium">{formatDate(selectedThesis.archiveDate)}</div>
                   </div>
                 </div>
-              )}
 
-              {/* Associated Items Tab */}
-              {activeTab === "associated" && (
-                <div className="space-y-6">
-                  {/* Publications */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <FileCheck className="w-5 h-5 text-blue-600" />
-                        Publications ({selectedThesis.associatedItems.publications.length})
-                      </h3>
-                      <button className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm">
-                        <Plus className="w-4 h-4" />
-                        Add Publication
-                      </button>
-                    </div>
-                    
-                    {selectedThesis.associatedItems.publications.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedThesis.associatedItems.publications.map(pub => (
-                          <div key={pub.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h4 className="text-sm font-medium text-gray-900 mb-1">{pub.title}</h4>
-                                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
-                                  <span className="flex items-center gap-1">
-                                    <BookOpen className="w-3 h-3" />
-                                    {pub.journalName}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {pub.publicationDate}
-                                  </span>
-                                  {pub.impactFactor && (
-                                    <span className="flex items-center gap-1">
-                                      <TrendingUp className="w-3 h-3" />
-                                      IF: {pub.impactFactor}
-                                    </span>
-                                  )}
-                                  {pub.citations !== undefined && (
-                                    <span className="flex items-center gap-1">
-                                      <Award className="w-3 h-3" />
-                                      {pub.citations} citations
-                                    </span>
-                                  )}
-                                </div>
-                                {pub.doi && (
-                                  <p className="text-xs text-gray-500">DOI: {pub.doi}</p>
-                                )}
-                              </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                pub.status === "published" ? "bg-green-100 text-green-700" :
-                                pub.status === "accepted" ? "bg-blue-100 text-blue-700" :
-                                pub.status === "submitted" ? "bg-yellow-100 text-yellow-700" :
-                                "bg-gray-100 text-gray-700"
-                              }`}>
-                                {pub.status.charAt(0).toUpperCase() + pub.status.slice(1)}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <FileCheck className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">No publications associated yet</p>
-                      </div>
-                    )}
-                  </div>
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Abstract</h4>
+                  <p className="text-gray-700">{selectedThesis.abstract}</p>
+                </div>
 
-                  {/* Grants */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <Award className="w-5 h-5 text-purple-600" />
-                        Grants ({selectedThesis.associatedItems.grants.length})
-                      </h3>
-                      <button className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm">
-                        <Plus className="w-4 h-4" />
-                        Add Grant
-                      </button>
-                    </div>
-                    
-                    {selectedThesis.associatedItems.grants.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedThesis.associatedItems.grants.map(grant => (
-                          <div key={grant.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <h4 className="text-sm font-medium text-gray-900">{grant.grantName}</h4>
-                                <p className="text-xs text-gray-600 mt-1">{grant.fundingAgency}</p>
-                              </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                grant.status === "active" ? "bg-green-100 text-green-700" :
-                                grant.status === "completed" ? "bg-blue-100 text-blue-700" :
-                                grant.status === "pending" ? "bg-yellow-100 text-yellow-700" :
-                                "bg-red-100 text-red-700"
-                              }`}>
-                                {grant.status.charAt(0).toUpperCase() + grant.status.slice(1)}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 mt-3 text-xs">
-                              <div>
-                                <span className="text-gray-600">Amount:</span>
-                                <span className="font-medium text-gray-900 ml-1">
-                                  {grant.amount.toLocaleString()} {grant.currency}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-600">Period:</span>
-                                <span className="font-medium text-gray-900 ml-1">
-                                  {grant.startDate} - {grant.endDate}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-600">PI:</span>
-                                <span className="font-medium text-gray-900 ml-1">{grant.principalInvestigator}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <Award className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">No grants associated yet</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Funding */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <Banknote className="w-5 h-5 text-green-600" />
-                        Funding ({selectedThesis.associatedItems.funding.length})
-                      </h3>
-                      <button className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm">
-                        <Plus className="w-4 h-4" />
-                        Add Funding
-                      </button>
-                    </div>
-                    
-                    {selectedThesis.associatedItems.funding.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedThesis.associatedItems.funding.map(fund => (
-                          <div key={fund.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <h4 className="text-sm font-medium text-gray-900">{fund.sourceName}</h4>
-                                <p className="text-xs text-gray-600 mt-1">{fund.purpose}</p>
-                              </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                fund.status === "received" ? "bg-green-100 text-green-700" :
-                                fund.status === "pending" ? "bg-yellow-100 text-yellow-700" :
-                                "bg-red-100 text-red-700"
-                              }`}>
-                                {fund.status.charAt(0).toUpperCase() + fund.status.slice(1)}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-6 mt-3 text-xs">
-                              <div>
-                                <span className="text-gray-600">Type:</span>
-                                <span className="font-medium text-gray-900 ml-1 capitalize">
-                                  {fund.fundingType.replace('_', ' ')}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-600">Amount:</span>
-                                <span className="font-medium text-gray-900 ml-1">
-                                  {fund.amount.toLocaleString()} {fund.currency}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-600">Received:</span>
-                                <span className="font-medium text-gray-900 ml-1">{fund.receivedDate}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <Banknote className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">No funding sources associated yet</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Patents */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <Scroll className="w-5 h-5 text-orange-600" />
-                        Patents ({selectedThesis.associatedItems.patents.length})
-                      </h3>
-                      <button className="px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 text-sm">
-                        <Plus className="w-4 h-4" />
-                        Add Patent
-                      </button>
-                    </div>
-                    
-                    {selectedThesis.associatedItems.patents.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedThesis.associatedItems.patents.map(patent => (
-                          <div key={patent.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <h4 className="text-sm font-medium text-gray-900">{patent.patentTitle}</h4>
-                                {patent.patentNumber && (
-                                  <p className="text-xs text-gray-600 mt-1">Patent No: {patent.patentNumber}</p>
-                                )}
-                              </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                patent.status === "granted" ? "bg-green-100 text-green-700" :
-                                patent.status === "pending" ? "bg-yellow-100 text-yellow-700" :
-                                patent.status === "rejected" ? "bg-red-100 text-red-700" :
-                                "bg-gray-100 text-gray-700"
-                              }`}>
-                                {patent.status.charAt(0).toUpperCase() + patent.status.slice(1)}
-                              </span>
-                            </div>
-                            <div className="mt-3 text-xs space-y-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-gray-600">Inventors:</span>
-                                <span className="font-medium text-gray-900">{patent.inventors.join(', ')}</span>
-                              </div>
-                              <div className="flex items-center gap-6">
-                                <div>
-                                  <span className="text-gray-600">Application:</span>
-                                  <span className="font-medium text-gray-900 ml-1">{patent.applicationDate}</span>
-                                </div>
-                                {patent.grantDate && (
-                                  <div>
-                                    <span className="text-gray-600">Granted:</span>
-                                    <span className="font-medium text-gray-900 ml-1">{patent.grantDate}</span>
-                                  </div>
-                                )}
-                                <div>
-                                  <span className="text-gray-600">Country:</span>
-                                  <span className="font-medium text-gray-900 ml-1">{patent.country}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <Scroll className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">No patents associated yet</p>
-                      </div>
-                    )}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Keywords</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedThesis.keywords.map((keyword, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                        {keyword}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              )}
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Pages</div>
+                    <div className="text-2xl font-bold">{selectedThesis.pages}</div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">File Size</div>
+                    <div className="text-2xl font-bold">{selectedThesis.fileSize}</div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Views</div>
+                    <div className="text-2xl font-bold">{selectedThesis.views}</div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Rating</div>
+                    <div className="text-2xl font-bold flex items-center gap-1">
+                      {selectedThesis.rating}
+                      <Star className="w-5 h-5 text-yellow-500" />
+                    </div>
+                  </div>
+                </div>
+
+                {selectedThesis.isPlagiarismChecked && (
+                  <div className="bg-green-50 border border-green-200 p-4 rounded-lg mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileCheck className="w-5 h-5 text-green-600" />
+                      <span className="font-semibold text-green-900">Plagiarism Check Completed</span>
+                    </div>
+                    <div className="text-sm text-green-700">
+                      Similarity Score: {selectedThesis.plagiarismScore}%
+                    </div>
+                  </div>
+                )}
+
+                {selectedThesis.doi && (
+                  <div className="mb-6">
+                    <div className="text-sm text-gray-600 mb-1">DOI</div>
+                    <div className="font-mono text-blue-600">{selectedThesis.doi}</div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleDownload(selectedThesis)}
+                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+                  >
+                    <Download className="w-5 h-5" />
+                    Download Thesis
+                  </button>
+                  <button
+                    className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      ) : (
-        /* Create/Add New Thesis Form */
-        <div className="space-y-6">
-          <button
-            onClick={() => setViewMode("list")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <ChevronRight className="w-4 h-4 rotate-180" />
-            Back to Thesis List
-          </button>
+      )}
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Register New Thesis</h2>
-              <p className="text-sm text-gray-600 mt-1">Complete the form below to register a new thesis/dissertation</p>
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Upload New Thesis</h2>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-
             <div className="p-6">
-              <div className="text-center py-12 text-gray-500">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p>Thesis registration form would go here</p>
-                <p className="text-sm mt-2">Include fields for student info, supervisor, title, abstract, etc.</p>
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition cursor-pointer">
+                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-700 mb-2">Click to upload or drag and drop</p>
+                  <p className="text-sm text-gray-500">PDF files up to 50MB</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Thesis Type</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option>Thesis</option>
+                      <option>Dissertation</option>
+                      <option>Final Project</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Degree Level</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option>Bachelor</option>
+                      <option>Master</option>
+                      <option>PhD</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Author Name</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Supervisor</label>
+                    <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      {departments.filter(d => d !== 'all').map(dept => (
+                        <option key={dept}>{dept}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Abstract</label>
+                  <textarea rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Keywords (comma-separated)</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" 
+                         placeholder="e.g., Machine Learning, AI, Data Science" />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                  >
+                    <Upload className="w-5 h-5" />
+                    Upload Thesis
+                  </button>
+                  <button
+                    onClick={() => setShowUploadModal(false)}
+                    className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+// Types
+type BookStatus = 'available' | 'borrowed' | 'reserved' | 'maintenance' | 'lost';
+
+interface BookFilterOptions {
+  bookType: BookType | 'all';
+  catalogue: CatalogueCategory | 'all';
+  publisher: string;
+  status: 'all' | 'available' | 'low_stock';
+  yearFrom: string;
+  yearTo: string;
+  language: string;
+}
+
+const BookManagement: React.FC = () => {
+  const [books, setBooks] = useState<BookRecord[]>(bookRecords);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<BookRecord | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCatalogue, setSelectedCatalogue] = useState<CatalogueCategory | 'all'>('all');
+  
+const [filters, setFilters] = useState<BookFilterOptions>({
+  bookType: 'all',
+  catalogue: 'all',
+  publisher: 'all',
+  status: 'all',
+  yearFrom: '',
+  yearTo: '',
+  language: 'all'
+});
+
+  // Statistics
+  const statistics = useMemo(() => {
+    const total = books.length;
+    const totalPhysicalCopies = books.reduce((sum, b) => sum + b.totalCopies, 0);
+    const availableCopies = books.reduce((sum, b) => sum + b.availableCopies, 0);
+    const borrowedCopies = books.reduce((sum, b) => sum + b.borrowedCopies, 0);
+    const utilizationRate = ((borrowedCopies / totalPhysicalCopies) * 100).toFixed(1);
+    const uniquePublishers = new Set(books.map(b => b.publisher)).size;
+    const avgRating = books.reduce((sum, b) => sum + b.rating, 0) / total;
+
+    return {
+      total,
+      totalPhysicalCopies,
+      availableCopies,
+      borrowedCopies,
+      utilizationRate,
+      uniquePublishers,
+      avgRating: avgRating.toFixed(1)
+    };
+  }, [books]);
+
+  // Publisher statistics
+  const publisherStats = useMemo(() => {
+    const stats = books.reduce((acc, book) => {
+      if (!acc[book.publisher]) {
+        acc[book.publisher] = {
+          count: 0,
+          totalCopies: 0,
+          borrowed: 0
+        };
+      }
+      acc[book.publisher].count += 1;
+      acc[book.publisher].totalCopies += book.totalCopies;
+      acc[book.publisher].borrowed += book.borrowedCopies;
+      return acc;
+    }, {} as Record<string, { count: number; totalCopies: number; borrowed: number }>);
+
+    return Object.entries(stats)
+      .map(([publisher, data]) => ({ publisher, ...data }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+  }, [books]);
+
+  // Catalogue statistics
+  const catalogueStats = useMemo(() => {
+    const stats = books.reduce((acc, book) => {
+      if (!acc[book.catalogue]) {
+        acc[book.catalogue] = { count: 0, available: 0, borrowed: 0 };
+      }
+      acc[book.catalogue].count += book.totalCopies;
+      acc[book.catalogue].available += book.availableCopies;
+      acc[book.catalogue].borrowed += book.borrowedCopies;
+      return acc;
+    }, {} as Record<string, { count: number; available: number; borrowed: number }>);
+
+    return Object.entries(stats)
+      .map(([catalogue, data]) => ({ catalogue, ...data }))
+      .sort((a, b) => b.count - a.count);
+  }, [books]);
+
+  // Filtered books
+  const filteredBooks = useMemo(() => {
+    return books.filter(book => {
+      const matchesSearch = 
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.authors.some(a => a.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        book.isbn.includes(searchTerm) ||
+        book.subjects.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        book.publisher.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesType = filters.bookType === 'all' || book.bookType === filters.bookType;
+      const matchesCatalogue = filters.catalogue === 'all' || book.catalogue === filters.catalogue;
+      const matchesPublisher = filters.publisher === 'all' || book.publisher === filters.publisher;
+      const matchesLanguage = filters.language === 'all' || book.language === filters.language;
+      
+      const matchesStatus = 
+        filters.status === 'all' ||
+        (filters.status === 'available' && book.availableCopies > 0) ||
+        (filters.status === 'low_stock' && book.availableCopies <= 5 && book.availableCopies > 0);
+
+      const matchesYearFrom = !filters.yearFrom || book.publicationYear >= parseInt(filters.yearFrom);
+      const matchesYearTo = !filters.yearTo || book.publicationYear <= parseInt(filters.yearTo);
+
+      const matchesSelectedCatalogue = selectedCatalogue === 'all' || book.catalogue === selectedCatalogue;
+
+      return matchesSearch && matchesType && matchesCatalogue && matchesPublisher && 
+             matchesLanguage && matchesStatus && matchesYearFrom && matchesYearTo && 
+             matchesSelectedCatalogue;
+    });
+  }, [books, searchTerm, filters, selectedCatalogue]);
+
+  // Helper functions
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const getAvailabilityColor = (available: number, total: number) => {
+    const percentage = (available / total) * 100;
+    if (percentage > 50) return 'text-green-600 bg-green-50';
+    if (percentage > 20) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
+  const getBookTypeLabel = (type: BookType) => {
+    const labels = {
+      textbook: 'Textbook',
+      reference: 'Reference',
+      lecture_notes: 'Lecture Notes'
+    };
+    return labels[type];
+  };
+
+  const handleViewDetail = (book: BookRecord) => {
+    setSelectedBook(book);
+    setShowDetailModal(true);
+  };
+
+  return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Book Management</h1>
+            <p className="text-gray-600 mt-1">
+              Comprehensive library collection management system
+            </p>
+          </div>
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
+          >
+            <Plus className="w-4 h-4" />
+            Add Book
+          </button>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+              <Library className="w-4 h-4" />
+              Total Titles
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{statistics.total}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-blue-600 text-sm mb-1">
+              <Book className="w-4 h-4" />
+              Total Copies
+            </div>
+            <div className="text-2xl font-bold text-blue-600">{statistics.totalPhysicalCopies}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-green-600 text-sm mb-1">
+              <CheckCircle className="w-4 h-4" />
+              Available
+            </div>
+            <div className="text-2xl font-bold text-green-600">{statistics.availableCopies}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-orange-600 text-sm mb-1">
+              <Users className="w-4 h-4" />
+              Borrowed
+            </div>
+            <div className="text-2xl font-bold text-orange-600">{statistics.borrowedCopies}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-purple-600 text-sm mb-1">
+              <TrendingUp className="w-4 h-4" />
+              Utilization
+            </div>
+            <div className="text-2xl font-bold text-purple-600">{statistics.utilizationRate}%</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-indigo-600 text-sm mb-1">
+              <Building2 className="w-4 h-4" />
+              Publishers
+            </div>
+            <div className="text-2xl font-bold text-indigo-600">{statistics.uniquePublishers}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 text-yellow-600 text-sm mb-1">
+              <Star className="w-4 h-4" />
+              Avg Rating
+            </div>
+            <div className="text-2xl font-bold text-yellow-600">{statistics.avgRating}</div>
+          </div>
+        </div>
+
+        {/* Catalogue Quick Filter */}
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <Layers className="w-4 h-4" />
+            Browse by Catalogue
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCatalogue('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                selectedCatalogue === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Categories
+            </button>
+            {catalogues.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCatalogue(cat)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  selectedCatalogue === cat
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Publishers Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-blue-600" />
+              Top Publishers
+            </h3>
+            <div className="space-y-3">
+              {publisherStats.map((stat, idx) => (
+                <div key={stat.publisher} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-sm">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">{stat.publisher}</div>
+                      <div className="text-sm text-gray-600">{stat.count} titles, {stat.totalCopies} copies</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-gray-900">{stat.borrowed} borrowed</div>
+                    <div className="text-xs text-gray-600">
+                      {((stat.borrowed / stat.totalCopies) * 100).toFixed(1)}% usage
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-green-600" />
+              Catalogue Distribution
+            </h3>
+            <div className="space-y-3">
+              {catalogueStats.slice(0, 6).map((stat) => (
+                <div key={stat.catalogue} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-gray-900">{stat.catalogue}</span>
+                    <span className="text-gray-600">{stat.count} copies</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full"
+                      style={{ width: `${(stat.count / statistics.totalPhysicalCopies) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Controls */}
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by title, author, ISBN, subject, or publisher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
+                  showFilters ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+              </button>
+              <div className="flex bg-gray-200 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-white shadow' : ''}`}
+                >
+                  <ListIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow' : ''}`}
+                >
+                  <Grid className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Book Type</label>
+                  <select
+                    value={filters.bookType}
+                    onChange={(e) => setFilters({...filters, bookType: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="textbook">Textbook</option>
+                    <option value="reference">Reference</option>
+                    <option value="lecture_notes">Lecture Notes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Catalogue</label>
+                  <select
+                    value={filters.catalogue}
+                    onChange={(e) => setFilters({...filters, catalogue: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Catalogues</option>
+                    {catalogues.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
+                  <select
+                    value={filters.publisher}
+                    onChange={(e) => setFilters({...filters, publisher: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Publishers</option>
+                    {publishers.map(pub => (
+                      <option key={pub.id} value={pub.name}>{pub.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => setFilters({...filters, status: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="available">Available</option>
+                    <option value="low_stock">Low Stock (≤5)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Year From</label>
+                  <input
+                    type="number"
+                    placeholder="2010"
+                    value={filters.yearFrom}
+                    onChange={(e) => setFilters({...filters, yearFrom: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Year To</label>
+                  <input
+                    type="number"
+                    placeholder="2024"
+                    value={filters.yearTo}
+                    onChange={(e) => setFilters({...filters, yearTo: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                  <select
+                    value={filters.language}
+                    onChange={(e) => setFilters({...filters, language: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Languages</option>
+                    <option value="English">English</option>
+                    <option value="Indonesian">Indonesian</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={() => setFilters({
+                    bookType: 'all',
+                    catalogue: 'all',
+                    publisher: 'all',
+                    status: 'all',
+                    yearFrom: '',
+                    yearTo: '',
+                    language: 'all'
+                  })}
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="mb-4 text-sm text-gray-600">
+        Showing {filteredBooks.length} of {books.length} books
+      </div>
+
+      {/* List View */}
+      {viewMode === 'list' && (
+        <div className="space-y-4">
+          {filteredBooks.map((book) => (
+            <div key={book.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-24 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-12 h-12 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{book.title}</h3>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
+                        <span className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          {book.authors.join(', ')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Building2 className="w-4 h-4" />
+                          {book.publisher}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {book.publicationYear} • {book.edition}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Hash className="w-4 h-4" />
+                          ISBN: {book.isbn}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                          {getBookTypeLabel(book.bookType)}
+                        </span>
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                          {book.catalogue}
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
+                          {book.shelfLocation}
+                        </span>
+                        {book.subjects.slice(0, 3).map((subject, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs border border-green-200">
+                            {subject}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-6 text-sm">
+                        <span className={`flex items-center gap-1 px-3 py-1 rounded-full font-medium ${getAvailabilityColor(book.availableCopies, book.totalCopies)}`}>
+                          <CheckCircle className="w-4 h-4" />
+                          {book.availableCopies}/{book.totalCopies} Available
+                        </span>
+                        <span className="text-gray-600">
+                          {book.borrowedCopies} Borrowed
+                        </span>
+                        <span className="flex items-center gap-1 text-yellow-600">
+                          <Star className="w-4 h-4 fill-current" />
+                          {book.rating} ({book.totalRatings})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => handleViewDetail(book)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title="View Details"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                        title="Edit"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Grid View */}
+      {viewMode === 'grid' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredBooks.map((book) => (
+            <div key={book.id} className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md transition">
+              <div className="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                <BookOpen className="w-20 h-20 text-white" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">{book.title}</h3>
+              <p className="text-sm text-gray-600 mb-2 line-clamp-1">{book.authors[0]}</p>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                  {getBookTypeLabel(book.bookType)}
+                </span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                  {book.catalogue}
+                </span>
+              </div>
+              <div className="mb-3">
+                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                  <span>Availability</span>
+                  <span>{book.availableCopies}/{book.totalCopies}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${
+                      (book.availableCopies / book.totalCopies) > 0.5 ? 'bg-green-600' :
+                      (book.availableCopies / book.totalCopies) > 0.2 ? 'bg-yellow-600' : 'bg-red-600'
+                    }`}
+                    style={{ width: `${(book.availableCopies / book.totalCopies) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="flex items-center gap-4 text-xs text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                    {book.rating}
+                  </span>
+                  <span>{book.publisher}</span>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleViewDetail(book)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    className="p-2 text-green-600 hover:bg-green-50 rounded transition"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {filteredBooks.length === 0 && (
+        <div className="bg-white p-12 rounded-lg shadow-sm text-center">
+          <Library className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No books found</h3>
+          <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setSelectedCatalogue('all');
+              setFilters({
+                bookType: 'all',
+                catalogue: 'all',
+                publisher: 'all',
+                status: 'all',
+                yearFrom: '',
+                yearTo: '',
+                language: 'all'
+              });
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Clear All Filters
+          </button>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedBook && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Book Details</h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-3 gap-6 mb-6">
+                <div className="col-span-1">
+                  <div className="w-full h-80 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <BookOpen className="w-32 h-32 text-white" />
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <div className="flex items-start gap-2 mb-4">
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      {getBookTypeLabel(selectedBook.bookType)}
+                    </span>
+                    <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                      {selectedBook.catalogue}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedBook.title}</h3>
+                  {selectedBook.subtitle && (
+                    <p className="text-lg text-gray-600 mb-4">{selectedBook.subtitle}</p>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Author(s)</div>
+                      <div className="font-medium">{selectedBook.authors.join(', ')}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Publisher</div>
+                      <div className="font-medium">{selectedBook.publisher}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">ISBN</div>
+                      <div className="font-medium font-mono">{selectedBook.isbn}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Edition</div>
+                      <div className="font-medium">{selectedBook.edition}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Publication Year</div>
+                      <div className="font-medium">{selectedBook.publicationYear}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Pages</div>
+                      <div className="font-medium">{selectedBook.pages}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Language</div>
+                      <div className="font-medium">{selectedBook.language}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Shelf Location</div>
+                      <div className="font-medium">{selectedBook.shelfLocation}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <div className="text-sm text-green-700 mb-1">Available</div>
+                      <div className="text-2xl font-bold text-green-600">{selectedBook.availableCopies}</div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                      <div className="text-sm text-orange-700 mb-1">Borrowed</div>
+                      <div className="text-2xl font-bold text-orange-600">{selectedBook.borrowedCopies}</div>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="text-sm text-blue-700 mb-1">Total Copies</div>
+                      <div className="text-2xl font-bold text-blue-600">{selectedBook.totalCopies}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                      <span className="font-semibold text-gray-900">{selectedBook.rating}</span> ({selectedBook.totalRatings} ratings)
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="w-5 h-5 text-purple-600" />
+                      Popularity: {selectedBook.popularityScore}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                <p className="text-gray-700">{selectedBook.description}</p>
+              </div>
+
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">Subjects</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedBook.subjects.map((subject, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Added to Library</div>
+                  <div className="font-medium">{formatDate(selectedBook.addedDate)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Last Updated</div>
+                  <div className="font-medium">{formatDate(selectedBook.lastUpdated)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Price</div>
+                  <div className="font-medium">{selectedBook.currency} {selectedBook.price.toFixed(2)}</div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+                >
+                  <Edit className="w-5 h-5" />
+                  Edit Details
+                </button>
+                <button
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                >
+                  <Copy className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>
@@ -12377,10 +13634,10 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     <div className="h-full w-full bg-gray-50 overflow-auto">
       <div className="p-1 max-w mx-auto">
         {/* Header Section */}
-      <div className="flex items-center justify-between mt-2">
+      <div className="flex items-center justify-between">
   <div>
-    <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-      <Building className="w-8 h-8 text-blue-600" />
+    <h1 className="text-3xl font-bold text-gray-900 mb-1 flex items-center">
+      
       HSB Class Schedule
     </h1>
     {selectedDate && (
@@ -12444,15 +13701,15 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
             <span className="text-sm font-medium text-gray-700">Legend:</span>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 bg-blue-100 border border-blue-300 rounded"></div>
-              <span className="text-sm">Morning (S)</span>
+              <span className="text-sm">Morning</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 bg-orange-100 border border-orange-300 rounded"></div>
-              <span className="text-sm">Afternoon (C)</span>
+              <span className="text-sm">Afternoon</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 bg-purple-100 border border-purple-300 rounded"></div>
-              <span className="text-sm">Evening (T)</span>
+              <span className="text-sm">Evening</span>
             </div>
           </div>
         </div>
@@ -12519,7 +13776,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
         )}
 
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t border-gray-300 text-center text-sm text-gray-500">
+        <div className="mt-1 text-center text-sm text-gray-500">
           © 2025 Hanoi School of Business and Management (HSB). All rights reserved. Designed by Tuan.HA
         </div>
       </div>
@@ -13459,6 +14716,937 @@ const OneStopService = () => {
 };
 
 
+
+
+// Import types and data from documentData.ts
+
+const DocumentManagement: React.FC = () => {
+  const [documents, setDocuments] = useState<Document[]>(sampleDocuments);
+  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'pending'>('overview');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSource, setSelectedSource] = useState<DocumentSource | "ALL">("ALL");
+  const [selectedType, setSelectedType] = useState<DocumentType | "ALL">("ALL");
+  const [selectedStatus, setSelectedStatus] = useState<DocumentStatus | "ALL">("ALL");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
+
+  // Statistics
+  const stats = useMemo(() => {
+    const docStats = getDocumentStatistics();
+    return {
+      total: docStats.total,
+      pendingSignature: docStats.byStatus.pendingSignature,
+      pendingReview: docStats.byStatus.pendingReview,
+      urgent: docStats.byPriority.urgent,
+      issued: docStats.byStatus.issued,
+    };
+  }, []);
+
+  // Document type labels
+  const documentTypeLabels: Record<DocumentType, string> = {
+    CIRCULAR: "Thông tư",
+    DIRECTIVE: "Chỉ thị",
+    DECISION: "Quyết định",
+    DISPATCH: "Công văn",
+    GUIDELINE: "Hướng dẫn",
+    REGULATION: "Quy định",
+    REPORT: "Báo cáo",
+    REQUEST: "Đề nghị",
+    NOTIFICATION: "Thông báo",
+    RESOLUTION: "Nghị quyết",
+    INSTRUCTION: "Chỉ đạo"
+  };
+
+  // Document source labels
+  const documentSourceLabels: Record<DocumentSource, string> = {
+    VNU_HANOI: "ĐHQG Hà Nội",
+    MOE: "Bộ Giáo dục",
+    MPS: "Bộ Công an",
+    MOH: "Bộ Y tế",
+    MOET: "Bộ GD&ĐT",
+    MOST: "Bộ KH&CN",
+    MOF: "Bộ Tài chính",
+    MOLISA: "Bộ LĐ-TB&XH",
+    INTERNAL: "Nội bộ",
+    OTHER: "Khác"
+  };
+
+  // Document status labels
+  const documentStatusLabels: Record<DocumentStatus, string> = {
+    DRAFT: "Dự thảo",
+    PENDING_REVIEW: "Chờ xem xét",
+    PENDING_SIGNATURE: "Chờ ký",
+    SIGNED: "Đã ký",
+    ISSUED: "Đã ban hành",
+    ARCHIVED: "Đã lưu trữ",
+    REJECTED: "Từ chối",
+    EXPIRED: "Hết hiệu lực"
+  };
+
+  // Priority labels
+  const priorityLabels: Record<PriorityLevel, string> = {
+    LOW: "Thấp",
+    MEDIUM: "Trung bình",
+    HIGH: "Cao",
+    URGENT: "Khẩn cấp"
+  };
+
+  // Get status color
+  const getStatusColor = (status: DocumentStatus): string => {
+    const colors: Record<DocumentStatus, string> = {
+      DRAFT: "bg-gray-100 text-gray-700 border-gray-200",
+      PENDING_REVIEW: "bg-amber-100 text-amber-700 border-amber-200",
+      PENDING_SIGNATURE: "bg-blue-100 text-blue-700 border-blue-200",
+      SIGNED: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      ISSUED: "bg-purple-100 text-purple-700 border-purple-200",
+      ARCHIVED: "bg-gray-100 text-gray-600 border-gray-200",
+      REJECTED: "bg-red-100 text-red-700 border-red-200",
+      EXPIRED: "bg-gray-100 text-gray-500 border-gray-200"
+    };
+    return colors[status];
+  };
+
+  // Get priority color
+  const getPriorityColor = (priority: PriorityLevel): string => {
+    const colors: Record<PriorityLevel, string> = {
+      LOW: "bg-green-100 text-green-700 border-green-200",
+      MEDIUM: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      HIGH: "bg-orange-100 text-orange-700 border-orange-200",
+      URGENT: "bg-red-100 text-red-700 border-red-200"
+    };
+    return colors[priority];
+  };
+
+  // Format date
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  // Filter documents
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const matchesSearch = 
+        doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.documentNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.sourceOrganization.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesSource = selectedSource === "ALL" || doc.source === selectedSource;
+      const matchesType = selectedType === "ALL" || doc.type === selectedType;
+      const matchesStatus = selectedStatus === "ALL" || doc.status === selectedStatus;
+
+      return matchesSearch && matchesSource && matchesType && matchesStatus;
+    });
+  }, [documents, searchTerm, selectedSource, selectedType, selectedStatus]);
+
+  // Handle document click
+  const handleDocumentClick = (doc: Document) => {
+    setSelectedDocument(doc);
+    setShowDocumentModal(true);
+  };
+
+  // Render Overview Tab
+  const renderOverview = () => (
+    <div className="space-y-3">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <FileText className="text-blue-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Tổng số văn bản</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.total}</p>
+          <p className="text-sm text-gray-500">Tất cả văn bản trong hệ thống</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-amber-100 rounded-xl">
+              <Clock className="text-amber-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Chờ ký duyệt</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.pendingSignature}</p>
+          <p className="text-sm text-amber-600 font-medium">Cần xử lý ngay</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-purple-100 rounded-xl">
+              <Eye className="text-purple-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Chờ xem xét</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.pendingReview}</p>
+          <p className="text-sm text-gray-500">Đang được xem xét</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-red-100 rounded-xl">
+              <AlertTriangle className="text-red-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Khẩn cấp</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.urgent}</p>
+          <p className="text-sm text-red-600 font-medium">Ưu tiên cao nhất</p>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố trạng thái văn bản</h3>
+          <div className="space-y-3">
+            {Object.entries(documentStatusLabels).map(([status, label]) => {
+              const count = documents.filter(d => d.status === status).length;
+              const percentage = (count / documents.length) * 100;
+              return (
+                <div key={status} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{label}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${
+                          status === 'ISSUED' ? 'bg-purple-500' :
+                          status === 'PENDING_SIGNATURE' ? 'bg-blue-500' :
+                          status === 'PENDING_REVIEW' ? 'bg-amber-500' :
+                          status === 'SIGNED' ? 'bg-emerald-500' :
+                          status === 'REJECTED' ? 'bg-red-500' : 'bg-gray-400'
+                        }`}
+                        style={{width: `${percentage}%`}}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 w-8">{count}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Nguồn văn bản hàng đầu</h3>
+          <div className="space-y-4">
+            {Object.entries(
+              documents.reduce((acc, doc) => {
+                acc[doc.source] = (acc[doc.source] || 0) + 1;
+                return acc;
+              }, {} as Record<DocumentSource, number>)
+            )
+              .sort(([, a], [, b]) => b - a)
+              .slice(0, 5)
+              .map(([source, count], idx) => (
+                <div key={source} className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center font-bold text-indigo-600">
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {documentSourceLabels[source as DocumentSource]}
+                    </p>
+                    <p className="text-xs text-gray-500">Nguồn văn bản</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-gray-900">{count}</p>
+                    <p className="text-xs text-gray-500">văn bản</p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Documents */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Văn bản gần đây</h3>
+        <div className="space-y-2">
+          {documents.slice(0, 5).map(doc => (
+            <div 
+              key={doc.id} 
+              className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+              onClick={() => handleDocumentClick(doc)}
+            >
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                  <FileText size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{doc.title}</p>
+                  <p className="text-xs text-gray-500">{doc.documentNumber} • {documentSourceLabels[doc.source]}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500">{formatDate(doc.issuedDate)}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                  {documentStatusLabels[doc.status]}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Render Documents Tab
+  const renderDocuments = () => (
+    <div className="space-y-4">
+      {/* Search and Actions */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="relative flex-1 min-w-[300px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo số văn bản, tiêu đề, nội dung..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+              showFilters
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Filter size={18} />
+            Bộ lọc
+          </button>
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-all ${
+                viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+              }`}
+            >
+              <ListIcon size={18} />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-all ${
+                viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+              }`}
+            >
+              <Grid size={18} />
+            </button>
+          </div>
+          <button
+            onClick={() => setShowNewDocumentModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            <Plus size={18} />
+            Thêm văn bản
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      {showFilters && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Nguồn văn bản</label>
+              <select
+                value={selectedSource}
+                onChange={(e) => setSelectedSource(e.target.value as DocumentSource | "ALL")}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="ALL">Tất cả</option>
+                {Object.entries(documentSourceLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Loại văn bản</label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value as DocumentType | "ALL")}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="ALL">Tất cả</option>
+                {Object.entries(documentTypeLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Trạng thái</label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as DocumentStatus | "ALL")}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="ALL">Tất cả</option>
+                {Object.entries(documentStatusLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Documents List/Grid */}
+      {viewMode === 'list' ? (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Số văn bản</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tiêu đề</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Loại</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ngày BH</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ưu tiên</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Hành động</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredDocuments.map(doc => (
+                  <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-semibold text-indigo-600">{doc.documentNumber}</p>
+                    </td>
+                    <td className="px-6 py-4 max-w-md">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{doc.title}</p>
+                      <p className="text-xs text-gray-500 truncate">{doc.sourceOrganization}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                        {documentTypeLabels[doc.type]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-700">{formatDate(doc.issuedDate)}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(doc.priority)}`}>
+                        {priorityLabels[doc.priority]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                        {documentStatusLabels[doc.status]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDocumentClick(doc)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
+                      >
+                        <Eye size={14} />
+                        Xem
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {filteredDocuments.length === 0 && (
+            <div className="text-center py-12">
+              <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500">Không tìm thấy văn bản nào</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredDocuments.map(doc => (
+            <div
+              key={doc.id}
+              onClick={() => handleDocumentClick(doc)}
+              className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                  {documentTypeLabels[doc.type]}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(doc.priority)}`}>
+                  {priorityLabels[doc.priority]}
+                </span>
+              </div>
+
+              <p className="text-sm font-semibold text-indigo-600 mb-2">{doc.documentNumber}</p>
+              <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">{doc.title}</h3>
+
+              <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                <Building2 size={14} />
+                <span className="truncate">{doc.sourceOrganization}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                <Calendar size={14} />
+                <span>Ngày BH: {formatDate(doc.issuedDate)}</span>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                  {documentStatusLabels[doc.status]}
+                </span>
+                {doc.attachments && doc.attachments.length > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Paperclip size={14} />
+                    {doc.attachments.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {filteredDocuments.length === 0 && (
+            <div className="col-span-full text-center py-12 bg-white rounded-xl border border-gray-200">
+              <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500">Không tìm thấy văn bản nào</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  // Render Pending Tab
+  const renderPending = () => {
+    const pendingDocs = documents.filter(
+      d => d.status === 'PENDING_SIGNATURE' || d.status === 'PENDING_REVIEW'
+    );
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-amber-600 mt-0.5" size={20} />
+            <div>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">
+                Có {pendingDocs.length} văn bản cần xử lý
+              </h3>
+              <p className="text-sm text-amber-700">
+                Các văn bản đang chờ xem xét hoặc ký duyệt cần được xử lý sớm
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {pendingDocs.map(doc => (
+            <div key={doc.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-bold text-gray-900">{doc.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                      {documentStatusLabels[doc.status]}
+                    </span>
+                  </div>
+                  <p className="text-sm text-indigo-600 font-semibold mb-1">{doc.documentNumber}</p>
+                  <p className="text-sm text-gray-600">{documentSourceLabels[doc.source]} • {documentTypeLabels[doc.type]}</p>
+                </div>
+                <button
+                  onClick={() => handleDocumentClick(doc)}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                >
+                  <Eye size={16} />
+                  Xem chi tiết
+                </button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Cơ quan</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">{doc.sourceOrganization}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Ngày ban hành</p>
+                  <p className="text-sm font-semibold text-gray-900">{formatDate(doc.issuedDate)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Ưu tiên</p>
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(doc.priority)}`}>
+                    {priorityLabels[doc.priority]}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Người tạo</p>
+                  <p className="text-sm font-semibold text-gray-900">{doc.createdBy}</p>
+                </div>
+              </div>
+
+              {doc.signatories && doc.signatories.length > 0 && (
+                <div className="pt-4 border-t border-gray-200">
+                  <p className="text-xs font-semibold text-gray-500 mb-2">NGƯỜI KÝ DUYỆT</p>
+                  <div className="flex flex-wrap gap-2">
+                    {doc.signatories.map(sig => (
+                      <div key={sig.id} className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                        <User size={14} className="text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900">{sig.name}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          sig.status === 'SIGNED' ? 'bg-emerald-100 text-emerald-700' :
+                          sig.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {sig.status === 'SIGNED' ? 'Đã ký' : sig.status === 'PENDING' ? 'Chờ ký' : 'Từ chối'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {pendingDocs.length === 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+            <CheckCircle size={48} className="mx-auto text-emerald-500 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Tất cả đã được xử lý</h3>
+            <p className="text-gray-500">Không có văn bản nào đang chờ xử lý</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Document Detail Modal
+  const DocumentDetailModal = () => {
+    if (!selectedDocument) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+          {/* Modal Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-xs font-semibold rounded-full border border-white/30">
+                    {documentTypeLabels[selectedDocument.type]}
+                  </span>
+                  <span className={`px-3 py-1 bg-white text-xs font-semibold rounded-full ${
+                    selectedDocument.priority === 'URGENT' ? 'text-red-700' :
+                    selectedDocument.priority === 'HIGH' ? 'text-orange-700' :
+                    selectedDocument.priority === 'MEDIUM' ? 'text-yellow-700' :
+                    'text-green-700'
+                  }`}>
+                    {priorityLabels[selectedDocument.priority]}
+                  </span>
+                  <span className="px-3 py-1 bg-white text-indigo-700 text-xs font-semibold rounded-full">
+                    {documentStatusLabels[selectedDocument.status]}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">{selectedDocument.title}</h2>
+                <p className="text-indigo-100">{selectedDocument.documentNumber}</p>
+              </div>
+              <button 
+                onClick={() => setShowDocumentModal(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Body */}
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-280px)]">
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Cơ quan ban hành</p>
+                <p className="text-base font-bold text-gray-900">{selectedDocument.sourceOrganization}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Nguồn</p>
+                <p className="text-base font-bold text-gray-900">{documentSourceLabels[selectedDocument.source]}</p>
+              </div>
+              {selectedDocument.category && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Lĩnh vực</p>
+                  <p className="text-base font-bold text-gray-900">{selectedDocument.category}</p>
+                </div>
+              )}
+              {selectedDocument.confidentialityLevel && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Độ mật</p>
+                  <p className="text-base font-bold text-gray-900">
+                    {selectedDocument.confidentialityLevel === 'PUBLIC' ? 'Công khai' :
+                     selectedDocument.confidentialityLevel === 'INTERNAL' ? 'Nội bộ' :
+                     selectedDocument.confidentialityLevel === 'CONFIDENTIAL' ? 'Mật' : 'Tối mật'}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Ngày ban hành</p>
+                <p className="text-base font-bold text-gray-900">{formatDate(selectedDocument.issuedDate)}</p>
+              </div>
+              {selectedDocument.receivedDate && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Ngày nhận</p>
+                  <p className="text-base font-bold text-gray-900">{formatDate(selectedDocument.receivedDate)}</p>
+                </div>
+              )}
+              {selectedDocument.effectiveDate && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Ngày hiệu lực</p>
+                  <p className="text-base font-bold text-gray-900">{formatDate(selectedDocument.effectiveDate)}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Người tạo</p>
+                <p className="text-base font-bold text-gray-900">{selectedDocument.createdBy}</p>
+              </div>
+            </div>
+
+            {/* Recipient Departments */}
+            {selectedDocument.recipientDepartments && selectedDocument.recipientDepartments.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Phòng ban nhận văn bản</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedDocument.recipientDepartments.map((dept, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
+                      {dept}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Tóm tắt nội dung</h3>
+              <p className="text-sm text-gray-700 leading-relaxed p-4 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedDocument.summary}
+              </p>
+            </div>
+
+            {/* Full Content */}
+            {selectedDocument.content && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Nội dung chi tiết</h3>
+                <div className="text-sm text-gray-700 leading-relaxed p-4 bg-gray-50 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                  {selectedDocument.content}
+                </div>
+              </div>
+            )}
+
+            {/* Signatories */}
+            {selectedDocument.signatories.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Người ký duyệt</h3>
+                <div className="space-y-3">
+                  {selectedDocument.signatories.map(sig => (
+                    <div key={sig.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900">{sig.name}</p>
+                        <p className="text-xs text-gray-600 mt-1">{sig.position} {sig.department && `• ${sig.department}`}</p>
+                        {(sig.email || sig.phone) && (
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            {sig.email && (
+                              <div className="flex items-center gap-1">
+                                <Mail size={12} />
+                                {sig.email}
+                              </div>
+                            )}
+                            {sig.phone && (
+                              <div className="flex items-center gap-1">
+                                <Phone size={12} />
+                                {sig.phone}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {sig.signedAt && (
+                          <p className="text-xs text-gray-500 mt-2">Đã ký: {formatDate(sig.signedAt)}</p>
+                        )}
+                        {sig.comments && (
+                          <p className="text-xs text-gray-700 mt-2 italic bg-white p-2 rounded">💬 {sig.comments}</p>
+                        )}
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                        sig.status === 'SIGNED' ? 'bg-emerald-100 text-emerald-700' :
+                        sig.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {sig.status === 'SIGNED' ? 'Đã ký' : sig.status === 'PENDING' ? 'Chờ ký' : 'Từ chối'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Attachments */}
+            {selectedDocument.attachments && selectedDocument.attachments.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  File đính kèm ({selectedDocument.attachments.length})
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedDocument.attachments.map((attachment, idx) => {
+                    const fileName = typeof attachment === 'string' ? attachment : attachment.fileName;
+                    const fileSize = typeof attachment === 'string' ? null : attachment.fileSize;
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <Paperclip className="text-indigo-600 flex-shrink-0" size={18} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{fileName}</p>
+                            {fileSize && (
+                              <p className="text-xs text-gray-500">{(fileSize / 1024 / 1024).toFixed(2)} MB</p>
+                            )}
+                          </div>
+                        </div>
+                        <button className="ml-2 text-indigo-600 hover:text-indigo-700 flex-shrink-0">
+                          <Download size={16} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {selectedDocument.tags.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedDocument.tags.map((tag, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            {selectedDocument.notes && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="text-amber-600 mt-0.5 flex-shrink-0" size={18} />
+                  <div>
+                    <h3 className="text-sm font-semibold text-amber-900 mb-1">Ghi chú</h3>
+                    <p className="text-sm text-amber-700">{selectedDocument.notes}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
+            <div className="flex gap-3 justify-end">
+              <button 
+                onClick={() => setShowDocumentModal(false)}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Đóng
+              </button>
+              {selectedDocument.status === 'PENDING_SIGNATURE' && (
+                <>
+                  <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                    <Edit size={18} />
+                    Chỉnh sửa
+                  </button>
+                  <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                    <Send size={18} />
+                    Gửi duyệt
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 rounded-xl border sticky top-0 z-10 mb-3">
+        <div className="max-w mx-auto p-3">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Quản lý Văn bản</h1>
+              <p className="text-gray-600 mt-1">Hệ thống quản lý công văn, thông tư từ ĐHQG Hà Nội và các Bộ</p>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex gap-4">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'overview'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <BarChart3 size={20} />
+                Tổng quan
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('documents')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'documents'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <FileText size={20} />
+                Văn bản
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'pending'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Clock size={20} />
+                Chờ xử lý
+                {(stats.pendingSignature + stats.pendingReview) > 0 && (
+                  <span className="px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded-full">
+                    {stats.pendingSignature + stats.pendingReview}
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w mx-auto">
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'documents' && renderDocuments()}
+        {activeTab === 'pending' && renderPending()}
+      </div>
+
+      {/* Document Detail Modal */}
+      {showDocumentModal && <DocumentDetailModal />}
+    </div>
+  );
+};
 
 
 const HSBShop = () => {
@@ -15508,6 +17696,9 @@ const ProjectsTab: React.FC = () => {
                   <span className={`project-type-small type-${project.type}`}>
                     {project.type === 'student' ? 'S' : project.type === 'staff' ? 'F' : 'M'}
                   </span>
+                  <span className={`status-badge-small status-${project.status}`}>
+                    {project.status}
+                  </span>
                 </div>
                 <div className="project-list-item-meta">
                   <span className="project-list-item-department">{project.department}</span>
@@ -15518,21 +17709,7 @@ const ProjectsTab: React.FC = () => {
                   </div>
                   <span className="progress-text-small">{project.progress}%</span>
                 </div>
-                <div className="project-list-item-footer">
-                  <div className="project-members-small">
-                    {project.members.slice(0, 3).map(member => (
-                      <div key={member.id} className={`member-avatar-tiny avatar-${member.color}`}>
-                        {member.initials}
-                      </div>
-                    ))}
-                    {project.members.length > 3 && (
-                      <span className="member-count-tiny">+{project.members.length - 3}</span>
-                    )}
-                  </div>
-                  <span className={`status-badge-small status-${project.status}`}>
-                    {project.status}
-                  </span>
-                </div>
+                
               </div>
             ))}
           </div>
@@ -16756,6 +18933,12 @@ const AccountManagement: React.FC = () => {
     if (activeTab === 'library-dashboard') {
       return <LibraryDashboard />;
     }
+    if (activeTab === 'thesis-store') {
+      return <ThesisStorage />;
+    }
+    if (activeTab === 'book-management') {
+      return <BookManagement />;
+    }
     if (activeTab === 'thesis-dissertation') {
       return <ThesisManagement />;
     }
@@ -16764,6 +18947,9 @@ const AccountManagement: React.FC = () => {
     }
    if (activeTab == 'one-stop-service'){
       return <OneStopService/>;
+    }
+    if (activeTab == 'docu-manage'){
+      return <DocumentManagement/>;
     }
     if (activeTab == 'projects'){
       return <ProjectsTab/>;
