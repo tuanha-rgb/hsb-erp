@@ -9,6 +9,20 @@ import {   bookRecords,   publishers,   catalogues,  type BookRecord,  type Publ
 import {  type Document,  type DocumentSource,  type DocumentType,  type DocumentStatus,  type PriorityLevel,
   type Signatory,  type Attachment,  sampleDocuments,  getDocumentStatistics} from './documentdata';
 
+// ✅ Types (match your file name exactly)
+import {
+  Faculty, ProgramCatalog, BachelorProgramStat, FacultyMetric,
+  CourseItem, StudentGradeRow, FacultyCode,
+} from "./academicmodel";
+
+// ✅ Data (match your file names from the screenshot)
+import { faculties } from "./faculties";
+import { programs } from "./programs";
+import { bachelorProgramStats } from "./programstats";
+import { facultyMetrics } from "./facultymetrics";
+import { courseData } from "./courses";
+import { studentGrades } from "./studentgrades";
+
 import {  Thesis,  ThesisStatus,  ThesisCategory,  ThesisLevel,  sampleTheses,} from "./thesis";
 
 import { sampleStudents, studentdata } from "./studentdata";
@@ -3082,7 +3096,7 @@ const StudentProfileAdmin = () => {
 // Types
 
 
-const ThesisManagement: React.FC = () => {
+const ThesisManagement = () => {
   const [theses, setTheses] = useState<Thesis[]>(sampleTheses);
   const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
@@ -5516,100 +5530,20 @@ const LecturersOverview = () => {
     );
   };
 
+
+
+
+type ViewKey = "overview" | "courses" | "grading";
+
 const GradeManagement = () => {
-  const [activeView, setActiveView] = useState('overview');
-  const [selectedFaculty, setSelectedFaculty] = useState('all');
-  const [selectedProgram, setSelectedProgram] = useState('all');
-  const [selectedSemester, setSelectedSemester] = useState('fall-2024');
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [activeView, setActiveView] = useState<ViewKey>("overview");
+  const [selectedFaculty, setSelectedFaculty] = useState<"all" | FacultyCode>("all");
+  const [selectedProgram, setSelectedProgram] = useState<string>("all");
+  const [selectedSemester, setSelectedSemester] = useState<string>("fall-2024");
+  const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
   const [editMode, setEditMode] = useState(false);
 
-  const faculties = [
-    { code: 'FOM', name: 'Faculty of Management' },
-    { code: 'FOMAC', name: 'Faculty of Marketing and Communication' },
-    { code: 'FONS', name: 'Faculty of Nontraditional Security' }
-  ];
-
-  const programs = {
-    bachelor: [
-      { code: 'MET', name: 'Management Economics and Technology', faculty: 'FOM' },
-      { code: 'MAC', name: 'Marketing and Communication', faculty: 'FOMAC' },
-      { code: 'HAT', name: 'Hospitality and Tourism', faculty: 'FOM' },
-      { code: 'MAS', name: 'Management and Sustainability', faculty: 'FOM' },
-      { code: 'BNS', name: 'Business and Nontraditional Security', faculty: 'FONS' },
-      { code: 'HAS', name: 'Health Administration and Security', faculty: 'FONS' }
-    ],
-    master: [
-      { code: 'HSB-MBA', name: 'Master of Business Administration', faculty: 'FOM' },
-      { code: 'MOTE', name: 'Master of Technology and Entrepreneurship', faculty: 'FONS' },
-      { code: 'MNS', name: 'Master of Nontraditional Security', faculty: 'FONS' }
-    ],
-    phd: [
-      { code: 'DMS', name: 'Doctor of Management Science', faculty: 'FOM' }
-    ]
-  };
-
-  const bachelorProgramStats = [
-    { code: 'MET', students: 380, passRate: 64.2, stdDev: 0.52 },
-    { code: 'MAC', students: 320, passRate: 83.5, stdDev: 0.58 },
-    { code: 'HAT', students: 290, passRate: 82.8, stdDev: 0.61 },
-    { code: 'MAS', students: 310, passRate: 75.1, stdDev: 0.48 },
-    { code: 'BNS', students: 340, passRate: 86.3, stdDev: 0.45 },
-    { code: 'HAS', students: 210, passRate: 84.8, stdDev: 0.50 }
-  ];
-
-  const facultyMetrics = [
-    { code: 'FOM', name: 'Faculty of Management', timelyDelivery: 89.5, stdDev: 0.54, skewness: -0.32, kurtosis: 2.85 },
-    { code: 'FOMAC', name: 'Faculty of Marketing and Communication', timelyDelivery: 92.3, stdDev: 0.58, skewness: -0.28, kurtosis: 2.92 },
-    { code: 'FONS', name: 'Faculty of Nontraditional Security', timelyDelivery: 94.1, stdDev: 0.47, skewness: -0.35, kurtosis: 3.12 }
-  ];
-
-  const courseData = [
-    { id: 'HSB1001', name: 'Quản trị học / Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Nguyen Van A', students: 45, avgGrade: 3.45, passRate: 95.6 },
-    { id: 'HSB1002', name: 'Kinh tế học / Economics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Tran Thi B', students: 52, avgGrade: 3.28, passRate: 92.3 },
-    { id: 'HSB1003', name: 'Phân tích dữ liệu / Data Analysis', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Le Van C', students: 38, avgGrade: 3.52, passRate: 97.4 },
-    { id: 'HSB1004', name: 'Luật Kinh doanh và đạo đức kinh doanh / Business Law and Ethics', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Pham Thi D', students: 48, avgGrade: 3.38, passRate: 93.8 },
-    { id: 'HSB1005', name: 'Nguyên lý kế toán / Principle of Accounting', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Hoang Van E', students: 44, avgGrade: 3.15, passRate: 90.9 },
-    { id: 'HSB1006', name: 'Quản trị tài chính doanh nghiệp / Management of Corporate Finance', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Vo Thi F', students: 42, avgGrade: 3.42, passRate: 94.5 },
-    { id: 'HSB2014', name: 'Quản trị công ty / Corporate Governance', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Bui Van G', students: 36, avgGrade: 3.58, passRate: 96.2 },
-    { id: 'HSB1033', name: 'Quản trị nguồn nhân lực và nhân tài / Management of Human Resource & Talents', program: 'MAS', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Dinh Thi H', students: 50, avgGrade: 3.35, passRate: 93.5 },
-    { id: 'HSB2001E', name: 'Tư duy chiến lược và quản trị chiến lược / Strategic Thinking and Strategic Management', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Ly Van I', students: 40, avgGrade: 3.48, passRate: 95.0 },
-    { id: 'HSB2003E', name: 'Kinh doanh toàn cầu / Global Business', program: 'MET', faculty: 'FOM', level: 'Bachelor', instructor: 'Dr. Mai Van J', students: 35, avgGrade: 3.62, passRate: 97.1 },
-    { id: 'HSB2004E', name: 'Quản trị thương hiệu và tài sản trí tuệ / Management of Branding and Intellectual Property', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Dang Thi K', students: 38, avgGrade: 3.55, passRate: 96.8 },
-    { id: 'HSB3119', name: 'Tổng quan về Khoa học dữ liệu / Introduction to Data Science', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Cao Van L', students: 32, avgGrade: 3.68, passRate: 98.1 },
-    { id: 'HSB2023', name: 'Toán ứng dụng / Applied Mathematics', program: 'MET', faculty: 'FONS', level: 'Bachelor', instructor: 'Dr. Phan Thi M', students: 46, avgGrade: 3.22, passRate: 91.3 },
-    { id: 'HSB2011', name: 'Nguyên lý Marketing và truyền thông / Principles of Marketing & Communication', program: 'MAC', faculty: 'FOMAC', level: 'Bachelor', instructor: 'Dr. Truong Van N', students: 55, avgGrade: 3.45, passRate: 94.5 },
-    { id: 'MNS401', name: 'Cybersecurity Management', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Ta Van Canh', students: 38, avgGrade: 3.52, passRate: 97.4 },
-    { id: 'MBA501', name: 'Corporate Strategy', program: 'HSB-MBA', faculty: 'FOM', level: 'Master', instructor: 'Dr. Le Van P', students: 28, avgGrade: 3.68, passRate: 100 },
-    { id: 'MNS601', name: 'Advanced Security Analysis', program: 'MNS', faculty: 'FONS', level: 'Master', instructor: 'Dr. Tran Thi Q', students: 22, avgGrade: 3.71, passRate: 100 }
-  ];
-
-  const studentGrades = [
-    { studentId: '25080001', name: 'Do Thi Hoa', midterm: 8.2, final: 8.7, assignments: 8.5, participation: 9.0, overall: 8.60, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080002', name: 'Nguyen Van Phuc', midterm: 7.0, final: 7.5, assignments: 7.8, participation: 7.6, overall: 7.48, letterGrade: 'C', gpa: 2.5 },
-{ studentId: '25080003', name: 'Tran Thi Lan', midterm: 9.3, final: 9.0, assignments: 9.1, participation: 9.2, overall: 9.15, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080004', name: 'Bui Van Tien', midterm: 6.8, final: 6.5, assignments: 6.9, participation: 7.0, overall: 6.80, letterGrade: 'C', gpa: 2.0 },
-{ studentId: '25080005', name: 'Le Thi Mai', midterm: 8.5, final: 8.3, assignments: 8.4, participation: 8.6, overall: 8.45, letterGrade: 'B', gpa: 3.5 },
-{ studentId: '25080006', name: 'Pham Van Kien', midterm: 7.2, final: 7.0, assignments: 7.4, participation: 7.5, overall: 7.28, letterGrade: 'C', gpa: 2.5 },
-{ studentId: '25080007', name: 'Hoang Thi Thu', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.5, overall: 9.13, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080008', name: 'Nguyen Van Minh', midterm: 8.0, final: 8.2, assignments: 8.1, participation: 8.4, overall: 8.18, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080009', name: 'Tran Thi Quynh', midterm: 7.5, final: 8.0, assignments: 7.8, participation: 8.1, overall: 7.85, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080010', name: 'Le Van Hung', midterm: 6.2, final: 6.5, assignments: 6.8, participation: 6.9, overall: 6.60, letterGrade: 'D', gpa: 2.0 },
-{ studentId: '25080011', name: 'Nguyen Thi Huong', midterm: 8.7, final: 9.0, assignments: 8.9, participation: 9.2, overall: 8.95, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080012', name: 'Tran Van Hoang', midterm: 7.3, final: 7.0, assignments: 7.2, participation: 7.5, overall: 7.25, letterGrade: 'C', gpa: 2.5 },
-{ studentId: '25080013', name: 'Pham Thi Lien', midterm: 9.2, final: 9.3, assignments: 9.0, participation: 9.4, overall: 9.23, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080014', name: 'Bui Van Nam', midterm: 6.9, final: 7.2, assignments: 7.0, participation: 6.8, overall: 6.98, letterGrade: 'C', gpa: 2.0 },
-{ studentId: '25080015', name: 'Hoang Thi Yen', midterm: 8.4, final: 8.7, assignments: 8.6, participation: 8.8, overall: 8.63, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080016', name: 'Le Van Hai', midterm: 7.8, final: 8.0, assignments: 7.9, participation: 8.2, overall: 7.98, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080017', name: 'Nguyen Thi Thao', midterm: 6.5, final: 6.8, assignments: 6.7, participation: 7.0, overall: 6.75, letterGrade: 'D', gpa: 2.0 },
-{ studentId: '25080018', name: 'Tran Van Phong', midterm: 8.1, final: 8.3, assignments: 8.0, participation: 8.4, overall: 8.20, letterGrade: 'B', gpa: 3.0 },
-{ studentId: '25080019', name: 'Pham Thi Van', midterm: 9.0, final: 8.8, assignments: 9.2, participation: 9.1, overall: 9.03, letterGrade: 'A', gpa: 4.0 },
-{ studentId: '25080020', name: 'Le Van Long', midterm: 7.0, final: 7.3, assignments: 7.2, participation: 7.1, overall: 7.15, letterGrade: 'C', gpa: 2.5 }
-
-  
-  
-  ];
-
+  // ------ Overview ------
   const OverviewDashboard = () => (
     <div className="min-h-screen bg-gray-50">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -5690,7 +5624,7 @@ const GradeManagement = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Faculty Metrics</h3>
           <div className="space-y-4">
-            {facultyMetrics.map((faculty, i) => (
+            {facultyMetrics.map((faculty: FacultyMetric, i) => (
               <div key={i} className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -5725,7 +5659,7 @@ const GradeManagement = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Bachelor Programs</h3>
           <div className="grid grid-cols-2 gap-2">
-            {bachelorProgramStats.map((prog, i) => (
+            {bachelorProgramStats.map((prog: BachelorProgramStat, i) => (
               <div key={i} className="p-2 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="text-m font-bold text-gray-900">{prog.code}</h4>
@@ -5749,122 +5683,146 @@ const GradeManagement = () => {
     </div>
   );
 
-  const CourseAnalysis = () => (
-    <div className="min-h-screen bg-gray-50 p-2">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <select 
-                value={selectedFaculty}
-                onChange={(e) => setSelectedFaculty(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All Faculties</option>
-                {faculties.map(f => (
-                  <option key={f.code} value={f.code}>{f.code} - {f.name}</option>
-                ))}
-              </select>
+  // ------ Course Analysis ------
+  const CourseAnalysis = () => {
+    // simple filtering by faculty if wanted
+    const visibleCourses =
+      selectedFaculty === "all"
+        ? courseData
+        : courseData.filter((c) => c.faculty === selectedFaculty);
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <select
+                  value={selectedFaculty}
+                  onChange={(e) => setSelectedFaculty(e.target.value as any)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Faculties</option>
+                  {faculties.map((f: Faculty) => (
+                    <option key={f.code} value={f.code}>
+                      {f.code} - {f.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Download size={18} />
+                Export
+              </button>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              <Download size={18} />
-              Export
-            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Code</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Program</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Instructor</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Students</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Avg Grade</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {visibleCourses.map((course: CourseItem) => (
+                  <tr key={course.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <span className="font-semibold text-blue-600">{course.id}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-900">{course.name}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-gray-900">{course.program}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          course.faculty === "FOM"
+                            ? "bg-blue-100 text-blue-700"
+                            : course.faculty === "FOMAC"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {course.faculty}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          course.level === "Bachelor"
+                            ? "bg-blue-100 text-blue-700"
+                            : course.level === "Master"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {course.level}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{course.instructor}</td>
+                    <td className="px-6 py-4 text-sm font-semibold">{course.students}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          course.avgGrade >= 3.5 ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {course.avgGrade}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          course.passRate >= 95 ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {course.passRate}%
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => {
+                          setSelectedCourse(course);
+                          setActiveView("grading");
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Manage Grades
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Code</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Course Name</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Program</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Faculty</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Instructor</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Students</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Avg Grade</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pass Rate</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {courseData.map((course) => (
-                <tr key={course.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <span className="font-semibold text-blue-600">{course.id}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-sm text-gray-900">{course.name}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-gray-900">{course.program}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      course.faculty === 'FOM' ? 'bg-blue-100 text-blue-700' :
-                      course.faculty === 'FOMAC' ? 'bg-purple-100 text-purple-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {course.faculty}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      course.level === 'Bachelor' ? 'bg-blue-100 text-blue-700' :
-                      course.level === 'Master' ? 'bg-purple-100 text-purple-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {course.level}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{course.instructor}</td>
-                  <td className="px-6 py-4 text-sm font-semibold">{course.students}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      course.avgGrade >= 3.5 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {course.avgGrade}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      course.passRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {course.passRate}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button 
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setActiveView('grading');
-                      }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Manage Grades
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
+  // ------ Grade Insertion ------
   const GradeInsertion = () => {
     if (!selectedCourse) {
       return (
         <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
           <div className="max-w-md mx-auto">
-            <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No Course Selected</h3>
             <p className="text-gray-600 mb-6">Please select a course from the Course Analysis tab.</p>
-            <button 
-              onClick={() => setActiveView('courses')}
+            <button
+              onClick={() => setActiveView("courses")}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Go to Course Analysis
@@ -5880,17 +5838,16 @@ const GradeManagement = () => {
           <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">{selectedCourse.id} - {selectedCourse.name}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {selectedCourse.id} - {selectedCourse.name}
+                </h2>
                 <div className="flex gap-4 mt-2 text-sm text-gray-600">
                   <span>Program: {selectedCourse.program}</span>
                   <span>•</span>
                   <span>Instructor: {selectedCourse.instructor}</span>
                 </div>
               </div>
-              <button 
-                onClick={() => setSelectedCourse(null)}
-                className="p-2 hover:bg-white rounded-lg"
-              >
+              <button onClick={() => setSelectedCourse(null)} className="p-2 hover:bg-white rounded-lg">
                 <X size={20} />
               </button>
             </div>
@@ -5900,12 +5857,12 @@ const GradeManagement = () => {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Student Grades</h3>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setEditMode(!editMode)}
                   className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   {editMode ? <X size={18} /> : <Edit size={18} />}
-                  {editMode ? 'Cancel' : 'Edit Grades'}
+                  {editMode ? "Cancel" : "Edit Grades"}
                 </button>
                 {editMode && (
                   <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -5932,81 +5889,86 @@ const GradeManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {studentGrades.map((student) => (
-                    <tr key={student.studentId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-blue-600">{student.studentId}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{student.name}</td>
+                  {studentGrades.map((row: StudentGradeRow) => (
+                    <tr key={row.studentId} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-blue-600">{row.studentId}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.name}</td>
                       <td className="px-4 py-3 text-center">
                         {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.midterm}
+                          <input
+                            type="number"
+                            defaultValue={row.midterm}
                             className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
                             step="0.1"
                             min="0"
                             max="10"
                           />
                         ) : (
-                          <span className="text-sm font-semibold">{student.midterm}</span>
+                          <span className="text-sm font-semibold">{row.midterm}</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.final}
+                          <input
+                            type="number"
+                            defaultValue={row.final}
                             className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
                             step="0.1"
                             min="0"
                             max="10"
                           />
                         ) : (
-                          <span className="text-sm font-semibold">{student.final}</span>
+                          <span className="text-sm font-semibold">{row.final}</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.assignments}
+                          <input
+                            type="number"
+                            defaultValue={row.assignments}
                             className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
                             step="0.1"
                             min="0"
                             max="10"
                           />
                         ) : (
-                          <span className="text-sm font-semibold">{student.assignments}</span>
+                          <span className="text-sm font-semibold">{row.assignments}</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {editMode ? (
-                          <input 
-                            type="number" 
-                            defaultValue={student.participation}
+                          <input
+                            type="number"
+                            defaultValue={row.participation}
                             className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
                             step="0.1"
                             min="0"
                             max="10"
                           />
                         ) : (
-                          <span className="text-sm font-semibold">{student.participation}</span>
+                          <span className="text-sm font-semibold">{row.participation}</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className="text-sm font-bold text-gray-900">{student.overall}</span>
+                        <span className="text-sm font-bold text-gray-900">{row.overall}</span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          student.letterGrade === 'A' ? 'bg-green-100 text-green-700' :
-                          student.letterGrade === 'B' ? 'bg-blue-100 text-blue-700' :
-                          student.letterGrade === 'C' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {student.letterGrade}
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            row.letterGrade === "A"
+                              ? "bg-green-100 text-green-700"
+                              : row.letterGrade === "B"
+                              ? "bg-blue-100 text-blue-700"
+                              : row.letterGrade === "C"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {row.letterGrade}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className="text-sm font-bold text-gray-900">{student.gpa}</span>
+                        <span className="text-sm font-bold text-gray-900">{row.gpa}</span>
                       </td>
                     </tr>
                   ))}
@@ -6019,6 +5981,7 @@ const GradeManagement = () => {
     );
   };
 
+  // ------ Shell ------
   return (
     <div className="min-h-screen bg-gray-50 p-3">
       <div className="mx-auto w-full max-w space-y-4">
@@ -6033,25 +5996,25 @@ const GradeManagement = () => {
           <div className="border-b border-gray-200">
             <div className="flex gap-1 p-2">
               <button
-                onClick={() => { setActiveView('overview'); setSelectedCourse(null); }}
+                onClick={() => { setActiveView("overview"); setSelectedCourse(null); }}
                 className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                  activeView === 'overview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                  activeView === "overview" ? "bg-blue-50 text-blue-600" : "text-gray-600"
                 }`}
               >
                 Overview
               </button>
               <button
-                onClick={() => { setActiveView('courses'); setSelectedCourse(null); }}
+                onClick={() => { setActiveView("courses"); setSelectedCourse(null); }}
                 className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                  activeView === 'courses' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                  activeView === "courses" ? "bg-blue-50 text-blue-600" : "text-gray-600"
                 }`}
               >
                 Course Analysis
               </button>
               <button
-                onClick={() => setActiveView('grading')}
+                onClick={() => setActiveView("grading")}
                 className={`px-6 py-3 rounded-lg text-sm font-medium ${
-                  activeView === 'grading' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                  activeView === "grading" ? "bg-blue-50 text-blue-600" : "text-gray-600"
                 }`}
               >
                 Grade Insertion
@@ -6060,13 +6023,15 @@ const GradeManagement = () => {
           </div>
         </div>
 
-        {activeView === 'overview' && <OverviewDashboard />}
-        {activeView === 'courses' && <CourseAnalysis />}
-        {activeView === 'grading' && <GradeInsertion />}
+        {activeView === "overview" && <OverviewDashboard />}
+        {activeView === "courses" && <CourseAnalysis />}
+        {activeView === "grading" && <GradeInsertion />}
       </div>
     </div>
   );
 };
+
+
 
 const ResearchManagement = () => {
   const [activeView, setActiveView] = useState('overview');
@@ -6075,423 +6040,7 @@ const ResearchManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const patentData = [
-    {
-      id: 'PAT001',
-      title: 'AI-Based Medical Diagnostic System Using Deep Learning',
-      inventors: ['Dr. Nguyen Van A', 'Dr. Tran Thi B', 'Dr. Le Van C'],
-      applicationNumber: 'VN2024001234',
-      applicationDate: '2024-01-15',
-      status: 'Granted',
-      grantDate: '2024-08-20',
-      patentNumber: 'VN123456',
-      type: 'Invention Patent',
-      faculty: 'Faculty of Nontraditional Security',
-      discipline: 'Nontraditional Security',
-      abstract: 'A novel AI-based system for automated medical diagnosis using advanced deep learning algorithms for pattern recognition in medical imaging.',
-      country: 'Vietnam',
-      ipOffice: 'National Office of Intellectual Property (NOIP)'
-    },
-    {
-      id: 'PAT002',
-      title: 'Blockchain-Based Supply Chain Tracking Method',
-      inventors: ['Dr. Pham Thi D', 'Dr. Hoang Van E'],
-      applicationNumber: 'VN2024002345',
-      applicationDate: '2024-03-10',
-      status: 'Pending',
-      grantDate: null,
-      patentNumber: null,
-      type: 'Invention Patent',
-      faculty: 'Faculty of Management',
-      discipline: 'Finance',
-      abstract: 'A decentralized blockchain method for transparent and secure supply chain tracking with real-time verification capabilities.',
-      country: 'Vietnam',
-      ipOffice: 'National Office of Intellectual Property (NOIP)'
-    },
-    {
-      id: 'PAT003',
-      title: 'Quantum Encryption Algorithm for Secure Communications',
-      inventors: ['Dr. Vo Thi F', 'Dr. Bui Van G', 'Dr. Cao Thi H'],
-      applicationNumber: 'US2024098765',
-      applicationDate: '2024-02-20',
-      status: 'Granted',
-      grantDate: '2024-09-15',
-      patentNumber: 'US11,234,567',
-      type: 'Invention Patent',
-      faculty: 'Faculty of Nontraditional Security',
-      discipline: 'Engineering & IT',
-      abstract: 'A quantum-based encryption algorithm providing enhanced security for digital communications using quantum key distribution.',
-      country: 'United States',
-      ipOffice: 'United States Patent and Trademark Office (USPTO)'
-    },
-    {
-      id: 'PAT004',
-      title: 'IoT-Based Smart Agriculture Monitoring System',
-      inventors: ['Dr. Mai Van K', 'Dr. Dang Thi L'],
-      applicationNumber: 'VN2024003456',
-      applicationDate: '2024-05-08',
-      status: 'Under Examination',
-      grantDate: null,
-      patentNumber: null,
-      type: 'Utility Model',
-      faculty: 'Faculty of Nontraditional Security',
-      discipline: 'Sustainable Development',
-      abstract: 'An IoT-based system for real-time monitoring and optimization of agricultural processes using sensor networks and AI analytics.',
-      country: 'Vietnam',
-      ipOffice: 'National Office of Intellectual Property (NOIP)'
-    },
-    {
-      id: 'PAT005',
-      title: 'Digital Marketing Analytics Platform with AI',
-      inventors: ['Dr. Nguyen Thi M', 'Dr. Phan Van N'],
-      applicationNumber: 'VN2024004567',
-      applicationDate: '2024-06-15',
-      status: 'Pending',
-      grantDate: null,
-      patentNumber: null,
-      type: 'Invention Patent',
-      faculty: 'Faculty of Marketing and Communication',
-      discipline: 'Marketing',
-      abstract: 'An AI-powered platform for comprehensive digital marketing analytics with predictive consumer behavior modeling.',
-      country: 'Vietnam',
-      ipOffice: 'National Office of Intellectual Property (NOIP)'
-    },
-    {
-      id: 'PAT006',
-      title: 'Cybersecurity Threat Detection System',
-      inventors: ['Dr. Le Van Q', 'Dr. Hoang Thi R'],
-      applicationNumber: 'PCT/VN2024/00123',
-      applicationDate: '2024-04-25',
-      status: 'International Filing',
-      grantDate: null,
-      patentNumber: null,
-      type: 'Invention Patent',
-      faculty: 'Faculty of Nontraditional Security',
-      discipline: 'Law & Criminology',
-      abstract: 'An advanced system for real-time detection and prevention of cybersecurity threats using machine learning and behavioral analysis.',
-      country: 'International (PCT)',
-      ipOffice: 'World Intellectual Property Organization (WIPO)'
-    },
-    {
-      id: 'PAT007',
-      title: 'Sustainable Energy Management System for Smart Buildings',
-      inventors: ['Dr. Bui Van S', 'Dr. Cao Thi T'],
-      applicationNumber: 'VN2023005678',
-      applicationDate: '2023-11-10',
-      status: 'Granted',
-      grantDate: '2024-07-05',
-      patentNumber: 'VN123789',
-      type: 'Invention Patent',
-      faculty: 'Faculty of Nontraditional Security',
-      discipline: 'Sustainable Development',
-      abstract: 'An intelligent energy management system optimizing power consumption in smart buildings using renewable energy sources.',
-      country: 'Vietnam',
-      ipOffice: 'National Office of Intellectual Property (NOIP)'
-    },
-    {
-      id: 'PAT008',
-      title: 'Human Resource Performance Prediction Model',
-      inventors: ['Dr. Dinh Van I', 'Dr. Ly Van J'],
-      applicationNumber: 'VN2024006789',
-      applicationDate: '2024-07-20',
-      status: 'Pending',
-      grantDate: null,
-      patentNumber: null,
-      type: 'Invention Patent',
-      faculty: 'Faculty of Management',
-      discipline: 'Human Resources',
-      abstract: 'A predictive model for employee performance assessment using AI and big data analytics for HR optimization.',
-      country: 'Vietnam',
-      ipOffice: 'National Office of Intellectual Property (NOIP)'
-    }
-  ];
 
-  const researchProjects = [
-    {
-      id: 'PRJ001',
-      title: 'AI-Driven Healthcare Diagnostics',
-      pi: 'Dr. Nguyen Van A',
-      coInvestigators: ['Dr. Tran Thi B', 'Dr. Le Van C'],
-      type: 'Applied Research',
-      status: 'Active',
-      startDate: '2024-01-15',
-      endDate: '2026-01-14',
-      funding: '$250,000',
-      fundingSource: 'Nafosted',
-      progress: 45,
-      publications: 3,
-      department: 'Faculty of Nontraditional Security',
-      description: 'Developing machine learning algorithms for early disease detection and diagnosis in medical imaging.'
-    },
-    {
-      id: 'PRJ002',
-      title: 'Sustainable Urban Planning Framework',
-      pi: 'Dr. Pham Thi D',
-      coInvestigators: ['Dr. Hoang Van E'],
-      type: 'Basic Research',
-      status: 'Active',
-      startDate: '2024-03-01',
-      endDate: '2025-12-31',
-      funding: '$180,000',
-      fundingSource: 'Ministry of Education',
-      progress: 62,
-      publications: 5,
-      department: 'Faculty of Management',
-      description: 'Creating data-driven frameworks for sustainable city development and resource management.'
-    },
-    {
-      id: 'PRJ003',
-      title: 'Quantum Computing Applications',
-      pi: 'Dr. Vo Thi F',
-      coInvestigators: ['Dr. Bui Van G', 'Dr. Cao Thi H'],
-      type: 'Applied Research',
-      status: 'Active',
-      startDate: '2023-09-01',
-      endDate: '2026-08-31',
-      funding: '$400,000',
-      fundingSource: 'Ministry of Science and Technology',
-      progress: 78,
-      publications: 8,
-      department: 'Faculty of Nontraditional Security',
-      description: 'Exploring practical applications of quantum computing in cryptography and optimization.'
-    },
-    {
-      id: 'PRJ004',
-      title: 'Blockchain in Supply Chain',
-      pi: 'Dr. Dinh Van I',
-      coInvestigators: ['Dr. Ly Van J'],
-      type: 'Applied Research',
-      status: 'Completed',
-      startDate: '2022-06-01',
-      endDate: '2024-05-31',
-      funding: '$150,000',
-      fundingSource: 'Industry Partnership',
-      progress: 100,
-      publications: 12,
-      department: 'Faculty of Management',
-      description: 'Implementing blockchain technology for transparent and efficient supply chain management.'
-    },
-    {
-      id: 'PRJ005',
-      title: 'Neural Network Optimization',
-      pi: 'Dr. Mai Van K',
-      coInvestigators: ['Dr. Dang Thi L'],
-      type: 'Basic Research',
-      status: 'Pending',
-      startDate: '2025-01-01',
-      endDate: '2027-12-31',
-      funding: '$320,000',
-      fundingSource: 'VNU',
-      progress: 0,
-      publications: 0,
-      department: 'Faculty of Nontraditional Security',
-      description: 'Advanced research on neural network architecture optimization and efficiency.'
-    },
-    {
-      id: 'PRJ006',
-      title: 'Digital Marketing Strategies in Social Media',
-      pi: 'Dr. Nguyen Thi M',
-      coInvestigators: ['Dr. Phan Van N'],
-      type: 'Applied Research',
-      status: 'Active',
-      startDate: '2024-02-15',
-      endDate: '2025-12-31',
-      funding: '$120,000',
-      fundingSource: 'Industry Partnership',
-      progress: 55,
-      publications: 4,
-      department: 'Faculty of Marketing and Communication',
-      description: 'Analyzing consumer behavior and developing effective digital marketing frameworks for social media platforms.'
-    }
-  ];
-
-  const publications = [
-    {
-      id: 'PUB001',
-      title: 'Deep Learning Approaches for Medical Image Analysis',
-      authors: ['Dr. Nguyen Van A', 'Dr. Tran Thi B', 'Dr. Le Van C'],
-      type: 'Journal Article',
-      journal: 'IEEE Transactions on Medical Imaging',
-      year: 2024,
-      citations: 45,
-      impactFactor: 10.6,
-      status: 'Published',
-      doi: '10.1109/TMI.2024.12345',
-      project: 'PRJ001',
-      quartile: 'Q1',
-      discipline: 'Nontraditional Security'
-    },
-    {
-      id: 'PUB002',
-      title: 'Sustainable City Development: A Data-Driven Framework',
-      authors: ['Dr. Pham Thi D', 'Dr. Hoang Van E'],
-      type: 'Conference Paper',
-      journal: 'International Conference on Urban Planning',
-      year: 2024,
-      citations: 23,
-      impactFactor: null,
-      status: 'Published',
-      doi: '10.1145/ICUP.2024.56789',
-      project: 'PRJ002',
-      quartile: 'N/A',
-      discipline: 'Sustainable Development'
-    },
-    {
-      id: 'PUB003',
-      title: 'Quantum Algorithms for Cryptographic Applications',
-      authors: ['Dr. Vo Thi F', 'Dr. Bui Van G', 'Dr. Cao Thi H'],
-      type: 'Book Chapter',
-      journal: 'Nature Quantum Information',
-            publisher: 'IEEE',
-
-      year: 2024,
-      citations: 89,
-      impactFactor: 15.2,
-      status: 'Published',
-      doi: '10.1038/s41534-024-00234',
-      project: 'PRJ003',
-      quartile: 'Q1',
-      discipline: 'Engineering & IT'
-    },
-    {
-      id: 'PUB004',
-      title: 'Blockchain Technology in Supply Chain Management',
-      authors: ['Dr. Dinh Van I', 'Dr. Ly Van J'],
-      type: 'Book',
-      journal: 'Series in Computer Science and Engineering',
-      publisher: 'Springer',
-      year: 2024,
-      citations: 12,
-      impactFactor: null,
-      status: 'Published',
-      doi: null,
-      project: 'PRJ004',
-      quartile: 'N/A',
-      discipline: 'Finance'
-    },
-    {
-      id: 'PUB005',
-      title: 'Machine Learning in Healthcare: Current Trends',
-      authors: ['Dr. Nguyen Van A', 'Dr. Le Van C'],
-      type: 'Review Article',
-      journal: 'Journal of Healthcare Engineering',
-                  publisher: 'IEEE',
-
-      year: 2025,
-      citations: 0,
-      impactFactor: 3.9,
-      status: 'Under Review',
-      doi: null,
-      project: 'PRJ001',
-      quartile: 'Q2',
-      discipline: 'Nontraditional Security'
-    },
-    {
-      id: 'PUB006',
-      title: 'Optimization Techniques for Neural Networks',
-      authors: ['Dr. Mai Van K', 'Dr. Dang Thi L'],
-      type: 'Journal Article',
-      journal: 'Neural Networks',
-      year: 2024,
-      citations: 34,
-      impactFactor: 7.8,
-      status: 'Published',
-      doi: '10.1016/j.neunet.2024.98765',
-      project: 'PRJ005',
-      quartile: 'Q1',
-      discipline: 'Engineering & IT'
-    },
-    {
-      id: 'PUB007',
-      title: 'Digital Transformation in Human Resource Management',
-      authors: ['Dr. Pham Van O', 'Dr. Tran Thi P'],
-      type: 'Journal Article',
-      journal: 'Human Resource Management Review',
-                  publisher: 'Taylor & Francis',
-
-      year: 2024,
-      citations: 28,
-      impactFactor: 6.2,
-      status: 'Published',
-      doi: '10.1016/j.hrmr.2024.45678',
-      project: 'PRJ002',
-      quartile: 'Q1',
-      discipline: 'Human Resources'
-    },
-    {
-      id: 'PUB008',
-      title: 'Social Media Marketing Effectiveness in Emerging Markets',
-      authors: ['Dr. Nguyen Thi M', 'Dr. Phan Van N'],
-      type: 'Journal Article',
-      journal: 'Journal of Marketing Research',
-      year: 2024,
-      citations: 31,
-      impactFactor: 8.1,
-      status: 'Published',
-      doi: '10.1177/JMR.2024.12345',
-      project: 'PRJ006',
-      quartile: 'Q1',
-      discipline: 'Marketing'
-    },
-    {
-      id: 'PUB009',
-      title: 'Crisis Communication Strategies in the Digital Age',
-      authors: ['Dr. Le Van Q', 'Dr. Hoang Thi R'],
-      type: 'Conference Paper',
-      journal: 'International Communication Association Conference',
-      year: 2024,
-      citations: 15,
-      impactFactor: null,
-      status: 'Published',
-      doi: null,
-      project: null,
-      quartile: 'N/A',
-      discipline: 'Communication'
-    },
-    {
-      id: 'PUB010',
-      title: 'Cybercrime and Legal Frameworks in Southeast Asia',
-      authors: ['Dr. Bui Van S', 'Dr. Cao Thi T'],
-      type: 'Book Chapter',
-      journal: 'International Journal of Cyber Criminology',
-                  publisher: 'Taylor & Francis',
-
-      year: 2024,
-      citations: 19,
-      impactFactor: 4.5,
-      status: 'Published',
-      doi: '10.5281/ijcc.2024.98765',
-      project: null,
-      quartile: 'Q2',
-      discipline: 'Law & Criminology'
-    }
-  ];
-
-  const getDisciplineColor = (discipline) => {
-    switch (discipline) {
-      case 'Nontraditional Security': return 'bg-blue-100 text-blue-700';
-      case 'Sustainable Development': return 'bg-green-100 text-green-700';
-      case 'Engineering & IT': return 'bg-purple-100 text-purple-700';
-      case 'Human Resources': return 'bg-green-100 text-green-700';
-      case 'Finance': return 'bg-green-100 text-green-700';
-      case 'Marketing': return 'bg-green-100 text-green-700';
-      case 'Communication': return 'bg-green-100 text-green-700';
-      case 'Law & Criminology': return 'bg-blue-100 text-blue-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-700';
-      case 'Completed': return 'bg-blue-100 text-blue-700';
-      case 'Pending': return 'bg-yellow-100 text-yellow-700';
-      case 'Published': return 'bg-green-100 text-green-700';
-      case 'Under Review': return 'bg-orange-100 text-orange-700';
-      case 'Rejected': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
 
   const OverviewDashboard = () => (
     <div className="space-y-3">
