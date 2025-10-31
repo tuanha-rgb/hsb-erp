@@ -3,36 +3,48 @@ import Student from "./student";
 import Lecturer from "./lecturer";
 import './project.css';
 import './index.css';
+import {  AttendanceRecord,  StudentAttendanceStats,  CourseAttendance,  AttendanceAlert,  AICamera,  initializeAttendanceData
+} from "./attendance/attendancemodel";
 import {   bookRecords,   publishers,   catalogues,  type BookRecord,  type Publisher,
-  type BookType,  type CatalogueCategory} from './bookdata';
+  type BookType,  type CatalogueCategory} from './documents/bookdata';
+import {
+  scholarships,
+  applications,
+  getStatusscholarshipColor,
+  type Scholarship,
+  type ScholarshipApplication,
+  type ScholarshipStatus,
+  type ApplicationStatus,
+} from "./student/scholarshipdata";
+
 
 import {  type Document,  type DocumentSource,  type DocumentType,  type DocumentStatus,  type PriorityLevel,
-  type Signatory,  type Attachment,  sampleDocuments,  getDocumentStatistics} from './documentdata';
+  type Signatory,  type Attachment,  sampleDocuments,  getDocumentStatistics} from './documents/documentdata';
 
 // ✅ Types (match your file name exactly)
 import {
   Faculty, ProgramCatalog, BachelorProgramStat, FacultyMetric,
   CourseItem, StudentGradeRow, FacultyCode,
-} from "./academicmodel";
+} from "./acad/academicmodel";
 
 // ✅ Data (match your file names from the screenshot)
-import { faculties } from "./faculties";
-import { programs } from "./programs";
-import { bachelorProgramStats } from "./programstats";
-import { facultyMetrics } from "./facultymetrics";
-import { courseData } from "./courses";
-import { studentGrades } from "./studentgrades";
+import { faculties } from "./acad/faculties";
+import { programs } from "./acad/programs";
+import { bachelorProgramStats } from "./acad/programstats";
+import { facultyMetrics } from "./acad/facultymetrics";
+import { courseData } from "./acad/courses";
+import { studentGrades } from "./student/studentgrades";
 
-import {  Thesis,  ThesisStatus,  ThesisCategory,  ThesisLevel,  sampleTheses,} from "./thesis";
+import {  Thesis,  ThesisStatus,  ThesisCategory,  ThesisLevel,  sampleTheses,} from "./acad/thesis";
 
-import { sampleStudents, studentdata } from "./studentdata";
+import { sampleStudents, studentdata } from "./student/studentdata";
 
-import { researchProjects } from "./researchProjects";
-import { publications } from "./publications";
-import { patentData } from "./patent";
+import { researchProjects } from "./research/researchProjects";
+import { publications } from "./research/publications";
+import { patentData } from "./research/patent";
 
-import { ResearchProject, Publication, Patent } from "./research";
-import { getDisciplineColor, getStatusColor } from "./ResearchColors";
+import { ResearchProject, Publication, Patent } from "./research/research";
+import { getDisciplineColor, getStatusColor } from "./research/ResearchColors";
 
 import type { LucideIcon } from "lucide-react";
 import RoleDropdown, { type RoleValue } from "./RoleDropdown";
@@ -1609,178 +1621,7 @@ const Scholarship = () => {
     setSelectedScholarshipToPush(null);
   };
 
-  const scholarships = [
-    {
-      id: 1,
-      name: 'Merit-Based Scholarship',
-      type: 'Internal - Merit',
-      amount: '10,000,000 VND',
-      period: '2024-2025',
-      deadline: '2024-12-31',
-      status: 'Active',
-      applicants: 45,
-      awarded: 12,
-      budget: '120,000,000 VND',
-      budgetUsed: '60,000,000 VND',
-      department: 'Academic Affairs'
-    },
-    {
-      id: 2,
-      name: 'Commendation Scholarship',
-      type: 'Internal - Commendation',
-      amount: '5,000,000 VND',
-      period: '2024-2025',
-      deadline: '2025-01-15',
-      status: 'Active',
-      applicants: 38,
-      awarded: 8,
-      budget: '50,000,000 VND',
-      budgetUsed: '25,000,000 VND',
-      department: 'Student Services'
-    },
-    {
-      id: 3,
-      name: 'TechCorp Vietnam Scholarship',
-      type: 'External - Company',
-      amount: '20,000,000 VND',
-      period: '2024-2025',
-      deadline: '2025-02-28',
-      status: 'Active',
-      applicants: 67,
-      awarded: 5,
-      budget: '100,000,000 VND',
-      budgetUsed: '100,000,000 VND',
-      department: 'Academic Affairs',
-      sponsor: 'TechCorp Vietnam'
-    },
-    {
-      id: 4,
-      name: 'VinGroup Talent Scholarship',
-      type: 'External - Company',
-      amount: '25,000,000 VND',
-      period: '2024-2025',
-      deadline: '2024-12-20',
-      status: 'Active',
-      applicants: 89,
-      awarded: 10,
-      budget: '250,000,000 VND',
-      budgetUsed: '250,000,000 VND',
-      department: 'Academic Affairs',
-      sponsor: 'VinGroup'
-    },
-    {
-      id: 5,
-      name: 'HSB Alumni Scholarship',
-      type: 'External - Alumni',
-      amount: '8,000,000 VND',
-      period: '2024-2025',
-      deadline: '2025-01-31',
-      status: 'Active',
-      applicants: 52,
-      awarded: 15,
-      budget: '120,000,000 VND',
-      budgetUsed: '120,000,000 VND',
-      department: 'Student Services',
-      sponsor: 'HSB Alumni Association'
-    }
-  ];
-
-  const applications = [
-    {
-      id: 1,
-      studentId: '22080000',
-      studentName: 'Nguyễn Văn A',
-      scholarshipName: 'Merit-Based Scholarship',
-      amount: '10,000,000 VND',
-      submittedDate: '2024-10-15',
-      status: 'Under Review',
-      gpa: 3.85,
-      department: 'Academic Affairs',
-      reviewer: 'Dr. Trần Thị B',
-      documents: ['Transcript', 'Recommendation Letter', 'Personal Statement']
-    },
-    {
-      id: 2,
-      studentId: '22080001',
-      studentName: 'Lê Thị C',
-      scholarshipName: 'TechCorp Vietnam Scholarship',
-      amount: '20,000,000 VND',
-      submittedDate: '2024-10-18',
-      status: 'Approved',
-      gpa: 3.92,
-      department: 'Academic Affairs',
-      reviewer: 'Dr. Trần Thị B',
-      approvedDate: '2024-10-22',
-      documents: ['Transcript', 'Project Portfolio', 'Recommendation Letter']
-    },
-    {
-      id: 3,
-      studentId: '22080002',
-      studentName: 'Phạm Văn D',
-      scholarshipName: 'Commendation Scholarship',
-      amount: '5,000,000 VND',
-      submittedDate: '2024-10-12',
-      status: 'Under Review',
-      gpa: 3.45,
-      department: 'Student Services',
-      reviewer: 'Ms. Nguyễn Thị E',
-      documents: ['Transcript', 'Community Service Certificate', 'Personal Statement']
-    },
-    {
-      id: 4,
-      studentId: '22080003',
-      studentName: 'Hoàng Thị F',
-      scholarshipName: 'VinGroup Talent Scholarship',
-      amount: '25,000,000 VND',
-      submittedDate: '2024-10-20',
-      status: 'Pending Documents',
-      gpa: 3.88,
-      department: 'Academic Affairs',
-      reviewer: 'Dr. Trần Thị B',
-      documents: ['Transcript', 'Recommendation Letter']
-    },
-    {
-      id: 5,
-      studentId: '22080004',
-      studentName: 'Đỗ Văn G',
-      scholarshipName: 'HSB Alumni Scholarship',
-      amount: '8,000,000 VND',
-      submittedDate: '2024-10-19',
-      status: 'Rejected',
-      gpa: 3.12,
-      department: 'Student Services',
-      reviewer: 'Ms. Nguyễn Thị E',
-      rejectedDate: '2024-10-23',
-      rejectionReason: 'Does not meet minimum GPA requirement',
-      documents: ['Transcript', 'Financial Need Statement']
-    },
-    {
-      id: 6,
-      studentId: '22080005',
-      studentName: 'Vũ Thị H',
-      scholarshipName: 'Merit-Based Scholarship',
-      amount: '10,000,000 VND',
-      submittedDate: '2024-10-21',
-      status: 'Approved',
-      gpa: 3.95,
-      department: 'Academic Affairs',
-      reviewer: 'Dr. Trần Thị B',
-      approvedDate: '2024-10-24',
-      documents: ['Transcript', 'Recommendation Letter', 'Research Publication']
-    }
-  ];
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'Approved': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'Under Review': return 'bg-amber-100 text-amber-700 border-amber-200';
-      case 'Pending Documents': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'Rejected': return 'bg-red-100 text-red-700 border-red-200';
-      case 'Active': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'Closed': return 'bg-gray-100 text-gray-700 border-gray-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
+ 
 
   const filteredApplications = filterStatus === 'all' 
     ? applications 
@@ -1934,7 +1775,7 @@ const Scholarship = () => {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-gray-500">{app.submittedDate}</span>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(app.status)}`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusscholarshipColor(app.status)}`}>
                   {app.status}
                 </span>
               </div>
@@ -2050,7 +1891,7 @@ const Scholarship = () => {
                     <p className="text-sm text-gray-700">{app.submittedDate}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(app.status)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusscholarshipColor(app.status)}`}>
                       {app.status}
                     </span>
                   </td>
@@ -2219,7 +2060,7 @@ const Scholarship = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="text-xl font-bold text-gray-900">{scholarship.name}</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(scholarship.status)}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusscholarshipColor(scholarship.status)}`}>
                     {scholarship.status}
                   </span>
                 </div>
@@ -4702,203 +4543,12 @@ const CourseFeedback =() => {
   );
 }
 
-// This component uses Tailwind CSS utility classes
-// Make sure Tailwind is configured in your project
 
-// Types and Interfaces
-interface AttendanceRecord {
-  id: string;
-  studentId: string;
-  studentName: string;
-  courseId: string;
-  courseName: string;
-  date: Date;
-  status: "present" | "absent" | "late" | "excused";
-  source: "ai-camera" | "manual" | "quiz" | "assignment";
-  sessionType: "lecture" | "lab" | "tutorial" | "exam";
-  timestamp?: Date;
-  cameraId?: string;
-  lecturerVerified?: boolean;
-  notes?: string;
-}
 
-interface StudentAttendanceStats {
-  studentId: string;
-  studentName: string;
-  department: string;
-  year: number;
-  totalSessions: number;
-  attended: number;
-  late: number;
-  absent: number;
-  excused: number;
-  attendanceRate: number;
-  trend: "improving" | "declining" | "stable";
-  atRisk: boolean;
-  eligibleForExam: boolean;
-  quizBonus: number;
-}
-
-interface CourseAttendance {
-  courseId: string;
-  courseName: string;
-  instructor: string;
-  totalStudents: number;
-  averageAttendance: number;
-  sessionsHeld: number;
-  atRiskStudents: number;
-  trend: "up" | "down" | "stable";
-}
-
-interface AttendanceAlert {
-  id: string;
-  studentId: string;
-  studentName: string;
-  type: "below-threshold" | "declining-trend" | "consecutive-absence" | "exam-ineligible";
-  severity: "critical" | "warning" | "info";
-  message: string;
-  date: Date;
-  acknowledged: boolean;
-  courseId?: string;
-}
-
-interface AICamera {
-  id: string;
-  location: string;
-  status: "online" | "offline" | "maintenance";
-  lastSync: Date;
-  sessionsToday: number;
-  accuracy: number;
-}
-
-// Sample Data Generator
-const generateSampleAttendanceData = (): {
-  records: AttendanceRecord[];
-  students: StudentAttendanceStats[];
-  courses: CourseAttendance[];
-  alerts: AttendanceAlert[];
-  cameras: AICamera[];
-} => {
-  const studentNames = [
-    "Emma Wilson", "Liam Chen", "Sophia Rodriguez", "Noah Patel", "Olivia Kim",
-    "Ethan Brown", "Ava Johnson", "Mason Lee", "Isabella Garcia", "Lucas Martinez",
-    "Mia Anderson", "Oliver Taylor", "Charlotte Thomas", "Elijah Jackson", "Amelia White"
-  ];
-
-  const courses = [
-    { id: "CS101", name: "Introduction to Programming", instructor: "Dr. Smith" },
-    { id: "MATH201", name: "Calculus II", instructor: "Prof. Johnson" },
-    { id: "PHYS301", name: "Quantum Mechanics", instructor: "Dr. Lee" },
-    { id: "ENG102", name: "Technical Writing", instructor: "Prof. Davis" },
-    { id: "CHEM105", name: "Organic Chemistry", instructor: "Dr. Wilson" }
-  ];
-
-  const departments = ["Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry"];
-
-  // Generate attendance records
-  const records: AttendanceRecord[] = [];
-  const now = new Date();
-  
-  for (let i = 0; i < 200; i++) {
-    const daysAgo = Math.floor(Math.random() * 60);
-    const date = new Date(now);
-    date.setDate(date.getDate() - daysAgo);
-    
-    records.push({
-      id: `ATT-${1000 + i}`,
-      studentId: `STU-${Math.floor(Math.random() * 15) + 1}`,
-      studentName: studentNames[Math.floor(Math.random() * studentNames.length)],
-      courseId: courses[Math.floor(Math.random() * courses.length)].id,
-      courseName: courses[Math.floor(Math.random() * courses.length)].name,
-      date: date,
-      status: Math.random() > 0.15 ? "present" : Math.random() > 0.5 ? "late" : "absent",
-      source: Math.random() > 0.3 ? "ai-camera" : Math.random() > 0.5 ? "quiz" : "manual",
-      sessionType: ["lecture", "lab", "tutorial"][Math.floor(Math.random() * 3)] as any,
-      timestamp: date,
-      cameraId: Math.random() > 0.3 ? `CAM-${Math.floor(Math.random() * 5) + 1}` : undefined,
-      lecturerVerified: Math.random() > 0.2
-    });
-  }
-
-  // Generate student stats
-  const students: StudentAttendanceStats[] = studentNames.map((name, idx) => {
-    const totalSessions = 40 + Math.floor(Math.random() * 20);
-    const attended = Math.floor(totalSessions * (0.6 + Math.random() * 0.35));
-    const late = Math.floor((totalSessions - attended) * 0.3);
-    const excused = Math.floor((totalSessions - attended - late) * 0.4);
-    const absent = totalSessions - attended - late - excused;
-    const attendanceRate = (attended / totalSessions) * 100;
-    const quizBonus = Math.floor(Math.random() * 10);
-    const finalRate = Math.min(attendanceRate + quizBonus, 100);
-
-    return {
-      studentId: `STU-${idx + 1}`,
-      studentName: name,
-      department: departments[Math.floor(Math.random() * departments.length)],
-      year: Math.floor(Math.random() * 4) + 1,
-      totalSessions,
-      attended,
-      late,
-      absent,
-      excused,
-      attendanceRate: finalRate,
-      trend: attendanceRate > 75 ? "stable" : attendanceRate > 60 ? "declining" : "declining",
-      atRisk: finalRate < 70,
-      eligibleForExam: finalRate >= 70,
-      quizBonus
-    };
-  });
-
-  // Generate course stats
-  const courseStats: CourseAttendance[] = courses.map(course => {
-    const avgAttendance = 65 + Math.random() * 30;
-    return {
-      courseId: course.id,
-      courseName: course.name,
-      instructor: course.instructor,
-      totalStudents: 45 + Math.floor(Math.random() * 35),
-      averageAttendance: avgAttendance,
-      sessionsHeld: 35 + Math.floor(Math.random() * 15),
-      atRiskStudents: Math.floor(Math.random() * 15),
-      trend: avgAttendance > 80 ? "up" : avgAttendance > 65 ? "stable" : "down"
-    };
-  });
-
-  // Generate alerts
-  const alerts: AttendanceAlert[] = students
-    .filter(s => s.atRisk || s.attendanceRate < 60)
-    .map((s, idx) => ({
-      id: `ALERT-${idx + 1}`,
-      studentId: s.studentId,
-      studentName: s.studentName,
-      type: s.attendanceRate < 50 ? "exam-ineligible" : s.attendanceRate < 60 ? "below-threshold" : "declining-trend",
-      severity: s.attendanceRate < 50 ? "critical" : s.attendanceRate < 60 ? "warning" : "info",
-      message: s.attendanceRate < 50 
-        ? `Critical: ${s.studentName} is ineligible for final exam (${s.attendanceRate.toFixed(1)}% attendance)`
-        : s.attendanceRate < 60
-        ? `Warning: ${s.studentName} is at risk of failing attendance requirement (${s.attendanceRate.toFixed(1)}%)`
-        : `Notice: ${s.studentName} showing declining attendance trend`,
-      date: new Date(),
-      acknowledged: Math.random() > 0.5,
-      courseId: courses[Math.floor(Math.random() * courses.length)].id
-    }));
-
-  // Generate camera data
-  const cameras: AICamera[] = Array.from({ length: 5 }, (_, i) => ({
-    id: `CAM-${i + 1}`,
-    location: [`Lecture Hall A`, `Lab Building 2`, `Tutorial Room 3B`, `Main Auditorium`, `Computer Lab 5`][i],
-    status: Math.random() > 0.1 ? "online" : "offline",
-    lastSync: new Date(Date.now() - Math.random() * 3600000),
-    sessionsToday: Math.floor(Math.random() * 12),
-    accuracy: 85 + Math.random() * 13
-  }));
-
-  return { records, students, courses: courseStats, alerts, cameras };
-};
 
 // Main Attendance Component
-const Attendance: React.FC = () => {
-  const [data] = useState(generateSampleAttendanceData());
+const AttendanceStudent: React.FC = () => {
+  const [data] = useState(() => initializeAttendanceData());
   const [activeTab, setActiveTab] = useState<"overview" | "students" | "courses" | "alerts" | "cameras">("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "at-risk" | "eligible" | "ineligible">("all");
@@ -5094,7 +4744,13 @@ const MetricCard: React.FC<{
 
 // Overview Tab
 const OverviewTab: React.FC<{
-  data: ReturnType<typeof generateSampleAttendanceData>;
+  data: {
+    records: AttendanceRecord[];
+    students: StudentAttendanceStats[];
+    courses: CourseAttendance[];
+    alerts: AttendanceAlert[];
+    cameras: AICamera[];
+  };
   stats: any;
   dateRange: string;
   onDateRangeChange: (range: "week" | "month" | "semester") => void;
@@ -5457,7 +5113,7 @@ const StudentDetailView: React.FC<{
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-2xl font-bold mb-2">{student.studentName}</h2>
-            <p className="text-gray-600">{student.studentId} • {student.department} • Year {student.year}</p>
+            <p className="text-gray-600">{student.studentId} • {student.program} ({student.level}) • Year {student.year}</p>
           </div>
           <div className={`px-5 py-3 rounded-lg font-semibold ${
             student.eligibleForExam
@@ -19620,7 +19276,7 @@ const AccountManagement = () => {
       return <Scholarship />;
     }
     if (activeTab === 'attendance') {
-      return <Attendance />;
+      return <AttendanceStudent />;
     }
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;

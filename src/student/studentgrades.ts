@@ -1,5 +1,5 @@
 // src/features/academics/data/studentGrades.ts
-import { StudentGradeRow } from "./academicmodel";
+import { StudentGradeRow } from "../acad/academicmodel";
 
 export const studentGrades: StudentGradeRow[] = [
   { studentId: "25080001", name: "Do Thi Hoa",        midterm: 8.2, final: 8.7, assignments: 8.5, participation: 9.0, overall: 8.60, letterGrade: "A", gpa: 4.0 },

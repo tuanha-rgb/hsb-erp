@@ -1,6 +1,6 @@
 // src/features/academics/academicModels.ts
 
-export type FacultyCode = "FOM" | "FOMAC" | "FONS";
+export type FacultyCode = "FOM" | "FOMAC" | "FONS" | "INS" | "ITM";
 export interface Faculty {
   code: FacultyCode;
   name: string;

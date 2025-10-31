@@ -22,3 +22,5 @@ export const courseData: CourseItem[] = [
   { id: "MBA501",   name: "Corporate Strategy",                                                program: "HSB-MBA", faculty: "FOM", level: "Master", instructor: "Dr. Le Van P",     students: 28, avgGrade: 3.68, passRate: 100 },
   { id: "MNS601",   name: "Advanced Security Analysis",                                        program: "MNS", faculty: "FONS",  level: "Master",   instructor: "Dr. Tran Thi Q",  students: 22, avgGrade: 3.71, passRate: 100 },
 ];
+
+export default courseData
