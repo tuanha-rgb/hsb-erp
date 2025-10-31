@@ -17,6 +17,7 @@ import {
   type ApplicationStatus,
 } from "./student/scholarshipdata";
 
+import { sampleEvents, type EventItem, getEventStatusColor } from "./student/eventdata";
 
 import {  type Document,  type DocumentSource,  type DocumentType,  type DocumentStatus,  type PriorityLevel,
   type Signatory,  type Attachment,  sampleDocuments,  getDocumentStatistics} from './documents/documentdata';
@@ -50,7 +51,8 @@ import type { LucideIcon } from "lucide-react";
 import RoleDropdown, { type RoleValue } from "./RoleDropdown";
 
 import { navigationConfig, type UserType, type MenuItem } from "./navigation";
-
+import { sampleUsers,  getStatusaccColor } from "./useraccounts";
+import type { UserAccount} from "./useraccounts";
 import { 
   ChevronDown, ChevronRight, Users, GraduationCap, BookOpen, Calendar, 
   DollarSign, FileText, Award, Clock, Building, Globe, Briefcase, 
@@ -10470,92 +10472,7 @@ const EventsDashboard = () => {
     const [filterType, setFilterType] = useState('all');
     const [selectedEvent, setSelectedEvent] = useState(null);
 
-    const sampleEvents = [
-      {
-        id: 'EVT001',
-        name: 'Annual Tech Conference 2025',
-        type: 'Conference',
-        date: '2025-10-25',
-        time: '09:00 - 17:00',
-        location: 'Main Auditorium',
-        capacity: 500,
-        registered: 423,
-        status: 'Open',
-        organizer: 'CS Department',
-        description: 'Annual technology conference featuring keynotes, workshops, and networking.',
-        color: 'blue'
-      },
-      {
-        id: 'EVT002',
-        name: 'Career Fair',
-        type: 'Career',
-        date: '2025-10-28',
-        time: '10:00 - 16:00',
-        location: 'Sports Center',
-        capacity: 1000,
-        registered: 847,
-        status: 'Open',
-        organizer: 'Career Services',
-        description: 'Meet top employers and explore internship and job opportunities.',
-        color: 'green'
-      },
-      {
-        id: 'EVT003',
-        name: 'Research Symposium',
-        type: 'Academic',
-        date: '2025-10-20',
-        time: '13:00 - 18:00',
-        location: 'Conference Hall B',
-        capacity: 200,
-        registered: 156,
-        status: 'Open',
-        organizer: 'Graduate School',
-        description: 'Showcase of cutting-edge research by faculty and graduate students.',
-        color: 'purple'
-      },
-      {
-        id: 'EVT004',
-        name: 'Student Orientation',
-        type: 'Orientation',
-        date: '2025-10-16',
-        time: '08:00 - 12:00',
-        location: 'Main Campus',
-        capacity: 800,
-        registered: 800,
-        status: 'Full',
-        organizer: 'Student Affairs',
-        description: 'Welcome new students and introduce campus resources.',
-        color: 'orange'
-      },
-      {
-        id: 'EVT005',
-        name: 'Alumni Networking Night',
-        type: 'Social',
-        date: '2025-11-05',
-        time: '18:00 - 21:00',
-        location: 'University Club',
-        capacity: 300,
-        registered: 187,
-        status: 'Open',
-        organizer: 'Alumni Relations',
-        description: 'Connect with successful alumni and build professional networks.',
-        color: 'pink'
-      },
-      {
-        id: 'EVT006',
-        name: 'Startup Pitch Competition',
-        type: 'Competition',
-        date: '2025-11-10',
-        time: '14:00 - 18:00',
-        location: 'Innovation Hub',
-        capacity: 150,
-        registered: 89,
-        status: 'Open',
-        organizer: 'Entrepreneurship Center',
-        description: 'Students pitch their startup ideas to win funding and mentorship.',
-        color: 'yellow'
-      }
-    ];
+
 
     const getStatusColor = (status) => {
       switch (status) {
@@ -18280,128 +18197,10 @@ const availableTabs = [
 ];
 
 // Sample data
-const sampleUsers: UserAccount[] = [
-  {
-    id: "1",
-    name: "Nguyen Thi Mai",
-    email: "nguyen.mai@hsb.edu.vn",
-    phone: "+84 912 345 678",
-    role: "rector",
-    department: "N/A",
-    status: "active",
-    lastLogin: "2025-10-29 09:15",
-    createdAt: "2024-01-15",
-    permissions: ["students_view", "lecturers_view", "departments_view", "departments_operations", "finance_view"],
-    tabAccess: []
-  },
-  {
-    id: "2",
-    name: "Tran Van Hoang",
-    email: "tran.hoang@hsb.edu.vn",
-    phone: "+84 903 456 789",
-    role: "dean",
-    department: "Faculty of Management",
-    status: "active",
-    lastLogin: "2025-10-29 08:30",
-    createdAt: "2024-03-20",
-    permissions: ["students_view", "students_edit", "lecturers_view", "events_view"],
-    tabAccess: []
-  },
-  {
-    id: "3",
-    name: "Le Thi Huong",
-    email: "le.huong@hsb.edu.vn",
-    phone: "+84 918 765 432",
-    role: "head",
-    department: "Human Resources",
-    status: "active",
-    lastLogin: "2025-10-28 16:45",
-    createdAt: "2024-05-10",
-    permissions: ["lecturers_view", "lecturers_edit", "users_view"],
-    tabAccess: []
-  },
-  {
-    id: "4",
-    name: "Pham Van Khanh",
-    email: "pham.khanh@hsb.edu.vn",
-    phone: "+84 909 876 543",
-    role: "lead_staff",
-    department: "International Relations",
-    status: "active",
-    lastLogin: "2025-10-29 10:00",
-    createdAt: "2024-06-15",
-    permissions: ["students_view", "events_view", "documents_view"],
-    tabAccess: []
-  },
-  {
-    id: "5",
-    name: "Hoang Thi Lan",
-    email: "hoang.lan@hsb.edu.vn",
-    phone: "+84 916 234 567",
-    role: "staff",
-    department: "Academic Affairs",
-    status: "inactive",
-    lastLogin: "2025-10-15 14:20",
-    createdAt: "2024-08-01",
-    permissions: ["students_view", "timetable_manage"],
-    tabAccess: []
-  },
-  {
-    id: "6",
-    name: "Dr. Nguyen Van Minh",
-    email: "nguyen.minh@hsb.edu.vn",
-    phone: "+84 905 123 456",
-    role: "lecturer",
-    department: "Faculty of Business Administration",
-    status: "active",
-    lastLogin: "2025-10-29 07:45",
-    createdAt: "2024-02-10",
-    permissions: ["students_view", "classes_view", "timetable_manage", "documents_view"],
-    tabAccess: []
-  },
-  {
-    id: "7",
-    name: "Pham Thi Anh",
-    email: "pham.anh@hsb.edu.vn",
-    phone: "+84 907 654 321",
-    role: "lecturer",
-    department: "Faculty of Marketing & Communication",
-    status: "active",
-    lastLogin: "2025-10-28 18:30",
-    createdAt: "2024-04-25",
-    permissions: ["students_view", "classes_view", "events_view"],
-    tabAccess: []
-  },
-  {
-    id: "8",
-    name: "Tran Minh Quan",
-    email: "tran.quan.student@hsb.edu.vn",
-    phone: "+84 913 987 654",
-    role: "student",
-    department: "Faculty of Information Technology",
-    status: "active",
-    lastLogin: "2025-10-29 10:30",
-    createdAt: "2024-09-01",
-    permissions: ["students_view", "classes_view", "library_view"],
-    tabAccess: []
-  },
-  {
-    id: "9",
-    name: "Le Thi Bich Ngoc",
-    email: "le.ngoc.student@hsb.edu.vn",
-    phone: "+84 914 321 098",
-    role: "student",
-    department: "Faculty of Economics",
-    status: "active",
-    lastLogin: "2025-10-29 09:00",
-    createdAt: "2024-09-01",
-    permissions: ["students_view", "events_view"],
-    tabAccess: []
-  },
-];
+
 
 const AccountManagement = () => {
-  const [users, setUsers] = useState<UserAccount[]>(sampleUsers);
+  const [users, setUsers] = useState<UserAccount[]>(sampleUsers); // no cast needed now
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
   const [searchTerm, setSearchTerm] = useState("");
