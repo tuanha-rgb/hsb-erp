@@ -10,6 +10,7 @@ import {
   User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon, Pencil
 } from 'lucide-react';
 import * as QRCode from "qrcode";
+import Documents from "./documenthandbook";
 
 
 // ————————————————————————————————————————
@@ -2731,9 +2732,11 @@ const LecturerApp = () => {
     { name: 'My Profile', icon: UserIcon },
     { name: 'Teaching', icon: BookText },
     { name: 'Schedule', icon: Clock },
+    { name: 'Documents', icon: BookOpen },
     { name: 'Research', icon: TrendingUp },
     { name: 'Canvas/LMS', icon: Globe },
     { name: 'Identification', icon: UserIcon },
+
   ];
 
   const renderContent = () => {
@@ -2746,6 +2749,8 @@ const LecturerApp = () => {
         return <LecturerTeaching />;
       case 'Schedule':
         return <ScheduleView />;
+      case 'Documents':
+        return <Documents />;  
       case 'Research':
         return <ResearchView />;
       case 'Canvas/LMS':
