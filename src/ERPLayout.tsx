@@ -50,7 +50,7 @@ import {
   Kanban, BarChart2, FolderOpen, List, Package, Boxes, ShoppingCart, CreditCard, 
   AlertOctagon, RotateCcw, Footprints, RefreshCw, Shield, Key, Upload, Scroll, FileCheck, Send,
   Banknote, Archive, Grid, List as ListIcon, Library, Users as UsersIcon, Book, BookOpen as BookOpenIcon,
-  Building2, Copy, Layers, Hash, Cpu, Zap, Cloud, Database, HardDrive, Server, Terminal, Code, Bug, GitBranch, Paperclip,
+  Building2, Copy, Layers, Hash, Cpu, Zap, Cloud, Database, HardDrive, Server, Terminal, Code, Bug, GitBranch, Paperclip,Camera
 } from "lucide-react";
 
 // Utility renderer for dynamic values
@@ -2570,9 +2570,6 @@ const Scholarship = () => {
 
 {/*research management for lecturer*/}
 
- 
-
-
 const StudentServicesOverview = () => {
     const [selectedService, setSelectedService] = useState(null);
 
@@ -4704,6 +4701,1174 @@ const CourseFeedback =() => {
     </div>
   );
 }
+
+// This component uses Tailwind CSS utility classes
+// Make sure Tailwind is configured in your project
+
+// Types and Interfaces
+interface AttendanceRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  courseId: string;
+  courseName: string;
+  date: Date;
+  status: "present" | "absent" | "late" | "excused";
+  source: "ai-camera" | "manual" | "quiz" | "assignment";
+  sessionType: "lecture" | "lab" | "tutorial" | "exam";
+  timestamp?: Date;
+  cameraId?: string;
+  lecturerVerified?: boolean;
+  notes?: string;
+}
+
+interface StudentAttendanceStats {
+  studentId: string;
+  studentName: string;
+  department: string;
+  year: number;
+  totalSessions: number;
+  attended: number;
+  late: number;
+  absent: number;
+  excused: number;
+  attendanceRate: number;
+  trend: "improving" | "declining" | "stable";
+  atRisk: boolean;
+  eligibleForExam: boolean;
+  quizBonus: number;
+}
+
+interface CourseAttendance {
+  courseId: string;
+  courseName: string;
+  instructor: string;
+  totalStudents: number;
+  averageAttendance: number;
+  sessionsHeld: number;
+  atRiskStudents: number;
+  trend: "up" | "down" | "stable";
+}
+
+interface AttendanceAlert {
+  id: string;
+  studentId: string;
+  studentName: string;
+  type: "below-threshold" | "declining-trend" | "consecutive-absence" | "exam-ineligible";
+  severity: "critical" | "warning" | "info";
+  message: string;
+  date: Date;
+  acknowledged: boolean;
+  courseId?: string;
+}
+
+interface AICamera {
+  id: string;
+  location: string;
+  status: "online" | "offline" | "maintenance";
+  lastSync: Date;
+  sessionsToday: number;
+  accuracy: number;
+}
+
+// Sample Data Generator
+const generateSampleAttendanceData = (): {
+  records: AttendanceRecord[];
+  students: StudentAttendanceStats[];
+  courses: CourseAttendance[];
+  alerts: AttendanceAlert[];
+  cameras: AICamera[];
+} => {
+  const studentNames = [
+    "Emma Wilson", "Liam Chen", "Sophia Rodriguez", "Noah Patel", "Olivia Kim",
+    "Ethan Brown", "Ava Johnson", "Mason Lee", "Isabella Garcia", "Lucas Martinez",
+    "Mia Anderson", "Oliver Taylor", "Charlotte Thomas", "Elijah Jackson", "Amelia White"
+  ];
+
+  const courses = [
+    { id: "CS101", name: "Introduction to Programming", instructor: "Dr. Smith" },
+    { id: "MATH201", name: "Calculus II", instructor: "Prof. Johnson" },
+    { id: "PHYS301", name: "Quantum Mechanics", instructor: "Dr. Lee" },
+    { id: "ENG102", name: "Technical Writing", instructor: "Prof. Davis" },
+    { id: "CHEM105", name: "Organic Chemistry", instructor: "Dr. Wilson" }
+  ];
+
+  const departments = ["Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry"];
+
+  // Generate attendance records
+  const records: AttendanceRecord[] = [];
+  const now = new Date();
+  
+  for (let i = 0; i < 200; i++) {
+    const daysAgo = Math.floor(Math.random() * 60);
+    const date = new Date(now);
+    date.setDate(date.getDate() - daysAgo);
+    
+    records.push({
+      id: `ATT-${1000 + i}`,
+      studentId: `STU-${Math.floor(Math.random() * 15) + 1}`,
+      studentName: studentNames[Math.floor(Math.random() * studentNames.length)],
+      courseId: courses[Math.floor(Math.random() * courses.length)].id,
+      courseName: courses[Math.floor(Math.random() * courses.length)].name,
+      date: date,
+      status: Math.random() > 0.15 ? "present" : Math.random() > 0.5 ? "late" : "absent",
+      source: Math.random() > 0.3 ? "ai-camera" : Math.random() > 0.5 ? "quiz" : "manual",
+      sessionType: ["lecture", "lab", "tutorial"][Math.floor(Math.random() * 3)] as any,
+      timestamp: date,
+      cameraId: Math.random() > 0.3 ? `CAM-${Math.floor(Math.random() * 5) + 1}` : undefined,
+      lecturerVerified: Math.random() > 0.2
+    });
+  }
+
+  // Generate student stats
+  const students: StudentAttendanceStats[] = studentNames.map((name, idx) => {
+    const totalSessions = 40 + Math.floor(Math.random() * 20);
+    const attended = Math.floor(totalSessions * (0.6 + Math.random() * 0.35));
+    const late = Math.floor((totalSessions - attended) * 0.3);
+    const excused = Math.floor((totalSessions - attended - late) * 0.4);
+    const absent = totalSessions - attended - late - excused;
+    const attendanceRate = (attended / totalSessions) * 100;
+    const quizBonus = Math.floor(Math.random() * 10);
+    const finalRate = Math.min(attendanceRate + quizBonus, 100);
+
+    return {
+      studentId: `STU-${idx + 1}`,
+      studentName: name,
+      department: departments[Math.floor(Math.random() * departments.length)],
+      year: Math.floor(Math.random() * 4) + 1,
+      totalSessions,
+      attended,
+      late,
+      absent,
+      excused,
+      attendanceRate: finalRate,
+      trend: attendanceRate > 75 ? "stable" : attendanceRate > 60 ? "declining" : "declining",
+      atRisk: finalRate < 70,
+      eligibleForExam: finalRate >= 70,
+      quizBonus
+    };
+  });
+
+  // Generate course stats
+  const courseStats: CourseAttendance[] = courses.map(course => {
+    const avgAttendance = 65 + Math.random() * 30;
+    return {
+      courseId: course.id,
+      courseName: course.name,
+      instructor: course.instructor,
+      totalStudents: 45 + Math.floor(Math.random() * 35),
+      averageAttendance: avgAttendance,
+      sessionsHeld: 35 + Math.floor(Math.random() * 15),
+      atRiskStudents: Math.floor(Math.random() * 15),
+      trend: avgAttendance > 80 ? "up" : avgAttendance > 65 ? "stable" : "down"
+    };
+  });
+
+  // Generate alerts
+  const alerts: AttendanceAlert[] = students
+    .filter(s => s.atRisk || s.attendanceRate < 60)
+    .map((s, idx) => ({
+      id: `ALERT-${idx + 1}`,
+      studentId: s.studentId,
+      studentName: s.studentName,
+      type: s.attendanceRate < 50 ? "exam-ineligible" : s.attendanceRate < 60 ? "below-threshold" : "declining-trend",
+      severity: s.attendanceRate < 50 ? "critical" : s.attendanceRate < 60 ? "warning" : "info",
+      message: s.attendanceRate < 50 
+        ? `Critical: ${s.studentName} is ineligible for final exam (${s.attendanceRate.toFixed(1)}% attendance)`
+        : s.attendanceRate < 60
+        ? `Warning: ${s.studentName} is at risk of failing attendance requirement (${s.attendanceRate.toFixed(1)}%)`
+        : `Notice: ${s.studentName} showing declining attendance trend`,
+      date: new Date(),
+      acknowledged: Math.random() > 0.5,
+      courseId: courses[Math.floor(Math.random() * courses.length)].id
+    }));
+
+  // Generate camera data
+  const cameras: AICamera[] = Array.from({ length: 5 }, (_, i) => ({
+    id: `CAM-${i + 1}`,
+    location: [`Lecture Hall A`, `Lab Building 2`, `Tutorial Room 3B`, `Main Auditorium`, `Computer Lab 5`][i],
+    status: Math.random() > 0.1 ? "online" : "offline",
+    lastSync: new Date(Date.now() - Math.random() * 3600000),
+    sessionsToday: Math.floor(Math.random() * 12),
+    accuracy: 85 + Math.random() * 13
+  }));
+
+  return { records, students, courses: courseStats, alerts, cameras };
+};
+
+// Main Attendance Component
+const Attendance: React.FC = () => {
+  const [data] = useState(generateSampleAttendanceData());
+  const [activeTab, setActiveTab] = useState<"overview" | "students" | "courses" | "alerts" | "cameras">("overview");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"all" | "at-risk" | "eligible" | "ineligible">("all");
+  const [selectedStudent, setSelectedStudent] = useState<StudentAttendanceStats | null>(null);
+  const [dateRange, setDateRange] = useState<"week" | "month" | "semester">("month");
+
+  // Filtered students
+  const filteredStudents = useMemo(() => {
+    return data.students.filter(student => {
+      const matchesSearch = student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFilter = 
+        filterStatus === "all" ? true :
+        filterStatus === "at-risk" ? student.atRisk :
+        filterStatus === "eligible" ? student.eligibleForExam :
+        !student.eligibleForExam;
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [data.students, searchTerm, filterStatus]);
+
+  // Overall stats
+  const overallStats = useMemo(() => {
+    const totalStudents = data.students.length;
+    const avgAttendance = data.students.reduce((sum, s) => sum + s.attendanceRate, 0) / totalStudents;
+    const atRisk = data.students.filter(s => s.atRisk).length;
+    const eligible = data.students.filter(s => s.eligibleForExam).length;
+    const criticalAlerts = data.alerts.filter(a => a.severity === "critical" && !a.acknowledged).length;
+
+    return { totalStudents, avgAttendance, atRisk, eligible, criticalAlerts };
+  }, [data]);
+
+  return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 text-gray-900">
+              Attendance Monitoring
+            </h1>
+            <p className="text-gray-600 text-sm">
+              Track student attendance, analyze trends, and manage exam eligibility
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-all">
+              <RefreshCw size={16} />
+              <span>Sync Cameras</span>
+            </button>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-all">
+              <Download size={16} />
+              <span>Export Report</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            icon={<Users size={24} />}
+            title="Total Students"
+            value={overallStats.totalStudents.toString()}
+            subtitle="Enrolled this semester"
+            color="blue"
+          />
+          <MetricCard
+            icon={<BarChart3 size={24} />}
+            title="Average Attendance"
+            value={`${overallStats.avgAttendance.toFixed(1)}%`}
+            subtitle={overallStats.avgAttendance >= 70 ? "Above threshold" : "Below threshold"}
+            color={overallStats.avgAttendance >= 70 ? "green" : "red"}
+            trend={overallStats.avgAttendance >= 70 ? "up" : "down"}
+          />
+          <MetricCard
+            icon={<CheckCircle size={24} />}
+            title="Exam Eligible"
+            value={overallStats.eligible.toString()}
+            subtitle={`${((overallStats.eligible / overallStats.totalStudents) * 100).toFixed(0)}% of students`}
+            color="green"
+          />
+          <MetricCard
+            icon={<AlertTriangle size={24} />}
+            title="At Risk"
+            value={overallStats.atRisk.toString()}
+            subtitle={`${overallStats.criticalAlerts} critical alerts`}
+            color="orange"
+          />
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-sm mb-6">
+        <div className="flex border-b border-gray-200 px-4 overflow-x-auto">
+          {[
+            { id: "overview", label: "Overview", icon: <BarChart3 size={18} /> },
+            { id: "students", label: "Students", icon: <Users size={18} /> },
+            { id: "courses", label: "Courses", icon: <BookOpen size={18} /> },
+            { id: "alerts", label: "Alerts", icon: <Bell size={18} /> },
+            { id: "cameras", label: "AI Cameras", icon: <Camera size={18} /> }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-5 py-4 flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-blue-600 text-blue-600 font-semibold'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === "overview" && (
+            <OverviewTab 
+              data={data} 
+              stats={overallStats}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+            />
+          )}
+          
+          {activeTab === "students" && (
+            <StudentsTab
+              students={filteredStudents}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              filterStatus={filterStatus}
+              onFilterChange={setFilterStatus}
+              selectedStudent={selectedStudent}
+              onSelectStudent={setSelectedStudent}
+            />
+          )}
+          
+          {activeTab === "courses" && (
+            <CoursesTab courses={data.courses} />
+          )}
+          
+          {activeTab === "alerts" && (
+            <AlertsTab alerts={data.alerts} />
+          )}
+          
+          {activeTab === "cameras" && (
+            <CamerasTab cameras={data.cameras} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Metric Card Component
+const MetricCard: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  subtitle: string;
+  color: string;
+  trend?: "up" | "down";
+}> = ({ icon, title, value, subtitle, color, trend }) => {
+  const colorClasses = {
+    blue: 'bg-blue-50 text-blue-600',
+    green: 'bg-green-50 text-green-600',
+    red: 'bg-red-50 text-red-600',
+    orange: 'bg-orange-50 text-orange-600',
+  }[color];
+
+  return (
+    <div className="bg-white p-5 rounded-lg shadow-sm flex gap-4 hover:shadow-md transition-shadow">
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${colorClasses}`}>
+        {icon}
+      </div>
+      <div className="flex-1">
+        <div className="text-xs text-gray-600 mb-1">{title}</div>
+        <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
+        <div className="text-xs text-gray-600 flex items-center gap-1">
+          {trend && (
+            trend === "up" ? 
+              <TrendingUp size={14} className="text-green-600" /> : 
+              <TrendingDown size={14} className="text-red-600" />
+          )}
+          {subtitle}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Overview Tab
+const OverviewTab: React.FC<{
+  data: ReturnType<typeof generateSampleAttendanceData>;
+  stats: any;
+  dateRange: string;
+  onDateRangeChange: (range: "week" | "month" | "semester") => void;
+}> = ({ data, stats, dateRange, onDateRangeChange }) => {
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Attendance Trend Chart */}
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Attendance Trends</h3>
+          <div className="flex gap-2">
+            {["week", "month", "semester"].map(range => (
+              <button
+                key={range}
+                onClick={() => onDateRangeChange(range as any)}
+                className={`px-3 py-1.5 text-xs rounded transition-all capitalize ${
+                  dateRange === range
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {range}
+              </button>
+            ))}
+          </div>
+        </div>
+        <AttendanceTrendChart data={data.records} />
+      </div>
+
+      {/* Distribution Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Attendance Distribution</h3>
+          <AttendanceDistribution students={data.students} />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Source Breakdown</h3>
+          <SourceBreakdown records={data.records} />
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Recent Sessions</h3>
+        <RecentSessions records={data.records.slice(0, 10)} />
+      </div>
+    </div>
+  );
+};
+
+// Attendance Trend Chart
+const AttendanceTrendChart: React.FC<{ data: AttendanceRecord[] }> = ({ data }) => {
+  const chartData = useMemo(() => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return date.toISOString().split('T')[0];
+    });
+
+    return last7Days.map(date => {
+      const dayRecords = data.filter(r => r.date.toISOString().split('T')[0] === date);
+      const present = dayRecords.filter(r => r.status === "present").length;
+      const total = dayRecords.length;
+      const rate = total > 0 ? (present / total) * 100 : 0;
+      
+      return {
+        date: new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+        rate: rate.toFixed(1)
+      };
+    });
+  }, [data]);
+
+  return (
+    <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+      <div className="flex h-48 items-end gap-3">
+        {chartData.map((item, idx) => (
+          <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+            <div className="text-xs font-semibold text-gray-700">
+              {item.rate}%
+            </div>
+            <div
+              className={`w-full rounded-t transition-all ${
+                parseFloat(item.rate) >= 70 ? 'bg-green-500' : 
+                parseFloat(item.rate) >= 50 ? 'bg-orange-500' : 
+                'bg-red-500'
+              }`}
+              style={{ height: `${(parseFloat(item.rate) / 100) * 140}px` }}
+            />
+            <div className="text-xs text-gray-600 text-center">
+              {item.date}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Attendance Distribution
+const AttendanceDistribution: React.FC<{ students: StudentAttendanceStats[] }> = ({ students }) => {
+  const distribution = useMemo(() => {
+    const ranges = [
+      { label: "90-100%", count: students.filter(s => s.attendanceRate >= 90).length, color: "bg-green-600" },
+      { label: "80-89%", count: students.filter(s => s.attendanceRate >= 80 && s.attendanceRate < 90).length, color: "bg-green-500" },
+      { label: "70-79%", count: students.filter(s => s.attendanceRate >= 70 && s.attendanceRate < 80).length, color: "bg-yellow-500" },
+      { label: "60-69%", count: students.filter(s => s.attendanceRate >= 60 && s.attendanceRate < 70).length, color: "bg-orange-500" },
+      { label: "Below 60%", count: students.filter(s => s.attendanceRate < 60).length, color: "bg-red-500" }
+    ];
+    return ranges;
+  }, [students]);
+
+  const maxCount = Math.max(...distribution.map(d => d.count));
+
+  return (
+    <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+      {distribution.map((item, idx) => (
+        <div key={idx} className="mb-3 last:mb-0">
+          <div className="flex justify-between mb-1">
+            <span className="text-sm text-gray-700">{item.label}</span>
+            <span className="text-sm font-semibold text-gray-900">{item.count} students</span>
+          </div>
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full ${item.color} transition-all`}
+              style={{ width: `${(item.count / maxCount) * 100}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Source Breakdown
+const SourceBreakdown: React.FC<{ records: AttendanceRecord[] }> = ({ records }) => {
+  const breakdown = useMemo(() => {
+    const aiCamera = records.filter(r => r.source === "ai-camera").length;
+    const quiz = records.filter(r => r.source === "quiz").length;
+    const manual = records.filter(r => r.source === "manual").length;
+    const total = records.length;
+
+    return [
+      { label: "AI Camera", count: aiCamera, percentage: ((aiCamera / total) * 100).toFixed(1), color: "blue", icon: <Camera size={16} /> },
+      { label: "Quiz/Assignment", count: quiz, percentage: ((quiz / total) * 100).toFixed(1), color: "purple", icon: <FileText size={16} /> },
+      { label: "Manual Entry", count: manual, percentage: ((manual / total) * 100).toFixed(1), color: "gray", icon: <UserCheck size={16} /> }
+    ];
+  }, [records]);
+
+  return (
+    <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+      {breakdown.map((item, idx) => (
+        <div key={idx} className={`flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 ${idx < breakdown.length - 1 ? 'mb-2' : ''}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              item.color === 'blue' ? 'bg-blue-100 text-blue-600' :
+              item.color === 'purple' ? 'bg-purple-100 text-purple-600' :
+              'bg-gray-100 text-gray-600'
+            }`}>
+              {item.icon}
+            </div>
+            <span className="text-sm text-gray-700">{item.label}</span>
+          </div>
+          <div className="text-right">
+            <div className="text-base font-semibold text-gray-900">{item.count}</div>
+            <div className="text-xs text-gray-600">{item.percentage}%</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Recent Sessions
+const RecentSessions: React.FC<{ records: AttendanceRecord[] }> = ({ records }) => {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <table className="w-full">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600">Date/Time</th>
+            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600">Student</th>
+            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600">Course</th>
+            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
+            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {records.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10).map((record, idx) => (
+            <tr key={record.id} className={`${idx > 0 ? 'border-t border-gray-200' : ''} hover:bg-gray-50`}>
+              <td className="px-3 py-3 text-sm text-gray-700">
+                {record.date.toLocaleDateString()} {record.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </td>
+              <td className="px-3 py-3 text-sm font-medium text-gray-900">
+                {record.studentName}
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-700">
+                {record.courseName}
+              </td>
+              <td className="px-3 py-3">
+                <StatusBadge status={record.status} />
+              </td>
+              <td className="px-3 py-3">
+                <SourceBadge source={record.source} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// Students Tab
+const StudentsTab: React.FC<{
+  students: StudentAttendanceStats[];
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+  filterStatus: string;
+  onFilterChange: (status: any) => void;
+  selectedStudent: StudentAttendanceStats | null;
+  onSelectStudent: (student: StudentAttendanceStats | null) => void;
+}> = ({ students, searchTerm, onSearchChange, filterStatus, onFilterChange, selectedStudent, onSelectStudent }) => {
+  return (
+    <div>
+      {/* Search and Filter */}
+      <div className="flex gap-3 mb-5">
+        <div className="flex-1 relative">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name or student ID..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <select
+          value={filterStatus}
+          onChange={(e) => onFilterChange(e.target.value)}
+          className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="all">All Students</option>
+          <option value="at-risk">At Risk</option>
+          <option value="eligible">Exam Eligible</option>
+          <option value="ineligible">Exam Ineligible</option>
+        </select>
+      </div>
+
+      {/* Student List */}
+      {selectedStudent ? (
+        <StudentDetailView 
+          student={selectedStudent} 
+          onBack={() => onSelectStudent(null)} 
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {students.map(student => (
+            <StudentCard 
+              key={student.studentId} 
+              student={student} 
+              onClick={() => onSelectStudent(student)}
+            />
+          ))}
+        </div>
+      )}
+
+      {students.length === 0 && (
+        <div className="text-center py-16 text-gray-500">
+          <Users size={48} className="mx-auto mb-4 opacity-30" />
+          <p className="text-base">No students found matching your criteria</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Student Card
+const StudentCard: React.FC<{
+  student: StudentAttendanceStats;
+  onClick: () => void;
+}> = ({ student, onClick }) => {
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white border border-gray-200 rounded-lg p-5 cursor-pointer transition-all hover:border-blue-500 hover:shadow-lg hover:-translate-y-1"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h4 className="text-base font-semibold text-gray-900 mb-1">
+            {student.studentName}
+          </h4>
+          <p className="text-xs text-gray-600">
+            {student.studentId} • Year {student.year}
+          </p>
+        </div>
+        {student.atRisk && (
+          <AlertTriangle size={18} className="text-orange-500" />
+        )}
+      </div>
+
+      <div className="mb-3">
+        <div className="flex justify-between mb-1.5">
+          <span className="text-sm text-gray-700">Attendance Rate</span>
+          <span className={`text-sm font-semibold ${
+            student.eligibleForExam ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {student.attendanceRate.toFixed(1)}%
+          </span>
+        </div>
+        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className={`h-full transition-all ${
+              student.eligibleForExam ? 'bg-green-500' : 'bg-red-500'
+            }`}
+            style={{ width: `${student.attendanceRate}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-3 text-xs mb-3">
+        <div className="flex-1">
+          <div className="text-gray-600 mb-0.5">Present</div>
+          <div className="font-semibold text-gray-900">{student.attended}/{student.totalSessions}</div>
+        </div>
+        <div className="flex-1">
+          <div className="text-gray-600 mb-0.5">Quiz Bonus</div>
+          <div className="font-semibold text-purple-600">+{student.quizBonus}%</div>
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-gray-200 flex justify-between items-center">
+        <div className={`text-xs px-2 py-1 rounded font-medium ${
+          student.eligibleForExam
+            ? 'bg-green-50 text-green-700'
+            : 'bg-red-50 text-red-700'
+        }`}>
+          {student.eligibleForExam ? '✓ Exam Eligible' : '✗ Not Eligible'}
+        </div>
+        <Eye size={14} className="text-gray-400" />
+      </div>
+    </div>
+  );
+};
+
+// Student Detail View
+const StudentDetailView: React.FC<{
+  student: StudentAttendanceStats;
+  onBack: () => void;
+}> = ({ student, onBack }) => {
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        className="px-4 py-2 border border-gray-200 bg-white rounded-lg hover:bg-gray-50 mb-5 flex items-center gap-2 transition-all"
+      >
+        ← Back to List
+      </button>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">{student.studentName}</h2>
+            <p className="text-gray-600">{student.studentId} • {student.department} • Year {student.year}</p>
+          </div>
+          <div className={`px-5 py-3 rounded-lg font-semibold ${
+            student.eligibleForExam
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {student.eligibleForExam ? '✓ Exam Eligible' : '✗ Not Eligible for Exam'}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">Attendance Rate</div>
+            <div className={`text-3xl font-bold ${student.eligibleForExam ? 'text-green-600' : 'text-red-600'}`}>
+              {student.attendanceRate.toFixed(1)}%
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">Sessions Attended</div>
+            <div className="text-3xl font-bold text-gray-900">
+              {student.attended}/{student.totalSessions}
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">Quiz Bonus</div>
+            <div className="text-3xl font-bold text-purple-600">
+              +{student.quizBonus}%
+            </div>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">Absences</div>
+            <div className="text-3xl font-bold text-red-600">
+              {student.absent}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3">Attendance Breakdown</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[
+              { label: "Present", value: student.attended, color: "text-green-600" },
+              { label: "Late", value: student.late, color: "text-yellow-600" },
+              { label: "Absent", value: student.absent, color: "text-red-600" },
+              { label: "Excused", value: student.excused, color: "text-gray-600" }
+            ].map(item => (
+              <div key={item.label} className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">{item.label}</span>
+                <span className={`font-semibold ${item.color}`}>{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {student.atRisk && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
+            <AlertTriangle size={20} className="text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold text-red-900 mb-1">
+                At Risk: Attendance Below Threshold
+              </div>
+              <div className="text-sm text-red-800">
+                This student needs {Math.ceil((70 - student.attendanceRate) * student.totalSessions / 100)} more attended sessions to become eligible for the final exam.
+                {student.quizBonus > 0 && ` Current quiz bonus: +${student.quizBonus}%`}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Courses Tab
+const CoursesTab: React.FC<{ courses: CourseAttendance[] }> = ({ courses }) => {
+  const [sortBy, setSortBy] = useState<"name" | "attendance" | "atRisk">("attendance");
+
+  const sortedCourses = useMemo(() => {
+    return [...courses].sort((a, b) => {
+      if (sortBy === "name") return a.courseName.localeCompare(b.courseName);
+      if (sortBy === "attendance") return b.averageAttendance - a.averageAttendance;
+      return b.atRiskStudents - a.atRiskStudents;
+    });
+  }, [courses, sortBy]);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-5">
+        <h3 className="text-lg font-semibold">Course Performance</h3>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as any)}
+          className="px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="attendance">Sort by Attendance</option>
+          <option value="atRisk">Sort by At-Risk Students</option>
+          <option value="name">Sort by Name</option>
+        </select>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {sortedCourses.map(course => (
+          <div
+            key={course.courseId}
+            className="bg-white border border-gray-200 rounded-lg p-5"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <h4 className="text-base font-semibold mb-1">{course.courseName}</h4>
+                <p className="text-sm text-gray-600">
+                  {course.courseId} • Instructor: {course.instructor}
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {course.trend === "up" ? (
+                  <TrendingUp size={18} className="text-green-600" />
+                ) : course.trend === "down" ? (
+                  <TrendingDown size={18} className="text-red-600" />
+                ) : (
+                  <Minus size={18} className="text-gray-600" />
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4 mb-3">
+              <div>
+                <div className="text-xs text-gray-600 mb-1">Students</div>
+                <div className="text-xl font-semibold">{course.totalStudents}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-600 mb-1">Avg Attendance</div>
+                <div className={`text-xl font-semibold ${
+                  course.averageAttendance >= 70 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {course.averageAttendance.toFixed(1)}%
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-600 mb-1">Sessions</div>
+                <div className="text-xl font-semibold">{course.sessionsHeld}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-600 mb-1">At Risk</div>
+                <div className="text-xl font-semibold text-orange-600">{course.atRiskStudents}</div>
+              </div>
+            </div>
+
+            <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all ${
+                  course.averageAttendance >= 70 ? 'bg-green-500' : 'bg-red-500'
+                }`}
+                style={{ width: `${course.averageAttendance}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Alerts Tab
+const AlertsTab: React.FC<{ alerts: AttendanceAlert[] }> = ({ alerts }) => {
+  const [filter, setFilter] = useState<"all" | "critical" | "warning" | "unacknowledged">("all");
+
+  const filteredAlerts = useMemo(() => {
+    return alerts.filter(alert => {
+      if (filter === "all") return true;
+      if (filter === "unacknowledged") return !alert.acknowledged;
+      return alert.severity === filter;
+    });
+  }, [alerts, filter]);
+
+  const stats = useMemo(() => {
+    return {
+      total: alerts.length,
+      critical: alerts.filter(a => a.severity === "critical").length,
+      warning: alerts.filter(a => a.severity === "warning").length,
+      unacknowledged: alerts.filter(a => !a.acknowledged).length
+    };
+  }, [alerts]);
+
+  return (
+    <div>
+      <div className="grid grid-cols-4 gap-3 mb-5">
+        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="text-xs text-gray-600 mb-1">Total Alerts</div>
+          <div className="text-2xl font-bold">{stats.total}</div>
+        </div>
+        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+          <div className="text-xs text-red-700 mb-1">Critical</div>
+          <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
+        </div>
+        <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="text-xs text-orange-700 mb-1">Warning</div>
+          <div className="text-2xl font-bold text-orange-600">{stats.warning}</div>
+        </div>
+        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="text-xs text-blue-700 mb-1">Unacknowledged</div>
+          <div className="text-2xl font-bold text-blue-600">{stats.unacknowledged}</div>
+        </div>
+      </div>
+
+      <div className="flex gap-2 mb-5">
+        {["all", "critical", "warning", "unacknowledged"].map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f as any)}
+            className={`px-4 py-2 rounded-lg text-sm capitalize transition-all ${
+              filter === f
+                ? 'bg-blue-600 text-white'
+                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {filteredAlerts.map(alert => (
+          <div
+            key={alert.id}
+            className={`bg-white border rounded-lg p-4 flex gap-4 items-start ${
+              alert.severity === "critical" ? 'border-red-300' :
+              alert.severity === "warning" ? 'border-orange-300' :
+              'border-blue-300'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+              alert.severity === "critical" ? 'bg-red-50' :
+              alert.severity === "warning" ? 'bg-orange-50' :
+              'bg-blue-50'
+            }`}>
+              {alert.severity === "critical" ? (
+                <XCircle size={24} className="text-red-600" />
+              ) : alert.severity === "warning" ? (
+                <AlertTriangle size={24} className="text-orange-600" />
+              ) : (
+                <AlertCircle size={24} className="text-blue-600" />
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between mb-2">
+                <h4 className="text-sm font-semibold text-gray-900">
+                  {alert.studentName}
+                </h4>
+                <span className="text-xs text-gray-600">
+                  {alert.date.toLocaleDateString()}
+                </span>
+              </div>
+              <p className="text-sm text-gray-700 mb-2">
+                {alert.message}
+              </p>
+              <div className="flex gap-2 items-center">
+                <span className={`text-xs px-2 py-1 rounded font-medium ${
+                  alert.acknowledged
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  {alert.acknowledged ? "Acknowledged" : "Pending"}
+                </span>
+                {!alert.acknowledged && (
+                  <button className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Acknowledge
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filteredAlerts.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <Bell size={48} className="mx-auto mb-4 opacity-20" />
+          <p>No alerts matching your filter</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Cameras Tab
+const CamerasTab: React.FC<{ cameras: AICamera[] }> = ({ cameras }) => {
+  return (
+    <div>
+      <div className="mb-5">
+        <h3 className="text-lg font-semibold mb-2">AI Camera Network</h3>
+        <p className="text-sm text-gray-600">
+          Monitor the status and performance of AI cameras used for attendance tracking
+        </p>
+      </div>
+
+      <div className="p-4 bg-blue-50 rounded-lg mb-6 border border-blue-200">
+        <div className="flex gap-3 items-start">
+          <AlertCircle size={20} className="text-blue-600 shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold text-blue-900 mb-1">
+              API Integration Pending
+            </div>
+            <div className="text-sm text-blue-800">
+              Once the AI camera API documentation is available, this system will automatically sync attendance data from all connected cameras. The interface below shows how camera data will be displayed.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {cameras.map(camera => (
+          <div
+            key={camera.id}
+            className="bg-white border border-gray-200 rounded-lg p-5"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                camera.status === "online" ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                <Camera size={24} className={camera.status === "online" ? 'text-green-600' : 'text-red-600'} />
+              </div>
+              <div className={`px-2 py-1 rounded text-xs font-semibold ${
+                camera.status === "online" ? 'bg-green-100 text-green-700' :
+                camera.status === "offline" ? 'bg-red-100 text-red-700' :
+                'bg-yellow-100 text-yellow-700'
+              }`}>
+                {camera.status.toUpperCase()}
+              </div>
+            </div>
+
+            <h4 className="text-base font-semibold mb-1">{camera.id}</h4>
+            <p className="text-sm text-gray-600 mb-4">{camera.location}</p>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <div className="text-xs text-gray-600 mb-1">Sessions Today</div>
+                <div className="text-lg font-semibold">{camera.sessionsToday}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-600 mb-1">Accuracy</div>
+                <div className="text-lg font-semibold text-green-600">{camera.accuracy.toFixed(1)}%</div>
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-600">
+              Last sync: {camera.lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="p-5 bg-gray-50 rounded-lg border border-gray-200">
+        <h4 className="text-base font-semibold mb-3">Integration Guide</h4>
+        <div className="text-sm text-gray-700 leading-relaxed">
+          <p className="mb-2">
+            <strong>When API is available:</strong>
+          </p>
+          <ul className="list-disc ml-5 mb-3 space-y-1">
+            <li>Camera data will sync every 5 minutes</li>
+            <li>Face recognition events will automatically create attendance records</li>
+            <li>Lecturers can verify or override AI-detected attendance</li>
+            <li>System will flag low confidence detections for manual review</li>
+          </ul>
+          <p className="mb-2">
+            <strong>Expected API Endpoints:</strong>
+          </p>
+          <pre className="bg-gray-900 text-green-400 p-3 rounded text-xs font-mono overflow-x-auto">
+GET /api/cameras - List all cameras<br />
+GET /api/cameras/:id/sessions - Get camera sessions<br />
+POST /api/attendance/verify - Verify attendance record
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Status Badge
+const StatusBadge: React.FC<{ status: AttendanceRecord["status"] }> = ({ status }) => {
+  const config = {
+    present: { bg: 'bg-green-100', text: 'text-green-700', icon: <CheckCircle size={12} /> },
+    late: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: <Clock size={12} /> },
+    absent: { bg: 'bg-red-100', text: 'text-red-700', icon: <XCircle size={12} /> },
+    excused: { bg: 'bg-teal-100', text: 'text-teal-700', icon: <CheckCircle size={12} /> }
+  }[status];
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium ${config.bg} ${config.text}`}>
+      {config.icon}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+// Source Badge
+const SourceBadge: React.FC<{ source: AttendanceRecord["source"] }> = ({ source }) => {
+  const config = {
+    "ai-camera": { bg: 'bg-blue-100', text: 'text-blue-700', icon: <Camera size={12} />, label: "AI Camera" },
+    "quiz": { bg: 'bg-purple-100', text: 'text-purple-700', icon: <FileText size={12} />, label: "Quiz" },
+    "manual": { bg: 'bg-gray-100', text: 'text-gray-700', icon: <UserCheck size={12} />, label: "Manual" },
+    "assignment": { bg: 'bg-teal-100', text: 'text-teal-700', icon: <Award size={12} />, label: "Assignment" }
+  }[source];
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${config.bg} ${config.text}`}>
+      {config.icon}
+      {config.label}
+    </span>
+  );
+};
+
 
 
 
@@ -16255,7 +17420,7 @@ interface KanbanColumn {
 
 type ViewMode = 'kanban' | 'gantt';
 
-const ProjectsTab: React.FC = () => {
+const ProjectsTab = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -17579,7 +18744,7 @@ const sampleUsers: UserAccount[] = [
   },
 ];
 
-const AccountManagement: React.FC = () => {
+const AccountManagement = () => {
   const [users, setUsers] = useState<UserAccount[]>(sampleUsers);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "detail" | "create">("list");
@@ -18454,7 +19619,9 @@ const AccountManagement: React.FC = () => {
     if (activeTab === 'scholarships') {
       return <Scholarship />;
     }
-    
+    if (activeTab === 'attendance') {
+      return <Attendance />;
+    }
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;
     } 
