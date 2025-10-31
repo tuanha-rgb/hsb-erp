@@ -3038,9 +3038,8 @@ const ThesisManagement = () => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-            <span>Digital Library</span>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-gray-900 font-medium">Library: Thesis Management</span>
+           
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Thesis/Dissertation Management</h1>
         </div>

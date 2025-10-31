@@ -1,5 +1,5 @@
 // src/features/academics/data/facultyMetrics.ts
-import { FacultyMetric } from "./acad/academicmodel";
+import { FacultyMetric } from "./academicmodel";
 
 export const facultyMetrics: FacultyMetric[] = [
   { code: "FOM",   name: "Faculty of Management",                   timelyDelivery: 89.5, stdDev: 0.54, skewness: -0.32, kurtosis: 2.85 },

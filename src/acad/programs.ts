@@ -1,5 +1,5 @@
 // src/features/academics/data/programs.ts
-import { ProgramCatalog } from "./acad/academicmodel";
+import { ProgramCatalog } from "./academicmodel";
 
 export const programs: ProgramCatalog = {
   bachelor: [
