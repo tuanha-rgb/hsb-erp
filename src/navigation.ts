@@ -86,7 +86,7 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
               { id: 'library-dashboard', label: 'Library Dashboard' },
               { id: 'book-management', label: 'Book Management' },
               { id: 'thesis-store', label: 'Thesis Storage' },
-              { id: 'journals', label: 'Journals' },
+              { id: 'library-view', label: 'Library Viewer' },
               { id: 'other-type', label: 'Others' }
             ]
           },

@@ -17,6 +17,8 @@ import {
   type ApplicationStatus,
 } from "./student/scholarshipdata";
 
+import LibraryViewer from "./libraryviewer";
+
 import { sampleEvents, type EventItem, getEventStatusColor } from "./student/eventdata";
 
 import {  type Document,  type DocumentSource,  type DocumentType,  type DocumentStatus,  type PriorityLevel,
@@ -19102,6 +19104,9 @@ const AccountManagement = () => {
     
     if (activeTab === 'library-dashboard') {
       return <LibraryDashboard />;
+    }
+    if (activeTab === 'library-view') {
+      return <LibraryViewer />;
     }
     if (activeTab === 'thesis-store') {
       return <ThesisStorage />;

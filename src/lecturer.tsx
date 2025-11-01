@@ -99,7 +99,7 @@ const DashboardContent = () => {
   return (
     <>
     <div className="px-3 sm:px-3">
-  <div className="flex justify-between items-start">
+  <div className="flex justify-between items-start mt-3">
     <div>
       <h1 className="text-3xl font-bold text-gray-900">Lecturer Dashboard</h1>
       <p className="text-gray-500 mt-1">Welcome back, Dr. Nguyen Van A</p>
@@ -108,9 +108,9 @@ const DashboardContent = () => {
 </div>
      
 
-      <div className="px-3 sm:px-3">
+      <div className="px-3 ">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-3">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -131,7 +131,7 @@ const DashboardContent = () => {
           })}
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
           {/* My Courses */}
           <div className="col-span-2 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex justify-between items-center mb-6">
@@ -177,9 +177,9 @@ const DashboardContent = () => {
               <h2 className="text-xl font-bold text-gray-900">Schedule</h2>
               <Calendar className="w-5 h-5 text-gray-400" />
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 overflow-auto ">
               {upcomingClasses.map((cls, index) => (
-                <div key={index} className="border-l-4 border-blue-600 pl-4 py-2">
+                <div key={index} className="border-l-4 overflow-auto border-blue-600 pl-4 py-2">
                   <p className="font-semibold text-gray-900 text-sm">{cls.course}</p>
                   <p className="text-xs text-gray-600 mt-1">{cls.type} • {cls.duration}</p>
                   <p className="text-xs text-blue-600 font-medium mt-1">{cls.time}</p>
@@ -191,7 +191,7 @@ const DashboardContent = () => {
         </div>
 
         {/* Pending Tasks */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 mt-3">
           <div className="col-span-3 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-900">Pending Tasks</h2>
@@ -366,7 +366,7 @@ const LecturerProfile = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w mx-auto px-8 py-8">
+      <div className="max-w mx-auto mt-3">
         {activeTab === 'overview' && (
           <div className="grid grid-cols-3 gap-6">
             {/* Left Column - Personal & Academic Info */}
@@ -655,7 +655,7 @@ const ScheduleView = () => {
   return (
     <div className="flex-1 overflow-auto">
       {/* Header */}
-      <div className="bg-white border-b rounded-xl border-gray-200 px-9 py-6">
+      <div className="bg-white border-b rounded-xl border-gray-200 p-3 mb-3">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Schedule & Tasks</h1>
@@ -678,12 +678,12 @@ const ScheduleView = () => {
         </div>
       </div>
 
-      <div className="p-8">
-        <div className="space-y-6">
+      <div className="">
+        <div className="space-y-3">
           {/* Calendar Section - Full Width */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-3">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-gray-900">{monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}</h2>
                 <div className="flex gap-2">
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -1093,7 +1093,7 @@ const LecturerTeaching = () => {
   };
 
   return (
-    <div className="flex-1 overflow-auto p-3">
+    <div className="flex-1 overflow-auto p-1">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-6">
         <div className="flex justify-between items-start">
@@ -1114,7 +1114,7 @@ const LecturerTeaching = () => {
         </div>
       </div>
 
-      <div className="p-3">
+      <div className="mt-3">
         {/* Teaching Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -2170,14 +2170,14 @@ const CanvasView = () => {
   return (
     <div>
       {/* Header */}
-      <div className="header bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] rounded-xl  text-white  mb-3 shadow-[0_4px_20px_rgba(91,108,232,0.3)] p-8 md:p-8 lg:p-8" >
+      <div className="header bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] rounded-xl  text-white  mb-3 shadow-[0_4px_20px_rgba(91,108,232,0.3)] p-5" >
         <div className="header-content max-w mx-auto rounded-xl flex items-center justify-between gap-4 flex-wrap">
           <div>
             <div className="header-title text-[28px] font-bold mb-1">HSB Canvas / LMS</div>
             <div className="header-subtitle text-sm opacity-90">Lecturer Management System</div>
           </div>
           <button
-            className="header-btn bg-white/20 border border-white/30 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:bg-white/30 hover:-translate-y-0.5"
+            className="header-btn bg-white/20 border border-white/30 text-white p-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:bg-white/30 hover:-translate-y-0.5"
             onClick={() => navigateTo("documentation")}
           >
             <BookOpen className="w-[18px] h-[18px]" />
@@ -2187,11 +2187,11 @@ const CanvasView = () => {
       </div>
 
       {/* Container */}
-      <div className="p-3">
+      <div className="">
         {/* Course Overview Stats */}
-        <div className="section mb-12">
-          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">Course Overview</h2>
-          <div className="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+        <div className="section">
+          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-3 text-center">Course Overview</h2>
+          <div className="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="stat-card bg-white rounded-2xl p-7 border border-gray-200 text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(91,108,232,0.12)]">
               <div className="stat-value text-[40px] font-bold bg-[linear-gradient(135deg,#5b6ce8_0%,#8b5cf6_100%)] bg-clip-text text-transparent mb-2">
                 65
@@ -2220,7 +2220,7 @@ const CanvasView = () => {
         </div>
 
         {/* Main Features */}
-        <div className="cards-grid grid gap-6 mb-12" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
+        <div className="cards-grid grid gap-3 mt-3 mb-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
           <div
             className="feature-card bg-white rounded-2xl p-8 border border-gray-200 transition-all cursor-pointer relative overflow-hidden hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(91,108,232,0.15)] hover:border-[#5b6ce8]"
             onClick={() => navigateTo("materials")}
@@ -2265,8 +2265,8 @@ const CanvasView = () => {
         </div>
 
         {/* Pending Tasks */}
-        <div className="section mb-12">
-          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">
+        <div className="section mb-3">
+          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-3 text-center">
             Pending Tasks & Actions Required
           </h2>
 
@@ -2357,13 +2357,13 @@ const CanvasView = () => {
         </div>
 
         {/* Course Discussion Updates */}
-        <div className="section mb-12">
-          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-6 text-center">
+        <div className="section mb-3">
+          <h2 className="section-title text-[20px] font-semibold text-gray-900 mb-3 text-center">
             Course Discussion Updates
           </h2>
 
           {/* CSIR-6261 Discussions */}
-          <div className="mb-6">
+          <div className="mb-3">
             <div
               className="course-discussion-header flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all mb-3 hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]"
               onClick={() => toggleDiscussion("csir6261")}
@@ -2385,7 +2385,7 @@ const CanvasView = () => {
             </div>
 
             {open.csir6261 && (
-              <div className="course-discussions block mb-6">
+              <div className="course-discussions block mb-3">
                 <div className="update-item bg-white rounded-xl p-5 border border-gray-200 mb-3 flex items-start gap-4 transition-all hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]">
                   <div className="update-icon update-icon-purple w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 text-[20px] bg-[rgba(139,92,246,0.1)]">
                     💬
@@ -2457,7 +2457,7 @@ const CanvasView = () => {
           </div>
 
           {/* CS-6262 Discussions */}
-          <div className="mb-6">
+          <div className="mb-3">
             <div
               className="course-discussion-header flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all mb-3 hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]"
               onClick={() => toggleDiscussion("cs6262")}
@@ -2520,7 +2520,7 @@ const CanvasView = () => {
           </div>
 
           {/* CS-6238 Discussions */}
-          <div className="mb-6">
+          <div className="mb-3">
             <div
               className="course-discussion-header flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all mb-3 hover:border-[#5b6ce8] hover:shadow-[0_2px_8px_rgba(91,108,232,0.1)]"
               onClick={() => toggleDiscussion("cs6238")}
