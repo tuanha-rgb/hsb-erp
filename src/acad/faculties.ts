@@ -9,4 +9,3 @@ export const faculties: Faculty[] = [
   { code: "ITM", name: "Institute of Training and Management" },
 ];
 
-export default faculties;
