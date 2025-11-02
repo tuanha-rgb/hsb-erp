@@ -13663,7 +13663,7 @@ const getEnvVar = (key: string): string => {
 
 const RoomSchedule: React.FC<RoomScheduleProps> = ({ 
   googleSheetUrl = getEnvVar('VITE_SHEET_URL'),
-  apiKey = getEnvVar('VITE_GOOGLE_API_KEY')
+  apiKey = getEnvVar('VITE_SHEET_API')
 }) => {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [scheduleData, setScheduleData] = useState<WeeklyScheduleData>({});
