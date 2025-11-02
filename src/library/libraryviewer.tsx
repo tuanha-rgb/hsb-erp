@@ -27,7 +27,6 @@ interface CarouselSlide {
   action?: string;
   color: string;
 }
-const epubObjectUrlRef = useRef<string | null>(null);
 
 const carouselSlides: CarouselSlide[] = [
   {
