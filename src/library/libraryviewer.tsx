@@ -278,39 +278,47 @@ const loadingTask = getDocument(url);
     setCurrentPage(pageNum);
   };
 
-  const loadEPUB = async (url: string) => {
+ const loadEPUB = async (url: string) => {
   if (!epubContainerRef.current) return;
 
-  const book = ePub(url);
-  epubBookRef.current = book;
-  
-  const rendition = book.renderTo(epubContainerRef.current, {
-    width: '100%',
-    height: '100%',
-    spread: 'none'
-  });
-  
-  renditionRef.current = rendition;
-  
-  await rendition.display();
-  
-  // Get total pages after book is loaded
-  await book.ready;
-  
-  // Access spine items correctly
-  const navigation = await book.loaded.navigation;
-setTotalPages(500); // Temporary placeholder
-  setCurrentPage(1);
-
-  // Track location changes
-  rendition.on('relocated', (location: any) => {
-    if (location && location.start) {
-      const currentItem = book.spine.get(location.start.href);
-      if (currentItem) {
-        setCurrentPage(currentItem.index + 1);
-      }
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-  });
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const book = ePub(arrayBuffer);
+    epubBookRef.current = book;
+    
+    const rendition = book.renderTo(epubContainerRef.current, {
+      width: '100%',
+      height: '100%',
+      spread: 'none',
+      flow: 'paginated'
+    });
+    
+    renditionRef.current = rendition;
+    await rendition.display();
+    await book.ready;
+    
+    setTotalPages(0); // EPUBs don't have fixed pages
+    setCurrentPage(1);
+
+    rendition.on('relocated', (location: any) => {
+      if (location?.start?.index !== undefined) {
+        setCurrentPage(location.start.index + 1);
+      }
+    });
+    
+  } catch (err) {
+    console.error('EPUB load error:', err);
+    throw new Error(`Failed to load EPUB: ${err instanceof Error ? err.message : 'Unknown error'}`);
+  }
 };
 
   const handlePrevPage = async () => {
