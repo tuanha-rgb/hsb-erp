@@ -341,32 +341,35 @@ export const bookRecords: BookRecord[] = [
     currency: 'USD'
   },
   {
-    id: 'BK-SOC-010',
-    isbn: '978-1-4462-9536-4',
-    title: 'Research Methods in Social Sciences',
-    authors: ['Chava Frankfort-Nachmias', 'David Nachmias'],
-    publisher: 'Sage Publications',
-    publisherCode: 'SAGE',
-    edition: '8th Edition',
-    publicationYear: 2022,
-    bookType: 'textbook',
-    catalogue: 'Social Sciences',
-    subjects: ['Research Methods', 'Social Sciences', 'Statistics'],
-    description: 'Comprehensive guide to research methodology in social sciences.',
-    language: 'English',
-    pages: 592,
-    totalCopies: 22,
-    availableCopies: 19,
-    borrowedCopies: 3,
-    reservedCopies: 0,
-    shelfLocation: 'SOC-R-01-10',
-    rating: 4.5,
-    totalRatings: 142,
-    popularityScore: 78,
-    addedDate: '2023-09-01',
-    lastUpdated: '2024-10-08',
-    price: 88.00,
-    currency: 'USD'
+     id: 'BK-SOC-011',
+  isbn: '978-1-133-95477-4', // ← replace with your exact ISBN
+  title: 'Research Methods: The Essential Knowledge Base',
+  authors: ['William M. Trochim', 'James P. Donnelly', 'Kanika Arora'],
+  publisher: 'Cengage Learning',
+  publisherCode: 'CENGAGE',
+  edition: 'Latest Edition',
+  publicationYear: 2014,             // adjust if your copy differs
+  bookType: 'textbook',
+  catalogue: 'Social Sciences',
+  subjects: ['Research Methods', 'Social Sciences', 'Statistics', 'Methodology'],
+  description: 'Core concepts and practical techniques for designing, conducting, and analyzing research across the social sciences.',
+  language: 'English',
+  pages: 446,                         // approximate; adjust to your copy
+  totalCopies: 20,
+  availableCopies: 17,
+  borrowedCopies: 3,
+  reservedCopies: 0,
+  shelfLocation: 'SOC-R-01-11',
+  rating: 4.6,
+  totalRatings: 265,
+  popularityScore: 82,
+  addedDate: '2024-11-02',
+  lastUpdated: '2024-11-02',
+  price: 95.00,
+  currency: 'USD',
+   // Google Drive integration
+    driveFileId: '1x9cCXbDyKAcDqtpjfx4UlWu5tlXE0SVy', // Replace with actual Google Drive file ID
+    fileType: 'pdf'
   },
 
   {

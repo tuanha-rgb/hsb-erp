@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Book, BookOpen, Search, Filter, X, ChevronDown, ChevronRight,
   Star, Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
-  TrendingUp, Users, ZoomIn, ZoomOut
+  TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
 } from 'lucide-react';
 import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
 import { sampleTheses, type Thesis } from '../acad/thesis';
@@ -74,6 +74,15 @@ const carouselSlides: CarouselSlide[] = [
     color: 'from-pink-500 to-pink-600'
   }
 ];
+
+
+type PageMode = 'single' | 'dual';
+
+interface Bookmark {
+  page: number;
+  note?: string;
+  timestamp: number;
+}
 
 interface ReadingViewProps {
   item: ReadingItem;
@@ -188,21 +197,47 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
   );
 };
 
+
+
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(1.5);
+  const [pageMode, setPageMode] = useState<PageMode>('single');
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [bookmarkNote, setBookmarkNote] = useState('');
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvas2Ref = useRef<HTMLCanvasElement>(null);
   const epubContainerRef = useRef<HTMLDivElement>(null);
   const pdfDocRef = useRef<any>(null);
   const epubBookRef = useRef<any>(null);
   const renditionRef = useRef<any>(null);
 
-  // Check if item has file to load
   const hasFile = isBook(item) && item.driveFileId && item.fileType;
+  const storageKey = `bookmarks_${item.id}`;
+
+  // Load bookmarks from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        setBookmarks(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load bookmarks:', e);
+      }
+    }
+  }, [storageKey]);
+
+  // Save bookmarks to localStorage
+  useEffect(() => {
+    if (bookmarks.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(bookmarks));
+    }
+  }, [bookmarks, storageKey]);
 
   useEffect(() => {
     if (!hasFile) {
@@ -213,7 +248,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     loadDocument();
     
     return () => {
-      // Cleanup
       if (pdfDocRef.current) {
         pdfDocRef.current.destroy();
         pdfDocRef.current = null;
@@ -251,22 +285,37 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     }
   };
 
-  const loadPDF = async (url: string) => {
+   const loadPDF = async (url: string) => {
     // const loadingTask = pdfjsLib.getDocument(url);
 const loadingTask = getDocument(url);
 
     const pdf = await loadingTask.promise;
     pdfDocRef.current = pdf;
     setTotalPages(pdf.numPages);
-    await renderPDFPage(1);
+    await renderPDFPages(1);
   };
 
-  const renderPDFPage = async (pageNum: number) => {
-    if (!pdfDocRef.current || !canvasRef.current) return;
+  const renderPDFPages = async (pageNum: number) => {
+    if (!pdfDocRef.current) return;
+    
+    // Render first page
+    if (canvasRef.current) {
+      await renderPDFPage(pageNum, canvasRef.current);
+    }
+    
+    // Render second page if in dual mode
+    if (pageMode === 'dual' && canvas2Ref.current && pageNum < totalPages) {
+      await renderPDFPage(pageNum + 1, canvas2Ref.current);
+    }
+    
+    setCurrentPage(pageNum);
+  };
+
+  const renderPDFPage = async (pageNum: number, canvas: HTMLCanvasElement) => {
+    if (!pdfDocRef.current || pageNum > totalPages) return;
     
     const page = await pdfDocRef.current.getPage(pageNum);
     const viewport = page.getViewport({ scale });
-    const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     
     if (!context) return;
@@ -275,67 +324,53 @@ const loadingTask = getDocument(url);
     canvas.width = viewport.width;
     
     await page.render({ canvasContext: context, viewport }).promise;
-    setCurrentPage(pageNum);
   };
 
- const loadEPUB = async (url: string) => {
-  if (!epubContainerRef.current) return;
+  const loadEPUB = async (url: string) => {
+    if (!epubContainerRef.current) return;
 
-  try {
-    const response = await fetch(url, {
-      mode: 'cors',
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const book = ePub(arrayBuffer);
+    const book = ePub(url);
     epubBookRef.current = book;
     
     const rendition = book.renderTo(epubContainerRef.current, {
       width: '100%',
       height: '100%',
-      spread: 'none',
-      flow: 'paginated'
+      spread: pageMode === 'dual' ? 'auto' : 'none'
     });
     
     renditionRef.current = rendition;
     await rendition.display();
-    await book.ready;
     
-    setTotalPages(0); // EPUBs don't have fixed pages
+    await book.ready;
+    setTotalPages(50); // EPUB doesn't have fixed pages
     setCurrentPage(1);
 
     rendition.on('relocated', (location: any) => {
-      if (location?.start?.index !== undefined) {
-        setCurrentPage(location.start.index + 1);
-      }
+      setCurrentPage(Math.floor(location.start.percentage * 50) + 1);
     });
-    
-  } catch (err) {
-    console.error('EPUB load error:', err);
-    throw new Error(`Failed to load EPUB: ${err instanceof Error ? err.message : 'Unknown error'}`);
-  }
-};
+  };
 
   const handlePrevPage = async () => {
+    const step = pageMode === 'dual' ? 2 : 1;
     if (currentPage <= 1) return;
     
+    const newPage = Math.max(1, currentPage - step);
+    
     if (isBook(item) && item.fileType === 'pdf') {
-      await renderPDFPage(currentPage - 1);
+      await renderPDFPages(newPage);
     } else if (renditionRef.current) {
       await renditionRef.current.prev();
     }
   };
 
   const handleNextPage = async () => {
+    const step = pageMode === 'dual' ? 2 : 1;
     if (currentPage >= totalPages) return;
     
+    const newPage = Math.min(totalPages, currentPage + step);
+    
     if (isBook(item) && item.fileType === 'pdf') {
-      await renderPDFPage(currentPage + 1);
+      await renderPDFPages(newPage);
     } else if (renditionRef.current) {
       await renditionRef.current.next();
     }
@@ -345,8 +380,7 @@ const loadingTask = getDocument(url);
     if (isBook(item) && item.fileType === 'pdf') {
       const newScale = Math.min(scale + 0.25, 3);
       setScale(newScale);
-      // Re-render current page with new scale
-      setTimeout(() => renderPDFPage(currentPage), 0);
+      setTimeout(() => renderPDFPages(currentPage), 0);
     }
   };
 
@@ -354,20 +388,54 @@ const loadingTask = getDocument(url);
     if (isBook(item) && item.fileType === 'pdf') {
       const newScale = Math.max(scale - 0.25, 0.5);
       setScale(newScale);
-      // Re-render current page with new scale
-      setTimeout(() => renderPDFPage(currentPage), 0);
+      setTimeout(() => renderPDFPages(currentPage), 0);
     }
   };
 
-  const handleDownload = async () => {
-    if (!isBook(item) || !item.driveFileId) return;
-    try {
-      const fileUrl = await getFileUrl(item.driveFileId);
-      window.open(fileUrl, '_blank');
-    } catch (err) {
-      console.error('Download error:', err);
+  const togglePageMode = async () => {
+    const newMode = pageMode === 'single' ? 'dual' : 'single';
+    setPageMode(newMode);
+    
+    if (isBook(item) && item.fileType === 'pdf') {
+      // For PDF, re-render with new mode
+      setTimeout(() => renderPDFPages(currentPage), 0);
+    } else if (renditionRef.current && epubBookRef.current) {
+      // For EPUB, need to recreate rendition
+      renditionRef.current.destroy();
+      await loadEPUB(await getFileUrl(item.driveFileId));
     }
   };
+
+  const addBookmark = () => {
+    const newBookmark: Bookmark = {
+      page: currentPage,
+      note: bookmarkNote.trim() || undefined,
+      timestamp: Date.now()
+    };
+    
+    setBookmarks(prev => [...prev, newBookmark].sort((a, b) => a.page - b.page));
+    setBookmarkNote('');
+  };
+
+  const removeBookmark = (index: number) => {
+    setBookmarks(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const goToBookmark = async (page: number) => {
+    if (isBook(item) && item.fileType === 'pdf') {
+      await renderPDFPages(page);
+    } else if (renditionRef.current && epubBookRef.current) {
+      const cfi = epubBookRef.current.locations.cfiFromPercentage(page / totalPages);
+      await renditionRef.current.display(cfi);
+    }
+    setShowBookmarks(false);
+  };
+
+  const isBookmarked = (page: number) => {
+    return bookmarks.some(b => b.page === page);
+  };
+
+ 
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
@@ -381,10 +449,54 @@ const loadingTask = getDocument(url);
         <div className="flex items-center gap-3">
           {hasFile && totalPages > 0 && (
             <span className="text-sm text-gray-500">
-              Page {currentPage} / {totalPages}
+              Page {currentPage}
+              {pageMode === 'dual' && currentPage < totalPages && `-${currentPage + 1}`}
+              {' / '}{totalPages}
             </span>
           )}
           
+          {/* View Mode Toggle */}
+          {isBook(item) && item.fileType === 'pdf' && hasFile && (
+            <button
+              onClick={togglePageMode}
+              className={`p-2 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}
+              title={pageMode === 'single' ? 'Dual Page View' : 'Single Page View'}
+            >
+              {pageMode === 'single' ? <Columns size={18} /> : <Square size={18} />}
+            </button>
+          )}
+          
+          {/* Bookmark Toggle */}
+          <button
+            onClick={() => setShowBookmarks(!showBookmarks)}
+            className={`p-2 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}
+            title="Bookmarks"
+          >
+            <Menu size={18} />
+            {bookmarks.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {bookmarks.length}
+              </span>
+            )}
+          </button>
+          
+          {/* Add Bookmark */}
+          <button
+            onClick={() => {
+              if (isBookmarked(currentPage)) {
+                const index = bookmarks.findIndex(b => b.page === currentPage);
+                removeBookmark(index);
+              } else {
+                addBookmark();
+              }
+            }}
+            className={`p-2 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
+            title={isBookmarked(currentPage) ? 'Remove Bookmark' : 'Add Bookmark'}
+          >
+            {isBookmarked(currentPage) ? <BookmarkCheck size={18} /> : <BookmarkCheck size={18} />}
+          </button>
+          
+          {/* Zoom Controls for PDF */}
           {isBook(item) && item.fileType === 'pdf' && hasFile && (
             <div className="flex items-center gap-1 border-l pl-3 ml-3">
               <button 
@@ -407,18 +519,88 @@ const loadingTask = getDocument(url);
             </div>
           )}
           
-          {hasFile && (
-            <button 
-              onClick={handleDownload} 
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
-              disabled={loading}
-            >
-              <Download size={16} className="inline mr-1" />
-              Download
-            </button>
-          )}
+         
+          
         </div>
       </div>
+
+      {/* Bookmarks Sidebar */}
+      {showBookmarks && (
+        <div className="absolute right-0 top-16 bottom-0 w-80 bg-white border-l border-gray-200 shadow-lg z-10 overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Bookmarks ({bookmarks.length})</h3>
+              <button onClick={() => setShowBookmarks(false)} className="text-gray-500 hover:text-gray-700">
+                <X size={18} />
+              </button>
+            </div>
+            
+            {/* Add Bookmark Form */}
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Add note (optional)"
+                value={bookmarkNote}
+                onChange={(e) => setBookmarkNote(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isBookmarked(currentPage)) {
+                    addBookmark();
+                  }
+                }}
+              />
+              <button
+                onClick={addBookmark}
+                disabled={isBookmarked(currentPage)}
+                className="w-full px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isBookmarked(currentPage) ? 'Already Bookmarked' : `Bookmark Page ${currentPage}`}
+              </button>
+            </div>
+          </div>
+          
+          {/* Bookmarks List */}
+          <div className="flex-1 overflow-auto p-4 space-y-2">
+            {bookmarks.length === 0 ? (
+              <div className="text-center text-gray-500 text-sm py-8">
+                No bookmarks yet
+              </div>
+            ) : (
+              bookmarks.map((bookmark, index) => (
+                <div
+                  key={index}
+                  className="p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer group"
+                  onClick={() => goToBookmark(bookmark.page)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <BookmarkCheck size={14} className="text-yellow-500" />
+                        <span className="font-medium text-sm text-gray-900">Page {bookmark.page}</span>
+                      </div>
+                      {bookmark.note && (
+                        <p className="text-xs text-gray-600 line-clamp-2">{bookmark.note}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(bookmark.timestamp).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeBookmark(index);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 p-1"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Content Area */}
       <div className="flex-1 overflow-auto bg-gray-100">
@@ -450,13 +632,16 @@ const loadingTask = getDocument(url);
         )}
 
         {!loading && !error && hasFile && (
-          <div className="max-w-5xl mx-auto py-8">
+          <div className="max-w-7xl mx-auto py-8">
             {isBook(item) && item.fileType === 'pdf' ? (
-              <div className="flex justify-center">
+              <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : ''}`}>
                 <canvas ref={canvasRef} className="shadow-2xl bg-white" />
+                {pageMode === 'dual' && currentPage < totalPages && (
+                  <canvas ref={canvas2Ref} className="shadow-2xl bg-white" />
+                )}
               </div>
             ) : isBook(item) && item.fileType === 'epub' ? (
-              <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: '900px' }}>
+              <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: pageMode === 'dual' ? '1400px' : '900px' }}>
                 <div ref={epubContainerRef} style={{ height: '800px', width: '100%' }} />
               </div>
             ) : null}
@@ -465,74 +650,14 @@ const loadingTask = getDocument(url);
 
         {!loading && !error && !hasFile && (
           <div className="max-w-4xl mx-auto px-6 py-8">
-            {/* Metadata Display (Fallback for items without files) */}
             <div className="bg-white rounded-lg shadow-lg p-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {isBook(item) ? item.title : item.title}
               </h1>
-              {isBook(item) && item.subtitle && (
-                <p className="text-xl text-gray-600 mb-4">{item.subtitle}</p>
-              )}
-              <div className="flex items-center gap-4 text-sm text-gray-600 mb-6">
-                {isBook(item) ? (
-                  <>
-                    <span>By {item.authors.join(', ')}</span>
-                    <span>•</span>
-                    <span>{item.publisher} ({item.publicationYear})</span>
-                    <span>•</span>
-                    <span>{item.pages} pages</span>
-                  </>
-                ) : (
-                  <>
-                    <span>By {item.student.name}</span>
-                    <span>•</span>
-                    <span>{item.department}</span>
-                    <span>•</span>
-                    <span>{item.academicYear}</span>
-                  </>
-                )}
-              </div>
-
-              <div className="prose max-w-none">
-                {isBook(item) ? (
-                  <>
-                    <h2>Description</h2>
-                    <p>{item.description}</p>
-                    
-                    <h3>Details</h3>
-                    <ul>
-                      <li><strong>ISBN:</strong> {item.isbn}</li>
-                      <li><strong>Edition:</strong> {item.edition}</li>
-                      <li><strong>Language:</strong> {item.language}</li>
-                      <li><strong>Subjects:</strong> {item.subjects.join(', ')}</li>
-                      <li><strong>Location:</strong> {item.shelfLocation}</li>
-                      <li><strong>Available Copies:</strong> {item.availableCopies} of {item.totalCopies}</li>
-                    </ul>
-                  </>
-                ) : (
-                  <>
-                    <h2>Abstract</h2>
-                    <p>{item.abstract}</p>
-
-                    <h3>Details</h3>
-                    <ul>
-                      <li><strong>ID:</strong> {item.id}</li>
-                      <li><strong>Level:</strong> {item.level.toUpperCase()}</li>
-                      <li><strong>Category:</strong> {item.category}</li>
-                      <li><strong>Status:</strong> {item.status}</li>
-                      <li><strong>Supervisor:</strong> {item.supervisor.name}</li>
-                      <li><strong>Field of Study:</strong> {item.fieldOfStudy}</li>
-                      <li><strong>Keywords:</strong> {item.keywords.join(', ')}</li>
-                    </ul>
-                  </>
-                )}
-
-                <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
-                  <p className="text-sm text-blue-800">
-                    📖 <strong>Digital content not available.</strong> This item does not have an associated digital file.
-                    Please check with the library for access options.
-                  </p>
-                </div>
+              <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
+                <p className="text-sm text-blue-800">
+                  📖 <strong>Digital content not available.</strong> This item does not have an associated digital file.
+                </p>
               </div>
             </div>
           </div>
@@ -551,7 +676,9 @@ const loadingTask = getDocument(url);
             Previous
           </button>
           <span className="text-sm text-gray-600">
-            {currentPage} / {totalPages}
+            {currentPage}
+            {pageMode === 'dual' && currentPage < totalPages && `-${currentPage + 1}`}
+            {' / '}{totalPages}
           </span>
           <button
             onClick={handleNextPage}
