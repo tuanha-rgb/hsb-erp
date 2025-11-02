@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
 import { sampleTheses, type Thesis } from '../acad/thesis';
-import { getFileUrl } from './googledrive';  // ← ADD THIS LINE
+import { getFileUrl } from './googledrive';
 import ePub from 'epubjs';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 // Ask Vite to give us the built URL of the worker file
@@ -14,8 +14,9 @@ import pdfjsWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // Configure PDF.js worker
 GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
+
 type ViewMode = 'grid' | 'list';
-type ContentType = 'all' | 'books' | 'theses';
+type ContentType = 'books' | 'theses'; // Changed from 'all' | 'books' | 'theses'
 type ReadingItem = BookRecord | Thesis;
 
 interface CarouselSlide {
@@ -75,7 +76,6 @@ const carouselSlides: CarouselSlide[] = [
   }
 ];
 
-
 type PageMode = 'single' | 'dual';
 
 interface Bookmark {
@@ -91,7 +91,6 @@ interface ReadingViewProps {
 
 const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
 const isThesis = (item: ReadingItem): item is Thesis => 'student' in item;
-
 
 const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> = ({ onSlideClick }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -126,12 +125,9 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
 
   return (
     <div className="relative overflow-hidden rounded-2xl shadow-2xl h-[400px] group">
-      {/* Gradient Background */}
       <div className={`absolute inset-0 bg-gradient-to-r ${slide.color} transition-all duration-700`} />
       
-      {/* Content */}
       <div className="relative h-full flex items-center justify-between px-12">
-        {/* Left Content */}
         <div className="flex-1 text-white z-10">
           {slide.badge && (
             <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold mb-4">
@@ -150,7 +146,6 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
           )}
         </div>
 
-        {/* Right Image/Icon */}
         <div className="relative">
           {slide.image.startsWith('http') || slide.image.startsWith('https') || slide.image.startsWith('/') ? (
             <img 
@@ -165,7 +160,7 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
           )}
         </div>
       </div>
-      {/* Navigation Arrows */}
+
       <button
         onClick={prevSlide}
         className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
@@ -179,7 +174,6 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
         <ChevronRight size={24} />
       </button>
 
-      {/* Dots Navigation */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
         {carouselSlides.map((_, index) => (
           <button
@@ -196,8 +190,6 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
     </div>
   );
 };
-
-
 
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -220,7 +212,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const hasFile = isBook(item) && item.driveFileId && item.fileType;
   const storageKey = `bookmarks_${item.id}`;
 
-  // Load bookmarks from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
@@ -232,7 +223,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     }
   }, [storageKey]);
 
-  // Save bookmarks to localStorage
   useEffect(() => {
     if (bookmarks.length > 0) {
       localStorage.setItem(storageKey, JSON.stringify(bookmarks));
@@ -285,10 +275,8 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     }
   };
 
-   const loadPDF = async (url: string) => {
-    // const loadingTask = pdfjsLib.getDocument(url);
-const loadingTask = getDocument(url);
-
+  const loadPDF = async (url: string) => {
+    const loadingTask = getDocument(url);
     const pdf = await loadingTask.promise;
     pdfDocRef.current = pdf;
     setTotalPages(pdf.numPages);
@@ -298,12 +286,10 @@ const loadingTask = getDocument(url);
   const renderPDFPages = async (pageNum: number) => {
     if (!pdfDocRef.current) return;
     
-    // Render first page
     if (canvasRef.current) {
       await renderPDFPage(pageNum, canvasRef.current);
     }
     
-    // Render second page if in dual mode
     if (pageMode === 'dual' && canvas2Ref.current && pageNum < totalPages) {
       await renderPDFPage(pageNum + 1, canvas2Ref.current);
     }
@@ -342,7 +328,7 @@ const loadingTask = getDocument(url);
     await rendition.display();
     
     await book.ready;
-    setTotalPages(50); // EPUB doesn't have fixed pages
+    setTotalPages(50);
     setCurrentPage(1);
 
     rendition.on('relocated', (location: any) => {
@@ -397,10 +383,8 @@ const loadingTask = getDocument(url);
     setPageMode(newMode);
     
     if (isBook(item) && item.fileType === 'pdf') {
-      // For PDF, re-render with new mode
       setTimeout(() => renderPDFPages(currentPage), 0);
     } else if (renditionRef.current && epubBookRef.current) {
-      // For EPUB, need to recreate rendition
       renditionRef.current.destroy();
       await loadEPUB(await getFileUrl(item.driveFileId));
     }
@@ -435,11 +419,8 @@ const loadingTask = getDocument(url);
     return bookmarks.some(b => b.page === page);
   };
 
- 
-
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      {/* Header */}
       <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-white">
         <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
           <ArrowLeft size={20} />
@@ -455,7 +436,6 @@ const loadingTask = getDocument(url);
             </span>
           )}
           
-          {/* View Mode Toggle */}
           {isBook(item) && item.fileType === 'pdf' && hasFile && (
             <button
               onClick={togglePageMode}
@@ -466,7 +446,6 @@ const loadingTask = getDocument(url);
             </button>
           )}
           
-          {/* Bookmark Toggle */}
           <button
             onClick={() => setShowBookmarks(!showBookmarks)}
             className={`p-2 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}
@@ -480,7 +459,6 @@ const loadingTask = getDocument(url);
             )}
           </button>
           
-          {/* Add Bookmark */}
           <button
             onClick={() => {
               if (isBookmarked(currentPage)) {
@@ -493,10 +471,9 @@ const loadingTask = getDocument(url);
             className={`p-2 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
             title={isBookmarked(currentPage) ? 'Remove Bookmark' : 'Add Bookmark'}
           >
-            {isBookmarked(currentPage) ? <BookmarkCheck size={18} /> : <BookmarkCheck size={18} />}
+            <BookmarkCheck size={18} />
           </button>
           
-          {/* Zoom Controls for PDF */}
           {isBook(item) && item.fileType === 'pdf' && hasFile && (
             <div className="flex items-center gap-1 border-l pl-3 ml-3">
               <button 
@@ -518,13 +495,9 @@ const loadingTask = getDocument(url);
               </button>
             </div>
           )}
-          
-         
-          
         </div>
       </div>
 
-      {/* Bookmarks Sidebar */}
       {showBookmarks && (
         <div className="absolute right-0 top-16 bottom-0 w-80 bg-white border-l border-gray-200 shadow-lg z-10 overflow-hidden flex flex-col">
           <div className="p-4 border-b border-gray-200">
@@ -535,7 +508,6 @@ const loadingTask = getDocument(url);
               </button>
             </div>
             
-            {/* Add Bookmark Form */}
             <div className="space-y-2">
               <input
                 type="text"
@@ -559,7 +531,6 @@ const loadingTask = getDocument(url);
             </div>
           </div>
           
-          {/* Bookmarks List */}
           <div className="flex-1 overflow-auto p-4 space-y-2">
             {bookmarks.length === 0 ? (
               <div className="text-center text-gray-500 text-sm py-8">
@@ -602,7 +573,6 @@ const loadingTask = getDocument(url);
         </div>
       )}
 
-      {/* Content Area */}
       <div className="flex-1 overflow-auto bg-gray-100">
         {loading && (
           <div className="flex items-center justify-center h-full">
@@ -664,7 +634,6 @@ const loadingTask = getDocument(url);
         )}
       </div>
 
-      {/* Navigation Footer */}
       {hasFile && totalPages > 0 && !loading && !error && (
         <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-center gap-4 bg-white">
           <button
@@ -696,7 +665,7 @@ const loadingTask = getDocument(url);
 
 const LibraryViewer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [contentType, setContentType] = useState<ContentType>('all');
+  const [contentType, setContentType] = useState<ContentType>('books'); // ✅ CHANGED: Default to 'books'
   const [selectedCategory, setSelectedCategory] = useState<CatalogueCategory | 'all'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -704,18 +673,13 @@ const LibraryViewer: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
-  // Combined and filtered content
-  const filteredContent = useMemo(() => {
-    let items: ReadingItem[] = [];
+  // ✅ UPDATED: Only show current content type, not 'all'
+  
+const filteredContent = useMemo(() => {
+  let items: ReadingItem[] = contentType === 'books' 
+    ? [...bookRecords] 
+    : [...sampleTheses.filter(t => t.status === 'approved')]; // ✅ ADDED: Filter for approved only
 
-    if (contentType === 'all' || contentType === 'books') {
-      items = [...items, ...bookRecords];
-    }
-    if (contentType === 'all' || contentType === 'theses') {
-      items = [...items, ...sampleTheses];
-    }
-
-    // Apply search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       items = items.filter(item => {
@@ -735,50 +699,38 @@ const LibraryViewer: React.FC = () => {
       });
     }
 
-    // Apply category filter (books only)
-    if (selectedCategory !== 'all') {
+    if (selectedCategory !== 'all' && contentType === 'books') {
       items = items.filter(item => isBook(item) && item.catalogue === selectedCategory);
     }
 
     return items;
   }, [searchQuery, contentType, selectedCategory]);
 
-  // Paginated content
   const paginatedContent = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return filteredContent.slice(startIndex, endIndex);
   }, [filteredContent, currentPage, itemsPerPage]);
 
-  // Total pages
   const totalPages = Math.ceil(filteredContent.length / itemsPerPage);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, contentType, selectedCategory, itemsPerPage]);
 
-  // Handle carousel action
   const handleCarouselAction = (slideId: string) => {
     switch(slideId) {
-      case '1': // New Arrivals
+      case '1':
+      case '2':
+      case '4':
         setContentType('books');
         break;
-      case '2': // AI & ML
-        setSelectedCategory('Computer Science');
-        setContentType('books');
-        break;
-      case '3': // Thesis Archive
+      case '3':
         setContentType('theses');
-        break;
-      case '4': // Business & Economics
-        setSelectedCategory('Business & Economics');
-        setContentType('books');
         break;
     }
   };
 
-  // Get category statistics
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
     catalogues.forEach(cat => {
@@ -787,7 +739,6 @@ const LibraryViewer: React.FC = () => {
     return stats;
   }, []);
 
-  // Get quick stats
   const stats = useMemo(() => ({
     totalBooks: bookRecords.length,
     totalTheses: sampleTheses.length,
@@ -801,12 +752,10 @@ const LibraryViewer: React.FC = () => {
 
   return (
     <div className="h-full overflow-auto bg-gray-50">
-      {/* Hero Carousel Section */}
       <div className="bg-white border-b border-gray-200 px-3 py-3">
         <FloatingCarousel onSlideClick={handleCarouselAction} />
       </div>
 
-      {/* Quick Stats Bar */}
       <div className="bg-white border-b border-gray-200 px-3 py-3">
         <div className="grid grid-cols-4 gap-4">
           <div className="flex items-center gap-3">
@@ -848,72 +797,46 @@ const LibraryViewer: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-3 py-3">
-        {/* Categories Section */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-bold text-gray-900">Browse by Category</h2>
-            <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setContentType('all');
-              }}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              View All
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {catalogues.map((category) => (
-              <button
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setContentType('books');
-                }}
-                className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
-                  selectedCategory === category
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
-              >
-                <div className="text-3xl mb-2">
-                  {category === 'Computer Science' && '💻'}
-                  {category === 'Engineering' && '⚙️'}
-                  {category === 'Business & Economics' && '💼'}
-                  {category === 'Mathematics' && '📐'}
-                  {category === 'Physics' && '⚛️'}
-                  {category === 'Chemistry' && '🧪'}
-                  {category === 'Biology & Life Sciences' && '🧬'}
-                  {category === 'Social Sciences' && '👥'}
-                  {category === 'Humanities' && '📚'}
-                  {category === 'Medicine & Health' && '🏥'}
-                  {category === 'Architecture' && '🏛️'}
-                  {category === 'Arts & Design' && '🎨'}
-                </div>
-                <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
-                  {category}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {categoryStats[category] || 0} books
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+      
 
-        {/* Header with Search */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-3">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mt-3">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Library Collection</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {contentType === 'books' ? 'Book Collection' : 'Thesis Archive'}
+              </h1>
               <p className="text-sm text-gray-600 mt-1">
-                Browse and read {bookRecords.length} books and {sampleTheses.length} theses
+                {contentType === 'books' 
+                  ? `Browse ${bookRecords.length} books in our digital library`
+                  : `Explore ${sampleTheses.length} academic theses and dissertations`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            
+            {/* ✅ NEW: Content Type Toggle */}
+            <div className="flex items-center gap-3">
+              <div className="bg-gray-100 border border-gray-200 rounded-lg p-1 flex">
+                <button
+                  onClick={() => setContentType('books')}
+                  className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                    contentType === 'books'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  📚 Books
+                </button>
+                <button
+                  onClick={() => setContentType('theses')}
+                  className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                    contentType === 'theses'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  🎓 Theses
+                </button>
+              </div>
+              
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -929,50 +852,37 @@ const LibraryViewer: React.FC = () => {
             </div>
           </div>
 
-          {/* Search and Filters */}
           <div className="flex gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
-                placeholder="Search by title, author, or keywords..."
+                placeholder={contentType === 'books' ? "Search books by title, author..." : "Search theses by title, student..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-            >
-              <Filter size={18} />
-              Filters
-            </button>
+            {contentType === 'books' && (
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Filter size={18} />
+                Filters
+              </button>
+            )}
           </div>
 
-          {/* Filter Panel */}
-          {showFilters && (
+          {showFilters && contentType === 'books' && (
             <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Content Type</label>
-                  <select
-                    value={contentType}
-                    onChange={(e) => setContentType(e.target.value as ContentType)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="all">All Content</option>
-                    <option value="books">Books Only</option>
-                    <option value="theses">Theses Only</option>
-                  </select>
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value as CatalogueCategory | 'all')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    disabled={contentType === 'theses'}
                   >
                     <option value="all">All Categories</option>
                     {catalogues.map(cat => (
@@ -987,7 +897,7 @@ const LibraryViewer: React.FC = () => {
           <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
             <div className="flex items-center gap-3">
               <span>
-                {filteredContent.length} item{filteredContent.length !== 1 ? 's' : ''} found
+                {filteredContent.length} {contentType === 'books' ? 'book' : 'thesis'}{filteredContent.length !== 1 ? 'es' : ''} found
               </span>
               <span>•</span>
               <div className="flex items-center gap-2">
@@ -1012,8 +922,56 @@ const LibraryViewer: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Content Grid/List */}
+<div className="mt-3">
+        {/* ✅ Only show categories when viewing books */}
+        {contentType === 'books' && (
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="px-6 text-xl font-bold text-gray-900">Browse by Category</h2>
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className="px-3 text-m text-bold text-blue-600 hover:text-blue-800 font-medium"
+              >
+                View All
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+              {catalogues.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`p-3 rounded-xl border-2 transition-all hover:shadow-md ${
+                    selectedCategory === category
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-3xl">
+                    {category === 'Computer Science'}
+                    {category === 'Engineering'}
+                    {category === 'Business & Economics' }
+                    {category === 'Mathematics' }
+                    {category === 'Physics' }
+                    {category === 'Chemistry' }
+                    {category === 'Biology & Life Sciences' }
+                    {category === 'Social Sciences' }
+                    {category === 'Humanities' }
+                    {category === 'Medicine & Health' }
+                    {category === 'Architecture' }
+                    {category === 'Arts & Design'}
+                  </div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
+                    {category}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {categoryStats[category] || 0} books
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {paginatedContent.map((item) => (
@@ -1117,7 +1075,6 @@ const LibraryViewer: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination Controls */}
         {totalPages > 1 && filteredContent.length > 0 && (
           <div className="mt-3 flex items-center justify-between">
             <div className="text-sm text-gray-600">
@@ -1139,7 +1096,6 @@ const LibraryViewer: React.FC = () => {
                 <ChevronLeft size={16} className="inline" />
               </button>
               
-              {/* Page Numbers */}
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;

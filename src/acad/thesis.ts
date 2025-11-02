@@ -1,4 +1,4 @@
-// src/types/thesis.ts
+// src/acad/thesis.ts
 
 // --- Core Types ---
 export type ThesisStatus =

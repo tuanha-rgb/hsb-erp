@@ -7,11 +7,12 @@ import {
   Home, User as UserIcon, BookText, Globe, Lock, ChevronLeft,
   Mail, Phone, Building2, Edit, GraduationCap,
   Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare, DollarSign, Search, Filter, Eye, MoreVertical,
-  User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon, Pencil
+  User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon, Pencil,
+  BookPlus
 } from 'lucide-react';
 import * as QRCode from "qrcode";
-import Documents from "./documenthandbook";
-
+import Documents from "./documents/documenthandbook";
+import LibraryViewer from "./library/libraryviewer";
 
 // ————————————————————————————————————————
 // Dashboard view (re-uses your original data)
@@ -2735,6 +2736,7 @@ const LecturerApp = () => {
     { name: 'Documents', icon: BookOpen },
     { name: 'Research', icon: TrendingUp },
     { name: 'Canvas/LMS', icon: Globe },
+    { name: 'Online Library', icon: BookPlus },
     { name: 'Identification', icon: UserIcon },
 
   ];
@@ -2755,6 +2757,8 @@ const LecturerApp = () => {
         return <ResearchView />;
       case 'Canvas/LMS':
         return <CanvasView />;
+       case 'Library':
+        return <LibraryViewer/>; 
       case 'Identification':
         return <Identification />;
       default:

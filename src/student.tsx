@@ -9,8 +9,8 @@ import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search,
 FileQuestion, FileDown, PieChart, Filter, XCircle, Pencil, Users, FileText, Gem, Notebook, Book, Building,
 Star, Send, MessageSquare} 
 from 'lucide-react';
-import Documents from "./documenthandbook";
-
+import Documents from "./documents/documenthandbook";
+import LibraryViewer from "./library/libraryviewer";
 
 export default function Student() {
   const [activePage, setActivePage] = useState('calendar');
@@ -6531,6 +6531,7 @@ return (
       {[
         { id: 'dashboard', icon: Home, label: 'Dashboard' },
         { id: 'profile', icon: User, label: 'My Profile' },
+        { id: 'library', icon: BookOpen, label: 'Online Library' },
         { id: 'academic', icon: BookOpen, label: 'Academic' },
         { id: 'feedback', icon: Send, label: 'Feedback' },
         { id: 'finance', icon: DollarSign, label: 'Finance' },
@@ -6539,6 +6540,7 @@ return (
         { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
         { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
         { id: 'documents', icon: Notebook, label: 'Documents' },
+        
         { id: 'scholarship', icon: Gem, label: 'Scholarship' },
         { id: 'matriculation', icon: User, label: 'Identity' },
       ].map(item => (
@@ -6590,6 +6592,7 @@ return (
       {/* ... Content rendering based on activePage ... */}
       {activePage === 'dashboard' && <Dashboard />}
       {activePage === 'profile' && <Profile />}
+      {activePage === 'library' && <LibraryViewer />}
       {activePage === 'academic' && <Academic />}
       {activePage === 'feedback' && <StudentFeedbackPortal />}
       {activePage === 'finance' && <Finance />}
