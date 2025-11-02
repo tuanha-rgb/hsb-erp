@@ -27,6 +27,7 @@ interface CarouselSlide {
   action?: string;
   color: string;
 }
+const epubObjectUrlRef = useRef<string | null>(null);
 
 const carouselSlides: CarouselSlide[] = [
   {
@@ -282,44 +283,78 @@ const loadingTask = getDocument(url);
   if (!epubContainerRef.current) return;
 
   try {
-    const response = await fetch(url, {
+    setLoading(true);
+    setError(null);
+
+    // 1) Fetch the EPUB bytes
+    const resp = await fetch(url, {
+      // Use 'omit' unless you specifically need cookies from the same origin
+      // Some CDNs will reject CORS if credentials are included
       mode: 'cors',
-      credentials: 'include'
+      credentials: 'omit',
     });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
     }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const book = ePub(arrayBuffer);
+    const buf = await resp.arrayBuffer();
+
+    // 2) Create a Blob URL (bypasses CORS & Range issues for epub.js)
+    const blob = new Blob([buf], { type: 'application/epub+zip' });
+    const objectUrl = URL.createObjectURL(blob);
+    epubObjectUrlRef.current = objectUrl;
+
+    // 3) Init book & rendition
+    const book = ePub(objectUrl);
     epubBookRef.current = book;
-    
+
     const rendition = book.renderTo(epubContainerRef.current, {
       width: '100%',
       height: '100%',
       spread: 'none',
-      flow: 'paginated'
+      flow: 'paginated', // paginated mode
     });
-    
     renditionRef.current = rendition;
-    await rendition.display();
-    await book.ready;
-    
-    setTotalPages(0); // EPUBs don't have fixed pages
-    setCurrentPage(1);
 
+    // 4) Display first section
+    await rendition.display();
+
+    // 5) Wait for book to be ready, then compute a sensible "page count"
+    await book.ready;
+
+    // epub.js doesn’t have real pages; use spine length as a stable proxy
+    type SpineLike = { items?: unknown[]; spineItems?: unknown[]; get?: (href: string) => any };
+const spine = (book.spine as unknown as SpineLike);
+const spineLen = spine.items?.length ?? spine.spineItems?.length ?? 0;
+
+setTotalPages(spineLen || 1);
+setCurrentPage(1);
+
+    // 6) Track current "page" by spine index
     rendition.on('relocated', (location: any) => {
-      if (location?.start?.index !== undefined) {
-        setCurrentPage(location.start.index + 1);
-      }
-    });
-    
+  try {
+    const href = location?.start?.href ?? location?.start?.cfi;
+    const spineLike = (book.spine as any);
+    const idx =
+      href && spineLike?.get
+        ? spineLike.get(href)?.index
+        : undefined;
+
+    if (typeof idx === 'number') setCurrentPage(idx + 1);
+  } catch {
+    // ignore
+  }
+});
   } catch (err) {
     console.error('EPUB load error:', err);
-    throw new Error(`Failed to load EPUB: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    setError(
+      `Failed to load EPUB: ${err instanceof Error ? err.message : 'Unknown error'}`
+    );
+    throw err;
+  } finally {
+    setLoading(false);
   }
 };
+
 
   const handlePrevPage = async () => {
     if (currentPage <= 1) return;
