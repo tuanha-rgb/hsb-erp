@@ -1,5 +1,5 @@
-import { bookRecords, type BookRecord } from './documents/bookdata';
-import { sampleTheses, type Thesis } from './acad/thesis';
+import { bookRecords, type BookRecord } from './bookdata';
+import { sampleTheses, type Thesis } from '../acad/thesis';
 
 export type LibraryItem = BookRecord | Thesis;
 

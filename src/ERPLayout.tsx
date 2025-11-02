@@ -6,7 +6,7 @@ import './index.css';
 import {  AttendanceRecord,  StudentAttendanceStats,  CourseAttendance,  AttendanceAlert,  AICamera,  initializeAttendanceData
 } from "./attendance/attendancemodel";
 import {   bookRecords,   publishers,   catalogues,  type BookRecord,  type Publisher,
-  type BookType,  type CatalogueCategory} from './documents/bookdata';
+  type BookType,  type CatalogueCategory} from './library/bookdata';
 import {
   scholarships,
   applications,
@@ -17,7 +17,7 @@ import {
   type ApplicationStatus,
 } from "./student/scholarshipdata";
 
-import LibraryViewer from "./libraryviewer";
+import LibraryViewer from "./library/libraryviewer";
 
 import { sampleEvents, type EventItem, getEventStatusColor } from "./student/eventdata";
 

@@ -1,12 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Book, BookOpen, Search, Filter, X, ChevronDown, ChevronRight,
   Star, Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
-  TrendingUp, Users
+  TrendingUp, Users, ZoomIn, ZoomOut
 } from 'lucide-react';
-import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './documents/bookdata';
-import { sampleTheses, type Thesis } from './acad/thesis';
+import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
+import { sampleTheses, type Thesis } from '../acad/thesis';
+import { getFileUrl } from './googledrive';  // ← ADD THIS LINE
+import ePub from 'epubjs';
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+// Ask Vite to give us the built URL of the worker file
+import pdfjsWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
+// Configure PDF.js worker
+GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
 type ViewMode = 'grid' | 'list';
 type ContentType = 'all' | 'books' | 'theses';
 type ReadingItem = BookRecord | Thesis;
@@ -76,6 +83,7 @@ interface ReadingViewProps {
 const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
 const isThesis = (item: ReadingItem): item is Thesis => 'student' in item;
 
+
 const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> = ({ onSlideClick }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -134,7 +142,7 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
         </div>
 
         {/* Right Image/Icon */}
-          <div className="relative">
+        <div className="relative">
           {slide.image.startsWith('http') || slide.image.startsWith('https') || slide.image.startsWith('/') ? (
             <img 
               src={slide.image} 
@@ -182,125 +190,371 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
 
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [scale, setScale] = useState(1.5);
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const epubContainerRef = useRef<HTMLDivElement>(null);
+  const pdfDocRef = useRef<any>(null);
+  const epubBookRef = useRef<any>(null);
+  const renditionRef = useRef<any>(null);
+
+  // Check if item has file to load
+  const hasFile = isBook(item) && item.driveFileId && item.fileType;
+
+  useEffect(() => {
+    if (!hasFile) {
+      setLoading(false);
+      return;
+    }
+
+    loadDocument();
+    
+    return () => {
+      // Cleanup
+      if (pdfDocRef.current) {
+        pdfDocRef.current.destroy();
+        pdfDocRef.current = null;
+      }
+      if (renditionRef.current) {
+        renditionRef.current.destroy();
+        renditionRef.current = null;
+      }
+      if (epubBookRef.current) {
+        epubBookRef.current.destroy();
+        epubBookRef.current = null;
+      }
+    };
+  }, [item, hasFile]);
+
+  const loadDocument = async () => {
+    if (!isBook(item) || !item.driveFileId || !item.fileType) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const fileUrl = await getFileUrl(item.driveFileId);
+      
+      if (item.fileType === 'pdf') {
+        await loadPDF(fileUrl);
+      } else if (item.fileType === 'epub') {
+        await loadEPUB(fileUrl);
+      }
+    } catch (err) {
+      console.error('Document load error:', err);
+      setError('Failed to load document: ' + (err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPDF = async (url: string) => {
+    // const loadingTask = pdfjsLib.getDocument(url);
+const loadingTask = getDocument(url);
+
+    const pdf = await loadingTask.promise;
+    pdfDocRef.current = pdf;
+    setTotalPages(pdf.numPages);
+    await renderPDFPage(1);
+  };
+
+  const renderPDFPage = async (pageNum: number) => {
+    if (!pdfDocRef.current || !canvasRef.current) return;
+    
+    const page = await pdfDocRef.current.getPage(pageNum);
+    const viewport = page.getViewport({ scale });
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    
+    if (!context) return;
+    
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+    
+    await page.render({ canvasContext: context, viewport }).promise;
+    setCurrentPage(pageNum);
+  };
+
+  const loadEPUB = async (url: string) => {
+  if (!epubContainerRef.current) return;
+
+  const book = ePub(url);
+  epubBookRef.current = book;
+  
+  const rendition = book.renderTo(epubContainerRef.current, {
+    width: '100%',
+    height: '100%',
+    spread: 'none'
+  });
+  
+  renditionRef.current = rendition;
+  
+  await rendition.display();
+  
+  // Get total pages after book is loaded
+  await book.ready;
+  
+  // Access spine items correctly
+  const navigation = await book.loaded.navigation;
+setTotalPages(500); // Temporary placeholder
+  setCurrentPage(1);
+
+  // Track location changes
+  rendition.on('relocated', (location: any) => {
+    if (location && location.start) {
+      const currentItem = book.spine.get(location.start.href);
+      if (currentItem) {
+        setCurrentPage(currentItem.index + 1);
+      }
+    }
+  });
+};
+
+  const handlePrevPage = async () => {
+    if (currentPage <= 1) return;
+    
+    if (isBook(item) && item.fileType === 'pdf') {
+      await renderPDFPage(currentPage - 1);
+    } else if (renditionRef.current) {
+      await renditionRef.current.prev();
+    }
+  };
+
+  const handleNextPage = async () => {
+    if (currentPage >= totalPages) return;
+    
+    if (isBook(item) && item.fileType === 'pdf') {
+      await renderPDFPage(currentPage + 1);
+    } else if (renditionRef.current) {
+      await renditionRef.current.next();
+    }
+  };
+
+  const handleZoomIn = async () => {
+    if (isBook(item) && item.fileType === 'pdf') {
+      const newScale = Math.min(scale + 0.25, 3);
+      setScale(newScale);
+      // Re-render current page with new scale
+      setTimeout(() => renderPDFPage(currentPage), 0);
+    }
+  };
+
+  const handleZoomOut = async () => {
+    if (isBook(item) && item.fileType === 'pdf') {
+      const newScale = Math.max(scale - 0.25, 0.5);
+      setScale(newScale);
+      // Re-render current page with new scale
+      setTimeout(() => renderPDFPage(currentPage), 0);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!isBook(item) || !item.driveFileId) return;
+    try {
+      const fileUrl = await getFileUrl(item.driveFileId);
+      window.open(fileUrl, '_blank');
+    } catch (err) {
+      console.error('Download error:', err);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-white z-50 overflow-auto">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-white">
         <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
           <ArrowLeft size={20} />
           <span>Back to Library</span>
         </button>
+        
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">Page {currentPage}</span>
-          <button className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50">
-            <Download size={16} className="inline mr-1" />
-            Download
-          </button>
+          {hasFile && totalPages > 0 && (
+            <span className="text-sm text-gray-500">
+              Page {currentPage} / {totalPages}
+            </span>
+          )}
+          
+          {isBook(item) && item.fileType === 'pdf' && hasFile && (
+            <div className="flex items-center gap-1 border-l pl-3 ml-3">
+              <button 
+                onClick={handleZoomOut} 
+                className="p-2 hover:bg-gray-100 rounded"
+                disabled={loading}
+              >
+                <ZoomOut size={18} />
+              </button>
+              <span className="text-sm text-gray-600 min-w-[60px] text-center">
+                {Math.round(scale * 100)}%
+              </span>
+              <button 
+                onClick={handleZoomIn} 
+                className="p-2 hover:bg-gray-100 rounded"
+                disabled={loading}
+              >
+                <ZoomIn size={18} />
+              </button>
+            </div>
+          )}
+          
+          {hasFile && (
+            <button 
+              onClick={handleDownload} 
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
+              disabled={loading}
+            >
+              <Download size={16} className="inline mr-1" />
+              Download
+            </button>
+          )}
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Title Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isBook(item) ? item.title : item.title}
-          </h1>
-          {isBook(item) && item.subtitle && (
-            <p className="text-xl text-gray-600 mb-4">{item.subtitle}</p>
-          )}
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            {isBook(item) ? (
-              <>
-                <span>By {item.authors.join(', ')}</span>
-                <span>•</span>
-                <span>{item.publisher} ({item.publicationYear})</span>
-                <span>•</span>
-                <span>{item.pages} pages</span>
-              </>
-            ) : (
-              <>
-                <span>By {item.student.name}</span>
-                <span>•</span>
-                <span>{item.department}</span>
-                <span>•</span>
-                <span>{item.academicYear}</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Document Viewer */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 min-h-[600px]">
-          {isBook(item) ? (
-            <div className="prose max-w-none">
-              <h2>Description</h2>
-              <p>{item.description}</p>
-              
-              <h3>Details</h3>
-              <ul>
-                <li><strong>ISBN:</strong> {item.isbn}</li>
-                <li><strong>Edition:</strong> {item.edition}</li>
-                <li><strong>Language:</strong> {item.language}</li>
-                <li><strong>Subjects:</strong> {item.subjects.join(', ')}</li>
-                <li><strong>Location:</strong> {item.shelfLocation}</li>
-                <li><strong>Available Copies:</strong> {item.availableCopies} of {item.totalCopies}</li>
-              </ul>
-
-              <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
-                <p className="text-sm text-blue-800">
-                  📖 <strong>Full content preview coming soon.</strong> This is a placeholder for the actual book content viewer.
-                  In production, this would display PDF content or integrated e-book reader.
-                </p>
-              </div>
+      <div className="flex-1 overflow-auto bg-gray-100">
+        {loading && (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading document...</p>
             </div>
-          ) : (
-            <div className="prose max-w-none">
-              <h2>Abstract</h2>
-              <p>{item.abstract}</p>
+          </div>
+        )}
 
-              <h3>Details</h3>
-              <ul>
-                <li><strong>ID:</strong> {item.id}</li>
-                <li><strong>Level:</strong> {item.level.toUpperCase()}</li>
-                <li><strong>Category:</strong> {item.category}</li>
-                <li><strong>Status:</strong> {item.status}</li>
-                <li><strong>Supervisor:</strong> {item.supervisor.name}</li>
-                <li><strong>Field of Study:</strong> {item.fieldOfStudy}</li>
-                <li><strong>Keywords:</strong> {item.keywords.join(', ')}</li>
-              </ul>
+        {error && (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center max-w-md">
+              <div className="text-red-600 mb-4">
+                <X size={48} className="mx-auto mb-2" />
+                <p className="font-semibold">Error Loading Document</p>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">{error}</p>
+              <button 
+                onClick={loadDocument}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
 
-              {item.documents.fullThesis && (
-                <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded">
-                  <p className="text-sm text-green-800">
-                    📄 <strong>Thesis document:</strong> {item.documents.fullThesis}
-                    <br />
-                    Full document viewer integration available in production environment.
+        {!loading && !error && hasFile && (
+          <div className="max-w-5xl mx-auto py-8">
+            {isBook(item) && item.fileType === 'pdf' ? (
+              <div className="flex justify-center">
+                <canvas ref={canvasRef} className="shadow-2xl bg-white" />
+              </div>
+            ) : isBook(item) && item.fileType === 'epub' ? (
+              <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: '900px' }}>
+                <div ref={epubContainerRef} style={{ height: '800px', width: '100%' }} />
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {!loading && !error && !hasFile && (
+          <div className="max-w-4xl mx-auto px-6 py-8">
+            {/* Metadata Display (Fallback for items without files) */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {isBook(item) ? item.title : item.title}
+              </h1>
+              {isBook(item) && item.subtitle && (
+                <p className="text-xl text-gray-600 mb-4">{item.subtitle}</p>
+              )}
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-6">
+                {isBook(item) ? (
+                  <>
+                    <span>By {item.authors.join(', ')}</span>
+                    <span>•</span>
+                    <span>{item.publisher} ({item.publicationYear})</span>
+                    <span>•</span>
+                    <span>{item.pages} pages</span>
+                  </>
+                ) : (
+                  <>
+                    <span>By {item.student.name}</span>
+                    <span>•</span>
+                    <span>{item.department}</span>
+                    <span>•</span>
+                    <span>{item.academicYear}</span>
+                  </>
+                )}
+              </div>
+
+              <div className="prose max-w-none">
+                {isBook(item) ? (
+                  <>
+                    <h2>Description</h2>
+                    <p>{item.description}</p>
+                    
+                    <h3>Details</h3>
+                    <ul>
+                      <li><strong>ISBN:</strong> {item.isbn}</li>
+                      <li><strong>Edition:</strong> {item.edition}</li>
+                      <li><strong>Language:</strong> {item.language}</li>
+                      <li><strong>Subjects:</strong> {item.subjects.join(', ')}</li>
+                      <li><strong>Location:</strong> {item.shelfLocation}</li>
+                      <li><strong>Available Copies:</strong> {item.availableCopies} of {item.totalCopies}</li>
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <h2>Abstract</h2>
+                    <p>{item.abstract}</p>
+
+                    <h3>Details</h3>
+                    <ul>
+                      <li><strong>ID:</strong> {item.id}</li>
+                      <li><strong>Level:</strong> {item.level.toUpperCase()}</li>
+                      <li><strong>Category:</strong> {item.category}</li>
+                      <li><strong>Status:</strong> {item.status}</li>
+                      <li><strong>Supervisor:</strong> {item.supervisor.name}</li>
+                      <li><strong>Field of Study:</strong> {item.fieldOfStudy}</li>
+                      <li><strong>Keywords:</strong> {item.keywords.join(', ')}</li>
+                    </ul>
+                  </>
+                )}
+
+                <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
+                  <p className="text-sm text-blue-800">
+                    📖 <strong>Digital content not available.</strong> This item does not have an associated digital file.
+                    Please check with the library for access options.
                   </p>
                 </div>
-              )}
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
-          <button 
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+      {/* Navigation Footer */}
+      {hasFile && totalPages > 0 && !loading && !error && (
+        <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-center gap-4 bg-white">
+          <button
+            onClick={handlePrevPage}
             disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
+            <ChevronLeft size={18} />
             Previous
           </button>
-          <button 
-            onClick={() => setCurrentPage(currentPage + 1)}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+          <span className="text-sm text-gray-600">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             Next
+            <ChevronRight size={18} />
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };

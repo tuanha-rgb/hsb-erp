@@ -130,8 +130,6 @@ export interface Thesis {
     time: string;
   } | null;
   associatedItems: AssociatedItems;
-  driveFileId?: string; // Google Drive file ID
-  fileType?: 'pdf' | 'epub';
 }
 
 // --- Sample Data ---
