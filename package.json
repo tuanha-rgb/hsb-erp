@@ -14,6 +14,7 @@
     "firebase": "^12.5.0",
     "localforage": "^1.10.0",
     "lucide-react": "^0.469.0",
+    "pdfjs": "^2.5.4",
     "pdfjs-dist": "^5.4.296",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",

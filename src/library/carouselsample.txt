@@ -1,0 +1,46 @@
+const carouselSlides: CarouselSlide[] = [
+  {
+    id: '1',
+    title: 'New Arrivals - Fall 2024',
+    description: 'Penguin best collection',
+    image: 'https://i.postimg.cc/Y0ST8dTJ/classic-penguin.jpg',
+    badge: 'NEW',
+    action: 'Browse Collection',
+    color: 'from-blue-500 to-blue-600'
+  },
+  {
+    id: '2',
+    title: 'AI Engineering',
+    description: 'Hot AI book by a Vietnamese Author - Huyen Chip',
+    image: 'https://i.postimg.cc/K8RxmDvf/aie-cover.png',
+    badge: 'HOT',
+    action: 'Explore AI Books',
+    color: 'from-purple-500 to-purple-600'
+  },
+  {
+    id: '3',
+    title: 'The Four',
+    description: 'The Hidden DNA of Amazon, Apple, Facebook, and Google',
+    image: 'https://i.postimg.cc/wvKmXBbC/thefour.jpg',
+    badge: 'FEATURED',
+    action: 'Explore Business Books',
+    color: 'from-green-500 to-green-600'
+  },
+  {
+    id: '4',
+    title: 'Divide',
+    description: 'American Injustice in the Age of the Wealth Gap',
+    image: 'https://i.postimg.cc/PfgRCb4b/divide.jpg',
+    action: 'Discover More',
+    color: 'from-orange-500 to-orange-600'
+  },
+  {
+    id: '5',
+    title: 'Digital Library Features',
+    description: 'Bookmark, annotate, and share your favorite academic resources',
+    image: '✨',
+    badge: 'INFO',
+    action: 'Learn More',
+    color: 'from-pink-500 to-pink-600'
+  }
+];

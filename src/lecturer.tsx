@@ -2757,7 +2757,7 @@ const LecturerApp = () => {
         return <ResearchView />;
       case 'Canvas/LMS':
         return <CanvasView />;
-       case 'Library':
+       case 'Online Library':
         return <LibraryViewer/>; 
       case 'Identification':
         return <Identification />;

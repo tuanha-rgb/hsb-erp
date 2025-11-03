@@ -5,6 +5,7 @@ import {
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
 } from 'lucide-react';
 import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
+import { bookService } from '../firebase/book.service';
 import { sampleTheses, type Thesis } from '../acad/thesis';
 import { getFileUrl } from './googledrive';
 import ePub from 'epubjs';
@@ -29,52 +30,7 @@ interface CarouselSlide {
   color: string;
 }
 
-const carouselSlides: CarouselSlide[] = [
-  {
-    id: '1',
-    title: 'New Arrivals - Fall 2024',
-    description: 'Penguin best collection',
-    image: 'https://i.postimg.cc/Y0ST8dTJ/classic-penguin.jpg',
-    badge: 'NEW',
-    action: 'Browse Collection',
-    color: 'from-blue-500 to-blue-600'
-  },
-  {
-    id: '2',
-    title: 'AI Engineering',
-    description: 'Hot AI book by a Vietnamese Author - Huyen Chip',
-    image: 'https://i.postimg.cc/K8RxmDvf/aie-cover.png',
-    badge: 'HOT',
-    action: 'Explore AI Books',
-    color: 'from-purple-500 to-purple-600'
-  },
-  {
-    id: '3',
-    title: 'The Four',
-    description: 'The Hidden DNA of Amazon, Apple, Facebook, and Google',
-    image: 'https://i.postimg.cc/wvKmXBbC/thefour.jpg',
-    badge: 'FEATURED',
-    action: 'Explore Business Books',
-    color: 'from-green-500 to-green-600'
-  },
-  {
-    id: '4',
-    title: 'Divide',
-    description: 'American Injustice in the Age of the Wealth Gap',
-    image: 'https://i.postimg.cc/PfgRCb4b/divide.jpg',
-    action: 'Discover More',
-    color: 'from-orange-500 to-orange-600'
-  },
-  {
-    id: '5',
-    title: 'Digital Library Features',
-    description: 'Bookmark, annotate, and share your favorite academic resources',
-    image: '✨',
-    badge: 'INFO',
-    action: 'Learn More',
-    color: 'from-pink-500 to-pink-600'
-  }
-];
+
 
 type PageMode = 'single' | 'dual';
 
@@ -92,19 +48,51 @@ interface ReadingViewProps {
 const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
 const isThesis = (item: ReadingItem): item is Thesis => 'student' in item;
 
+// COMPLETE FIX for FloatingCarousel in libraryviewer.tsx
+// Replace lines 51-198 with this:
+
 const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> = ({ onSlideClick }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [featuredBooks, setFeaturedBooks] = useState<any[]>([]);
+  const [carouselSlides, setCarouselSlide] = useState<CarouselSlide[]>([]);
+
+  // Load featured books for carousel
+  useEffect(() => {
+    loadFeaturedBooks();
+  }, []);
+
+  const loadFeaturedBooks = async () => {
+    try {
+      const featured = await bookService.getFeaturedBooks();
+      
+      // Transform featured books into carousel slides
+      const slides: CarouselSlide[] = featured.map((book, index) => ({
+        id: book.id || `featured-${index}`,
+        title: book.title,
+        description: book.description || `By ${book.author}`,
+        image: book.coverImage || 'https://via.placeholder.com/400x600/667eea/ffffff?text=' + encodeURIComponent(book.title),
+        badge: 'FEATURED',
+        action: 'View Book',
+        color: ['from-blue-500 to-blue-600', 'from-purple-500 to-purple-600', 'from-green-500 to-green-600'][index % 3]
+      }));
+
+      setCarouselSlide(slides);
+      setFeaturedBooks(featured);
+    } catch (error) {
+      console.error('Error loading featured books:', error);
+    }
+  };
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || carouselSlides.length === 0) return;
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, carouselSlides.length]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -120,6 +108,15 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
     setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length);
     setIsAutoPlaying(false);
   };
+
+  // Safety check for empty carousel
+  if (carouselSlides.length === 0) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl h-[400px] bg-gradient-to-r from-gray-400 to-gray-500 flex items-center justify-center">
+        <p className="text-white text-lg">Loading featured books...</p>
+      </div>
+    );
+  }
 
   const slide = carouselSlides[currentSlide];
 
@@ -235,7 +232,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       return;
     }
 
-    loadDocument();
+    loadAllBooks();
     
     return () => {
       if (pdfDocRef.current) {
@@ -253,27 +250,52 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     };
   }, [item, hasFile]);
 
-  const loadDocument = async () => {
-    if (!isBook(item) || !item.driveFileId || !item.fileType) return;
+   // Also load all books from Firebase instead of static data
+  const [allBooks, setAllBooks] = useState<BookRecord[]>([]);
 
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const fileUrl = await getFileUrl(item.driveFileId);
-      
-      if (item.fileType === 'pdf') {
-        await loadPDF(fileUrl);
-      } else if (item.fileType === 'epub') {
-        await loadEPUB(fileUrl);
-      }
-    } catch (err) {
-      console.error('Document load error:', err);
-      setError('Failed to load document: ' + (err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    loadAllBooks();
+  }, []);
+
+  const loadAllBooks = async () => {
+  try {
+    const firebaseBooks = await bookService.getAllBooks();
+    
+    const books: BookRecord[] = firebaseBooks.map(book => ({
+      id: book.id || '',
+      title: book.title,
+      authors: [book.author],
+      isbn: book.isbn || '',
+      publisher: book.publisher || '',
+      publisherCode: book.publisher?.substring(0, 3).toUpperCase() || 'UNK', // Add this
+      publicationYear: book.publishedYear || new Date().getFullYear(),
+      totalCopies: book.copies,
+      availableCopies: book.availableCopies,
+      borrowedCopies: book.copies - book.availableCopies,
+      reservedCopies: 0, // Add this
+      catalogue: book.category as CatalogueCategory,
+      bookType: 'printed' as BookType,
+      subjects: [],
+      description: book.description || '',
+      rating: 0,
+      totalRatings: 0,
+      popularityScore: 0,
+      shelfLocation: '',
+      addedDate: book.createdAt?.toISOString() || new Date().toISOString(),
+      lastUpdated: book.updatedAt?.toISOString() || new Date().toISOString(),
+      language: 'English',
+      pages: 0,
+      price: 0,
+      currency: 'USD',
+      edition: '1st',
+      subtitle: ''
+    }));
+
+    setAllBooks(books);
+  } catch (error) {
+    console.error('Error loading books:', error);
+  }
+};
 
   const loadPDF = async (url: string) => {
     const loadingTask = getDocument(url);
@@ -592,7 +614,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
               </div>
               <p className="text-gray-600 text-sm mb-4">{error}</p>
               <button 
-                onClick={loadDocument}
+                onClick={loadAllBooks}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Retry
