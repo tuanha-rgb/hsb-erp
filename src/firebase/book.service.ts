@@ -9,9 +9,21 @@ import {
   where,
   Timestamp 
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, getStorage, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from './firebase.config';
 import { compressImage } from '../imageCompression';
+
+// Import pdfjs-dist dynamically to avoid build issues
+let pdfjsLib: any = null;
+
+// Initialize PDF.js
+const initPdfJs = async () => {
+  if (!pdfjsLib) {
+    pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  }
+  return pdfjsLib;
+};
 
 export interface Book {
   id?: string;
@@ -25,21 +37,36 @@ export interface Book {
   availableCopies: number;
   description?: string;
   coverImage?: string;
-  pdfUrl?: string; // PDF file URL
-  bookType?: string; // printed, ebook, etc.
-  featured?: boolean; // For carousel
+  pdfUrl?: string;
+  bookType?: string;
+  featured?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
+export interface PdfPageData {
+  pageNumber: number;
+  text: string;
+}
+
+export interface PdfData {
+  numPages: number;
+  pages: PdfPageData[];
+  metadata?: any;
+}
+
 const BOOKS_COLLECTION = 'books';
+
+export async function getFirebasePdfUrl(storagePath: string): Promise<string> {
+  const storage = getStorage();
+  const fileRef = ref(storage, storagePath);
+  return await getDownloadURL(fileRef);
+}
 
 export const bookService = {
   // Upload cover image to Firebase Storage
   async uploadCoverImage(file: File, bookId: string): Promise<string> {
-    // Compress image before upload (80% quality, max 800x1200px)
     const compressed = await compressImage(file, 0.8);
-    
     const storageRef = ref(storage, `book-covers/${crypto.randomUUID()}-${file.name}`);
     await uploadBytes(storageRef, compressed);
     const downloadURL = await getDownloadURL(storageRef);
@@ -55,9 +82,7 @@ export const bookService = {
   },
 
   // Add new book with optional cover image and PDF
-  // Add new book with optional cover image and PDF
   async addBook(book: Omit<Book, 'id' | 'createdAt' | 'updatedAt'>, coverImageFile?: File, pdfFile?: File): Promise<string> {
-    // First create the book document
     const docRef = await addDoc(collection(db, BOOKS_COLLECTION), {
       ...book,
       coverImage: book.coverImage || '',
@@ -67,7 +92,6 @@ export const bookService = {
       updatedAt: Timestamp.now()
     });
 
-    // Upload files if provided
     const updates: any = {};
     
     if (coverImageFile) {
@@ -80,7 +104,6 @@ export const bookService = {
       updates.pdfUrl = pdfUrl;
     }
 
-    // Update book with file URLs if any files were uploaded
     if (Object.keys(updates).length > 0) {
       updates.updatedAt = Timestamp.now();
       await updateDoc(doc(db, BOOKS_COLLECTION, docRef.id), updates);
@@ -165,5 +188,52 @@ export const bookService = {
       availableCopies: book.availableCopies + 1,
       updatedAt: Timestamp.now()
     });
+  },
+
+  // Extract PDF text content (all pages)
+  async extractPdfText(pdfUrl: string): Promise<PdfData> {
+    const pdfjs = await initPdfJs();
+    const loadingTask = pdfjs.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
+    
+    const pages: PdfPageData[] = [];
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const text = textContent.items.map((item: any) => item.str).join(' ');
+      pages.push({ pageNumber: i, text });
+    }
+
+    const metadata = await pdf.getMetadata();
+    
+    return {
+      numPages: pdf.numPages,
+      pages,
+      metadata: metadata.info
+    };
+  },
+
+  // Get single page text (performance optimized)
+  async getPdfPage(pdfUrl: string, pageNumber: number): Promise<string> {
+    const pdfjs = await initPdfJs();
+    const loadingTask = pdfjs.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(pageNumber);
+    const textContent = await page.getTextContent();
+    return textContent.items.map((item: any) => item.str).join(' ');
+  },
+
+  // Get PDF metadata only
+  async getPdfMetadata(pdfUrl: string): Promise<any> {
+    const pdfjs = await initPdfJs();
+    const loadingTask = pdfjs.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
+    const metadata = await pdf.getMetadata();
+    return {
+      numPages: pdf.numPages,
+      info: metadata.info,
+      metadata: metadata.metadata
+    };
   }
 };

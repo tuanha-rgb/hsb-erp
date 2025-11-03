@@ -17,7 +17,9 @@ import {
   type ApplicationStatus,
 } from "./student/scholarshipdata";
 
-import LibraryViewer from "./library/libraryviewer";
+//import LibraryViewer from "./library/libraryviewer";
+
+import TestPdfTab from "./library/testpdf"
 import ThesisStorage from "./library/ThesisStorage";
 import BookManagement from "./library/BookManagement";
 
@@ -16401,7 +16403,7 @@ const AccountManagement = () => {
       return <LibraryDashboard />;
     }
     if (activeTab === 'library-view') {
-      return <LibraryViewer />;
+      return <TestPdfTab />;
     }
     if (activeTab === 'thesis-store') {
       return <ThesisStorage />;
