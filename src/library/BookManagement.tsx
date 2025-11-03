@@ -529,7 +529,7 @@ const AddBookModal: React.FC<{
   const [formData, setFormData] = useState({
     title: "",
     author: "",
-    category: "Business",
+    category: "",
     copies: 1,
     isbn: "",
     publisher: "",
@@ -708,7 +708,7 @@ const TextAreaField: React.FC<{
               label="Type"
               value={formData.bookType}
               onChange={(v) => setFormData({ ...formData, bookType: v })}
-              options={["Printed", "E-Book", "Audiobook"]}
+              options={["E-Book", "Audiobook","Printed"]}
             />
           </div>
 
@@ -719,7 +719,13 @@ const TextAreaField: React.FC<{
               onChange={(v) => setFormData({ ...formData, category: v })}
               options={[
                 "Business", "Management", "Finance", "Marketing",
-                "Economics", "Accounting", "Entrepreneurship",
+                "Economics", "Accounting", "Entrepreneurship",  'Computer Science' ,'Engineering', 
+   'Mathematics' ,
+   'Social Sciences',
+   'Humanities',
+   'Medicine & Health',
+   'Architecture',
+   'Arts & Design'
               ]}
             />
             <NumberField
