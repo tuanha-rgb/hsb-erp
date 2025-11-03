@@ -4,7 +4,7 @@ import {
   Star, Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
 } from 'lucide-react';
-import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
+import { catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
 import { bookService } from '../firebase/book.service';
 import { sampleTheses, type Thesis } from '../acad/thesis';
 import { getFileUrl } from './googledrive';
@@ -51,8 +51,10 @@ const isThesis = (item: ReadingItem): item is Thesis => 'student' in item;
 // COMPLETE FIX for FloatingCarousel in libraryviewer.tsx
 // Replace lines 51-198 with this:
 
-const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> = ({ onSlideClick }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+const FloatingCarousel: React.FC<{ 
+  onSlideClick?: (slideId: string) => void;
+  onBookClick?: (bookId: string) => void;
+}> = ({ onSlideClick, onBookClick }) => {  const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [featuredBooks, setFeaturedBooks] = useState<any[]>([]);
   const [carouselSlides, setCarouselSlide] = useState<CarouselSlide[]>([]);
@@ -135,11 +137,17 @@ const FloatingCarousel: React.FC<{ onSlideClick?: (slideId: string) => void }> =
           <p className="text-lg mb-6 text-white/90 max-w-md">{slide.description}</p>
           {slide.action && (
             <button 
-              onClick={() => onSlideClick?.(slide.id)}
-              className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              {slide.action}
-            </button>
+  onClick={() => {
+    if (onBookClick) {
+      onBookClick(slide.id);
+    } else {
+      onSlideClick?.(slide.id);
+    }
+  }}
+  className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
+>
+  {slide.action}
+</button>
           )}
         </div>
 
@@ -687,7 +695,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
 
 const LibraryViewer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [contentType, setContentType] = useState<ContentType>('books'); // ✅ CHANGED: Default to 'books'
+  const [contentType, setContentType] = useState<ContentType>('books');
   const [selectedCategory, setSelectedCategory] = useState<CatalogueCategory | 'all'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -695,12 +703,73 @@ const LibraryViewer: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
+  // Load books from Firebase
+  const [allBooks, setAllBooks] = useState<BookRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAllBooks();
+  }, []);
+
+  const loadAllBooks = async () => {
+    try {
+      setLoading(true);
+      const firebaseBooks = await bookService.getAllBooks();
+      
+      const books: BookRecord[] = firebaseBooks.map(book => ({
+        id: book.id || '',
+        title: book.title,
+        authors: [book.author],
+        isbn: book.isbn || '',
+        publisher: book.publisher || '',
+        publisherCode: book.publisher?.substring(0, 3).toUpperCase() || 'UNK',
+        publicationYear: book.publishedYear || new Date().getFullYear(),
+        totalCopies: book.copies,
+        availableCopies: book.availableCopies,
+        borrowedCopies: book.copies - book.availableCopies,
+        reservedCopies: 0,
+        catalogue: book.category as CatalogueCategory,
+        bookType: (book.bookType || 'printed') as BookType,
+        subjects: [],
+        description: book.description || '',
+        rating: 0,
+        totalRatings: 0,
+        popularityScore: 0,
+        shelfLocation: '',
+        addedDate: book.createdAt?.toISOString() || new Date().toISOString(),
+        lastUpdated: book.updatedAt?.toISOString() || new Date().toISOString(),
+        language: 'English',
+        pages: 0,
+        price: 0,
+        currency: 'USD',
+        edition: '1st',
+        subtitle: '',
+        coverImage: book.coverImage,
+        pdfUrl: book.pdfUrl
+      }));
+
+      setAllBooks(books);
+    } catch (error) {
+      console.error('Error loading books:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle carousel book click
+  const handleCarouselBookClick = (bookId: string) => {
+    const book = allBooks.find(b => b.id === bookId);
+    if (book) {
+      setReadingItem(book);
+    }
+  };
+
   // ✅ UPDATED: Only show current content type, not 'all'
   
 const filteredContent = useMemo(() => {
   let items: ReadingItem[] = contentType === 'books' 
-    ? [...bookRecords] 
-    : [...sampleTheses.filter(t => t.status === 'approved')]; // ✅ ADDED: Filter for approved only
+    ? [...allBooks] 
+    : [...sampleTheses.filter(t => t.status === 'approved')];
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -725,8 +794,8 @@ const filteredContent = useMemo(() => {
       items = items.filter(item => isBook(item) && item.catalogue === selectedCategory);
     }
 
-    return items;
-  }, [searchQuery, contentType, selectedCategory]);
+return items;
+}, [searchQuery, contentType, selectedCategory, allBooks]);
 
   const paginatedContent = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -754,23 +823,34 @@ const filteredContent = useMemo(() => {
   };
 
   const categoryStats = useMemo(() => {
-    const stats: Record<string, number> = {};
-    catalogues.forEach(cat => {
-      stats[cat] = bookRecords.filter(book => book.catalogue === cat).length;
-    });
-    return stats;
-  }, []);
+  const stats: Record<string, number> = {};
+  catalogues.forEach(cat => {
+    stats[cat] = allBooks.filter(book => book.catalogue === cat).length;
+  });
+  return stats;
+}, [allBooks]);
 
   const stats = useMemo(() => ({
-    totalBooks: bookRecords.length,
-    totalTheses: sampleTheses.length,
-    availableCopies: bookRecords.reduce((sum, book) => sum + book.availableCopies, 0),
-    popularBooks: bookRecords.filter(book => book.rating >= 4.5).length,
-  }), []);
+  totalBooks: allBooks.length,
+  totalTheses: sampleTheses.length,
+  availableCopies: allBooks.reduce((sum, book) => sum + book.availableCopies, 0),
+  popularBooks: allBooks.filter(book => book.rating >= 4.5).length,
+}), [allBooks]);
 
   if (readingItem) {
     return <ReadingView item={readingItem} onClose={() => setReadingItem(null)} />;
   }
+
+  if (loading) {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <Book className="w-16 h-16 text-blue-600 mx-auto mb-4 animate-pulse" />
+        <p className="text-gray-600">Loading library...</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="h-full overflow-auto bg-gray-50">
@@ -829,7 +909,7 @@ const filteredContent = useMemo(() => {
               </h1>
               <p className="text-sm text-gray-600 mt-1">
                 {contentType === 'books' 
-                  ? `Browse ${bookRecords.length} books in our digital library`
+                  ? `Browse ${allBooks.length} books in our digital library`
                   : `Explore ${sampleTheses.length} academic theses and dissertations`}
               </p>
             </div>
