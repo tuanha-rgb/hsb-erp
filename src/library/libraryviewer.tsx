@@ -734,8 +734,8 @@ const LibraryViewer: React.FC = () => {
       </p>
     </div>
          
-                 <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 text-sm">
+                 <div className="px-3 flex items-center gap-3">
+      <div className="px-3 flex items-center gap-2 text-sm">
         <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}
           className="border border-gray-300 rounded px-2 py-1.5 text-sm">
           <option value={10}>10</option>
@@ -743,7 +743,7 @@ const LibraryViewer: React.FC = () => {
           <option value={50}>50</option>
           <option value={100}>100</option>
         </select>
-        <span className="text-gray-600">per page</span>
+        <span className="text-gray-600"> items per page</span>
       </div>
  
           </div>

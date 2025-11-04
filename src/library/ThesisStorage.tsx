@@ -8,6 +8,8 @@ import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
 // Import programs data
 import { programs } from "../acad/programs"; // Adjust path as needed
+// Import thesis service
+import { thesisService, type Thesis } from "../firebase/thesis.service";
 
 /* ---------- Utilities ---------- */
 // Storage path mapping for thesis levels
@@ -98,7 +100,7 @@ interface ThesisFilterOptions {
 }
 
 /* ---------- Component ---------- */
-const ThesisManagement: React.FC = () => {
+const ThesisStorage: React.FC = () => {
   const [theses, setTheses] = useState<ThesisRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
@@ -146,30 +148,31 @@ const ThesisManagement: React.FC = () => {
       setLoading(true);
       setInitError(null);
       
-      // TODO: Replace with actual Firebase service call
-      // const firebaseTheses = await thesisService.getAllTheses();
+      // Load from Firebase
+      const firebaseTheses = await thesisService.getAllTheses();
       
-      // Mock data for now
-      const mockTheses: ThesisRecord[] = [
-        {
-          id: "MBA-BSC-2024-001",
-          title: "E-Commerce Platform Development Using Microservices",
-          studentName: "John Smith",
-          studentId: "STD-2020-123",
-          level: "bachelor",
-          program: "MBA",
-          year: 2024,
-          submissionDate: "2024-09-15",
-          defenseDate: "2024-10-20",
-          status: "approved",
-          abstract: "This thesis explores microservices architecture...",
-          keywords: ["Microservices", "E-Commerce", "Software Architecture"],
-          pages: 98,
-          plagiarismScore: 5.8
-        }
-      ];
+      // Transform to ThesisRecord format
+      const transformedTheses: ThesisRecord[] = firebaseTheses.map(thesis => ({
+        id: thesis.id,
+        title: thesis.title,
+        studentName: thesis.studentName,
+        studentId: thesis.studentId,
+        level: thesis.level,
+        program: thesis.program,
+        year: thesis.year,
+        submissionDate: thesis.submissionDate,
+        defenseDate: thesis.defenseDate,
+        approvalDate: thesis.approvalDate,
+        status: thesis.status,
+        abstract: thesis.abstract,
+        keywords: thesis.keywords,
+        pdfUrl: thesis.pdfUrl,
+        pages: thesis.pages,
+        plagiarismScore: thesis.plagiarismScore,
+        grade: thesis.grade,
+      }));
       
-      setTheses(mockTheses);
+      setTheses(transformedTheses);
     } catch (error: any) {
       console.error("Error loading theses:", error);
       setInitError(error?.message ?? "Failed to load theses");
@@ -392,7 +395,17 @@ const ThesisManagement: React.FC = () => {
                         </a>
                       )}
                       <button
-                        onClick={() => thesis.id && alert("Delete: " + thesis.id)}
+                        onClick={async () => {
+                          if (!thesis.id) return;
+                          if (!confirm("Are you sure you want to delete this thesis?")) return;
+                          try {
+                            await thesisService.deleteThesis(thesis.id);
+                            await loadTheses();
+                          } catch (error: any) {
+                            console.error("Error deleting thesis:", error);
+                            alert(error?.message ?? "Failed to delete thesis");
+                          }
+                        }}
                         className="p-1 text-red-600 hover:bg-red-50 rounded"
                         title="Delete Thesis"
                       >
@@ -411,11 +424,36 @@ const ThesisManagement: React.FC = () => {
       {showAddModal && (
         <AddThesisModal
           onClose={() => setShowAddModal(false)}
-          onSubmit={async (data) => {
-            console.log("Add thesis:", data);
-            // TODO: Implement thesisService.addThesis()
-            alert("Thesis added (mock)");
-            setShowAddModal(false);
+          onSubmit={async (data, pdfFile) => {
+            try {
+              // Add to Firebase
+              await thesisService.addThesis(
+                {
+                  title: data.title || "",
+                  studentName: data.studentName || "",
+                  studentId: data.studentId || "",
+                  level: data.level as "bachelor" | "master" | "phd",
+                  program: data.program || "",
+                  year: data.year || new Date().getFullYear(),
+                  submissionDate: data.submissionDate || "",
+                  defenseDate: data.defenseDate,
+                  status: data.status as any,
+                  abstract: data.abstract || "",
+                  keywords: data.keywords || [],
+                  pages: data.pages || 0,
+                  plagiarismScore: data.plagiarismScore || 0,
+                  grade: data.grade,
+                },
+                pdfFile
+              );
+
+              // Reload theses from Firebase
+              await loadTheses();
+              setShowAddModal(false);
+            } catch (error: any) {
+              console.error("Error adding thesis:", error);
+              alert(error?.message ?? "Failed to add thesis");
+            }
           }}
           existingTheses={theses}
         />
@@ -430,11 +468,35 @@ const ThesisManagement: React.FC = () => {
             setThesisToEdit(null);
           }}
           onSubmit={async (data) => {
-            console.log("Update thesis:", data);
-            // TODO: Implement thesisService.updateThesis()
-            alert("Thesis updated (mock)");
-            setShowEditModal(false);
-            setThesisToEdit(null);
+            try {
+              if (!thesisToEdit.id) return;
+              
+              // Update in Firebase
+              await thesisService.updateThesis(thesisToEdit.id, {
+                title: data.title,
+                studentName: data.studentName,
+                studentId: data.studentId,
+                level: data.level as "bachelor" | "master" | "phd",
+                program: data.program,
+                year: data.year,
+                submissionDate: data.submissionDate,
+                defenseDate: data.defenseDate,
+                status: data.status as any,
+                abstract: data.abstract,
+                keywords: data.keywords,
+                pages: data.pages,
+                plagiarismScore: data.plagiarismScore,
+                grade: data.grade,
+              });
+
+              // Reload theses
+              await loadTheses();
+              setShowEditModal(false);
+              setThesisToEdit(null);
+            } catch (error: any) {
+              console.error("Error updating thesis:", error);
+              alert(error?.message ?? "Failed to update thesis");
+            }
           }}
           existingTheses={theses}
         />
@@ -446,6 +508,17 @@ const ThesisManagement: React.FC = () => {
           thesis={selectedThesis}
           allTheses={theses}
           onClose={() => setShowDetailModal(false)}
+          onDelete={async (thesisId) => {
+            if (!confirm("Are you sure you want to delete this thesis?")) return;
+            try {
+              await thesisService.deleteThesis(thesisId);
+              await loadTheses();
+              setShowDetailModal(false);
+            } catch (error: any) {
+              console.error("Error deleting thesis:", error);
+              alert(error?.message ?? "Failed to delete thesis");
+            }
+          }}
         />
       )}
 
@@ -876,7 +949,8 @@ const ThesisDetailModal: React.FC<{
   thesis: ThesisRecord;
   allTheses: ThesisRecord[];
   onClose: () => void;
-}> = ({ thesis, allTheses, onClose }) => {
+  onDelete?: (thesisId: string) => void;
+}> = ({ thesis, allTheses, onClose, onDelete }) => {
   const thesisId = generateThesisId(
     getProgramCode(thesis.program),
     thesis.level,
@@ -999,4 +1073,4 @@ const Th: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </th>
 );
 
-export default ThesisManagement;
+export default ThesisStorage;
