@@ -5,8 +5,7 @@ import './project.css';
 import './index.css';
 import {  AttendanceRecord,  StudentAttendanceStats,  CourseAttendance,  AttendanceAlert,  AICamera,  initializeAttendanceData
 } from "./attendance/attendancemodel";
-import {   bookRecords,   publishers,   catalogues,  type BookRecord,  type Publisher,
-  type BookType,  type CatalogueCategory} from './library/bookdata';
+
 import {
   scholarships,
   applications,
@@ -17,9 +16,7 @@ import {
   type ApplicationStatus,
 } from "./student/scholarshipdata";
 
-//import LibraryViewer from "./library/libraryviewer";
-
-import TestPdfTab from "./library/testpdf"
+import LibraryViewer from "./library/libraryviewer";
 import ThesisStorage from "./library/ThesisStorage";
 import BookManagement from "./library/BookManagement";
 
@@ -16403,7 +16400,7 @@ const AccountManagement = () => {
       return <LibraryDashboard />;
     }
     if (activeTab === 'library-view') {
-      return <TestPdfTab />;
+      return <LibraryViewer />;
     }
     if (activeTab === 'thesis-store') {
       return <ThesisStorage />;
