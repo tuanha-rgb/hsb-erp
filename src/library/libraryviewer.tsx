@@ -216,6 +216,7 @@ interface ReadingViewProps { item: ReadingItem; onClose: () => void; }
 
 const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
 const isThesis = (item: ReadingItem): item is LibraryThesis => 'student' in item;
+
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -234,7 +235,13 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const epubBookRef = useRef<any>(null);
   const renditionRef = useRef<any>(null);
 
-  const hasFile = isBook(item) && (item.driveFileId || item.firebaseStoragePath) && item.fileType;
+  // Determine file type and availability
+  const fileKind: 'pdf' | 'epub' | null =
+    (isBook(item) && item.firebaseStoragePath && item.fileType
+      ? (item.fileType as 'pdf' | 'epub')
+      : (isThesis(item) && item.pdfUrl ? 'pdf' : null));
+  
+  const hasFile = fileKind !== null;
   const storageKey = `bookmarks_${item.id}`;
 
   useEffect(() => {
@@ -265,28 +272,50 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   }, [item, hasFile]);
 
   const loadDocument = async () => {
-    if (!isBook(item) || !item.fileType) return;
+    // Check if item has a valid file source
+    const hasValidSource = 
+      (isBook(item) && item.fileType && (item.firebaseStoragePath || item.driveFileId)) ||
+      (isThesis(item) && item.pdfUrl);
+    
+    if (!hasValidSource) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
       
       let fileUrl: string | null = null;
-      if (item.firebaseStoragePath) {
-        fileUrl = item.firebaseStoragePath;
-        console.log('ðŸ“š Loading Firebase PDF:', fileUrl);
-      } else if (item.driveFileId) {
-        console.log('ðŸ“‚ Fetching Google Drive URL');
-        fileUrl = await getFileUrl(item.driveFileId);
+      let fileType: 'pdf' | 'epub' = 'pdf';
+      
+      // Handle books
+      if (isBook(item)) {
+        if (item.firebaseStoragePath) {
+          fileUrl = item.firebaseStoragePath;
+          console.log('Loading book PDF:', fileUrl);
+        } else if (item.driveFileId) {
+          console.log('Fetching Google Drive URL');
+          fileUrl = await getFileUrl(item.driveFileId);
+        }
+        fileType = item.fileType!;
+      }
+      
+      // Handle theses (always PDF)
+      if (isThesis(item) && item.pdfUrl) {
+        fileUrl = item.pdfUrl;
+        fileType = 'pdf';
+        console.log('Loading thesis PDF:', fileUrl);
       }
       
       if (!fileUrl) throw new Error('No file source available');
       
-      if (item.fileType === 'pdf') await loadPDF(fileUrl);
-      else if (item.fileType === 'epub') await loadEPUB(fileUrl);
+      if (fileType === 'pdf') await loadPDF(fileUrl);
+      else if (fileType === 'epub') await loadEPUB(fileUrl);
       
-      console.log('âœ… Document loaded successfully');
+      console.log('Document loaded successfully');
     } catch (err) {
-      console.error('âŒ Document load error:', err);
+      console.error('Document load error:', err);
       setError('Failed to load document: ' + (err as Error).message);
     } finally {
       setLoading(false);
@@ -343,7 +372,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     const step = pageMode === 'dual' ? 2 : 1;
     if (currentPage <= 1) return;
     const newPage = Math.max(1, currentPage - step);
-    if (isBook(item) && item.fileType === 'pdf') await renderPDFPages(newPage);
+    if (fileKind === 'pdf') await renderPDFPages(newPage);
     else if (renditionRef.current) await renditionRef.current.prev();
   };
 
@@ -351,12 +380,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     const step = pageMode === 'dual' ? 2 : 1;
     if (currentPage >= totalPages) return;
     const newPage = Math.min(totalPages, currentPage + step);
-    if (isBook(item) && item.fileType === 'pdf') await renderPDFPages(newPage);
+    if (fileKind === 'pdf') await renderPDFPages(newPage);
     else if (renditionRef.current) await renditionRef.current.next();
   };
 
   const handleZoomIn = async () => {
-    if (isBook(item) && item.fileType === 'pdf') {
+    if (fileKind === 'pdf') {
       const newScale = Math.min(scale + 0.25, 3);
       setScale(newScale);
       setTimeout(() => renderPDFPages(currentPage), 0);
@@ -364,7 +393,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   };
 
   const handleZoomOut = async () => {
-    if (isBook(item) && item.fileType === 'pdf') {
+    if (fileKind === 'pdf') {
       const newScale = Math.max(scale - 0.25, 0.5);
       setScale(newScale);
       setTimeout(() => renderPDFPages(currentPage), 0);
@@ -374,7 +403,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const togglePageMode = async () => {
     const newMode = pageMode === 'single' ? 'dual' : 'single';
     setPageMode(newMode);
-    if (isBook(item) && item.fileType === 'pdf') {
+    if (fileKind === 'pdf') {
       setTimeout(() => renderPDFPages(currentPage), 0);
     } else if (renditionRef.current && epubBookRef.current && isBook(item) && item.firebaseStoragePath) {
       renditionRef.current.destroy();
@@ -397,7 +426,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   };
 
   const goToBookmark = async (page: number) => {
-    if (isBook(item) && item.fileType === 'pdf') {
+    if (fileKind === 'pdf') {
       await renderPDFPages(page);
     } else if (renditionRef.current && epubBookRef.current) {
       const cfi = epubBookRef.current.locations.cfiFromPercentage(page / totalPages);
@@ -421,7 +450,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
               Page {currentPage}{pageMode === 'dual' && currentPage < totalPages && `-${currentPage + 1}`}{' / '}{totalPages}
             </span>
           )}
-          {isBook(item) && item.fileType === 'pdf' && hasFile && (
+          {fileKind === 'pdf' && hasFile && (
             <button onClick={togglePageMode} className={`p-2 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}>
               {pageMode === 'single' ? <Columns size={18} /> : <Square size={18} />}
             </button>
@@ -445,7 +474,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
           >
             <BookmarkCheck size={18} />
           </button>
-          {isBook(item) && item.fileType === 'pdf' && hasFile && (
+          {fileKind === 'pdf' && hasFile && (
             <div className="flex items-center gap-1 border-l pl-3 ml-3">
               <button onClick={handleZoomOut} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
                 <ZoomOut size={18} />
@@ -531,14 +560,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
         )}
         {!loading && !error && hasFile && (
           <div className="max-w-7xl mx-auto py-8">
-            {isBook(item) && item.fileType === 'pdf' ? (
+            {fileKind === 'pdf'  ? (
               <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : ''}`}>
                 <canvas ref={canvasRef} className="shadow-2xl bg-white" />
                 {pageMode === 'dual' && currentPage < totalPages && (
                   <canvas ref={canvas2Ref} className="shadow-2xl bg-white" />
                 )}
               </div>
-            ) : isBook(item) && item.fileType === 'epub' ? (
+            ) : fileKind === 'epub'  ? (
               <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: pageMode === 'dual' ? '1400px' : '900px' }}>
                 <div ref={epubContainerRef} style={{ height: '800px', width: '100%' }} />
               </div>
@@ -551,7 +580,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{isBook(item) ? item.title : item.title}</h1>
               <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
                 <p className="text-sm text-blue-800">
-                  ðŸ“– <strong>Digital content not available.</strong> This item does not have an associated digital file.
+                   <strong>Digital content not available.</strong> This item does not have an associated digital file.
                 </p>
               </div>
             </div>
@@ -677,7 +706,19 @@ const LibraryViewer: React.FC = () => {
     }
 
     if (selectedCategory !== 'all' && contentType === 'books') {
-      items = items.filter(item => isBook(item) && item.catalogue === selectedCategory);
+      console.log('🔍 Filtering by category:', selectedCategory);
+      console.log('Before filter:', items.length, 'items');
+      items = items.filter(item => {
+        if (isBook(item)) {
+          const matches = item.catalogue === selectedCategory;
+          if (!matches && items.length < 10) {
+            console.log('Book:', item.title, 'Category:', item.catalogue, 'Looking for:', selectedCategory);
+          }
+          return matches;
+        }
+        return false;
+      });
+      console.log('After filter:', items.length, 'items');
     }
 
     return items;
@@ -693,10 +734,17 @@ const LibraryViewer: React.FC = () => {
   useEffect(() => { setCurrentPage(1); }, [searchQuery, contentType, selectedCategory, itemsPerPage]);
 
   const categoryStats = useMemo(() => {
+    console.log('📊 Calculating category stats...');
+    console.log('Total Firebase books:', firebaseBooks.length);
+    
     const stats: Record<string, number> = {};
     catalogues.forEach(cat => {
       stats[cat] = firebaseBooks.filter(book => book.category === cat).length;
     });
+    
+    console.log('Category stats:', stats);
+    console.log('Sample book categories:', firebaseBooks.slice(0, 3).map(b => ({ title: b.title, category: b.category })));
+    
     return stats;
   }, [firebaseBooks]);
 
@@ -823,12 +871,32 @@ const LibraryViewer: React.FC = () => {
           <div className="mb-3">
             <div className="flex justify-between items-center mb-3 px-6">
               <h2 className="text-xl font-bold">Browse by Category</h2>
-              <button onClick={() => setSelectedCategory('all')}
-                className="text-blue-600 hover:text-blue-800 font-medium">View All</button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    console.log('=== CATEGORY DEBUG INFO ===');
+                    console.log('Expected categories (catalogues):', catalogues);
+                    const actualCategories = [...new Set(firebaseBooks.map(b => b.category))];
+                    console.log('Actual categories in Firebase:', actualCategories);
+                    const mismatches = catalogues.filter(c => !actualCategories.includes(c));
+                    console.log('Catalogues NOT in Firebase:', mismatches);
+                    const extras = actualCategories.filter(c => !catalogues.includes(c as any));
+                    console.log('Firebase categories NOT in catalogues:', extras);
+                    console.log('=========================');
+                  }}
+                  className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded">
+                  Debug Categories
+                </button>
+                <button onClick={() => setSelectedCategory('all')}
+                  className="text-blue-600 hover:text-blue-800 font-medium">View All</button>
+              </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {catalogues.map((cat) => (
-                <button key={cat} onClick={() => setSelectedCategory(cat)}
+                <button key={cat} onClick={() => {
+                  console.log('🔍 Selected category:', cat);
+                  setSelectedCategory(cat);
+                }}
                   className={`p-3 rounded-xl border-2 transition-all ${
                     selectedCategory === cat ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}>

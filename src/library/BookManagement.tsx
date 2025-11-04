@@ -1358,10 +1358,15 @@ const EditBookModal: React.FC<{
               value={formData.category}
               onChange={(v) => setFormData({ ...formData, category: v })}
               options={[
-                "Business", "Management", "Finance", "Marketing",
-                "Economics", "Accounting", "Entrepreneurship", "Computer Science", "Engineering", 
-                "Mathematics", "Social Sciences", "Humanities", "Medicine & Health",
-                "Architecture", "Arts & Design"
+               "Business", "Management", "Finance", "Marketing",
+"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Cybersecurity' ,'Engineering', 
+   'Mathematics' ,
+   'Social Sciences',
+   'Humanities',
+   'Language',
+   'Medicine & Health',
+   'Architecture',
+   'Arts & Design'
               ]}
             />
             <NumberField

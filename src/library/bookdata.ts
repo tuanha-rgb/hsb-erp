@@ -1,16 +1,21 @@
 // bookData.ts - External data file for book records
 
-export type BookType = 'textbook' | 'reference' | 'lecture_notes';
+export type BookType = 'textbook' | 'reference' | 'lecture_notes' | 'E-Book';
 export type CatalogueCategory = 
-  | 'Computer Science' 
-  | 'Engineering' 
-  | 'Business & Economics' 
-  | 'Mathematics' 
-  | 'Physics' 
-  | 'Chemistry'
-  | 'Biology & Life Sciences'
+   | 'Business'
+  | 'Management'
+  | 'Finance'
+  | 'Marketing'
+  | 'Economics'
+  | 'Accounting'
+  | 'Entrepreneurship'
+  | 'Computer Science'
+  | 'Cybersecurity'
+  | 'Engineering'
+  | 'Mathematics'
   | 'Social Sciences'
   | 'Humanities'
+  | 'Language'
   | 'Medicine & Health'
   | 'Architecture'
   | 'Arts & Design';
@@ -77,18 +82,15 @@ export const publishers: Publisher[] = [
 
 // Catalogue Categories
 export const catalogues: CatalogueCategory[] = [
-  'Computer Science',
-  'Engineering',
-  'Business & Economics',
-  'Mathematics',
-  'Physics',
-  'Chemistry',
-  'Biology & Life Sciences',
-  'Social Sciences',
-  'Humanities',
-  'Medicine & Health',
-  'Architecture',
-  'Arts & Design'
+    "Business", "Management", "Finance", "Marketing",
+"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Cybersecurity' ,'Engineering', 
+   'Mathematics' ,
+   'Social Sciences',
+   'Humanities',
+   'Language',
+   'Medicine & Health',
+   'Architecture',
+   'Arts & Design'
 ];
 
 // Book Records
