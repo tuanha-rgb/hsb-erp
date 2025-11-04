@@ -24,7 +24,7 @@ export interface LibraryThesis {
   };
   level: "bachelor" | "master" | "phd";
   program: string;
-  academicYear: string;
+  academicYear: string; // Keep as string for consistency
   category: string;
   keywords: string[];
   abstract: string;
@@ -322,34 +322,61 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
     }
   };
 
-  const loadPDF = async (url: string) => {
-    const loadingTask = getDocument(url);
-    const pdf = await loadingTask.promise;
-    pdfDocRef.current = pdf;
-    setTotalPages(pdf.numPages);
-    await renderPDFPages(1);
-  };
+  
+const getNumPages = () => pdfDocRef.current?.numPages ?? totalPages;
 
-  const renderPDFPages = async (pageNum: number) => {
-    if (!pdfDocRef.current) return;
-    if (canvasRef.current) await renderPDFPage(pageNum, canvasRef.current);
-    if (pageMode === 'dual' && canvas2Ref.current && pageNum < totalPages) {
-      await renderPDFPage(pageNum + 1, canvas2Ref.current);
-    }
-    setCurrentPage(pageNum);
-  };
+// ---- loadPDF: set ref, capture numPages, then render
+const loadPDF = async (url: string) => {
+  const loadingTask = getDocument({ url, withCredentials: false });
+  const pdf = await loadingTask.promise;
+  pdfDocRef.current = pdf;
 
-  const renderPDFPage = async (pageNum: number, canvas: HTMLCanvasElement) => {
-    if (!pdfDocRef.current || pageNum > totalPages) return;
-    const page = await pdfDocRef.current.getPage(pageNum);
-    const viewport = page.getViewport({ scale });
-    const context = canvas.getContext('2d');
-    if (!context) return;
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-    await page.render({ canvasContext: context, viewport }).promise;
-  };
+  const numPages = pdf.numPages; // <- reliable
+  setTotalPages(numPages);
+  setCurrentPage(1);
 
+  await renderPDFPages(1); // will use getNumPages()
+};
+
+  // ---- render the spread (single/dual)
+const renderPDFPages = async (pageNum: number) => {
+  if (!pdfDocRef.current) return;
+
+  const numPages = getNumPages();
+
+  if (canvasRef.current) {
+    await renderPDFPage(pageNum, canvasRef.current, numPages);
+  }
+
+  if (pageMode === 'dual' && canvas2Ref.current && pageNum < numPages) {
+    await renderPDFPage(pageNum + 1, canvas2Ref.current, numPages);
+  }
+
+  setCurrentPage(pageNum);
+};
+
+// ---- render a single page (stop using totalPages state for the guard)
+const renderPDFPage = async (
+  pageNum: number,
+  canvas: HTMLCanvasElement,
+  numPages?: number
+) => {
+  if (!pdfDocRef.current || !canvas) return;
+
+  const pages = numPages ?? getNumPages();
+  if (pageNum < 1 || pageNum > pages) return;
+
+  const page = await pdfDocRef.current.getPage(pageNum);
+  const viewport = page.getViewport({ scale });
+
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  await page.render({ canvasContext: context, viewport }).promise;
+};
   const loadEPUB = async (url: string) => {
     if (!epubContainerRef.current) return;
     const book = ePub(url);
@@ -611,12 +638,15 @@ const LibraryViewer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [contentType, setContentType] = useState<ContentType>('books');
   const [selectedCategory, setSelectedCategory] = useState<CatalogueCategory | 'all'>('all');
+  const [selectedLevel, setSelectedLevel] = useState<'bachelor' | 'master' | 'phd' | 'all'>('all');
+  const [selectedYear, setSelectedYear] = useState<number | string>('all');
+  const [selectedPublisher, setSelectedPublisher] = useState<number | string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [showCategoryBrowser, setShowCategoryBrowser] = useState(true);
+  const [showCategoryBrowser, setShowCategoryBrowser] = useState(false);
   const [readingItem, setReadingItem] = useState<ReadingItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [firebaseBooks, setFirebaseBooks] = useState<FirebaseBook[]>([]);
   const [firebaseTheses, setFirebaseTheses] = useState<FirebaseThesis[]>([]);
 
@@ -646,107 +676,125 @@ const LibraryViewer: React.FC = () => {
 
   const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
 
-  const filteredContent = useMemo(() => {
-    // Convert Firebase books to BookRecord
-    const convertedBooks: BookRecord[] = firebaseBooks.map(fb => ({
-      id: fb.id!,
-      title: fb.title,
-      authors: [fb.author],
-      isbn: fb.isbn || '',
-      publisher: fb.publisher || '',
-      publisherCode: fb.publisherCode || 'FB',
-      bookType: (fb.bookType || 'textbook') as BookType,
-      catalogue: fb.category as CatalogueCategory,
-      publicationYear: fb.publishedYear,
-      pages: fb.pages || 200,
-      subjects: fb.subjects || [fb.category],
-      totalCopies: fb.copies,
-      availableCopies: fb.availableCopies,
-      rating: fb.rating || 0,
-      description: fb.description,
-      coverImage: fb.coverImage,
-      firebaseStoragePath: fb.pdfUrl,
-      fileType: fb.pdfUrl ? 'pdf' : undefined
-    }));
+const filteredContent = useMemo(() => {
+  const convertedBooks: BookRecord[] = firebaseBooks.map(fb => ({
+    id: fb.id!,
+    title: fb.title,
+    authors: [fb.author],
+    isbn: fb.isbn || '',
+    publisher: fb.publisher || '',
+    publisherCode: fb.publisherCode || 'FB',
+    bookType: (fb.bookType || 'textbook') as BookType,
+    catalogue: fb.category as CatalogueCategory,
+    publicationYear: fb.publishedYear,
+    pages: fb.pages || 200,
+    subjects: fb.subjects || [fb.category],
+    totalCopies: fb.copies,
+    availableCopies: fb.availableCopies,
+    rating: fb.rating || 0,
+    description: fb.description,
+    coverImage: fb.coverImage,
+    firebaseStoragePath: fb.pdfUrl,
+    fileType: fb.pdfUrl ? 'pdf' : undefined
+  }));
 
-    // Convert Firebase theses to LibraryThesis
-    const convertedTheses: LibraryThesis[] = firebaseTheses.map(ft => ({
-      id: ft.id!,
-      title: ft.title,
-      student: { id: ft.studentId, name: ft.studentName },
-      level: ft.level,
-      program: ft.program,
-      academicYear: `${ft.year - 1}-${ft.year}`,
-      category: ft.program,
-      keywords: ft.keywords,
-      abstract: ft.abstract,
-      status: ft.status,
-      submittedDate: ft.submissionDate,
-      approvedDate: ft.approvalDate,
-      pdfUrl: ft.pdfUrl,
-      pages: ft.pages,
-      plagiarismScore: ft.plagiarismScore,
-      grade: ft.grade
-    }));
+  const convertedTheses: LibraryThesis[] = firebaseTheses.map(ft => ({
+    id: ft.id!,
+    title: ft.title,
+    student: { id: ft.studentId, name: ft.studentName },
+    level: ft.level,
+    program: ft.program,
+    academicYear: ft.year.toString(),
+    category: ft.program,
+    keywords: ft.keywords,
+    abstract: ft.abstract,
+    status: ft.status,
+    submittedDate: ft.submissionDate,
+    approvedDate: ft.approvalDate,
+    pdfUrl: ft.pdfUrl,
+    pages: ft.pages,
+    plagiarismScore: ft.plagiarismScore,
+    grade: ft.grade
+  }));
 
-    let items: ReadingItem[] = contentType === 'books' ? convertedBooks : convertedTheses;
+  let items: ReadingItem[] = contentType === 'books' ? convertedBooks : convertedTheses;
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      items = items.filter(item => {
-        if (isBook(item)) {
-          return item.title.toLowerCase().includes(q) ||
-                 item.authors.some(a => a.toLowerCase().includes(q)) ||
-                 item.subjects.some(s => s.toLowerCase().includes(q));
-        } else {
-          return item.title.toLowerCase().includes(q) ||
-                 item.student.name.toLowerCase().includes(q) ||
-                 item.keywords.some(k => k.toLowerCase().includes(q));
-        }
-      });
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    items = items.filter(item => {
+      if (isBook(item)) {
+        return item.title.toLowerCase().includes(q) ||
+               item.authors.some(a => a.toLowerCase().includes(q)) ||
+               item.subjects.some(s => s.toLowerCase().includes(q));
+      } else {
+        return item.title.toLowerCase().includes(q) ||
+               item.student.name.toLowerCase().includes(q) ||
+               item.keywords.some(k => k.toLowerCase().includes(q));
+      }
+    });
+  }
+
+  if (selectedCategory !== 'all' && contentType === 'books') {
+  items = items.filter(item => isBook(item) && item.catalogue === selectedCategory);
+}
+
+if (selectedLevel !== 'all' && contentType === 'theses') {
+  items = items.filter(item => !isBook(item) && item.level === selectedLevel);
+}
+
+  if (selectedYear !== 'all') {
+  items = items.filter(item => {
+    if (contentType === 'books' && isBook(item)) {
+      return item.publicationYear.toString() === selectedYear;
+    } else if (contentType === 'theses' && !isBook(item)) {
+      return item.academicYear.toString() === selectedYear;
     }
+    return true;
+  });
+}
 
-    if (selectedCategory !== 'all' && contentType === 'books') {
-      console.log('🔍 Filtering by category:', selectedCategory);
-      console.log('Before filter:', items.length, 'items');
-      items = items.filter(item => {
-        if (isBook(item)) {
-          const matches = item.catalogue === selectedCategory;
-          if (!matches && items.length < 10) {
-            console.log('Book:', item.title, 'Category:', item.catalogue, 'Looking for:', selectedCategory);
-          }
-          return matches;
-        }
-        return false;
-      });
-      console.log('After filter:', items.length, 'items');
-    }
+  if (selectedPublisher !== 'all') {
+    items = items.filter(item => {
+      if (contentType === 'books' && isBook(item)) {
+        return item.publisher === selectedPublisher;
+      } else if (contentType === 'theses' && !isBook(item)) {
+        return item.program === selectedPublisher; // or supervisor if you track that
+      }
+      return true;
+    });
+  }
 
-    return items;
-  }, [searchQuery, contentType, selectedCategory, firebaseBooks, firebaseTheses]);
-
-  const paginatedContent = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredContent.slice(start, start + itemsPerPage);
-  }, [filteredContent, currentPage, itemsPerPage]);
-
+  return items;
+}, [searchQuery, contentType, selectedCategory, selectedYear, selectedPublisher, firebaseBooks, firebaseTheses]);
   const totalPages = Math.ceil(filteredContent.length / itemsPerPage);
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, contentType, selectedCategory, itemsPerPage]);
+const paginatedContent = useMemo(() => {
+  const start = (currentPage - 1) * itemsPerPage;
+  return filteredContent.slice(start, start + itemsPerPage);
+}, [filteredContent, currentPage, itemsPerPage]);
+
+  
+
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, contentType, selectedCategory, selectedYear, selectedPublisher, itemsPerPage]);
 
   const categoryStats = useMemo(() => {
-    console.log('📊 Calculating category stats...');
-    console.log('Total Firebase books:', firebaseBooks.length);
-    
     const stats: Record<string, number> = {};
     catalogues.forEach(cat => {
       stats[cat] = firebaseBooks.filter(book => book.category === cat).length;
     });
-    
-    console.log('Category stats:', stats);
-    console.log('Sample book categories:', firebaseBooks.slice(0, 3).map(b => ({ title: b.title, category: b.category })));
-    
     return stats;
+  }, [firebaseBooks]);
+
+  // Get unique years for filtering
+  const availableYears = useMemo(() => {
+    const years = firebaseBooks.map(b => b.publishedYear).filter(y => y);
+    return [...new Set(years)].sort((a, b) => b - a); // Descending order
+  }, [firebaseBooks]);
+
+  // Get unique publishers for filtering
+  const availablePublishers = useMemo(() => {
+    const publishers = firebaseBooks.map(b => b.publisher).filter(p => p);
+    return [...new Set(publishers)].sort();
   }, [firebaseBooks]);
 
   const stats = useMemo(() => ({
@@ -760,12 +808,22 @@ const LibraryViewer: React.FC = () => {
     return <ReadingView item={readingItem} onClose={() => setReadingItem(null)} />;
   }
 
+const hasActiveFilters = selectedCategory !== 'all' || selectedYear !== 'all' || selectedPublisher !== 'all' || selectedLevel !== 'all';
+
+const clearAllFilters = () => {
+  setSelectedCategory('all');
+  setSelectedLevel('all');
+  setSelectedYear('all');
+  setSelectedPublisher('all');
+  setSearchQuery('');
+};
+
   return (
     <div className="h-full overflow-auto bg-gray-50">
       <FloatingCarousel setReadingItem={setReadingItem} />
       <div className="bg-white border-b border-gray-200 px-3 py-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl font-bold text-gray-900">Digital Library</h1>
+          <h1 className="px-9 text-2xl font-bold text-gray-900">HSB Digital Library</h1>
           <div className="flex items-center gap-2">
             <button onClick={() => setViewMode('grid')}
               className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -779,90 +837,201 @@ const LibraryViewer: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 mb-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={contentType === 'books' ? "Search books..." : "Search theses..."}
-              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <X size={18} />
-              </button>
-            )}
-          </div>
-          <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
-              showFilters ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
-            }`}>
-            <Filter size={18} />Filters
-          </button>
-        </div>
+  <div className="flex-1 relative">
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+      placeholder={contentType === 'books' ? "Search books..." : "Search theses..."}
+      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    {searchQuery && (
+      <button onClick={() => setSearchQuery('')}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <X size={18} />
+      </button>
+    )}
+  </div>
+  
 
-        <div className="flex items-center gap-2">
-          <button onClick={() => setContentType('books')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-              contentType === 'books' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
-            }`}>
-            <Book size={18} />Books ({firebaseBooks.length})
-          </button>
-          <button onClick={() => setContentType('theses')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-              contentType === 'theses' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
-            }`}>
-            <BookOpen size={18} />Theses ({firebaseTheses.length})
-          </button>
-        </div>
+  {/* Items per page selector */}
+  <select 
+    value={itemsPerPage} 
+    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >
+    <option value={10}>10 per page </option>
+    <option value={20}>20 per page </option>
+    <option value={50}>50 per page </option>
+  </select>
+  
+  <button onClick={() => setShowFilters(!showFilters)}
+    className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+      showFilters ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
+    }`}>
+    <Filter size={18} />Filters
+  </button>
+</div>
+
+        {/*"Books/Theses buttons" through "showFilters dropdown"*/}
+
+        <div className="flex items-center gap-2 mb-3">
+  <button onClick={() => setContentType('books')}
+    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+      contentType === 'books' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+    }`}>
+    <Book size={18} />Books ({firebaseBooks.length})
+  </button>
+  <button onClick={() => setContentType('theses')}
+    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+      contentType === 'theses' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+    }`}>
+    <BookOpen size={18} />Theses ({firebaseTheses.length})
+  </button>
+
+  {/* Active filter badges */}
+  {hasActiveFilters && (
+    <>
+      {selectedCategory !== 'all' && (
+        <span className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2">
+          {selectedCategory}
+          <X size={14} className="cursor-pointer" onClick={() => setSelectedCategory('all')} />
+        </span>
+      )}
+      {selectedYear !== 'all' && (
+        <span className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2">
+          {selectedYear}
+          <X size={14} className="cursor-pointer" onClick={() => setSelectedYear('all')} />
+        </span>
+      )}
+      {selectedPublisher !== 'all' && (
+        <span className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2">
+          {selectedPublisher}
+          <X size={14} className="cursor-pointer" onClick={() => setSelectedPublisher('all')} />
+        </span>
+      )}
+      
+      {/* Clear All button inline */}
+      <button onClick={clearAllFilters}
+        className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+        Clear All Filters
+      </button>
+    </>
+  )}
+</div>
       </div>
 
       <div className="p-3">
         
 
        
+{showFilters && (
+  <div className="bg-white rounded-lg border p-4 mb-3">
+    <div className="flex justify-between mb-3">
+      <h3 className="font-semibold">Filters</h3>
+      <button onClick={() => { 
+        setSelectedCategory('all'); 
+        setSelectedYear('all');
+        setSelectedPublisher('all');
+        setSearchQuery(''); 
+      }}
+        className="text-sm text-blue-600 hover:text-blue-800">Clear All</button>
+    </div>
+    
+    {contentType === 'books' && (
+      <div className="space-y-3">
+        <div>
+          <label className="block text-sm font-medium mb-2">Category</label>
+          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value as any)}
+            className="w-full px-3 py-2 border rounded-lg">
+            <option value="all">All Categories</option>
+            {catalogues.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+        </div>
 
-        {showFilters && (
-          <div className="bg-white rounded-lg border p-4 mb-3">
-            <div className="flex justify-between mb-3">
-              <h3 className="font-semibold">Filters</h3>
-              <button onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
-                className="text-sm text-blue-600 hover:text-blue-800">Clear All</button>
-            </div>
-            {contentType === 'books' && (
-              <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 border rounded-lg">
-                  <option value="all">All Categories</option>
-                  {catalogues.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Year</label>
+          <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg">
+            <option value="all">All Years</option>
+            {Array.from(new Set(firebaseBooks.map(b => b.publishedYear))).sort((a, b) => b - a).map(year => 
+              <option key={year} value={year}>{year}</option>
             )}
-          </div>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Publisher</label>
+          <select value={selectedPublisher} onChange={(e) => setSelectedPublisher(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg">
+            <option value="all">All Publishers</option>
+            {Array.from(new Set(firebaseBooks.map(b => b.publisher).filter(Boolean))).sort().map(pub => 
+              <option key={pub} value={pub}>{pub}</option>
+            )}
+          </select>
+        </div>
+      </div>
+    )}
+
+    {contentType === 'theses' && (
+      <div className="space-y-3">
+         <div>
+      <label className="block text-sm font-medium mb-2">Year</label>
+      <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}
+        className="w-full px-3 py-2 border rounded-lg">
+        <option value="all">All Years</option>
+        {Array.from(new Set(firebaseTheses.map(t => t.year))).sort((a, b) => b - a).map(year => 
+          <option key={year} value={year}>{year}</option>
         )}
+      </select>
+    </div>
+
+        <div>
+      <label className="block text-sm font-medium mb-2">Program</label>
+      <select value={selectedPublisher} onChange={(e) => setSelectedPublisher(e.target.value)}
+        className="w-full px-3 py-2 border rounded-lg">
+        <option value="all">All Programs</option>
+        {Array.from(new Set(firebaseTheses.map(t => t.program).filter(Boolean))).sort().map(prog => 
+          <option key={prog} value={prog}>{prog}</option>
+        )}
+      </select>
+    </div>
+
+        <div>
+      <label className="block text-sm font-medium mb-2">Level</label>
+      <select value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value as any)}
+        className="w-full px-3 py-2 border rounded-lg">
+        <option value="all">All Levels</option>
+        <option value="bachelor">Bachelor</option>
+        <option value="master">Master</option>
+        <option value="phd">PhD</option>
+      </select>
+    </div>
+      </div>
+    )}
+  </div>
+)}
 
         {contentType === 'books' && (
           <div className="mb-3">
             <div className="flex justify-between items-center ">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowCategoryBrowser(!showCategoryBrowser)}
-                  className=" hover:bg-gray-100 rounded-lg transition-colors"
-                  title={showCategoryBrowser ? "Collapse categories" : "Expand categories"}
-                >
-                  {showCategoryBrowser ? (
-                    <ChevronDown size={20} className="text-gray-600" />
-                  ) : (
-                    <ChevronRight size={20} className="text-gray-600" />
-                  )}
-                </button>
-                
+              <div
+                className="px-3 flex items-center gap-2 cursor-pointer select-none hover:bg-gray-50 rounded-lg transition-colors mb-3"
+                onClick={() => setShowCategoryBrowser(!showCategoryBrowser)}
+                title={showCategoryBrowser ? "Collapse categories" : "Expand categories"}
+              >
+                {showCategoryBrowser ? (
+                  <ChevronDown size={20} className="text-gray-600" />
+                ) : (
+                  <ChevronRight size={20} className="text-gray-600" />
+                )}
+
                 <h2 className="text-xl font-bold">Browse by Category</h2>
+
                 {!showCategoryBrowser && (
                   <span className="text-sm text-gray-500">
                     ({catalogues.length} categories)
                   </span>
                 )}
               </div>
+
               <div className="px-3 flex gap-2">
                 
                 <button onClick={() => setSelectedCategory('all')}
@@ -894,65 +1063,76 @@ const LibraryViewer: React.FC = () => {
           </div>
         )}
 
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {paginatedContent.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-lg cursor-pointer transition-shadow"
-                onClick={() => setReadingItem(item)}>
-                
-                
-                <h3 className="font-semibold mb-2 line-clamp-2 text-gray-900">{item.title}</h3>
-                
-                <p className="text-sm text-gray-600 mb-2 line-clamp-1">
-                  {isBook(item) ? item.authors.join(', ') : item.student.name}
-                </p>
-                
-                {/* Category badge */}
-                <div className="mb-3">
-                  <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200">
-                    {isBook(item) ? item.catalogue : item.program}
+       {viewMode === 'grid' ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+    {paginatedContent.map((item) => (
+      <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-lg cursor-pointer transition-shadow"
+        onClick={() => setReadingItem(item)}>
+        
+        {/* Title - Full Width */}
+        <h3 className="font-semibold mb-2 line-clamp-2 text-gray-900 min-h-[2.5rem]">{item.title}</h3>
+        
+        <div className="flex gap-3">
+          {/* Content Section */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+              {isBook(item) ? item.authors.join(', ') : item.student.name}
+            </p>
+            
+            {/* Category badge */}
+            <div className="mb-2">
+              <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                {isBook(item) ? item.catalogue : item.program}
+              </span>
+            </div>
+            
+            {isBook(item) ? (
+              <div className="space-y-1">
+                <div className="text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <Book size={12} />
+                    {item.pages} pages • {item.publicationYear} • {item.fileType ? 'eBook' : 'Print'}
                   </span>
                 </div>
-                
-                {isBook(item) ? (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Book size={12} />
-                        {item.pages} pages
-                      </span>
-                      <span>{item.publicationYear}</span>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 pt-2 border-t">
-                      <span className="text-gray-600 truncate">{item.publisher}</span>
-                      <span>Available: {item.availableCopies}/{item.totalCopies}</span>
-                    </div>
-                    <div className="flex justify-end text-xs pt-1">
-                      {item.fileType && (
-                        <span className="text-green-600 font-medium uppercase">{item.fileType}</span>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>{item.academicYear}</span>
-                      <span>{item.pages || 0} pages</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className={`px-2 py-1 rounded font-medium ${
-                        item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                      }`}>{item.status}</span>
-                      {item.pdfUrl && (
-                        <span className="text-green-600 font-medium">PDF</span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <div className="text-xs text-gray-600 truncate pt-1 border-t">
+                  {item.publisher}
+                </div>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-1">
+                <div className="text-xs text-gray-500">
+                  {item.academicYear} • {item.pages || 0} pages
+                </div>
+                <div className="flex justify-between items-center text-xs pt-1 border-t">
+                  <span className={`px-2 py-1 rounded font-medium ${
+                    item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                  }`}>{item.status}</span>
+                  {item.pdfUrl && (
+                    <span className="text-green-600 font-medium">PDF</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
+          
+          {/* Book Cover - Right Side */}
+          {isBook(item) && item.coverImage && (
+            <div className="w-20 h-28 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+              <img 
+                src={item.coverImage} 
+                alt={item.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).parentElement!.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+) : (
           <div className="bg-white rounded-lg border overflow-hidden">
             {/* Table Header */}
             <div className="bg-gray-50 border-b px-4 py-3">

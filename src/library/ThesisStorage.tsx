@@ -99,6 +99,526 @@ interface ThesisFilterOptions {
   yearTo: string;
 }
 
+
+
+/* ---------- Edit Thesis Modal ---------- */
+const EditThesisModal: React.FC<{
+  thesis: ThesisRecord;
+  onClose: () => void;
+  onSubmit: (data: Partial<ThesisRecord>, pdfFile?: File) => Promise<void> | void;
+  existingTheses: ThesisRecord[];
+}> = ({ thesis, onClose, onSubmit, existingTheses }) => {
+  const [formData, setFormData] = useState({
+    title: thesis.title,
+    studentName: thesis.studentName,
+    studentId: thesis.studentId,
+    level: thesis.level,
+    program: thesis.program,
+    year: thesis.year,
+    submissionDate: thesis.submissionDate,
+    defenseDate: thesis.defenseDate || "",
+    approvalDate: thesis.approvalDate || "",
+    status: thesis.status,
+    abstract: thesis.abstract,
+    keywords: thesis.keywords.join(", "),
+    pages: thesis.pages || 0,
+    plagiarismScore: thesis.plagiarismScore || 0,
+    grade: thesis.grade || "",
+  });
+
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Calculate sequence - should remain same for existing thesis
+  const thesisSequence = useMemo(() => 
+    getThesisSequence(existingTheses, thesis),
+    [existingTheses, thesis]
+  );
+
+  // Auto-generated thesis ID
+  const thesisId = useMemo(() => 
+    generateThesisId(
+      getProgramCode(formData.program),
+      formData.level,
+      formData.year,
+      thesisSequence
+    ),
+    [formData.program, formData.level, formData.year, thesisSequence]
+  );
+
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setPdfFile(file);
+    } else {
+      alert("Please select a valid PDF file");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(
+        onSubmit(
+          {
+            ...formData,
+            keywords: formData.keywords.split(",").map(k => k.trim()).filter(Boolean),
+          },
+          pdfFile || undefined
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Get program options based on level
+  const programOptions = useMemo(() => {
+    if (formData.level === "bachelor") {
+      return programs.bachelor.map(p => `${p.code} - ${p.name}`);
+    } else if (formData.level === "master") {
+      return programs.master.map(p => `${p.code} - ${p.name}`);
+    } else {
+      return programs.phd.map(p => `${p.code} - ${p.name}`);
+    }
+  }, [formData.level]);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Edit Thesis</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* PDF Upload */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Thesis PDF {pdfFile || thesis.pdfUrl ? "(Optional - Change existing)" : ""}
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-32 bg-red-50 rounded border border-red-200 flex flex-col items-center justify-center">
+                <FileText className="w-8 h-8 text-red-600 mb-1" />
+                {(pdfFile || thesis.pdfUrl) && (
+                  <span className="text-xs text-red-600 text-center px-1">
+                    {pdfFile ? pdfFile.name.substring(0, 12) + "..." : "Attached"}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg cursor-pointer transition">
+                  <Upload className="w-5 h-5" />
+                  <span className="text-sm">
+                    {pdfFile || thesis.pdfUrl ? "Change PDF" : "Upload PDF File"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePdfChange}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  PDF format (Max 50MB)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Thesis ID Display */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-blue-900 mb-2">
+              Thesis ID
+            </label>
+            <code className="block text-lg font-mono font-bold text-blue-700 bg-white px-4 py-2 rounded border border-blue-300">
+              {thesisId}
+            </code>
+            <p className="text-xs text-blue-600 mt-2">
+              Storage: {THESIS_STORAGE_PATHS[formData.level]}
+            </p>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Student Name */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Student Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.studentName}
+                onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Student ID */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Student ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.studentId}
+                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Level */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Level</label>
+              <select
+                value={formData.level}
+                onChange={(e) => setFormData({ ...formData, level: e.target.value as ThesisLevel })}
+                className="w-full px-3 py-2 border rounded-lg"
+              >
+                <option value="bachelor">Bachelor</option>
+                <option value="master">Master</option>
+                <option value="phd">PhD</option>
+              </select>
+            </div>
+
+            {/* Year */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Year</label>
+              <input
+                type="number"
+                value={formData.year}
+                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                min={2000}
+                max={new Date().getFullYear() + 5}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          {/* Program */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Program</label>
+            <select
+              value={formData.program}
+              onChange={(e) => setFormData({ ...formData, program: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+            >
+              {programOptions.map((prog) => (
+                <option key={prog} value={prog}>
+                  {prog}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {/* Submission Date */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Submission Date</label>
+              <input
+                type="date"
+                value={formData.submissionDate}
+                onChange={(e) => setFormData({ ...formData, submissionDate: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+
+            {/* Defense Date */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Defense Date</label>
+              <input
+                type="date"
+                value={formData.defenseDate}
+                onChange={(e) => setFormData({ ...formData, defenseDate: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+
+            {/* Approval Date */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Approval Date</label>
+              <input
+                type="date"
+                value={formData.approvalDate}
+                onChange={(e) => setFormData({ ...formData, approvalDate: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as ThesisStatus })}
+                className="w-full px-3 py-2 border rounded-lg"
+              >
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under Review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+
+            {/* Grade */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Grade</label>
+              <input
+                type="text"
+                value={formData.grade}
+                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                placeholder="e.g., A, B+, Pass with Distinction"
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Pages */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Pages</label>
+              <input
+                type="number"
+                value={formData.pages}
+                onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
+                min={0}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+
+            {/* Plagiarism Score */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Plagiarism Score (%)</label>
+              <input
+                type="number"
+                value={formData.plagiarismScore}
+                onChange={(e) => setFormData({ ...formData, plagiarismScore: parseFloat(e.target.value) || 0 })}
+                min={0}
+                max={100}
+                step={0.1}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          {/* Abstract */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Abstract</label>
+            <textarea
+              value={formData.abstract}
+              onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
+              rows={4}
+              placeholder="Brief summary of the thesis..."
+              className="w-full px-3 py-2 border rounded-lg"
+            />
+          </div>
+
+          {/* Keywords */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Keywords</label>
+            <input
+              type="text"
+              value={formData.keywords}
+              onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+              placeholder="keyword1, keyword2, keyword3"
+              className="w-full px-3 py-2 border rounded-lg"
+            />
+            <p className="text-xs text-gray-500 mt-1">Separate keywords with commas</p>
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center gap-2 text-white ${
+                isSubmitting
+                  ? "bg-orange-400 cursor-not-allowed"
+                  : "bg-orange-600 hover:bg-orange-700"
+              }`}
+            >
+              <Edit className="w-5 h-5" />
+              {isSubmitting ? "Updating…" : "Update Thesis"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className={`px-6 py-3 border border-gray-300 rounded-lg ${
+                isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+
+/* ---------- Detail Modal ---------- */
+
+
+const ThesisDetailModal: React.FC<{
+  thesis: ThesisRecord;
+  allTheses: ThesisRecord[];
+  onClose: () => void;
+  onDelete?: (thesisId: string) => void;
+}> = ({ thesis, allTheses, onClose, onDelete }) => {
+  const thesisId = generateThesisId(
+    getProgramCode(thesis.program),
+    thesis.level,
+    thesis.year,
+    getThesisSequence(allTheses, thesis)
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Thesis Details</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded" aria-label="Close">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* Thesis ID */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <span className="text-sm font-medium text-blue-900">Thesis ID:</span>
+            <code className="block mt-1 text-lg font-mono font-bold text-blue-700">
+              {thesisId}
+            </code>
+            <p className="text-xs text-blue-600 mt-1">
+              Storage: {THESIS_STORAGE_PATHS[thesis.level]}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold">{thesis.title}</h3>
+            <p className="text-gray-600">
+              {PROGRAM_CODES[thesis.program] || thesis.program}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <span className="text-sm text-gray-600">Student:</span>
+              <p className="font-medium">
+                {thesis.studentName} ({thesis.studentId})
+              </p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Level:</span>
+              <p className="font-medium capitalize">{thesis.level}</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Program:</span>
+              <p className="font-medium">
+                {PROGRAM_CODES[thesis.program] || thesis.program}
+              </p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Year:</span>
+              <p className="font-medium">{thesis.year}</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Status:</span>
+              <p className="font-medium capitalize">
+                {thesis.status.replace('_', ' ')}
+              </p>
+            </div>
+            {typeof thesis.pages === 'number' && (
+              <div>
+                <span className="text-sm text-gray-600">Pages:</span>
+                <p className="font-medium">{thesis.pages}</p>
+              </div>
+            )}
+          </div>
+
+          {thesis.abstract && (
+            <div>
+              <span className="text-sm text-gray-600">Abstract:</span>
+              <p className="text-gray-800 mt-1">{thesis.abstract}</p>
+            </div>
+          )}
+
+          {thesis.keywords && thesis.keywords.length > 0 && (
+            <div>
+              <span className="text-sm text-gray-600">Keywords:</span>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {thesis.keywords.map((keyword, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {thesis.pdfUrl && (
+            <div className="pt-4">
+              <a
+                href={thesis.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+              >
+                <Download className="w-5 h-5" />
+                View PDF
+              </a>
+            </div>
+          )}
+
+          {onDelete && (
+            <div className="pt-2">
+              <button
+                onClick={() => onDelete(thesis.id)}
+                className="w-full border border-red-300 text-red-700 px-6 py-2 rounded-lg hover:bg-red-50"
+              >
+                Delete Thesis
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
 /* ---------- Component ---------- */
 const ThesisStorage: React.FC = () => {
   const [theses, setTheses] = useState<ThesisRecord[]>([]);
@@ -918,139 +1438,8 @@ const AddThesisModal: React.FC<{
 };
 
 /* ---------- Edit Thesis Modal ---------- */
-const EditThesisModal: React.FC<{
-  thesis: ThesisRecord;
-  onClose: () => void;
-  onSubmit: (data: Partial<ThesisRecord>, pdfFile?: File) => Promise<void> | void;
-  existingTheses: ThesisRecord[];
-}> = ({ thesis, onClose, onSubmit, existingTheses }) => {
-  // Similar to AddThesisModal but with pre-populated data
-  // For brevity, using same structure
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Edit Thesis</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-        <p className="text-gray-600">Edit functionality will be similar to Add modal</p>
-        <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-200 rounded-lg">
-          Close
-        </button>
-      </div>
-    </div>
-  );
-};
+// Replace the EditThesisModal (lines 920-945) in your ThesisStorage.tsx with this implementation:
 
-/* ---------- Detail Modal ---------- */
-const ThesisDetailModal: React.FC<{
-  thesis: ThesisRecord;
-  allTheses: ThesisRecord[];
-  onClose: () => void;
-  onDelete?: (thesisId: string) => void;
-}> = ({ thesis, allTheses, onClose, onDelete }) => {
-  const thesisId = generateThesisId(
-    getProgramCode(thesis.program),
-    thesis.level,
-    thesis.year,
-    getThesisSequence(allTheses, thesis)
-  );
-  
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Thesis Details</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-        <div className="p-6 space-y-4">
-          {/* Thesis ID */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <span className="text-sm font-medium text-blue-900">Thesis ID:</span>
-            <code className="block mt-1 text-lg font-mono font-bold text-blue-700">
-              {thesisId}
-            </code>
-            <p className="text-xs text-blue-600 mt-1">
-              Storage: {THESIS_STORAGE_PATHS[thesis.level]}
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-xl font-bold">{thesis.title}</h3>
-            <p className="text-gray-600">{PROGRAM_CODES[thesis.program] || thesis.program}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-sm text-gray-600">Student:</span>
-              <p className="font-medium">{thesis.studentName} ({thesis.studentId})</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-600">Level:</span>
-              <p className="font-medium capitalize">{thesis.level}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-600">Program:</span>
-              <p className="font-medium">{PROGRAM_CODES[thesis.program] || thesis.program}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-600">Year:</span>
-              <p className="font-medium">{thesis.year}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-600">Status:</span>
-              <p className="font-medium capitalize">{thesis.status.replace("_", " ")}</p>
-            </div>
-            {thesis.pages && (
-              <div>
-                <span className="text-sm text-gray-600">Pages:</span>
-                <p className="font-medium">{thesis.pages}</p>
-              </div>
-            )}
-          </div>
-
-          {thesis.abstract && (
-            <div>
-              <span className="text-sm text-gray-600">Abstract:</span>
-              <p className="text-gray-800 mt-1">{thesis.abstract}</p>
-            </div>
-          )}
-
-          {thesis.keywords && thesis.keywords.length > 0 && (
-            <div>
-              <span className="text-sm text-gray-600">Keywords:</span>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {thesis.keywords.map((keyword, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {thesis.pdfUrl && (
-            <div className="pt-4">
-              <a
-                href={thesis.pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-              >
-                <Download className="w-5 h-5" />
-                View PDF
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 /* ---------- Helper Components ---------- */
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: number | string }> = ({

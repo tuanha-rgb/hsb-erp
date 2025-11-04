@@ -792,24 +792,6 @@ const AddBookModal: React.FC<{
       setIsSubmitting(false);
     }
   };
-const TextAreaField: React.FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  rows?: number;
-  placeholder?: string;
-}> = ({ label, value, onChange, rows = 3, placeholder }) => (
-  <div>
-    <label className="block text-sm font-medium mb-1">{label}</label>
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      rows={rows}
-      placeholder={placeholder}
-      className="w-full px-3 py-2 border rounded-lg"
-    />
-  </div>
-);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -1182,24 +1164,7 @@ const EditBookModal: React.FC<{
     }
   };
 
-  const TextAreaField: React.FC<{
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    rows?: number;
-    placeholder?: string;
-  }> = ({ label, value, onChange, rows = 3, placeholder }) => (
-    <div>
-      <label className="block text-sm font-medium mb-1">{label}</label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 border rounded-lg"
-      />
-    </div>
-  );
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -1608,7 +1573,24 @@ const SelectField: React.FC<{
     </select>
   </div>
 );
-
+const TextAreaField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  rows?: number;
+  placeholder?: string;
+}> = ({ label, value, onChange, rows = 3, placeholder }) => (
+  <div>
+    <label className="block text-sm font-medium mb-1">{label}</label>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={rows}
+      placeholder={placeholder}
+      className="w-full px-3 py-2 border rounded-lg"
+    />
+  </div>
+);
 const Info: React.FC<{ label: string; value: React.ReactNode }> = ({
   label,
   value,
