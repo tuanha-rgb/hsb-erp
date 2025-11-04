@@ -16,6 +16,7 @@ import { db, storage } from './firebase.config';
 export interface Thesis {
   id?: string;
   title: string;
+  titleVietnamese?: string;
   studentName: string;
   studentId: string;
   level: "bachelor" | "master" | "phd";

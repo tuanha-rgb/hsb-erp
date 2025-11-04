@@ -4,19 +4,42 @@ import {
   Star, Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
 } from 'lucide-react';
-import { bookRecords, catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
-import { sampleTheses, type Thesis } from '../acad/thesis';
+import { catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
 import { getFileUrl } from './googledrive';
 import ePub from 'epubjs';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 import pdfjsWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { bookService, type Book as FirebaseBook } from '../firebase/book.service';
+import { thesisService, type Thesis as FirebaseThesis } from '../firebase/thesis.service';
 
 GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
 
+// Local Thesis type for library viewer (simplified)
+export interface LibraryThesis {
+  id: string;
+  title: string;
+  student: {
+    id: string;
+    name: string;
+  };
+  level: "bachelor" | "master" | "phd";
+  program: string;
+  academicYear: string;
+  category: string;
+  keywords: string[];
+  abstract: string;
+  status: "draft" | "submitted" | "under_review" | "approved" | "rejected" | "published";
+  submittedDate: string;
+  approvedDate?: string;
+  pdfUrl?: string;
+  pages?: number;
+  plagiarismScore?: number;
+  grade?: string;
+}
+
 type ViewMode = 'grid' | 'list';
 type ContentType = 'books' | 'theses';
-type ReadingItem = BookRecord | Thesis;
+type ReadingItem = BookRecord | LibraryThesis;
 
 interface CarouselSlide {
   id: string;
@@ -192,8 +215,7 @@ interface Bookmark { page: number; note?: string; timestamp: number; }
 interface ReadingViewProps { item: ReadingItem; onClose: () => void; }
 
 const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
-const isThesis = (item: ReadingItem): item is Thesis => 'student' in item;
-
+const isThesis = (item: ReadingItem): item is LibraryThesis => 'student' in item;
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -251,9 +273,9 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       let fileUrl: string | null = null;
       if (item.firebaseStoragePath) {
         fileUrl = item.firebaseStoragePath;
-        console.log('📚 Loading Firebase PDF:', fileUrl);
+        console.log('ðŸ“š Loading Firebase PDF:', fileUrl);
       } else if (item.driveFileId) {
-        console.log('📂 Fetching Google Drive URL');
+        console.log('ðŸ“‚ Fetching Google Drive URL');
         fileUrl = await getFileUrl(item.driveFileId);
       }
       
@@ -262,9 +284,9 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       if (item.fileType === 'pdf') await loadPDF(fileUrl);
       else if (item.fileType === 'epub') await loadEPUB(fileUrl);
       
-      console.log('✅ Document loaded successfully');
+      console.log('âœ… Document loaded successfully');
     } catch (err) {
-      console.error('❌ Document load error:', err);
+      console.error('âŒ Document load error:', err);
       setError('Failed to load document: ' + (err as Error).message);
     } finally {
       setLoading(false);
@@ -529,7 +551,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{isBook(item) ? item.title : item.title}</h1>
               <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
                 <p className="text-sm text-blue-800">
-                  📖 <strong>Digital content not available.</strong> This item does not have an associated digital file.
+                  ðŸ“– <strong>Digital content not available.</strong> This item does not have an associated digital file.
                 </p>
               </div>
             </div>
@@ -566,64 +588,90 @@ const LibraryViewer: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [firebaseBooks, setFirebaseBooks] = useState<FirebaseBook[]>([]);
+  const [firebaseTheses, setFirebaseTheses] = useState<FirebaseThesis[]>([]);
 
-  useEffect(() => { loadFirebaseBooks(); }, []);
+  // Load data from Firebase
+  useEffect(() => { 
+    loadFirebaseBooks();
+    loadFirebaseTheses();
+  }, []);
 
   const loadFirebaseBooks = async () => {
     try {
       const books = await bookService.getAllBooks();
       setFirebaseBooks(books);
     } catch (error) {
-      console.error('Failed to load Firebase books:', error);
+      console.error('Failed to load books:', error);
     }
   };
 
-  const filteredContent = useMemo(() => {
-  const convertedFirebaseBooks: BookRecord[] = firebaseBooks.map(fb => {
-  const baseRecord: BookRecord = {
-    id: fb.id!,
-    title: fb.title,
-    authors: [fb.author],
-    isbn: fb.isbn || '',
-    publisher: fb.publisher || '',
-    publisherCode: fb.publisherCode || 'FB',
-    bookType: (fb.bookType || 'textbook') as BookType,
-    catalogue: fb.category as CatalogueCategory,
-    
-    // Optional - now properly mapped
-    publicationYear: fb.publishedYear,
-    pages: fb.pages || 200,
-    subjects: fb.subjects || [fb.category],
-    totalCopies: fb.copies,
-    availableCopies: fb.availableCopies,
-    rating: fb.rating,
-    description: fb.description,
-    coverImage: fb.coverImage,
-    firebaseStoragePath: fb.pdfUrl,
-    fileType: fb.pdfUrl ? 'pdf' : undefined
+  const loadFirebaseTheses = async () => {
+    try {
+      const theses = await thesisService.getAllTheses();
+      setFirebaseTheses(theses.filter(t => t.status === 'approved'));
+    } catch (error) {
+      console.error('Failed to load theses:', error);
+    }
   };
-  return baseRecord;
-});
 
-    let items: ReadingItem[] = contentType === 'books' 
-      ? [...bookRecords, ...convertedFirebaseBooks] 
-      : [...sampleTheses.filter(t => t.status === 'approved')];
+  const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
+
+  const filteredContent = useMemo(() => {
+    // Convert Firebase books to BookRecord
+    const convertedBooks: BookRecord[] = firebaseBooks.map(fb => ({
+      id: fb.id!,
+      title: fb.title,
+      authors: [fb.author],
+      isbn: fb.isbn || '',
+      publisher: fb.publisher || '',
+      publisherCode: fb.publisherCode || 'FB',
+      bookType: (fb.bookType || 'textbook') as BookType,
+      catalogue: fb.category as CatalogueCategory,
+      publicationYear: fb.publishedYear,
+      pages: fb.pages || 200,
+      subjects: fb.subjects || [fb.category],
+      totalCopies: fb.copies,
+      availableCopies: fb.availableCopies,
+      rating: fb.rating || 0,
+      description: fb.description,
+      coverImage: fb.coverImage,
+      firebaseStoragePath: fb.pdfUrl,
+      fileType: fb.pdfUrl ? 'pdf' : undefined
+    }));
+
+    // Convert Firebase theses to LibraryThesis
+    const convertedTheses: LibraryThesis[] = firebaseTheses.map(ft => ({
+      id: ft.id!,
+      title: ft.title,
+      student: { id: ft.studentId, name: ft.studentName },
+      level: ft.level,
+      program: ft.program,
+      academicYear: `${ft.year - 1}-${ft.year}`,
+      category: ft.program,
+      keywords: ft.keywords,
+      abstract: ft.abstract,
+      status: ft.status,
+      submittedDate: ft.submissionDate,
+      approvedDate: ft.approvalDate,
+      pdfUrl: ft.pdfUrl,
+      pages: ft.pages,
+      plagiarismScore: ft.plagiarismScore,
+      grade: ft.grade
+    }));
+
+    let items: ReadingItem[] = contentType === 'books' ? convertedBooks : convertedTheses;
 
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase();
       items = items.filter(item => {
         if (isBook(item)) {
-          return (
-            item.title.toLowerCase().includes(query) ||
-            item.authors.some(a => a.toLowerCase().includes(query)) ||
-            item.subjects.some(s => s.toLowerCase().includes(query))
-          );
+          return item.title.toLowerCase().includes(q) ||
+                 item.authors.some(a => a.toLowerCase().includes(q)) ||
+                 item.subjects.some(s => s.toLowerCase().includes(q));
         } else {
-          return (
-            item.title.toLowerCase().includes(query) ||
-            item.student.name.toLowerCase().includes(query) ||
-            item.keywords.some(k => k.toLowerCase().includes(query))
-          );
+          return item.title.toLowerCase().includes(q) ||
+                 item.student.name.toLowerCase().includes(q) ||
+                 item.keywords.some(k => k.toLowerCase().includes(q));
         }
       });
     }
@@ -633,42 +681,31 @@ const LibraryViewer: React.FC = () => {
     }
 
     return items;
-  }, [searchQuery, contentType, selectedCategory, firebaseBooks]);
+  }, [searchQuery, contentType, selectedCategory, firebaseBooks, firebaseTheses]);
 
   const paginatedContent = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredContent.slice(startIndex, endIndex);
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredContent.slice(start, start + itemsPerPage);
   }, [filteredContent, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredContent.length / itemsPerPage);
 
   useEffect(() => { setCurrentPage(1); }, [searchQuery, contentType, selectedCategory, itemsPerPage]);
 
-  const handleCarouselAction = (slideId: string) => {
-    switch(slideId) {
-      case '1': case '2': case '4': setContentType('books'); break;
-      case '3': setContentType('theses'); break;
-    }
-  };
-  
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
     catalogues.forEach(cat => {
-      const staticCount = bookRecords.filter(book => book.catalogue === cat).length;
-      const firebaseCount = firebaseBooks.filter(book => book.category === cat).length;
-      stats[cat] = staticCount + firebaseCount;
+      stats[cat] = firebaseBooks.filter(book => book.category === cat).length;
     });
     return stats;
   }, [firebaseBooks]);
 
   const stats = useMemo(() => ({
-    totalBooks: bookRecords.length + firebaseBooks.length,
-    totalTheses: sampleTheses.length,
-    availableCopies: bookRecords.reduce((sum, book) => sum + book.availableCopies, 0) + 
-                     firebaseBooks.reduce((sum, book) => sum + book.availableCopies, 0),
-    popularBooks: bookRecords.filter(book => book.rating >= 4.5).length,
-  }), [firebaseBooks]);
+    totalBooks: firebaseBooks.length,
+    totalTheses: firebaseTheses.length,
+    availableCopies: firebaseBooks.reduce((sum, b) => sum + b.availableCopies, 0),
+    popularBooks: firebaseBooks.filter(b => (b.rating || 0) >= 4.5).length,
+  }), [firebaseBooks, firebaseTheses]);
 
   if (readingItem) {
     return <ReadingView item={readingItem} onClose={() => setReadingItem(null)} />;
@@ -677,161 +714,126 @@ const LibraryViewer: React.FC = () => {
   return (
     <div className="h-full overflow-auto bg-gray-50">
       <div className="bg-white border-b border-gray-200 px-3 py-3">
-        <FloatingCarousel onSlideClick={handleCarouselAction} setReadingItem={setReadingItem} />
-      </div>
-
-      <div className="bg-white border-b border-gray-200 px-3 py-3">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Book className="text-blue-600" size={24} />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalBooks}</div>
-              <div className="text-sm text-gray-600">Books</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <BookOpen className="text-green-600" size={24} />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalTheses}</div>
-              <div className="text-sm text-gray-600">Theses</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Star className="text-purple-600" size={24} />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.popularBooks}</div>
-              <div className="text-sm text-gray-600">Top Rated</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="text-orange-600" size={24} />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.availableCopies}</div>
-              <div className="text-sm text-gray-600">Available</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mt-3">
-          <div className="flex items-center  ">
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">
-        {contentType === 'books' ? 'Book Collection' : 'Thesis Archive'}
-      </h1>
-      <p className="text-sm text-gray-600 mt-1">
-        {contentType === 'books' 
-          ? `Browse ${bookRecords.length + firebaseBooks.length} books in our digital library`
-          : `Explore ${sampleTheses.length} academic theses and dissertations`}
-      </p>
-    </div>
-         
-                 <div className="px-3 flex items-center gap-3">
-      <div className="px-3 flex items-center gap-2 text-sm">
-        <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}
-          className="border border-gray-300 rounded px-2 py-1.5 text-sm">
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </select>
-        <span className="text-gray-600"> items per page</span>
-      </div>
- 
-          </div>
-            <div className="bg-gray-100 border border-gray-200 rounded-lg p-1 flex">
-        <button onClick={() => setContentType('books')}
-          className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
-            contentType === 'books' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-          }`}>📚 Books</button>
-        <button onClick={() => setContentType('theses')}
-          className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
-            contentType === 'theses' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-          }`}>🎓 Theses</button>
-      </div>
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-2xl font-bold text-gray-900">Digital Library</h1>
+          <div className="flex items-center gap-2">
             <button onClick={() => setViewMode('grid')}
               className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}>
-              <Grid size={18} />
+              <Grid size={20} />
             </button>
             <button onClick={() => setViewMode('list')}
               className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}>
-              <List size={18} />
+              <List size={20} />
             </button>
           </div>
-        </div>
-                
-        <div className="flex gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input type="text"
-              placeholder={contentType === 'books' ? "Search books by title, author..." : "Search theses by title, student..."}
-              value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          {contentType === 'books' && (
-            <button onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
-              <Filter size={18} />Filters
-            </button>
-          )}
         </div>
 
-        {showFilters && contentType === 'books' && (
-          <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={contentType === 'books' ? "Search books..." : "Search theses..."}
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+              showFilters ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
+            }`}>
+            <Filter size={18} />Filters
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button onClick={() => setContentType('books')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+              contentType === 'books' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+            }`}>
+            <Book size={18} />Books ({firebaseBooks.length})
+          </button>
+          <button onClick={() => setContentType('theses')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+              contentType === 'theses' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+            }`}>
+            <BookOpen size={18} />Theses ({firebaseTheses.length})
+          </button>
+        </div>
+      </div>
+
+      <div className="p-3">
+        <FloatingCarousel setReadingItem={setReadingItem} />
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-3">
+          <div className="bg-white p-4 rounded-lg border">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-600">Total Books</span>
+              <Book className="text-blue-600" size={20} />
+            </div>
+            <div className="text-2xl font-bold">{stats.totalBooks.toLocaleString()}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-600">Theses</span>
+              <BookOpen className="text-green-600" size={20} />
+            </div>
+            <div className="text-2xl font-bold">{stats.totalTheses.toLocaleString()}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-600">Available</span>
+              <BookmarkCheck className="text-purple-600" size={20} />
+            </div>
+            <div className="text-2xl font-bold">{stats.availableCopies.toLocaleString()}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-600">Popular</span>
+              <TrendingUp className="text-orange-600" size={20} />
+            </div>
+            <div className="text-2xl font-bold">{stats.popularBooks}</div>
+          </div>
+        </div>
+
+        {showFilters && (
+          <div className="bg-white rounded-lg border p-4 mb-3">
+            <div className="flex justify-between mb-3">
+              <h3 className="font-semibold">Filters</h3>
+              <button onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
+                className="text-sm text-blue-600 hover:text-blue-800">Clear All</button>
+            </div>
+            {contentType === 'books' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value as CatalogueCategory | 'all')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value as any)}
+                  className="w-full px-3 py-2 border rounded-lg">
                   <option value="all">All Categories</option>
                   {catalogues.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
               </div>
-            </div>
+            )}
           </div>
         )}
 
-       
-
-      <div className="mt-3">
         {contentType === 'books' && (
           <div className="mb-3">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="px-6 text-xl font-bold text-gray-900">Browse by Category</h2>
+            <div className="flex justify-between items-center mb-3 px-6">
+              <h2 className="text-xl font-bold">Browse by Category</h2>
               <button onClick={() => setSelectedCategory('all')}
-                className="px-3 text-m text-bold text-blue-600 hover:text-blue-800 font-medium">View All</button>
+                className="text-blue-600 hover:text-blue-800 font-medium">View All</button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-              {catalogues.map((category) => (
-                <button key={category} onClick={() => setSelectedCategory(category)}
-                  className={`p-3 rounded-xl border-2 transition-all hover:shadow-md ${
-                    selectedCategory === category ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
+              {catalogues.map((cat) => (
+                <button key={cat} onClick={() => setSelectedCategory(cat)}
+                  className={`p-3 rounded-xl border-2 transition-all ${
+                    selectedCategory === cat ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}>
-                  <div className="text-3xl">
-                    {category === 'Computer Science' }
-                    {category === 'Engineering' }
-                    {category === 'Business & Economics' }
-                    {category === 'Mathematics' }
-                    {category === 'Physics' }
-                    {category === 'Chemistry' }
-                    {category === 'Biology & Life Sciences' }
-                    {category === 'Social Sciences' }
-                    {category === 'Humanities' }
-                    {category === 'Medicine & Health' }
-                    {category === 'Architecture' }
-                    {category === 'Arts & Design' }
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{category}</div>
-                  <div className="text-xs text-gray-500">{categoryStats[category] || 0} books</div>
+                  <div className="text-sm font-semibold mb-1 line-clamp-2">{cat}</div>
+                  <div className="text-xs text-gray-500">{categoryStats[cat] || 0} books</div>
                 </button>
               ))}
             </div>
@@ -841,23 +843,20 @@ const LibraryViewer: React.FC = () => {
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {paginatedContent.map((item) => (
-              <div key={isBook(item) ? item.id : item.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow cursor-pointer"
+              <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-lg cursor-pointer"
                 onClick={() => setReadingItem(item)}>
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex justify-between mb-3">
                   {isBook(item) ? <Book className="text-blue-600" size={24} /> : <BookOpen className="text-green-600" size={24} />}
-                  <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                  <span className="px-2 py-1 text-xs rounded-full bg-gray-100">
                     {isBook(item) ? item.bookType : item.level}
                   </span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {isBook(item) ? item.title : item.title}
-                </h3>
+                <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
                 <p className="text-sm text-gray-600 mb-3 line-clamp-1">
                   {isBook(item) ? item.authors.join(', ') : item.student.name}
                 </p>
                 {isBook(item) ? (
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-gray-500">
                     <span>{item.pages} pages</span>
                     <div className="flex items-center gap-1">
                       <Star size={12} className="text-yellow-500 fill-yellow-500" />
@@ -865,11 +864,10 @@ const LibraryViewer: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-gray-500">
                     <span>{item.category}</span>
                     <span className={`px-2 py-0.5 rounded ${
-                      item.status === 'approved' ? 'bg-green-100 text-green-700' :
-                      item.status === 'under_review' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                      item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100'
                     }`}>{item.status}</span>
                   </div>
                 )}
@@ -879,15 +877,16 @@ const LibraryViewer: React.FC = () => {
         ) : (
           <div className="space-y-2">
             {paginatedContent.map((item) => (
-              <div key={isBook(item) ? item.id : item.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer flex items-center gap-4"
+              <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-md cursor-pointer flex items-center gap-4"
                 onClick={() => setReadingItem(item)}>
-                {isBook(item) ? <Book className="text-blue-600 flex-shrink-0" size={32} /> : <BookOpen className="text-green-600 flex-shrink-0" size={32} />}
+                {isBook(item) ? <Book className="text-blue-600" size={32} /> : <BookOpen className="text-green-600" size={32} />}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{isBook(item) ? item.title : item.title}</h3>
-                  <p className="text-sm text-gray-600 truncate">{isBook(item) ? item.authors.join(', ') : item.student.name}</p>
+                  <h3 className="font-semibold truncate">{item.title}</h3>
+                  <p className="text-sm text-gray-600 truncate">
+                    {isBook(item) ? item.authors.join(', ') : item.student.name}
+                  </p>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600 flex-shrink-0">
+                <div className="flex items-center gap-4 text-sm text-gray-600">
                   {isBook(item) ? (
                     <>
                       <span>{item.publicationYear}</span>
@@ -899,8 +898,7 @@ const LibraryViewer: React.FC = () => {
                     <>
                       <span>{item.academicYear}</span>
                       <span className={`px-2 py-1 rounded text-xs ${
-                        item.status === 'approved' ? 'bg-green-100 text-green-700' :
-                        item.status === 'under_review' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                        item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100'
                       }`}>{item.status}</span>
                     </>
                   )}
@@ -914,43 +912,42 @@ const LibraryViewer: React.FC = () => {
         {filteredContent.length === 0 && (
           <div className="text-center py-12">
             <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">No items found matching your criteria</p>
+            <p className="text-gray-600">No items found</p>
           </div>
         )}
 
-        {totalPages > 1 && filteredContent.length > 0 && (
-          <div className="mt-3 flex items-center justify-between">
+        {totalPages > 1 && (
+          <div className="mt-3 flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredContent.length)} of {filteredContent.length} items
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredContent.length)} of {filteredContent.length}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">First</button>
-              <button onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                <ChevronLeft size={16} className="inline" />
+                className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">First</button>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+                <ChevronLeft size={16} />
               </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) pageNum = i + 1;
-                  else if (currentPage <= 3) pageNum = i + 1;
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum = i + 1;
+                if (totalPages > 5) {
+                  if (currentPage <= 3) pageNum = i + 1;
                   else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
                   else pageNum = currentPage - 2 + i;
-                  return (
-                    <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1.5 text-sm border rounded transition-colors ${
-                        currentPage === pageNum ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'
-                      }`}>{pageNum}</button>
-                  );
-                })}
-              </div>
-              <button onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                <ChevronRight size={16} className="inline" />
+                }
+                return (
+                  <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-1.5 text-sm border rounded ${
+                      currentPage === pageNum ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'
+                    }`}>{pageNum}</button>
+                );
+              })}
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+                <ChevronRight size={16} />
               </button>
               <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Last</button>
+                className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">Last</button>
             </div>
           </div>
         )}
