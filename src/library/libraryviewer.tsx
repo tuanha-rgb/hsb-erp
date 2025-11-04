@@ -88,22 +88,25 @@ const FloatingCarousel: React.FC<{
     const book = featuredBooks.find(b => b.id === slideId);
     if (book && setReadingItem) {
       const bookRecord: BookRecord = {
-        id: book.id!,
-        title: book.title,
-        authors: [book.author],
-        isbn: book.isbn || '',
-        publicationYear: book.publishedYear || 2024,
-        publisher: book.publisher || '',
-        pages: 0,
-        catalogue: book.category as CatalogueCategory,
-        subjects: [book.category],
-        bookType: (book.bookType as BookType),
-        totalCopies: book.copies,
-        availableCopies: book.availableCopies,
-        rating: 0,
-        firebaseStoragePath: book.pdfUrl,
-        fileType: book.pdfUrl ? 'pdf' : undefined
-      };
+  id: book.id!,
+  isbn: book.isbn || '',
+  title: book.title,
+  authors: [book.author],
+  publisher: book.publisher || 'Unknown',
+  publisherCode: 'UNKN',
+  bookType: (book.bookType as BookType) || 'textbook',
+  catalogue: book.category as CatalogueCategory,
+  
+  // Optional fields
+  publicationYear: book.publishedYear,
+  pages: 0,
+  subjects: [book.category],
+  totalCopies: book.copies,
+  availableCopies: book.availableCopies,
+  rating: 0,
+  firebaseStoragePath: book.pdfUrl,
+  fileType: book.pdfUrl ? 'pdf' : undefined
+};
       setReadingItem(bookRecord);
     } else if (onBookClick) {
       onBookClick(slideId);
@@ -576,27 +579,28 @@ const LibraryViewer: React.FC = () => {
   };
 
   const filteredContent = useMemo(() => {
-    const convertedFirebaseBooks: BookRecord[] = firebaseBooks.map(fb => {
-      const baseRecord = {
-        id: fb.id!,
-        title: fb.title,
-        authors: [fb.author],
-        isbn: fb.isbn || '',
-        publicationYear: fb.publishedYear || 2024,
-        publisher: fb.publisher || '',
-        pages: 0,
-        catalogue: fb.category as CatalogueCategory,
-        subjects: [fb.category],
-        bookType: (fb.bookType as BookType) || 'printed',
-        totalCopies: fb.copies,
-        availableCopies: fb.availableCopies,
-        rating: 0,
-      };
-      if (fb.pdfUrl) {
-        return { ...baseRecord, firebaseStoragePath: fb.pdfUrl, fileType: 'pdf' as const };
-      }
-      return baseRecord;
-    });
+   const convertedFirebaseBooks: BookRecord[] = firebaseBooks.map(fb => {
+  const baseRecord: BookRecord = {
+    id: fb.id!,
+    title: fb.title,
+    authors: [fb.author],
+    isbn: fb.isbn || '',
+    publicationYear: fb.publishedYear || 2024,
+    publisher: fb.publisher || '',
+    publisherCode: 'FB',
+    pages: 0,
+    catalogue: fb.category as CatalogueCategory,
+    subjects: [fb.category],
+    bookType: (fb.bookType || 'textbook') as BookType, // Fix this line
+    totalCopies: fb.copies,
+    availableCopies: fb.availableCopies,
+    rating: 0,
+  };
+  if (fb.pdfUrl) {
+    return { ...baseRecord, firebaseStoragePath: fb.pdfUrl, fileType: 'pdf' as const };
+  }
+  return baseRecord;
+});
 
     let items: ReadingItem[] = contentType === 'books' 
       ? [...bookRecords, ...convertedFirebaseBooks] 

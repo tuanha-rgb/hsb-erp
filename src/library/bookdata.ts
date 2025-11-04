@@ -23,37 +23,41 @@ export interface Publisher {
   website: string;
 }
 
+// bookdata.ts
 export interface BookRecord {
+  // Required core fields
   id: string;
   isbn: string;
   title: string;
-  subtitle?: string;
   authors: string[];
   publisher: string;
   publisherCode: string;
-  edition: string;
-  publicationYear: number;
   bookType: BookType;
   catalogue: CatalogueCategory;
-  subjects: string[];
-  description: string;
-  language: string;
-  pages: number;
-  totalCopies: number;
-  availableCopies: number;
-  borrowedCopies: number;
-  reservedCopies: number;
-  shelfLocation: string;
+  
+  // Optional fields (add ? to each)
+  subtitle?: string;
+  edition?: string;
+  publicationYear?: number;
+  subjects?: string[];
+  description?: string;
+  language?: string;
+  pages?: number;
+  totalCopies?: number;
+  availableCopies?: number;
+  borrowedCopies?: number;
+  reservedCopies?: number;
+  shelfLocation?: string;
   coverImage?: string;
-  rating: number;
-  totalRatings: number;
-  popularityScore: number;
-  addedDate: string;
-  lastUpdated: string;
-  price: number;
-  currency: string;
-  firebaseStoragePath?: string; // NEW: 'books/isbn_123.pdf'
-  driveFileId?: string; // Google Drive file ID
+  rating?: number;
+  totalRatings?: number;
+  popularityScore?: number;
+  addedDate?: string;
+  lastUpdated?: string;
+  price?: number;
+  currency?: string;
+  firebaseStoragePath?: string;
+  driveFileId?: string;
   fileType?: 'pdf' | 'epub';
 }
 
