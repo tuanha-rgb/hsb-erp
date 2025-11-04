@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Book, BookOpen, Search, Filter, X, ChevronDown, ChevronRight,
-  Star, Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
+  Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
 } from 'lucide-react';
 import { catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
@@ -613,6 +613,7 @@ const LibraryViewer: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<CatalogueCategory | 'all'>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [showCategoryBrowser, setShowCategoryBrowser] = useState(true);
   const [readingItem, setReadingItem] = useState<ReadingItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -752,7 +753,7 @@ const LibraryViewer: React.FC = () => {
     totalBooks: firebaseBooks.length,
     totalTheses: firebaseTheses.length,
     availableCopies: firebaseBooks.reduce((sum, b) => sum + b.availableCopies, 0),
-    popularBooks: firebaseBooks.filter(b => (b.rating || 0) >= 4.5).length,
+    digitalBooks: firebaseBooks.filter(b => b.pdfUrl).length,
   }), [firebaseBooks, firebaseTheses]);
 
   if (readingItem) {
@@ -761,6 +762,7 @@ const LibraryViewer: React.FC = () => {
 
   return (
     <div className="h-full overflow-auto bg-gray-50">
+      <FloatingCarousel setReadingItem={setReadingItem} />
       <div className="bg-white border-b border-gray-200 px-3 py-3">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold text-gray-900">Digital Library</h1>
@@ -814,38 +816,9 @@ const LibraryViewer: React.FC = () => {
       </div>
 
       <div className="p-3">
-        <FloatingCarousel setReadingItem={setReadingItem} />
+        
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-3">
-          <div className="bg-white p-4 rounded-lg border">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Total Books</span>
-              <Book className="text-blue-600" size={20} />
-            </div>
-            <div className="text-2xl font-bold">{stats.totalBooks.toLocaleString()}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Theses</span>
-              <BookOpen className="text-green-600" size={20} />
-            </div>
-            <div className="text-2xl font-bold">{stats.totalTheses.toLocaleString()}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Available</span>
-              <BookmarkCheck className="text-purple-600" size={20} />
-            </div>
-            <div className="text-2xl font-bold">{stats.availableCopies.toLocaleString()}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Popular</span>
-              <TrendingUp className="text-orange-600" size={20} />
-            </div>
-            <div className="text-2xl font-bold">{stats.popularBooks}</div>
-          </div>
-        </div>
+       
 
         {showFilters && (
           <div className="bg-white rounded-lg border p-4 mb-3">
@@ -869,41 +842,54 @@ const LibraryViewer: React.FC = () => {
 
         {contentType === 'books' && (
           <div className="mb-3">
-            <div className="flex justify-between items-center mb-3 px-6">
-              <h2 className="text-xl font-bold">Browse by Category</h2>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => {
-                    console.log('=== CATEGORY DEBUG INFO ===');
-                    console.log('Expected categories (catalogues):', catalogues);
-                    const actualCategories = [...new Set(firebaseBooks.map(b => b.category))];
-                    console.log('Actual categories in Firebase:', actualCategories);
-                    const mismatches = catalogues.filter(c => !actualCategories.includes(c));
-                    console.log('Catalogues NOT in Firebase:', mismatches);
-                    const extras = actualCategories.filter(c => !catalogues.includes(c as any));
-                    console.log('Firebase categories NOT in catalogues:', extras);
-                    console.log('=========================');
-                  }}
-                  className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded">
-                  Debug Categories
+            <div className="flex justify-between items-center ">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowCategoryBrowser(!showCategoryBrowser)}
+                  className=" hover:bg-gray-100 rounded-lg transition-colors"
+                  title={showCategoryBrowser ? "Collapse categories" : "Expand categories"}
+                >
+                  {showCategoryBrowser ? (
+                    <ChevronDown size={20} className="text-gray-600" />
+                  ) : (
+                    <ChevronRight size={20} className="text-gray-600" />
+                  )}
                 </button>
+                
+                <h2 className="text-xl font-bold">Browse by Category</h2>
+                {!showCategoryBrowser && (
+                  <span className="text-sm text-gray-500">
+                    ({catalogues.length} categories)
+                  </span>
+                )}
+              </div>
+              <div className="px-3 flex gap-2">
+                
                 <button onClick={() => setSelectedCategory('all')}
-                  className="text-blue-600 hover:text-blue-800 font-medium">View All</button>
+                  className="font-bold text-blue-600 hover:text-blue-800">View All</button>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-              {catalogues.map((cat) => (
-                <button key={cat} onClick={() => {
-                  console.log('🔍 Selected category:', cat);
-                  setSelectedCategory(cat);
-                }}
-                  className={`p-3 rounded-xl border-2 transition-all ${
-                    selectedCategory === cat ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}>
-                  <div className="text-sm font-semibold mb-1 line-clamp-2">{cat}</div>
-                  <div className="text-xs text-gray-500">{categoryStats[cat] || 0} books</div>
-                </button>
-              ))}
+            
+            {/* Collapsible content with smooth animation */}
+            <div 
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                showCategoryBrowser ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+              }`}
+            >
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 px-6">
+                {catalogues.map((cat) => (
+                  <button key={cat} onClick={() => {
+                    console.log('🔍 Selected category:', cat);
+                    setSelectedCategory(cat);
+                  }}
+                    className={`p-3 rounded-xl border-2 transition-all ${
+                      selectedCategory === cat ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}>
+                    <div className="text-sm font-semibold mb-1 line-clamp-2">{cat}</div>
+                    <div className="text-xs text-gray-500">{categoryStats[cat] || 0} books</div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -911,69 +897,176 @@ const LibraryViewer: React.FC = () => {
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {paginatedContent.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-lg cursor-pointer"
+              <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-lg cursor-pointer transition-shadow"
                 onClick={() => setReadingItem(item)}>
-                <div className="flex justify-between mb-3">
-                  {isBook(item) ? <Book className="text-blue-600" size={24} /> : <BookOpen className="text-green-600" size={24} />}
-                  <span className="px-2 py-1 text-xs rounded-full bg-gray-100">
-                    {isBook(item) ? item.bookType : item.level}
-                  </span>
-                </div>
-                <h3 className="font-semibold mb-2 line-clamp-2">{item.title}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+                
+                
+                <h3 className="font-semibold mb-2 line-clamp-2 text-gray-900">{item.title}</h3>
+                
+                <p className="text-sm text-gray-600 mb-2 line-clamp-1">
                   {isBook(item) ? item.authors.join(', ') : item.student.name}
                 </p>
+                
+                {/* Category badge */}
+                <div className="mb-3">
+                  <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                    {isBook(item) ? item.catalogue : item.program}
+                  </span>
+                </div>
+                
                 {isBook(item) ? (
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>{item.pages} pages</span>
-                    <div className="flex items-center gap-1">
-                      <Star size={12} className="text-yellow-500 fill-yellow-500" />
-                      <span>{item.rating}</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Book size={12} />
+                        {item.pages} pages
+                      </span>
+                      <span>{item.publicationYear}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 pt-2 border-t">
+                      <span className="text-gray-600 truncate">{item.publisher}</span>
+                      <span>Available: {item.availableCopies}/{item.totalCopies}</span>
+                    </div>
+                    <div className="flex justify-end text-xs pt-1">
+                      {item.fileType && (
+                        <span className="text-green-600 font-medium uppercase">{item.fileType}</span>
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>{item.category}</span>
-                    <span className={`px-2 py-0.5 rounded ${
-                      item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100'
-                    }`}>{item.status}</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{item.academicYear}</span>
+                      <span>{item.pages || 0} pages</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className={`px-2 py-1 rounded font-medium ${
+                        item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      }`}>{item.status}</span>
+                      {item.pdfUrl && (
+                        <span className="text-green-600 font-medium">PDF</span>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-2">
-            {paginatedContent.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-md cursor-pointer flex items-center gap-4"
-                onClick={() => setReadingItem(item)}>
-                {isBook(item) ? <Book className="text-blue-600" size={32} /> : <BookOpen className="text-green-600" size={32} />}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{item.title}</h3>
-                  <p className="text-sm text-gray-600 truncate">
-                    {isBook(item) ? item.authors.join(', ') : item.student.name}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  {isBook(item) ? (
-                    <>
-                      <span>{item.publicationYear}</span>
-                      <span className="flex items-center gap-1">
-                        <Star size={14} className="text-yellow-500 fill-yellow-500" />{item.rating}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span>{item.academicYear}</span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100'
-                      }`}>{item.status}</span>
-                    </>
-                  )}
-                  <Eye size={18} className="text-gray-400" />
-                </div>
+          <div className="bg-white rounded-lg border overflow-hidden">
+            {/* Table Header */}
+            <div className="bg-gray-50 border-b px-4 py-3">
+              <div className="grid grid-cols-11 gap-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div className="col-span-4">Title / Author</div>
+                <div className="col-span-1">Category</div>
+                <div className="col-span-2">{contentType === 'books' ? 'Publisher' : 'Program'}</div>
+                <div className="col-span-1">Year</div>
+                <div className="col-span-1">Pages</div>
+                <div className="col-span-1">{contentType === 'books' ? 'Available' : 'Status'}</div>
+                <div className="col-span-1">Format</div>
               </div>
-            ))}
+            </div>
+            
+            {/* Table Body */}
+            <div className="divide-y">
+              {paginatedContent.map((item) => (
+                <div key={item.id} 
+                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => setReadingItem(item)}>
+                  <div className="grid grid-cols-11 gap-4 items-center">
+                   
+                    
+                    {/* Title / Author */}
+                    <div className="col-span-4 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-overflow text-sm">{item.title}</h3>
+                      <p className="text-xs text-gray-600 truncate">
+                        {isBook(item) ? item.authors.join(', ') : item.student.name}
+                      </p>
+                    </div>
+                    
+                    {/* Category */}
+                    <div className="col-span-1">
+                      <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-full">
+                        {isBook(item) ? item.catalogue : item.program}
+                      </span>
+                    </div>
+                    
+                    {/* Publisher / Program */}
+                    <div className="col-span-2">
+                      <span className="text-sm text-gray-700 truncate block">
+                        {isBook(item) ? item.publisher : item.program}
+                      </span>
+                      {isBook(item) && item.publisherCode && (
+                        <span className="text-xs text-gray-500">({item.publisherCode})</span>
+                      )}
+                    </div>
+                    
+                    {/* Year */}
+                    <div className="col-span-1">
+                      <span className="text-sm text-gray-700">
+                        {isBook(item) ? item.publicationYear : item.academicYear.split('-')[1]}
+                      </span>
+                    </div>
+                    
+                    {/* Pages */}
+                    <div className="col-span-1">
+                      <span className="text-sm text-gray-700">
+                        {item.pages || '-'}
+                      </span>
+                    </div>
+                    
+                    {/* Available / Status */}
+                    <div className="col-span-1">
+                      {isBook(item) ? (
+                        <div className="text-sm">
+                          <span className={`font-medium ${
+                            item.availableCopies > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {item.availableCopies}
+                          </span>
+                          <span className="text-gray-500">/{item.totalCopies}</span>
+                        </div>
+                      ) : (
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {item.status}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Format */}
+                    <div className="col-span-1">
+                      {isBook(item) ? (
+                        item.fileType ? (
+                          <span className="px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700 uppercase">
+                            {item.fileType}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )
+                      ) : (
+                        item.pdfUrl ? (
+                          <span className="px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700">
+                            PDF
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Book type info */}
+                  {isBook(item) && (
+                    <div className="grid grid-cols-12 gap-4 mt-2">
+                      <div className="col-span-1"></div>
+                      
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
