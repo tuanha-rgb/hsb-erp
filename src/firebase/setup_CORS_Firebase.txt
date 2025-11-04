@@ -1,0 +1,17 @@
+choose projects in google cloud
+activate cloud shell (top right corner icon)
+
+echo "[
+  {
+    \"origin\": [
+      \"http://localhost:5173\",
+	\"http://localhost\",
+      \"https://hsb-erp-git-master-tuanha-rgbs-projects.vercel.app\",
+      \"https://hsb.edu.vn\"
+    ],
+    \"method\": [\"GET\", \"HEAD\", \"PUT\", \"POST\", \"DELETE\"],
+    \"maxAgeSeconds\": 3600,
+    \"responseHeader\": [\"Content-Type\", \"x-goog-meta-*\"]
+  }
+]" > cors.json
+gsutil cors set cors.json gs://hsb-library.firebasestorage.app

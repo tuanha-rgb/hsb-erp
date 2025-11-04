@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import {
   Search, Filter, Plus, Eye, CheckCircle, Star, TrendingUp, Library, Book,
-  Copy, BookOpen, X, Upload, Image as ImageIcon, Download, FileText
+  Copy, BookOpen, X, Upload, Image as ImageIcon, Download, FileText, Loader, Edit
 } from "lucide-react";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
@@ -11,6 +11,95 @@ import {
   type BookType,
   type CatalogueCategory,
 } from "./bookdata";
+
+/* ---------- Utilities ---------- */
+// Category abbreviations for ID generation
+const CATEGORY_ABBREV: Record<string, string> = {
+   "Business": "BUS",
+  "Management": "MGT",
+  "Finance": "FIN",
+  "Marketing": "MKT",
+  "Economics": "ECO",
+  "Accounting": "ACC",
+  "Entrepreneurship": "ENT",
+  "Computer Science": "CS",
+  "Cybersecurity": "CYS",
+  "Engineering": "ENG",
+  "Mathematics": "MATH",
+  "Social Sciences": "SOC",
+  "Humanities": "HUM",
+  "Language": "LANG",
+  "Medicine & Health": "MED",
+  "Architecture": "ARCH",
+  "Arts & Design": "ART"
+
+};
+
+// Generate book ID: [CAT]-[YEAR]-[SEQ]-[I/L]
+const generateBookId = (category: string, year: number, sequence: number, isInternational: boolean): string => {
+  const abbrev = CATEGORY_ABBREV[category] || "GEN";
+  const locale = isInternational ? "I" : "L";
+  const seq = String(sequence).padStart(3, '0'); // Zero-padded 3 digits
+  return `${abbrev}-${year}-${seq}-${locale}`;
+};
+
+// Calculate sequence number for a book based on all books
+const getBookSequence = (books: BookRecord[], targetBook: BookRecord): number => {
+  const matchingBooks = books.filter(book => 
+    book.category === targetBook.category && 
+    (book.publishedYear || 0) === (targetBook.publishedYear || 0) &&
+    (book.isInternational ?? true) === (targetBook.isInternational ?? true)
+  );
+  
+  // Sort by creation date or ID to maintain consistent ordering
+  matchingBooks.sort((a, b) => {
+    const dateA = a.addedDate || a.id || '';
+    const dateB = b.addedDate || b.id || '';
+    return dateA.localeCompare(dateB);
+  });
+  
+  // Find index of target book + 1 (1-indexed)
+  const index = matchingBooks.findIndex(b => b.id === targetBook.id);
+  return index >= 0 ? index + 1 : matchingBooks.length + 1;
+};
+
+// ISBN lookup via Open Library API
+const fetchBookByISBN = async (isbn: string) => {
+  try {
+    const cleanISBN = isbn.replace(/[-\s]/g, '');
+    const res = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanISBN}&format=json&jscmd=data`);
+    const data = await res.json();
+    const bookData = data[`ISBN:${cleanISBN}`];
+    
+    if (!bookData) return null;
+    
+    // Fetch description from work endpoint if available
+    let description = "";
+    if (bookData.key) {
+      try {
+        const workRes = await fetch(`https://openlibrary.org${bookData.key}.json`);
+        const workData = await workRes.json();
+        description = typeof workData.description === 'string' 
+          ? workData.description 
+          : workData.description?.value || "";
+      } catch (e) {
+        console.log("Could not fetch description");
+      }
+    }
+    
+    return {
+      title: bookData.title || "",
+      author: bookData.authors?.[0]?.name || "",
+      publisher: bookData.publishers?.[0]?.name || "",
+      publishedYear: bookData.publish_date ? parseInt(bookData.publish_date) : undefined,
+      coverImage: bookData.cover?.large || bookData.cover?.medium || "",
+      description: description,
+    };
+  } catch (error) {
+    console.error("ISBN lookup failed:", error);
+    return null;
+  }
+};
 
 /* ---------- Types ---------- */
 interface BookRecord extends FirebaseBook {
@@ -34,6 +123,7 @@ interface BookRecord extends FirebaseBook {
   totalCopies: number;
   availableCopies: number;
   borrowedCopies: number;
+  isInternational?: boolean; // For Book ID generation
 }
 
 interface BookFilterOptions {
@@ -55,6 +145,8 @@ const BookManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [bookToEdit, setBookToEdit] = useState<BookRecord | null>(null);
   const [selectedBook, setSelectedBook] = useState<BookRecord | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCatalogue, setSelectedCatalogue] =
@@ -172,6 +264,57 @@ const BookManagement: React.FC = () => {
     } catch (error: any) {
       console.error("Error adding book:", error);
       alert(error?.message ?? "Failed to add book");
+    }
+  };
+
+  // Edit book
+  const handleEditBook = async (
+    bookId: string,
+    bookData: Partial<FirebaseBook>,
+    coverImageFile?: File,
+    pdfFile?: File
+  ) => {
+    try {
+      // Validation
+      if (coverImageFile) {
+        if (!coverImageFile.type.startsWith("image/"))
+          throw new Error("Cover must be an image");
+        if (coverImageFile.size > 10 * 1024 * 1024)
+          throw new Error("Cover image > 10MB");
+      }
+      if (pdfFile) {
+        if (pdfFile.type !== "application/pdf")
+          throw new Error("PDF must be application/pdf");
+        if (pdfFile.size > 50 * 1024 * 1024)
+          throw new Error("PDF > 50MB");
+      }
+
+      // bookService.updateBook likely only takes (bookId, bookData)
+      // If files need to be uploaded separately, use addBook pattern
+      await bookService.updateBook(
+        bookId,
+        {
+          title: bookData.title || "",
+          author: bookData.author || "",
+          category: bookData.category || "Business",
+          copies: bookData.copies || 1,
+          availableCopies: bookData.availableCopies || bookData.copies || 1,
+          isbn: bookData.isbn,
+          publisher: bookData.publisher,
+          publishedYear: bookData.publishedYear,
+          description: bookData.description,
+          bookType: bookData.bookType || "Printed",
+          featured: bookData.featured || false,
+        }
+      );
+
+      await loadBooks();
+      setShowEditModal(false);
+      setBookToEdit(null);
+      alert("Book updated successfully!");
+    } catch (error: any) {
+      console.error("Error updating book:", error);
+      alert(error?.message ?? "Failed to update book");
     }
   };
 
@@ -378,7 +521,7 @@ const BookManagement: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <Th>Cover</Th>
+                <Th>Book ID</Th>
                 <Th>Title</Th>
                 <Th>Author</Th>
                 <Th>Publisher</Th>
@@ -391,18 +534,16 @@ const BookManagement: React.FC = () => {
             <tbody className="divide-y divide-gray-200">
               {pageItems.map((book) => (
                 <tr key={book.id} className="hover:bg-gray-50">
+                  
                   <td className="px-6 py-4">
-                    {book.coverImage ? (
-                      <img
-                        src={book.coverImage}
-                        alt={book.title}
-                        className="w-12 h-16 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-12 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-white" />
-                      </div>
-                    )}
+                    <code className="text-xs font-mono font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200">
+                      {generateBookId(
+                        book.category, 
+                        book.publishedYear || new Date().getFullYear(),
+                        getBookSequence(books, book),
+                        book.isInternational ?? true
+                      )}
+                    </code>
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{book.title}</div>
@@ -440,6 +581,16 @@ const BookManagement: React.FC = () => {
                         title="View Details"
                       >
                         <Eye className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setBookToEdit(book);
+                          setShowEditModal(true);
+                        }}
+                        className="p-1 text-orange-600 hover:bg-orange-50 rounded"
+                        title="Edit Book"
+                      >
+                        <Edit className="w-5 h-5" />
                       </button>
                       {book.pdfUrl && (
                         <a
@@ -486,6 +637,22 @@ const BookManagement: React.FC = () => {
         <AddBookModal
           onClose={() => setShowAddModal(false)}
           onSubmit={handleAddBook}
+          existingBooks={books}
+        />
+      )}
+
+      {/* Edit Book Modal */}
+      {showEditModal && bookToEdit && (
+        <EditBookModal
+          book={bookToEdit}
+          onClose={() => {
+            setShowEditModal(false);
+            setBookToEdit(null);
+          }}
+          onSubmit={(bookData, coverImage, pdf) => 
+            bookToEdit.id && handleEditBook(bookToEdit.id, bookData, coverImage, pdf)
+          }
+          existingBooks={books}
         />
       )}
 
@@ -493,6 +660,7 @@ const BookManagement: React.FC = () => {
       {showDetailModal && selectedBook && (
         <BookDetailModal
           book={selectedBook}
+          allBooks={books}
           onClose={() => setShowDetailModal(false)}
         />
       )}
@@ -525,11 +693,12 @@ const AddBookModal: React.FC<{
     coverImage?: File,
     pdfFile?: File
   ) => Promise<void> | void;
-}> = ({ onClose, onSubmit }) => {
+  existingBooks: BookRecord[];
+}> = ({ onClose, onSubmit, existingBooks }) => {
   const [formData, setFormData] = useState({
     title: "",
     author: "",
-    category: "",
+    category: "Business",
     copies: 1,
     isbn: "",
     publisher: "",
@@ -537,12 +706,59 @@ const AddBookModal: React.FC<{
     description: "",
     bookType: "Printed",
     featured: false,
+    isInternational: true,
   });
 
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isbnLoading, setIsbnLoading] = useState(false);
+
+  // Calculate next sequence number based on existing books
+  const getNextSequence = useMemo(() => {
+    const matchingBooks = existingBooks.filter(book => 
+      book.category === formData.category && 
+      (book.publishedYear || 0) === formData.publishedYear &&
+      (book.isInternational ?? true) === formData.isInternational
+    );
+    return matchingBooks.length + 1;
+  }, [existingBooks, formData.category, formData.publishedYear, formData.isInternational]);
+
+  // Auto-generated book ID
+  const bookId = useMemo(() => 
+    generateBookId(formData.category, formData.publishedYear, getNextSequence, formData.isInternational),
+    [formData.category, formData.publishedYear, getNextSequence, formData.isInternational]
+  );
+
+  // ISBN lookup handler
+  const handleIsbnLookup = async () => {
+    if (!formData.isbn || formData.isbn.length < 10) {
+      return;
+    }
+    
+    setIsbnLoading(true);
+    try {
+      const bookData = await fetchBookByISBN(formData.isbn);
+      if (bookData) {
+        setFormData(prev => ({
+          ...prev,
+          title: bookData.title || prev.title,
+          author: bookData.author || prev.author,
+          publisher: bookData.publisher || prev.publisher,
+          publishedYear: bookData.publishedYear || prev.publishedYear,
+          description: bookData.description || prev.description,
+        }));
+        if (bookData.coverImage) {
+          setPreviewUrl(bookData.coverImage);
+        }
+      }
+    } catch (error) {
+      console.error("ISBN lookup failed:", error);
+    } finally {
+      setIsbnLoading(false);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -676,6 +892,39 @@ const TextAreaField: React.FC<{
           </div>
 
           {/* Fields */}
+          {/* Auto-generated Book ID */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-blue-900 mb-2">
+              Auto-Generated Book ID
+            </label>
+            <div className="flex items-center justify-between">
+              <code className="text-lg font-mono font-bold text-blue-700 bg-white px-4 py-2 rounded border border-blue-300">
+                {bookId}
+              </code>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    checked={formData.isInternational}
+                    onChange={() => setFormData({ ...formData, isInternational: true })}
+                  />
+                  International
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    checked={!formData.isInternational}
+                    onChange={() => setFormData({ ...formData, isInternational: false })}
+                  />
+                  Local
+                </label>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Format: [{CATEGORY_ABBREV[formData.category] || "GEN"}]-[{formData.publishedYear}]-[{String(getNextSequence).padStart(3, '0')}]-[{formData.isInternational ? "I" : "L"}]
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <TextField
               label="Title *"
@@ -719,10 +968,11 @@ const TextAreaField: React.FC<{
               onChange={(v) => setFormData({ ...formData, category: v })}
               options={[
                 "Business", "Management", "Finance", "Marketing",
-                "Economics", "Accounting", "Entrepreneurship",  'Computer Science' ,'Engineering', 
+"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Cybersecurity' ,'Engineering', 
    'Mathematics' ,
    'Social Sciences',
    'Humanities',
+   'Language',
    'Medicine & Health',
    'Architecture',
    'Arts & Design'
@@ -736,12 +986,44 @@ const TextAreaField: React.FC<{
             />
           </div>
 
-          <TextField
-            label="ISBN"
-            value={formData.isbn}
-            onChange={(v) => setFormData({ ...formData, isbn: v })}
-            placeholder="978-0-123456-78-9"
-          />
+          {/* ISBN with lookup button */}
+          <div>
+            <label className="block text-sm font-medium mb-1">ISBN</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.isbn}
+                onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+                placeholder="978-0-123456-78-9"
+                className="flex-1 px-3 py-2 border rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={handleIsbnLookup}
+                disabled={isbnLoading || !formData.isbn}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                  isbnLoading || !formData.isbn
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 text-white"
+                }`}
+              >
+                {isbnLoading ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin" />
+                    Looking up...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4" />
+                    Auto-Fill
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Enter ISBN and click Auto-Fill to retrieve book information
+            </p>
+          </div>
 
           <TextAreaField
             label="Description"
@@ -795,11 +1077,398 @@ const TextAreaField: React.FC<{
   );
 };
 
+/* ---------- Edit Book Modal ---------- */
+const EditBookModal: React.FC<{
+  book: BookRecord;
+  onClose: () => void;
+  onSubmit: (
+    book: Partial<FirebaseBook>,
+    coverImage?: File,
+    pdfFile?: File
+  ) => Promise<void> | void;
+  existingBooks: BookRecord[];
+}> = ({ book, onClose, onSubmit, existingBooks }) => {
+  const [formData, setFormData] = useState({
+    title: book.title,
+    author: book.author,
+    category: book.category,
+    copies: book.copies,
+    isbn: book.isbn || "",
+    publisher: book.publisher || "",
+    publishedYear: book.publishedYear || new Date().getFullYear(),
+    description: book.description || "",
+    bookType: book.bookType || "Printed",
+    featured: book.featured || false,
+    isInternational: book.isInternational ?? true,
+  });
+
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>(book.coverImage || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isbnLoading, setIsbnLoading] = useState(false);
+
+  // Calculate sequence - should remain same for existing book
+  const bookSequence = useMemo(() => 
+    getBookSequence(existingBooks, book),
+    [existingBooks, book]
+  );
+
+  // Auto-generated book ID
+  const bookId = useMemo(() => 
+    generateBookId(formData.category, formData.publishedYear, bookSequence, formData.isInternational),
+    [formData.category, formData.publishedYear, bookSequence, formData.isInternational]
+  );
+
+  // ISBN lookup handler
+  const handleIsbnLookup = async () => {
+    if (!formData.isbn || formData.isbn.length < 10) {
+      return;
+    }
+    
+    setIsbnLoading(true);
+    try {
+      const bookData = await fetchBookByISBN(formData.isbn);
+      if (bookData) {
+        setFormData(prev => ({
+          ...prev,
+          title: bookData.title || prev.title,
+          author: bookData.author || prev.author,
+          publisher: bookData.publisher || prev.publisher,
+          publishedYear: bookData.publishedYear || prev.publishedYear,
+          description: bookData.description || prev.description,
+        }));
+        if (bookData.coverImage) {
+          setPreviewUrl(bookData.coverImage);
+        }
+      }
+    } catch (error) {
+      console.error("ISBN lookup failed:", error);
+    } finally {
+      setIsbnLoading(false);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") setPdfFile(file);
+    else alert("Please select a valid PDF file");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(
+        onSubmit(
+          { ...formData, availableCopies: formData.copies },
+          coverImage || undefined,
+          pdfFile || undefined
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const TextAreaField: React.FC<{
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    rows?: number;
+    placeholder?: string;
+  }> = ({ label, value, onChange, rows = 3, placeholder }) => (
+    <div>
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 border rounded-lg"
+      />
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Edit Book</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Cover */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Book Cover Image
+            </label>
+            <div className="flex items-center gap-4">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-24 h-32 object-cover rounded border"
+                />
+              ) : (
+                <div className="w-24 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                  <ImageIcon className="w-8 h-8 text-white" />
+                </div>
+              )}
+              <div className="flex-1">
+                <label className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg cursor-pointer transition">
+                  <Upload className="w-5 h-5" />
+                  <span className="text-sm">
+                    {coverImage || book.coverImage ? "Change Cover" : "Upload Cover"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  JPG, PNG, or WEBP (Max 10MB)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* PDF */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Book PDF (Optional)
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-32 bg-red-50 rounded border border-red-200 flex flex-col items-center justify-center">
+                <FileText className="w-8 h-8 text-red-600 mb-1" />
+                {(pdfFile || book.pdfUrl) && (
+                  <span className="text-xs text-red-600 text-center px-1">
+                    {pdfFile ? pdfFile.name.substring(0, 12) + "..." : "Attached"}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg cursor-pointer transition">
+                  <Upload className="w-5 h-5" />
+                  <span className="text-sm">
+                    {pdfFile || book.pdfUrl ? "Change PDF" : "Upload PDF File"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePdfChange}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  PDF format (Max 50MB)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Book ID Display */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-blue-900 mb-2">
+              Book ID
+            </label>
+            <div className="flex items-center justify-between">
+              <code className="text-lg font-mono font-bold text-blue-700 bg-white px-4 py-2 rounded border border-blue-300">
+                {bookId}
+              </code>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    checked={formData.isInternational}
+                    onChange={() => setFormData({ ...formData, isInternational: true })}
+                  />
+                  International
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    checked={!formData.isInternational}
+                    onChange={() => setFormData({ ...formData, isInternational: false })}
+                  />
+                  Local
+                </label>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Format: [{CATEGORY_ABBREV[formData.category] || "GEN"}]-[{formData.publishedYear}]-[{String(bookSequence).padStart(3, '0')}]-[{formData.isInternational ? "I" : "L"}]
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <TextField
+              label="Title *"
+              value={formData.title}
+              onChange={(v) => setFormData({ ...formData, title: v })}
+              required
+            />
+            <TextField
+              label="Author *"
+              value={formData.author}
+              onChange={(v) => setFormData({ ...formData, author: v })}
+              required
+            />
+          </div>
+                
+          <div className="grid grid-cols-3 gap-4">
+            <TextField
+              label="Publisher"
+              value={formData.publisher}
+              onChange={(v) => setFormData({ ...formData, publisher: v })}
+            />
+            <NumberField
+              label="Year"
+              value={formData.publishedYear}
+              onChange={(v) => setFormData({ ...formData, publishedYear: v })}
+              min={1900}
+              max={new Date().getFullYear() + 1}
+            />
+            <SelectField
+              label="Type"
+              value={formData.bookType}
+              onChange={(v) => setFormData({ ...formData, bookType: v })}
+              options={["E-Book", "Audiobook","Printed"]}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <SelectField
+              label="Category"
+              value={formData.category}
+              onChange={(v) => setFormData({ ...formData, category: v })}
+              options={[
+                "Business", "Management", "Finance", "Marketing",
+                "Economics", "Accounting", "Entrepreneurship", "Computer Science", "Engineering", 
+                "Mathematics", "Social Sciences", "Humanities", "Medicine & Health",
+                "Architecture", "Arts & Design"
+              ]}
+            />
+            <NumberField
+              label="Copies"
+              value={formData.copies}
+              onChange={(v) => setFormData({ ...formData, copies: v })}
+              min={1}
+            />
+          </div>
+
+          {/* ISBN with lookup button */}
+          <div>
+            <label className="block text-sm font-medium mb-1">ISBN</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.isbn}
+                onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+                placeholder="978-0-123456-78-9"
+                className="flex-1 px-3 py-2 border rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={handleIsbnLookup}
+                disabled={isbnLoading || !formData.isbn}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                  isbnLoading || !formData.isbn
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 text-white"
+                }`}
+              >
+                {isbnLoading ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin" />
+                    Looking up...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4" />
+                    Auto-Fill
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Enter ISBN and click Auto-Fill to retrieve book information
+            </p>
+          </div>
+
+          <TextAreaField
+            label="Description"
+            value={formData.description}
+            onChange={(v) => setFormData({ ...formData, description: v })}
+            rows={3}
+            placeholder="Brief description of the book..."
+          />
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.featured}
+              onChange={(e) =>
+                setFormData({ ...formData, featured: e.target.checked })
+              }
+              className="w-4 h-4"
+            />
+            <label className="text-sm font-medium">
+              Featured (Show in carousel)
+            </label>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center gap-2 text-white ${
+                isSubmitting
+                  ? "bg-orange-400 cursor-not-allowed"
+                  : "bg-orange-600 hover:bg-orange-700"
+              }`}
+            >
+              <Edit className="w-5 h-5" />
+              {isSubmitting ? "Updating…" : "Update Book"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className={`px-6 py-3 border border-gray-300 rounded-lg ${
+                isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 /* ---------- Detail Modal ---------- */
 const BookDetailModal: React.FC<{
   book: BookRecord;
+  allBooks: BookRecord[];
   onClose: () => void;
-}> = ({ book, onClose }) => {
+}> = ({ book, allBooks, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -822,6 +1491,18 @@ const BookDetailModal: React.FC<{
           <div>
             <h3 className="text-xl font-bold">{book.title}</h3>
             <p className="text-gray-600">{book.author}</p>
+          </div>
+          {/* Book ID Display */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <span className="text-sm font-medium text-blue-900">Book ID:</span>
+            <code className="block mt-1 text-lg font-mono font-bold text-blue-700">
+              {generateBookId(
+                book.category, 
+                book.publishedYear || new Date().getFullYear(),
+                getBookSequence(allBooks, book),
+                book.isInternational ?? true
+              )}
+            </code>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Info label="Category" value={book.category} />

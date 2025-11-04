@@ -33,6 +33,10 @@ export interface Book {
   category: string;
   publisher?: string;
   publishedYear?: number;
+  publisherCode?: string; // ADD
+  pages?: number; // ADD
+  rating?: number; // ADD
+  subjects?: string[]; // ADD
   copies: number;
   availableCopies: number;
   description?: string;

@@ -1,861 +1,1002 @@
-// src/library/ThesisStorage.tsx
-import React, { useState, useMemo, useEffect } from 'react';
+// src/library/ThesisManagement.tsx
+import React, { useMemo, useState, useEffect } from "react";
 import {
-  Search, Filter, Upload, Download, Eye, FileText, User, GraduationCap,
-  Calendar, BookOpen, Star, X, Edit, Grid, List as ListIcon,
-  CheckCircle, Archive, FileCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight
-} from 'lucide-react';
-import {
-  sampleTheses,
-  type Thesis,
-  type ThesisCategory,
-  type ThesisLevel,
-} from '../acad/thesis';
+  Search, Filter, Plus, Eye, CheckCircle, Star, TrendingUp, GraduationCap, FileText,
+  Copy, BookOpen, X, Upload, Download, Award, Edit, Loader
+} from "lucide-react";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
-type PublishedFilter = 'all' | 'published' | 'unpublished';
+// Import programs data
+import { programs } from "../acad/programs"; // Adjust path as needed
 
-interface ThesisArchive {
-  id: string;
+/* ---------- Utilities ---------- */
+// Storage path mapping for thesis levels
+const THESIS_STORAGE_PATHS = {
+  bachelor: "theses",
+  master: "master-theses",
+  phd: "dissertation"
+};
+
+// Build program codes from imported data
+const PROGRAM_CODES: Record<string, string> = {
+  // Bachelor programs
+  ...Object.fromEntries(programs.bachelor.map(p => [p.code, `${p.code} - ${p.name}`])),
+  // Master programs
+  ...Object.fromEntries(programs.master.map(p => [p.code, `${p.code} - ${p.name}`])),
+  // PhD programs
+  ...Object.fromEntries(programs.phd.map(p => [p.code, `${p.code} - ${p.name}`])),
+};
+
+// Get program code from full program name
+const getProgramCode = (programName: string): string => {
+  // If already a code (3-4 letters), return as is
+  if (programName.length <= 4) return programName;
+  // Extract code from format "CODE - Description"
+  const match = programName.match(/^([A-Z]+)/);
+  return match ? match[1] : "GEN";
+};
+
+// Generate thesis ID: [PROGRAM]-[LEVEL]-[YEAR]-[SEQ]
+const generateThesisId = (programCode: string, level: string, year: number, sequence: number): string => {
+  const levelCode = level === "bachelor" ? "BSC" : level === "master" ? "MSC" : "PHD";
+  const seq = String(sequence).padStart(3, '0');
+  return `${programCode}-${levelCode}-${year}-${seq}`;
+};
+
+// Calculate sequence number for a thesis
+const getThesisSequence = (theses: ThesisRecord[], targetThesis: ThesisRecord): number => {
+  const targetProgramCode = getProgramCode(targetThesis.program);
+  
+  const matchingTheses = theses.filter(thesis => {
+    const thisProgramCode = getProgramCode(thesis.program);
+    return thisProgramCode === targetProgramCode &&
+           thesis.level === targetThesis.level && 
+           (thesis.year || 0) === (targetThesis.year || 0);
+  });
+  
+  matchingTheses.sort((a, b) => {
+    const dateA = a.submissionDate || a.id || '';
+    const dateB = b.submissionDate || b.id || '';
+    return dateA.localeCompare(dateB);
+  });
+  
+  const index = matchingTheses.findIndex(t => t.id === targetThesis.id);
+  return index >= 0 ? index + 1 : matchingTheses.length + 1;
+};
+
+/* ---------- Types ---------- */
+type ThesisLevel = "bachelor" | "master" | "phd";
+type ThesisStatus = "draft" | "submitted" | "under_review" | "approved" | "rejected" | "published";
+
+interface ThesisRecord {
+  id?: string;
   title: string;
-  author: string;
+  studentName: string;
   studentId: string;
-  supervisor: string;
-  coSupervisor?: string;
-  thesisType: ThesisCategory;
-  degreeLevel: ThesisLevel;
-  department: string;
+  level: ThesisLevel;
+  program: string;
+  year: number;
   submissionDate: string;
-  defenseDate: string | null;
-  approvalDate: string | null;
-  archiveDate: string;
+  defenseDate?: string;
+  approvalDate?: string;
+  status: ThesisStatus;
+  abstract: string;
   keywords: string[];
-  views: number;
-  rating: number;
-  citations: number;
-  isPlagiarismChecked: boolean;
-  plagiarismScore: number | null;
-  isPublished: boolean;
-  pages: number;
-  fileSize: string;
-  language: string;
-  doi?: string;
-  fileUrl?: string;
+  pdfUrl?: string;
+  coverImage?: string;
+  pages?: number;
+  plagiarismScore?: number;
+  grade?: string;
 }
 
 interface ThesisFilterOptions {
-  thesisType: ThesisCategory | 'all';
-  degreeLevel: ThesisLevel | 'all';
+  level: ThesisLevel | "all";
+  status: ThesisStatus | "all";
   department: string;
   yearFrom: string;
   yearTo: string;
-  language: string;
-  isPublished: PublishedFilter;
 }
 
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
+/* ---------- Component ---------- */
+const ThesisManagement: React.FC = () => {
+  const [theses, setTheses] = useState<ThesisRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
 
-const toArchive = (t: Thesis): ThesisArchive => {
-  const avgRating =
-    (t.reviews.reduce((s, r) => s + (r.rating ?? 0), 0) /
-      Math.max(t.reviews.length, 1)) || 0;
-
-  const citations =
-    t.associatedItems.publications.reduce((s, p) => s + (p.citations ?? 0), 0);
-
-  const anyDoi = t.associatedItems.publications.find(p => !!p.doi)?.doi;
-  const archiveDate = t.approvalDate ?? t.defenseDate ?? t.submissionDate;
-
-  return {
-    id: t.id,
-    title: t.title,
-    author: t.student.name,
-    studentId: t.student.studentId,
-    supervisor: t.supervisor.name,
-    coSupervisor: t.coSupervisor?.name,
-    thesisType: t.category,
-    degreeLevel: t.level,
-    department: t.department,
-    submissionDate: t.submissionDate,
-    defenseDate: t.defenseDate,
-    approvalDate: t.approvalDate,
-    archiveDate,
-    keywords: t.keywords,
-    views: t.reviews.length * 10,
-    rating: Number(avgRating.toFixed(1)),
-    citations,
-    isPlagiarismChecked: t.plagiarismScore !== null,
-    plagiarismScore: t.plagiarismScore,
-    isPublished: t.status === 'published',
-    pages: 0,
-    fileSize: '—',
-    language: 'English',
-    doi: anyDoi,
-    fileUrl: undefined,
-  };
-};
-
-const ThesisStorage: React.FC = () => {
-  const [theses, setTheses] = useState<ThesisArchive[]>(
-    () => sampleTheses.map(toArchive)
-  );
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedThesis, setSelectedThesis] = useState<ThesisArchive | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [thesisToEdit, setThesisToEdit] = useState<ThesisRecord | null>(null);
+  const [selectedThesis, setSelectedThesis] = useState<ThesisRecord | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // NEW: pagination state
-  const [pageSize, setPageSize] = useState<20 | 50 | 100>(20);
+  // Pagination
+  const [pageSize] = useState<20 | 50 | 100>(20);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState<ThesisFilterOptions>({
-    thesisType: 'all',
-    degreeLevel: 'all',
-    department: 'all',
-    yearFrom: '',
-    yearTo: '',
-    language: 'all',
-    isPublished: 'all',
+    level: "all",
+    status: "all",
+    department: "all",
+    yearFrom: "",
+    yearTo: "",
   });
 
-  // Re-clamp current page when filters/search/pageSize change
+  // Initialize
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, JSON.stringify(filters), pageSize]);
+    const auth = getAuth();
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      try {
+        setInitError(null);
+        if (!user) await signInAnonymously(auth);
+        await loadTheses();
+      } catch (e: any) {
+        console.error("Initialization failed:", e);
+        setInitError(e?.message ?? "Failed to initialize");
+        setLoading(false);
+      }
+    });
+    return () => unsub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadTheses = async () => {
+    try {
+      setLoading(true);
+      setInitError(null);
+      
+      // TODO: Replace with actual Firebase service call
+      // const firebaseTheses = await thesisService.getAllTheses();
+      
+      // Mock data for now
+      const mockTheses: ThesisRecord[] = [
+        {
+          id: "MBA-BSC-2024-001",
+          title: "E-Commerce Platform Development Using Microservices",
+          studentName: "John Smith",
+          studentId: "STD-2020-123",
+          level: "bachelor",
+          program: "MBA",
+          year: 2024,
+          submissionDate: "2024-09-15",
+          defenseDate: "2024-10-20",
+          status: "approved",
+          abstract: "This thesis explores microservices architecture...",
+          keywords: ["Microservices", "E-Commerce", "Software Architecture"],
+          pages: 98,
+          plagiarismScore: 5.8
+        }
+      ];
+      
+      setTheses(mockTheses);
+    } catch (error: any) {
+      console.error("Error loading theses:", error);
+      setInitError(error?.message ?? "Failed to load theses");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Statistics
   const statistics = useMemo(() => {
     const total = theses.length;
-    const thisYear = theses.filter(
-      t => new Date(t.archiveDate).getFullYear() === new Date().getFullYear()
-    ).length;
-    const published = theses.filter(t => t.isPublished).length;
-    const totalviews = theses.reduce((sum, t) => sum + t.views, 0);
-    const avgRating =
-      total === 0 ? 0 : theses.reduce((sum, t) => sum + t.rating, 0) / total;
-    const totalCitations = theses.reduce((sum, t) => sum + t.citations, 0);
+    const bachelor = theses.filter(t => t.level === "bachelor").length;
+    const master = theses.filter(t => t.level === "master").length;
+    const phd = theses.filter(t => t.level === "phd").length;
+    const approved = theses.filter(t => t.status === "approved" || t.status === "published").length;
+    const avgPlagiarism = total === 0 ? 0 : 
+      theses.filter(t => t.plagiarismScore).reduce((s, t) => s + (t.plagiarismScore || 0), 0) / 
+      theses.filter(t => t.plagiarismScore).length;
 
     return {
       total,
-      published,
-      thisYear,
-      totalviews,
-      totalCitations,
-      avgRating: avgRating.toFixed(1),
+      bachelor,
+      master,
+      phd,
+      approved,
+      avgPlagiarism: avgPlagiarism.toFixed(1),
     };
   }, [theses]);
 
-  const departments = useMemo(() => {
-    const depts = new Set(theses.map(t => t.department));
-    return ['all', ...Array.from(depts)];
-  }, [theses]);
-
+  // Filtering
   const filteredTheses = useMemo(() => {
-    return theses.filter(thesis => {
-      const q = searchTerm.trim().toLowerCase();
+    return theses.filter((thesis) => {
       const matchesSearch =
-        q.length === 0 ||
-        thesis.title.toLowerCase().includes(q) ||
-        thesis.author.toLowerCase().includes(q) ||
-        thesis.supervisor.toLowerCase().includes(q) ||
-        thesis.keywords.some(k => k.toLowerCase().includes(q));
+        thesis.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thesis.studentId.includes(searchTerm) ||
+        thesis.program.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesType =
-        filters.thesisType === 'all' || thesis.thesisType === filters.thesisType;
+      const matchesLevel = filters.level === "all" || thesis.level === filters.level;
+      const matchesStatus = filters.status === "all" || thesis.status === filters.status;
+      const matchesProgram = filters.department === "all" || thesis.program === filters.department;
+      
+      const matchesYear = 
+        (!filters.yearFrom || thesis.year >= parseInt(filters.yearFrom)) &&
+        (!filters.yearTo || thesis.year <= parseInt(filters.yearTo));
 
-      const matchesDegree =
-        filters.degreeLevel === 'all' || thesis.degreeLevel === filters.degreeLevel;
-
-      const matchesDept =
-        filters.department === 'all' || thesis.department === filters.department;
-
-      const matchesLanguage =
-        filters.language === 'all' || thesis.language === filters.language;
-
-      const matchesPublished =
-        filters.isPublished === 'all' ||
-        (filters.isPublished === 'published' && thesis.isPublished) ||
-        (filters.isPublished === 'unpublished' && !thesis.isPublished);
-
-      const thesisYear = new Date(thesis.archiveDate).getFullYear();
-      const matchesYearFrom =
-        !filters.yearFrom || thesisYear >= parseInt(filters.yearFrom, 10);
-      const matchesYearTo =
-        !filters.yearTo || thesisYear <= parseInt(filters.yearTo, 10);
-
-      return (
-        matchesSearch &&
-        matchesType &&
-        matchesDegree &&
-        matchesDept &&
-        matchesLanguage &&
-        matchesPublished &&
-        matchesYearFrom &&
-        matchesYearTo
-      );
+      return matchesSearch && matchesLevel && matchesStatus && matchesProgram && matchesYear;
     });
   }, [theses, searchTerm, filters]);
 
-  // NEW: pagination derived values
-  const totalItems = filteredTheses.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const clampedPage = Math.min(currentPage, totalPages);
-  const startIdx = (clampedPage - 1) * pageSize;
-  const endIdx = Math.min(startIdx + pageSize, totalItems);
-  const pageItems = useMemo(
-    () => filteredTheses.slice(startIdx, endIdx),
-    [filteredTheses, startIdx, endIdx]
+  // Pagination
+  const totalPages = Math.ceil(filteredTheses.length / pageSize);
+  const pageItems = filteredTheses.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
-  const handleViewDetail = (thesis: ThesisArchive) => {
-    setSelectedThesis(thesis);
-    setShowDetailModal(true);
-  };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, JSON.stringify(filters)]);
 
-  const handleDownload = (thesis: ThesisArchive) => {
-    console.log('Downloading:', thesis.title);
-  };
-
-  // Pagination controls
-  const goFirst = () => setCurrentPage(1);
-  const goPrev = () => setCurrentPage(p => Math.max(1, p - 1));
-  const goNext = () => setCurrentPage(p => Math.min(totalPages, p + 1));
-  const goLast = () => setCurrentPage(totalPages);
-
-  // Helper: compact page buttons (at most 5 numbers centered around current)
-  const pageNumbers = useMemo(() => {
-    const nums: number[] = [];
-    const maxButtons = 5;
-    let start = Math.max(1, clampedPage - 2);
-    let end = Math.min(totalPages, start + maxButtons - 1);
-    start = Math.max(1, end - maxButtons + 1);
-    for (let i = start; i <= end; i++) nums.push(i);
-    return nums;
-  }, [clampedPage, totalPages]);
+  // UI
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <GraduationCap className="w-16 h-16 text-blue-600 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Loading theses...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-3 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Thesis Storage</h1>
-            <p className="text-gray-600 mt-1">
-              Completed thesis, dissertations, and final project reports repository
-            </p>
-          </div>
-          <button
-            onClick={() => setShowUploadModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Thesis
-          </button>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Thesis Management
+        </h1>
+        <p className="text-gray-600">Manage bachelor, master, and doctoral theses</p>
+      </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-              <Archive className="w-4 h-4" />
-              Total Archived
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{statistics.total}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 text-green-600 text-sm mb-1">
-              <CheckCircle className="w-4 h-4" />
-              Published
-            </div>
-            <div className="text-2xl font-bold text-green-600">{statistics.published}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 text-blue-600 text-sm mb-1">
-              <Calendar className="w-4 h-4" />
-              This Year
-            </div>
-            <div className="text-2xl font-bold text-blue-600">{statistics.thisYear}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 text-purple-600 text-sm mb-1">
-              <Eye className="w-4 h-4" />
-              Views
-            </div>
-            <div className="text-2xl font-bold text-purple-600">{statistics.totalviews}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 text-orange-600 text-sm mb-1">
-              <BookOpen className="w-4 h-4" />
-              Citations
-            </div>
-            <div className="text-2xl font-bold text-orange-600">{statistics.totalCitations}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 text-yellow-600 text-sm mb-1">
-              <Star className="w-4 h-4" />
-              Avg Rating
-            </div>
-            <div className="text-2xl font-bold text-yellow-600">{statistics.avgRating}</div>
-          </div>
-        </div>
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <StatCard icon={<FileText className="w-5 h-5 text-blue-600" />} label="Total Theses" value={statistics.total} />
+        <StatCard icon={<GraduationCap className="w-5 h-5 text-cyan-600" />} label="Bachelor" value={statistics.bachelor} />
+        <StatCard icon={<GraduationCap className="w-5 h-5 text-indigo-600" />} label="Master" value={statistics.master} />
+        <StatCard icon={<Award className="w-5 h-5 text-purple-600" />} label="PhD" value={statistics.phd} />
+        <StatCard icon={<CheckCircle className="w-5 h-5 text-green-600" />} label="Approved" value={statistics.approved} />
+      </div>
 
-        {/* Search + Controls */}
-        <div className="bg-white p-3 rounded-lg shadow-sm">
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-            <div className="flex-1 relative">
+      {/* Controls */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex flex-wrap gap-3">
+          <div className="flex-1 min-w-[200px]">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by title, author, keywords, or supervisor..."
+                placeholder="Search theses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-
-            <div className="flex items-center gap-3">
-              {/* Page size selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Rows:</span>
-                <select
-                  value={pageSize}
-                  onChange={e => setPageSize(Number(e.target.value) as 20 | 50 | 100)}
-                  className="px-2 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-              </div>
-
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-                  showFilters ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <Filter className="w-4 h-4" />
-                Filters
-              </button>
-              <div className="flex bg-gray-200 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-white shadow' : ''}`}
-                >
-                  <ListIcon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow' : ''}`}
-                >
-                  <Grid className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
           </div>
-
-          {/* Filters Panel (unchanged) */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select
-                    value={filters.thesisType}
-                    onChange={(e) => setFilters({ ...filters, thesisType: e.target.value as ThesisCategory | 'all' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="thesis">Thesis</option>
-                    <option value="dissertation">Dissertation</option>
-                    <option value="final_project">Final Project</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Degree</label>
-                  <select
-                    value={filters.degreeLevel}
-                    onChange={(e) => setFilters({ ...filters, degreeLevel: e.target.value as ThesisLevel | 'all' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Degrees</option>
-                    <option value="bachelor">Bachelor</option>
-                    <option value="master">Master</option>
-                    <option value="phd">PhD</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                  <select
-                    value={filters.department}
-                    onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    {departments.map(dept => (
-                      <option key={dept} value={dept}>
-                        {dept === 'all' ? 'All Departments' : dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Year From</label>
-                  <input
-                    type="number"
-                    placeholder="2020"
-                    value={filters.yearFrom}
-                    onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Year To</label>
-                  <input
-                    type="number"
-                    placeholder="2024"
-                    value={filters.yearTo}
-                    onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                  <select
-                    value={filters.language}
-                    onChange={(e) => setFilters({ ...filters, language: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Languages</option>
-                    <option value="English">English</option>
-                    <option value="Indonesian">Indonesian</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Published</label>
-                  <select
-                    value={filters.isPublished}
-                    onChange={(e) => setFilters({ ...filters, isPublished: e.target.value as PublishedFilter })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All</option>
-                    <option value="published">Published</option>
-                    <option value="unpublished">Unpublished</option>
-                  </select>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-end gap-2">
-                <button
-                  onClick={() =>
-                    setFilters({
-                      thesisType: 'all',
-                      degreeLevel: 'all',
-                      department: 'all',
-                      yearFrom: '',
-                      yearTo: '',
-                      language: 'all',
-                      isPublished: 'all',
-                    })
-                  }
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Results Count + showing range */}
-      <div className="mb-3 text-sm text-gray-600 flex items-center justify-between">
-        <span>
-          Showing {totalItems === 0 ? 0 : startIdx + 1}–{endIdx} of {totalItems} theses
-        </span>
-
-        {/* Top pagination (optional) */}
-        <div className="hidden md:flex items-center gap-1">
-          <button onClick={goFirst} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === 1}>
-            <ChevronsLeft className="w-4 h-4" />
-          </button>
-          <button onClick={goPrev} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === 1}>
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          {pageNumbers.map(n => (
-            <button
-              key={n}
-              onClick={() => setCurrentPage(n)}
-              className={`px-3 py-1 rounded ${n === clampedPage ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}`}
-            >
-              {n}
-            </button>
-          ))}
-          <button onClick={goNext} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === totalPages}>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <button onClick={goLast} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === totalPages}>
-            <ChevronsRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* List / Grid use pageItems instead of filteredTheses */}
-      {viewMode === 'list' && (
-        <div className="space-y-3">
-          {pageItems.map((thesis) => (
-            <div key={thesis.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition">
-              {/* ... (unchanged card body) ... */}
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <div className="flex items-start gap-3">
-                    <FileText className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{thesis.title}</h3>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                        <span className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          {thesis.author}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <GraduationCap className="w-4 h-4" />
-                          {thesis.supervisor}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(thesis.submissionDate)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="w-4 h-4" />
-                          {thesis.pages} pages
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                          {thesis.thesisType.replace('_', ' ').toUpperCase()}
-                        </span>
-                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                          {thesis.degreeLevel.toUpperCase()}
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                          {thesis.department}
-                        </span>
-                        {thesis.isPublished && (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" />
-                            Published
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {thesis.keywords.slice(0, 5).map((keyword, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-gray-50 text-gray-600 rounded text-xs border border-gray-200">
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 ml-4">
-                  <button
-                    onClick={() => handleViewDetail(thesis)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                    title="View Details"
-                  >
-                    <Eye className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDownload(thesis)}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                    title="Download"
-                  >
-                    <Download className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-gray-600 pt-3 border-t border-gray-100">
-                <span className="flex items-center gap-1">
-                  <Download className="w-4 h-4" />
-                  {thesis.views} views
-                </span>
-                <span className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-500" />
-                  {thesis.rating.toFixed(1)} rating
-                </span>
-                {thesis.isPlagiarismChecked && (
-                  <span className="flex items-center gap-1">
-                    <FileCheck className="w-4 h-4 text-green-600" />
-                    Plagiarism: {thesis.plagiarismScore}%
-                  </span>
-                )}
-                <span className="flex items-center gap-1">
-                  {thesis.fileSize}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pageItems.map((thesis) => (
-            <div key={thesis.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition">
-              <div className="flex items-start justify-between mb-3">
-                <FileText className="w-8 h-8 text-blue-600 flex-shrink-0" />
-                {thesis.isPublished && (
-                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    Published
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{thesis.title}</h3>
-              <p className="text-sm text-gray-600 mb-3">{thesis.author}</p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  {thesis.degreeLevel.toUpperCase()}
-                </span>
-                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
-                  {thesis.department}
-                </span>
-              </div>
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-4 text-xs text-gray-600">
-                  <span className="flex items-center gap-1">
-                    <Download className="w-3 h-3" />
-                    {thesis.views}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3" />
-                    {thesis.rating}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleViewDetail(thesis)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDownload(thesis)}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded transition"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Empty State */}
-      {filteredTheses.length === 0 && (
-        <div className="bg-white p-12 rounded-lg shadow-sm text-center">
-          <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No theses found</h3>
-          <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
           <button
-            onClick={() => {
-              setSearchTerm('');
-              setFilters({
-                thesisType: 'all',
-                degreeLevel: 'all',
-                department: 'all',
-                yearFrom: '',
-                yearTo: '',
-                language: 'all',
-                isPublished: 'all',
-              });
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            onClick={() => setShowFilters(!showFilters)}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
           >
-            Clear All Filters
+            <Filter className="w-5 h-5" />
+            Filters
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Add Thesis
           </button>
         </div>
+      </div>
+
+      {/* Thesis Table */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <Th>Thesis ID</Th>
+                <Th>Title</Th>
+                <Th>Student</Th>
+                <Th>Level</Th>
+                <Th>Year</Th>
+                <Th>Status</Th>
+                <Th>Actions</Th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {pageItems.map((thesis) => (
+                <tr key={thesis.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <code className="text-xs font-mono font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200">
+                      {generateThesisId(
+                        getProgramCode(thesis.program),
+                        thesis.level,
+                        thesis.year,
+                        getThesisSequence(theses, thesis)
+                      )}
+                    </code>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {THESIS_STORAGE_PATHS[thesis.level]}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="font-medium text-gray-900 max-w-md truncate">{thesis.title}</div>
+                    <div className="text-sm text-gray-500">
+                      {PROGRAM_CODES[thesis.program] || thesis.program}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">{thesis.studentName}</div>
+                    <div className="text-xs text-gray-500">{thesis.studentId}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      thesis.level === "bachelor" ? "bg-cyan-100 text-cyan-800" :
+                      thesis.level === "master" ? "bg-indigo-100 text-indigo-800" :
+                      "bg-purple-100 text-purple-800"
+                    }`}>
+                      {thesis.level === "bachelor" ? "Bachelor" : thesis.level === "master" ? "Master" : "PhD"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {thesis.year}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      thesis.status === "approved" ? "bg-green-100 text-green-800" :
+                      thesis.status === "published" ? "bg-blue-100 text-blue-800" :
+                      thesis.status === "under_review" ? "bg-yellow-100 text-yellow-800" :
+                      thesis.status === "rejected" ? "bg-red-100 text-red-800" :
+                      "bg-gray-100 text-gray-800"
+                    }`}>
+                      {thesis.status.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedThesis(thesis);
+                          setShowDetailModal(true);
+                        }}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        title="View Details"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setThesisToEdit(thesis);
+                          setShowEditModal(true);
+                        }}
+                        className="p-1 text-orange-600 hover:bg-orange-50 rounded"
+                        title="Edit Thesis"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      {thesis.pdfUrl && (
+                        <a
+                          href={thesis.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1 text-green-600 hover:bg-green-50 rounded"
+                          title="View PDF"
+                        >
+                          <Download className="w-5 h-5" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => thesis.id && alert("Delete: " + thesis.id)}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                        title="Delete Thesis"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Add Thesis Modal */}
+      {showAddModal && (
+        <AddThesisModal
+          onClose={() => setShowAddModal(false)}
+          onSubmit={async (data) => {
+            console.log("Add thesis:", data);
+            // TODO: Implement thesisService.addThesis()
+            alert("Thesis added (mock)");
+            setShowAddModal(false);
+          }}
+          existingTheses={theses}
+        />
       )}
 
-      {/* Bottom Pagination */}
-      {filteredTheses.length > 0 && (
-        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="text-sm text-gray-600">
-            Showing {totalItems === 0 ? 0 : startIdx + 1}–{endIdx} of {totalItems}
-          </div>
-          <div className="flex items-center gap-1">
-            <button onClick={goFirst} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === 1}>
-              <ChevronsLeft className="w-4 h-4" />
-            </button>
-            <button onClick={goPrev} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === 1}>
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {pageNumbers.map(n => (
-              <button
-                key={n}
-                onClick={() => setCurrentPage(n)}
-                className={`px-3 py-1 rounded ${n === clampedPage ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}`}
-              >
-                {n}
-              </button>
-            ))}
-            <button onClick={goNext} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === totalPages}>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button onClick={goLast} className="px-2 py-1 rounded hover:bg-gray-100" disabled={clampedPage === totalPages}>
-              <ChevronsRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+      {/* Edit Thesis Modal */}
+      {showEditModal && thesisToEdit && (
+        <EditThesisModal
+          thesis={thesisToEdit}
+          onClose={() => {
+            setShowEditModal(false);
+            setThesisToEdit(null);
+          }}
+          onSubmit={async (data) => {
+            console.log("Update thesis:", data);
+            // TODO: Implement thesisService.updateThesis()
+            alert("Thesis updated (mock)");
+            setShowEditModal(false);
+            setThesisToEdit(null);
+          }}
+          existingTheses={theses}
+        />
       )}
 
       {/* Detail Modal */}
       {showDetailModal && selectedThesis && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Thesis Details</h2>
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              {/* … (detail body unchanged from your version) … */}
-              <div className="mb-6">
-                <div className="flex items-start gap-2 mb-4">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                    {selectedThesis.thesisType.replace('_', ' ').toUpperCase()}
-                  </span>
-                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
-                    {selectedThesis.degreeLevel.toUpperCase()}
-                  </span>
-                  {selectedThesis.isPublished && (
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4" />
-                      Published
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{selectedThesis.title}</h3>
+        <ThesisDetailModal
+          thesis={selectedThesis}
+          allTheses={theses}
+          onClose={() => setShowDetailModal(false)}
+        />
+      )}
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Author</div>
-                    <div className="font-medium">{selectedThesis.author}</div>
-                    <div className="text-sm text-gray-600">ID: {selectedThesis.studentId}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Supervisor</div>
-                    <div className="font-medium">{selectedThesis.supervisor}</div>
-                    {selectedThesis.coSupervisor && (
-                      <div className="text-sm text-gray-600">Co-supervisor: {selectedThesis.coSupervisor}</div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Department</div>
-                    <div className="font-medium">{selectedThesis.department}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Submission Date</div>
-                    <div className="font-medium">{formatDate(selectedThesis.submissionDate)}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Defense Date</div>
-                    <div className="font-medium">{formatDate(selectedThesis.defenseDate)}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Approval Date</div>
-                    <div className="font-medium">{formatDate(selectedThesis.approvalDate)}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Archive Date</div>
-                    <div className="font-medium">{formatDate(selectedThesis.archiveDate)}</div>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 mb-2">Keywords</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedThesis.keywords.map((keyword, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                        {keyword}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Pages</div>
-                    <div className="text-2xl font-bold">{selectedThesis.pages}</div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">File Size</div>
-                    <div className="text-2xl font-bold">{selectedThesis.fileSize}</div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Views</div>
-                    <div className="text-2xl font-bold">{selectedThesis.views}</div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Rating</div>
-                    <div className="text-2xl font-bold flex items-center gap-1">
-                      {selectedThesis.rating}
-                      <Star className="w-5 h-5 text-yellow-500" />
-                    </div>
-                  </div>
-                </div>
-
-                {selectedThesis.isPlagiarismChecked && (
-                  <div className="bg-green-50 border border-green-200 p-4 rounded-lg mb-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileCheck className="w-5 h-5 text-green-600" />
-                      <span className="font-semibold text-green-900">Plagiarism Check Completed</span>
-                    </div>
-                    <div className="text-sm text-green-700">
-                      Similarity Score: {selectedThesis.plagiarismScore}%
-                    </div>
-                  </div>
-                )}
-
-                {selectedThesis.doi && (
-                  <div className="mb-6">
-                    <div className="text-sm text-gray-600 mb-1">DOI</div>
-                    <div className="font-mono text-blue-600">{selectedThesis.doi}</div>
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleDownload(selectedThesis)}
-                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition"
-                  >
-                    <Download className="w-5 h-5" />
-                    Download Thesis
-                  </button>
-                  <button
-                    className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
   );
 };
 
-export default ThesisStorage;
+/* ---------- Add Thesis Modal ---------- */
+const AddThesisModal: React.FC<{
+  onClose: () => void;
+  onSubmit: (data: Partial<ThesisRecord>, pdfFile?: File) => Promise<void> | void;
+  existingTheses: ThesisRecord[];
+}> = ({ onClose, onSubmit, existingTheses }) => {
+  const [formData, setFormData] = useState({
+    title: "",
+    studentName: "",
+    studentId: "",
+    level: "bachelor" as ThesisLevel,
+    program: "MET", // Default to first bachelor program
+    year: new Date().getFullYear(),
+    submissionDate: new Date().toISOString().split('T')[0],
+    defenseDate: "",
+    status: "draft" as ThesisStatus,
+    abstract: "",
+    keywords: [] as string[],
+    pages: 0,
+    plagiarismScore: 0,
+    grade: "",
+  });
+
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get available programs for selected level
+  const availablePrograms = useMemo(() => {
+    return programs[formData.level] || [];
+  }, [formData.level]);
+
+  // Update program when level changes
+  useEffect(() => {
+    const availableProgs = programs[formData.level] || [];
+    if (availableProgs.length > 0 && !availableProgs.find(p => p.code === formData.program)) {
+      setFormData(prev => ({ ...prev, program: availableProgs[0].code }));
+    }
+  }, [formData.level, formData.program]);
+
+  // Calculate next sequence
+  const getNextSequence = useMemo(() => {
+    const programCode = getProgramCode(formData.program);
+    const matchingTheses = existingTheses.filter(thesis => {
+      const thisProgramCode = getProgramCode(thesis.program);
+      return thisProgramCode === programCode &&
+             thesis.level === formData.level && 
+             thesis.year === formData.year;
+    });
+    return matchingTheses.length + 1;
+  }, [existingTheses, formData.program, formData.level, formData.year]);
+
+  // Auto-generated thesis ID
+  const thesisId = useMemo(() => 
+    generateThesisId(getProgramCode(formData.program), formData.level, formData.year, getNextSequence),
+    [formData.program, formData.level, formData.year, getNextSequence]
+  );
+
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") setPdfFile(file);
+    else alert("Please select a valid PDF file");
+  };
+
+  const handleAddKeyword = () => {
+    if (keywordInput.trim() && !formData.keywords.includes(keywordInput.trim())) {
+      setFormData({ ...formData, keywords: [...formData.keywords, keywordInput.trim()] });
+      setKeywordInput("");
+    }
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    setFormData({ ...formData, keywords: formData.keywords.filter(k => k !== keyword) });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(onSubmit(formData, pdfFile || undefined));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Add New Thesis</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Thesis ID Display */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <label className="block text-sm font-medium text-blue-900 mb-2">
+              Auto-Generated Thesis ID
+            </label>
+            <code className="text-lg font-mono font-bold text-blue-700 bg-white px-4 py-2 rounded border border-blue-300">
+              {thesisId}
+            </code>
+            <p className="text-xs text-blue-600 mt-2">
+              Storage: {THESIS_STORAGE_PATHS[formData.level]}
+            </p>
+          </div>
+
+          {/* Basic Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title *</label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Level *</label>
+              <select
+                value={formData.level}
+                onChange={(e) => setFormData({ ...formData, level: e.target.value as ThesisLevel })}
+                className="w-full px-3 py-2 border rounded-lg"
+              >
+                <option value="bachelor">Bachelor</option>
+                <option value="master">Master</option>
+                <option value="phd">PhD</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Student Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Student Name *</label>
+              <input
+                type="text"
+                value={formData.studentName}
+                onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Student ID *</label>
+              <input
+                type="text"
+                value={formData.studentId}
+                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Program */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Program *</label>
+            <select
+              value={formData.program}
+              onChange={(e) => setFormData({ ...formData, program: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            >
+              {availablePrograms.map((program) => (
+                <option key={program.code} value={program.code}>
+                  {program.code} - {program.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Faculty: {availablePrograms.find(p => p.code === formData.program)?.faculty || 'N/A'}
+            </p>
+          </div>
+
+          {/* Dates & Year */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Year *</label>
+              <input
+                type="number"
+                value={formData.year}
+                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                className="w-full px-3 py-2 border rounded-lg"
+                min={2000}
+                max={2100}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Submission Date *</label>
+              <input
+                type="date"
+                value={formData.submissionDate}
+                onChange={(e) => setFormData({ ...formData, submissionDate: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Defense Date</label>
+              <input
+                type="date"
+                value={formData.defenseDate}
+                onChange={(e) => setFormData({ ...formData, defenseDate: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
+          </div>
+
+          {/* Status & Pages */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as ThesisStatus })}
+                className="w-full px-3 py-2 border rounded-lg"
+              >
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under Review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Pages</label>
+              <input
+                type="number"
+                value={formData.pages}
+                onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) })}
+                className="w-full px-3 py-2 border rounded-lg"
+                min={0}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Plagiarism Score (%)</label>
+              <input
+                type="number"
+                value={formData.plagiarismScore}
+                onChange={(e) => setFormData({ ...formData, plagiarismScore: parseFloat(e.target.value) })}
+                className="w-full px-3 py-2 border rounded-lg"
+                min={0}
+                max={100}
+                step={0.1}
+              />
+            </div>
+          </div>
+
+          {/* Abstract */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Abstract *</label>
+            <textarea
+              value={formData.abstract}
+              onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+              rows={4}
+              required
+            />
+          </div>
+
+          {/* Keywords */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Keywords</label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={keywordInput}
+                onChange={(e) => setKeywordInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddKeyword())}
+                className="flex-1 px-3 py-2 border rounded-lg"
+                placeholder="Type keyword and press Enter"
+              />
+              <button
+                type="button"
+                onClick={handleAddKeyword}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formData.keywords.map((keyword, idx) => (
+                <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2">
+                  {keyword}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveKeyword(keyword)}
+                    className="hover:text-blue-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* PDF Upload */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Thesis PDF
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-32 bg-red-50 rounded border border-red-200 flex flex-col items-center justify-center">
+                <FileText className="w-8 h-8 text-red-600 mb-1" />
+                {pdfFile && (
+                  <span className="text-xs text-red-600 text-center px-1">
+                    {pdfFile.name.substring(0, 12)}...
+                  </span>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg cursor-pointer transition">
+                  <Upload className="w-5 h-5" />
+                  <span className="text-sm">
+                    {pdfFile ? "Change PDF" : "Upload PDF File"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePdfChange}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  PDF format (Max 50MB for Bachelor/Master, 100MB for PhD)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center gap-2 text-white ${
+                isSubmitting
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              <Plus className="w-5 h-5" />
+              {isSubmitting ? "Adding…" : "Add Thesis"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className={`px-6 py-3 border border-gray-300 rounded-lg ${
+                isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-gray-50"
+              }`}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Edit Thesis Modal ---------- */
+const EditThesisModal: React.FC<{
+  thesis: ThesisRecord;
+  onClose: () => void;
+  onSubmit: (data: Partial<ThesisRecord>, pdfFile?: File) => Promise<void> | void;
+  existingTheses: ThesisRecord[];
+}> = ({ thesis, onClose, onSubmit, existingTheses }) => {
+  // Similar to AddThesisModal but with pre-populated data
+  // For brevity, using same structure
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Edit Thesis</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <p className="text-gray-600">Edit functionality will be similar to Add modal</p>
+        <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-200 rounded-lg">
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Detail Modal ---------- */
+const ThesisDetailModal: React.FC<{
+  thesis: ThesisRecord;
+  allTheses: ThesisRecord[];
+  onClose: () => void;
+}> = ({ thesis, allTheses, onClose }) => {
+  const thesisId = generateThesisId(
+    getProgramCode(thesis.program),
+    thesis.level,
+    thesis.year,
+    getThesisSequence(allTheses, thesis)
+  );
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Thesis Details</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          {/* Thesis ID */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <span className="text-sm font-medium text-blue-900">Thesis ID:</span>
+            <code className="block mt-1 text-lg font-mono font-bold text-blue-700">
+              {thesisId}
+            </code>
+            <p className="text-xs text-blue-600 mt-1">
+              Storage: {THESIS_STORAGE_PATHS[thesis.level]}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold">{thesis.title}</h3>
+            <p className="text-gray-600">{PROGRAM_CODES[thesis.program] || thesis.program}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <span className="text-sm text-gray-600">Student:</span>
+              <p className="font-medium">{thesis.studentName} ({thesis.studentId})</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Level:</span>
+              <p className="font-medium capitalize">{thesis.level}</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Program:</span>
+              <p className="font-medium">{PROGRAM_CODES[thesis.program] || thesis.program}</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Year:</span>
+              <p className="font-medium">{thesis.year}</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Status:</span>
+              <p className="font-medium capitalize">{thesis.status.replace("_", " ")}</p>
+            </div>
+            {thesis.pages && (
+              <div>
+                <span className="text-sm text-gray-600">Pages:</span>
+                <p className="font-medium">{thesis.pages}</p>
+              </div>
+            )}
+          </div>
+
+          {thesis.abstract && (
+            <div>
+              <span className="text-sm text-gray-600">Abstract:</span>
+              <p className="text-gray-800 mt-1">{thesis.abstract}</p>
+            </div>
+          )}
+
+          {thesis.keywords && thesis.keywords.length > 0 && (
+            <div>
+              <span className="text-sm text-gray-600">Keywords:</span>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {thesis.keywords.map((keyword, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {thesis.pdfUrl && (
+            <div className="pt-4">
+              <a
+                href={thesis.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+              >
+                <Download className="w-5 h-5" />
+                View PDF
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ---------- Helper Components ---------- */
+const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: number | string }> = ({
+  icon, label, value
+}) => (
+  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+    <div className="flex items-center justify-between">
+      <div className="flex-1">
+        <p className="text-sm text-gray-600 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-gray-900">{value}</p>
+      </div>
+      <div className="ml-4">{icon}</div>
+    </div>
+  </div>
+);
+
+const Th: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    {children}
+  </th>
+);
+
+export default ThesisManagement;
