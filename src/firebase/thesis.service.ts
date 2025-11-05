@@ -32,6 +32,7 @@ export interface Thesis {
   pages?: number;
   plagiarismScore?: number;
   grade?: string;
+  views?: number; // Track online views
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -158,6 +159,19 @@ export const thesisService = {
     await updateDoc(thesisRef, {
       status: 'approved',
       approvalDate: new Date().toISOString().split('T')[0],
+      updatedAt: Timestamp.now()
+    });
+  },
+
+  // Increment view count
+  async incrementViews(thesisId: string): Promise<void> {
+    const theses = await this.getAllTheses();
+    const thesis = theses.find(t => t.id === thesisId);
+    const currentViews = thesis?.views || 0;
+    
+    const thesisRef = doc(db, THESIS_COLLECTION, thesisId);
+    await updateDoc(thesisRef, {
+      views: currentViews + 1,
       updatedAt: Timestamp.now()
     });
   }

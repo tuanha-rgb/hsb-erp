@@ -18,7 +18,8 @@ export type CatalogueCategory =
   | 'Language'
   | 'Medicine & Health'
   | 'Architecture'
-  | 'Arts & Design';
+  | 'Arts & Design'
+  | 'Nontraditional Security';
 
 export interface Publisher {
   id: string;
@@ -90,7 +91,8 @@ export const catalogues: CatalogueCategory[] = [
    'Language',
    'Medicine & Health',
    'Architecture',
-   'Arts & Design'
+   'Arts & Design',
+    'Nontraditional Security'
 ];
 
 // Book Records

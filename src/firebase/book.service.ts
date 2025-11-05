@@ -44,6 +44,7 @@ export interface Book {
   pdfUrl?: string;
   bookType?: string;
   featured?: boolean;
+  views?: number; // Track online views
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -239,5 +240,18 @@ export const bookService = {
       info: metadata.info,
       metadata: metadata.metadata
     };
+  },
+
+  // Increment view count
+  async incrementViews(bookId: string): Promise<void> {
+    const books = await this.getAllBooks();
+    const book = books.find(b => b.id === bookId);
+    const currentViews = book?.views || 0;
+    
+    const bookRef = doc(db, BOOKS_COLLECTION, bookId);
+    await updateDoc(bookRef, {
+      views: currentViews + 1,
+      updatedAt: Timestamp.now()
+    });
   }
 };

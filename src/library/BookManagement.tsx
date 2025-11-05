@@ -31,7 +31,8 @@ const CATEGORY_ABBREV: Record<string, string> = {
   "Language": "LANG",
   "Medicine & Health": "MED",
   "Architecture": "ARCH",
-  "Arts & Design": "ART"
+  "Arts & Design": "ART",
+  "Nontraditional Security": "NTS"
 
 };
 
@@ -957,7 +958,7 @@ const AddBookModal: React.FC<{
    'Language',
    'Medicine & Health',
    'Architecture',
-   'Arts & Design'
+   'Arts & Design', 'Nontraditional Security'
               ]}
             />
             <NumberField
