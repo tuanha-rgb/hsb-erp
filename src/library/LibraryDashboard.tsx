@@ -138,7 +138,6 @@ const LibraryDashboard: React.FC = () => {
       const totalBorrowed = books.reduce((sum, b) => sum + (b.copies - b.availableCopies), 0);
 
       // Category breakdown
-       // Category breakdown
       const businessCategories = ["Business", "Management", "Finance", "Marketing", "Economics", "Accounting", "Entrepreneurship"];
       const technologyCategories = ["Computer Science", "Engineering", "Mathematics"];
       const othersCategories = ["Social Sciences", "Humanities", "Language", "Medicine & Health", "Architecture", "Arts & Design"];
@@ -180,7 +179,6 @@ const LibraryDashboard: React.FC = () => {
       const othersDigital = books.filter(b => othersCategories.includes(b.category) && isDigital(b)).length;
       const othersBorrowed = books.filter(b => othersCategories.includes(b.category)).reduce((sum, b) => sum + (b.copies - b.availableCopies), 0);
 
-
       const thesisBorrowed = physicalTheses * 0.032; // Estimate for physical thesis usage
 
       // Calculate actual online access from views
@@ -200,8 +198,7 @@ const LibraryDashboard: React.FC = () => {
       const ntsOnline = books.filter(b => isNTS(b)).reduce((sum, b) => sum + (b.views || 0), 0);
       const othersOnline = books.filter(b => othersCategories.includes(b.category)).reduce((sum, b) => sum + (b.views || 0), 0);
 
-
-       setStats({
+      setStats({
         totalCollection: books.length + theses.length,
         totalBooks: books.length,
         totalTheses: theses.length,
@@ -243,6 +240,7 @@ const LibraryDashboard: React.FC = () => {
           online: totalThesisViews
         }
       });
+
       // Generate popular resources from actual views (combine books and theses)
       const allResources = [
         ...books.map(b => {
@@ -372,28 +370,33 @@ const LibraryDashboard: React.FC = () => {
 
   // Generate usage trends based on selected period
   const getUsageTrends = (): UsageTrend[] => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
+    const currentYear = today.getFullYear();
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
+    const totalViews = stats.onlineAccess;
+    
     if (usagePeriod === 'current') {
-      // Current month - daily breakdown (last 7 days)
+      // Current month - show last 7 days, with all views on today
       return Array.from({ length: 7 }, (_, i) => {
         const day = new Date();
         day.setDate(day.getDate() - (6 - i));
+        const isToday = i === 6;
         return {
           month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-          online: Math.floor(stats.onlineAccess / 30 * (0.8 + Math.random() * 0.4))
+          online: isToday ? totalViews : 0
         };
       });
     } else if (usagePeriod === 'previous') {
-      // Previous month - daily breakdown (last 30 days of previous month)
-      const daysToShow = 10;
+      // Previous month - no historical data
+      const daysToShow = 7;
       return Array.from({ length: daysToShow }, (_, i) => {
         const day = new Date(currentYear, currentMonth - 1, Math.floor((30 / daysToShow) * (i + 1)));
         return {
           month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-          online: Math.floor(stats.onlineAccess * 0.85 * (0.7 + Math.random() * 0.3))
+          online: 0
         };
       });
     } else {
@@ -401,12 +404,48 @@ const LibraryDashboard: React.FC = () => {
       const monthsToShow = currentMonth + 1;
       return Array.from({ length: monthsToShow }, (_, i) => ({
         month: monthNames[i],
-        online: Math.floor(stats.onlineAccess * (0.6 + (i / monthsToShow) * 0.4))
+        online: i === currentMonth ? totalViews : 0
       }));
     }
   };
 
   const usageTrends = getUsageTrends();
+  
+  // Track month-start baseline for growth calculation
+  const getMonthStartBaseline = (): number => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const storageKey = `library_baseline_${currentYear}_${currentMonth}`;
+    
+    // Get stored baseline for current month
+    const stored = localStorage.getItem(storageKey);
+    
+    if (stored) {
+      return parseInt(stored, 10);
+    } else {
+      // First time this month - set current views as baseline
+      localStorage.setItem(storageKey, stats.onlineAccess.toString());
+      return stats.onlineAccess;
+    }
+  };
+  
+  // Calculate growth percentage (current vs month start)
+  const calculateGrowth = (): { percentage: number; direction: 'up' | 'down' | 'neutral' } => {
+    if (stats.onlineAccess === 0) return { percentage: 0, direction: 'neutral' };
+    
+    const monthStartViews = getMonthStartBaseline();
+    
+    if (monthStartViews === 0) {
+      return { percentage: 100, direction: 'up' };
+    }
+    
+    const growth = ((stats.onlineAccess - monthStartViews) / monthStartViews) * 100;
+    const direction = growth > 0 ? 'up' : growth < 0 ? 'down' : 'neutral';
+    
+    return { percentage: Math.abs(Math.round(growth)), direction };
+  };
+  
+  const growth = calculateGrowth();
 
   return (
     <div className="space-y-6">
@@ -437,8 +476,8 @@ const LibraryDashboard: React.FC = () => {
           <p className="text-xs text-gray-500 mb-1">Active Users</p>
           <p className="text-2xl font-bold text-gray-900">{stats.activeUsers.toLocaleString()}</p>
           <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">Students: {Math.floor(stats.activeUsers * 0.87).toLocaleString()}</p> {/*point to actual students reading*/}
-            <p className="text-xs text-gray-600">Staff: {Math.floor(stats.activeUsers * 0.13).toLocaleString()}</p> {/*point to actual staff reading*/}
+            <p className="text-xs text-gray-600">Students: {Math.floor(stats.activeUsers * 0.87).toLocaleString()}</p>
+            <p className="text-xs text-gray-600">Faculty: {Math.floor(stats.activeUsers * 0.13).toLocaleString()}</p>
           </div>
         </div>
 
@@ -447,7 +486,14 @@ const LibraryDashboard: React.FC = () => {
           <p className="text-2xl font-bold text-gray-900">{stats.onlineAccess.toLocaleString()}</p>
           <div className="mt-2 space-y-0.5">
             <p className="text-xs text-gray-600">This month</p>
-            <p className="text-xs text-green-600">↑ 18% vs last month</p>
+            {growth.direction !== 'neutral' && (
+              <p className={`text-xs ${growth.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                {growth.direction === 'up' ? '↑' : '↓'} {growth.percentage}% since month start
+              </p>
+            )}
+            {growth.direction === 'neutral' && (
+              <p className="text-xs text-gray-500">No change since month start</p>
+            )}
           </div>
         </div>
       </div>
@@ -517,31 +563,62 @@ const LibraryDashboard: React.FC = () => {
             </select>
           </div>
           
-          <div className="flex items-end justify-between gap-2 h-48">
-            {usageTrends.map((data, i) => {
-              const maxValue = Math.max(...usageTrends.map(t => t.online));
-              const onlineHeight = (data.online / maxValue) * 100;
+          {stats.onlineAccess === 0 ? (
+            <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg">
+              <div className="text-center">
+                <TrendingUp className="mx-auto mb-2 text-gray-400" size={32} />
+                <p className="text-sm text-gray-600">No online activity yet</p>
+                <p className="text-xs text-gray-500 mt-1">Views will appear when users access books</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-end justify-between gap-2 h-56">
+              {usageTrends.map((data, i) => {
+                // Calculate max value excluding zeros for better scaling
+                const maxValue = Math.max(...usageTrends.map(t => t.online), 1);
+                const onlineHeight = data.online > 0 ? (data.online / maxValue) * 100 : 0;
+                const hasData = data.online > 0;
 
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <div className="w-full flex flex-col gap-1 items-center">
-                    <div 
-                      className="w-full bg-green-500 rounded-t transition-all"
-                      style={{ height: `${onlineHeight}%`, minHeight: '4px' }}
-                      title={`Online: ${data.online.toLocaleString()}`}
-                    ></div>
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    {/* Number above bar - only show if has data */}
+                    {hasData ? (
+                      <span className="text-xs font-semibold text-gray-700 mb-1">
+                        {data.online}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400 mb-1">-</span>
+                    )}
+                    {/* Bar - only show if has data */}
+                    <div className="w-full flex flex-col gap-1 items-center flex-1 justify-end">
+                      {hasData ? (
+                        <div 
+                          className="w-full bg-green-500 rounded-t transition-all hover:bg-green-600"
+                          style={{ height: `${onlineHeight}%`, minHeight: '8px' }}
+                          title={`${data.month}: ${data.online.toLocaleString()} views`}
+                        ></div>
+                      ) : (
+                        <div className="w-full h-1 bg-gray-200 rounded"></div>
+                      )}
+                    </div>
+                    {/* Date label */}
+                    <span className="text-xs text-gray-500 mt-1">{data.month}</span>
                   </div>
-                  <span className="text-xs text-gray-500">{data.month}</span>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500 rounded"></div>
               <span className="text-sm text-gray-600">Online Access</span>
             </div>
+            {stats.onlineAccess > 0 && (
+              <span className="text-xs text-gray-500 italic">
+                Historical tracking started: {new Date().toLocaleDateString()}
+              </span>
+            )}
           </div>
         </div>
 

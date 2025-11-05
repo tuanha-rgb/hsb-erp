@@ -234,6 +234,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const pdfDocRef = useRef<any>(null);
   const epubBookRef = useRef<any>(null);
   const renditionRef = useRef<any>(null);
+  const viewTrackedRef = useRef<boolean>(false); // Prevent duplicate view tracking
 
   // Determine file type and availability
   const fileKind: 'pdf' | 'epub' | null =
@@ -263,6 +264,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       setLoading(false);
       return;
     }
+    viewTrackedRef.current = false; // Reset tracking flag for new item
     loadDocument();
     return () => {
       if (pdfDocRef.current) { pdfDocRef.current.destroy(); pdfDocRef.current = null; }
@@ -314,6 +316,39 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       else if (fileType === 'epub') await loadEPUB(fileUrl);
       
       console.log('Document loaded successfully');
+      
+      // Track view in Firebase (increment views counter) - only once per item
+      if (!viewTrackedRef.current) {
+        viewTrackedRef.current = true;
+        try {
+          if (isBook(item)) {
+            // For books, find Firebase book by matching title/author
+            const allBooks = await bookService.getAllBooks();
+            const firebaseBook = allBooks.find(b => 
+              b.title === item.title && b.author === item.authors[0]
+            );
+            
+            if (firebaseBook?.id) {
+              await bookService.incrementViews(firebaseBook.id);
+              console.log('Book view tracked:', firebaseBook.id);
+            }
+          } else if (isThesis(item)) {
+            // For theses, find by title and student name
+            const allTheses = await thesisService.getAllTheses();
+            const firebaseThesis = allTheses.find(t => 
+              t.title === item.title && t.studentName === item.student.name
+            );
+            
+            if (firebaseThesis?.id) {
+              await thesisService.incrementViews(firebaseThesis.id);
+              console.log('Thesis view tracked:', firebaseThesis.id);
+            }
+          }
+        } catch (viewErr) {
+          // Don't block document viewing if view tracking fails
+          console.error('Failed to track view:', viewErr);
+        }
+      }
     } catch (err) {
       console.error('Document load error:', err);
       setError('Failed to load document: ' + (err as Error).message);
