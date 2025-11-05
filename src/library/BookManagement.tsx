@@ -30,10 +30,11 @@ const CATEGORY_ABBREV: Record<string, string> = {
   "Humanities": "HUM",
   "Language": "LANG",
   "Medicine & Health": "MED",
-  "Architecture": "ARCH",
   "Arts & Design": "ART",
-  "Nontraditional Security": "NTS"
-
+  "Nontraditional Security": "NTS",
+  "Vietnam": "VN",
+  "Technology": "Tech",
+  "Data Science" : "Data"
 };
 
 // Generate book ID: [CAT]-[YEAR]-[SEQ]-[I/L]
@@ -950,15 +951,15 @@ const AddBookModal: React.FC<{
               value={formData.category}
               onChange={(v) => setFormData({ ...formData, category: v })}
               options={[
-                "Business", "Management", "Finance", "Marketing",
-"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Cybersecurity' ,'Engineering', 
+                "Business", "Management", 'Nontraditional Security','Technology',"Finance", "Marketing",
+"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Data Science','Cybersecurity' ,'Engineering', 
    'Mathematics' ,
    'Social Sciences',
    'Humanities',
    'Language',
    'Medicine & Health',
-   'Architecture',
-   'Arts & Design', 'Nontraditional Security'
+   'Arts & Design', 
+   'Vietnam'
               ]}
             />
             <NumberField
@@ -1324,15 +1325,15 @@ const EditBookModal: React.FC<{
               value={formData.category}
               onChange={(v) => setFormData({ ...formData, category: v })}
               options={[
-               "Business", "Management", "Finance", "Marketing",
-"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Cybersecurity' ,'Engineering', 
+               "Business", "Management", 'Nontraditional Security','Technology',"Finance", "Marketing",
+"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Data Science','Cybersecurity' ,'Engineering', 
    'Mathematics' ,
    'Social Sciences',
    'Humanities',
    'Language',
    'Medicine & Health',
-   'Architecture',
-   'Arts & Design'
+   'Arts & Design', 
+   'Vietnam'
               ]}
             />
             <NumberField

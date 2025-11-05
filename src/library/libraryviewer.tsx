@@ -51,16 +51,19 @@ interface CarouselSlide {
   color: string;
 }
 
+// AFTER  
 const FloatingCarousel: React.FC<{ 
   onSlideClick?: (slideId: string) => void;
   onBookClick?: (bookId: string) => void;
   setReadingItem?: (item: ReadingItem | null) => void;
-}> = ({ onSlideClick, onBookClick, setReadingItem }) => {
+  setPreviewItem?: (item: ReadingItem | null) => void;  // ADD THIS
+}> = ({ onSlideClick, onBookClick, setReadingItem, setPreviewItem }) => {  // ADD setPreviewItem here
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [featuredBooks, setFeaturedBooks] = useState<FirebaseBook[]>([]);
   const [carouselSlides, setCarouselSlide] = useState<CarouselSlide[]>([]);
-
+const [showPreview, setShowPreview] = useState(false);
+const [previewBook, setPreviewBook] = useState<FirebaseBook | null>(null);
   useEffect(() => {
     loadFeaturedBooks();
   }, []);
@@ -145,7 +148,14 @@ const FloatingCarousel: React.FC<{
       </div>
     );
   }
-
+  const handlePreview = (e: React.MouseEvent, slideId: string) => {
+  e.stopPropagation();
+  const book = featuredBooks.find(b => b.id === slideId);
+  if (book) {
+    setPreviewBook(book);
+    setShowPreview(true);
+  }
+};
   const slide = carouselSlides[currentSlide];
 
   return (
@@ -159,16 +169,108 @@ const FloatingCarousel: React.FC<{
             </span>
           )}
           <h2 className="text-4xl font-bold mb-4 drop-shadow-lg">{slide.title}</h2>
-          <p className="text-lg mb-6 text-white/90 max-w-md">{slide.description}</p>
-          {slide.action && (
-            <button 
-              onClick={() => handleViewBook(slide.id)}
-              className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              {slide.action}
-            </button>
+              <p className="text-lg mb-6 text-white/90 max-w-md line-clamp-3">
+                {slide.description.length > 150 
+                  ? `${slide.description.substring(0, 150)}...` 
+                  : slide.description}
+              </p>          
+              {slide.action && (
+                        <div className="flex gap-3">
+              <button 
+                onClick={(e) => handlePreview(e, slide.id)}
+                className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+              >
+                Preview
+              </button>
+              {slide.action && (
+                <button 
+                  onClick={() => handleViewBook(slide.id)}
+                  className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
+                >
+                  {slide.action}
+                </button>
+              )}
+            </div>
           )}
         </div>
+        {/* Preview Modal */}
+{showPreview && previewBook && (
+  <div 
+    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    onClick={() => setShowPreview(false)}
+  >
+    <div 
+      className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-auto p-6 shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900">{previewBook.title}</h3>
+          <p className="text-sm text-gray-600 mt-1">by {previewBook.author}</p>
+        </div>
+        <button 
+          onClick={() => setShowPreview(false)} 
+          className="text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <X size={24} />
+        </button>
+      </div>
+      
+      <div className="flex gap-6 mb-6">
+        <img 
+          src={previewBook.coverImage || 'https://via.placeholder.com/200x300'} 
+          alt={previewBook.title} 
+          className="w-48 h-72 object-cover rounded-lg shadow-lg"
+        />
+        <div className="flex-1">
+          <div className="space-y-3 text-sm">
+            <div>
+              <span className="font-semibold text-gray-700">ISBN:</span>
+              <span className="text-gray-600 ml-2">{previewBook.isbn || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">Publisher:</span>
+              <span className="text-gray-600 ml-2">{previewBook.publisher || 'Unknown'}</span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">Year:</span>
+              <span className="text-gray-600 ml-2">{previewBook.publishedYear || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">Category:</span>
+              <span className="inline-block ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                {previewBook.category}
+              </span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">Available:</span>
+              <span className={`ml-2 font-medium ${previewBook.availableCopies > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {previewBook.availableCopies}/{previewBook.copies}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+        <p className="text-gray-700 leading-relaxed">
+          {previewBook.description || 'No description available.'}
+        </p>
+      </div>
+
+      <button 
+        onClick={() => {
+          setShowPreview(false);
+          handleViewBook(previewBook.id!);
+        }}
+        className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+      >
+        Open & Read Book
+      </button>
+    </div>
+  </div>
+)}
         <div className="relative">
           {slide.image.startsWith('http') || slide.image.startsWith('https') || slide.image.startsWith('/') ? (
             <img 
@@ -313,7 +415,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       if (!fileUrl) throw new Error('No file source available');
       
       if (fileType === 'pdf') await loadPDF(fileUrl);
-      else if (fileType === 'epub') await loadEPUB(fileUrl);
       
       console.log('Document loaded successfully');
       
@@ -361,117 +462,136 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
 const getNumPages = () => pdfDocRef.current?.numPages ?? totalPages;
 
 // ---- loadPDF: set ref, capture numPages, then render
+// ============================================
+// CORRECTED PDF RENDERING CODE
+// ============================================
+
 const loadPDF = async (url: string) => {
   const loadingTask = getDocument({ url, withCredentials: false });
   const pdf = await loadingTask.promise;
   pdfDocRef.current = pdf;
 
-  const numPages = pdf.numPages; // <- reliable
+  const numPages = pdf.numPages;
   setTotalPages(numPages);
   setCurrentPage(1);
 
-  await renderPDFPages(1); // will use getNumPages()
+  // Only call once with a small delay
+  setTimeout(() => {
+    renderPDFPages(1);
+  }, 100);
 };
 
-  // ---- render the spread (single/dual)
+// ---- render the spread (single/dual)
 const renderPDFPages = async (pageNum: number) => {
   if (!pdfDocRef.current) return;
 
-  const numPages = getNumPages();
+  const numPages = pdfDocRef.current.numPages;
+  
+  // Validate page number
+  const validPageNum = Math.max(1, Math.min(pageNum, numPages));
 
+  // Clear first canvas before rendering
   if (canvasRef.current) {
-    await renderPDFPage(pageNum, canvasRef.current, numPages);
+    const ctx = canvasRef.current.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+    await renderPDFPage(validPageNum, canvasRef.current);
   }
 
-  if (pageMode === 'dual' && canvas2Ref.current && pageNum < numPages) {
-    await renderPDFPage(pageNum + 1, canvas2Ref.current, numPages);
+  // Handle second canvas for dual mode
+  if (pageMode === 'dual' && canvas2Ref.current) {
+    const ctx = canvas2Ref.current.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas2Ref.current.width, canvas2Ref.current.height);
+    }
+    
+    if (validPageNum < numPages) {
+      await renderPDFPage(validPageNum + 1, canvas2Ref.current);
+    }
   }
 
-  setCurrentPage(pageNum);
+  setCurrentPage(validPageNum);
 };
 
-// ---- render a single page (stop using totalPages state for the guard)
+// ---- render a single page
 const renderPDFPage = async (
   pageNum: number,
-  canvas: HTMLCanvasElement,
-  numPages?: number
+  canvas: HTMLCanvasElement
 ) => {
   if (!pdfDocRef.current || !canvas) return;
 
-  const pages = numPages ?? getNumPages();
-  if (pageNum < 1 || pageNum > pages) return;
+  const numPages = pdfDocRef.current.numPages;
+  if (pageNum < 1 || pageNum > numPages) return;
 
-  const page = await pdfDocRef.current.getPage(pageNum);
-  const viewport = page.getViewport({ scale });
+  try {
+    const page = await pdfDocRef.current.getPage(pageNum);
+    const viewport = page.getViewport({ scale });
 
-  const context = canvas.getContext('2d');
-  if (!context) return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
 
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
 
-  await page.render({ canvasContext: context, viewport }).promise;
+    await page.render({ canvasContext: context, viewport }).promise;
+  } catch (error) {
+    console.error(`Error rendering page ${pageNum}:`, error);
+  }
 };
-  const loadEPUB = async (url: string) => {
-    if (!epubContainerRef.current) return;
-    const book = ePub(url);
-    epubBookRef.current = book;
-    const rendition = book.renderTo(epubContainerRef.current, {
-      width: '100%', height: '100%',
-      spread: pageMode === 'dual' ? 'auto' : 'none'
-    });
-    renditionRef.current = rendition;
-    await rendition.display();
-    await book.ready;
-    setTotalPages(50);
-    setCurrentPage(1);
-    rendition.on('relocated', (location: any) => {
-      setCurrentPage(Math.floor(location.start.percentage * 50) + 1);
-    });
-  };
 
-  const handlePrevPage = async () => {
-    const step = pageMode === 'dual' ? 2 : 1;
-    if (currentPage <= 1) return;
-    const newPage = Math.max(1, currentPage - step);
-    if (fileKind === 'pdf') await renderPDFPages(newPage);
-    else if (renditionRef.current) await renditionRef.current.prev();
-  };
+// ---- Add useEffect for scale/pageMode changes
+useEffect(() => {
+  if (fileKind === 'pdf' && pdfDocRef.current && currentPage > 0) {
+    renderPDFPages(currentPage);
+  }
+}, [scale, pageMode]);
 
-  const handleNextPage = async () => {
-    const step = pageMode === 'dual' ? 2 : 1;
-    if (currentPage >= totalPages) return;
-    const newPage = Math.min(totalPages, currentPage + step);
-    if (fileKind === 'pdf') await renderPDFPages(newPage);
-    else if (renditionRef.current) await renditionRef.current.next();
-  };
+// ---- Navigation handlers (remove async, not needed)
+const handlePrevPage = () => {
+  const step = pageMode === 'dual' ? 2 : 1;
+  if (currentPage <= 1) return;
+  const newPage = Math.max(1, currentPage - step);
+  
+  if (fileKind === 'pdf') {
+    renderPDFPages(newPage);
+  } else if (renditionRef.current) {
+    renditionRef.current.prev();
+  }
+};
 
-  const handleZoomIn = async () => {
-    if (fileKind === 'pdf') {
-      const newScale = Math.min(scale + 0.25, 3);
-      setScale(newScale);
-      setTimeout(() => renderPDFPages(currentPage), 0);
-    }
-  };
+const handleNextPage = () => {
+  const step = pageMode === 'dual' ? 2 : 1;
+  if (currentPage >= totalPages) return;
+  const newPage = currentPage + step;
+  
+  if (fileKind === 'pdf') {
+    renderPDFPages(newPage);
+  } else if (renditionRef.current) {
+    renditionRef.current.next();
+  }
+};
 
-  const handleZoomOut = async () => {
-    if (fileKind === 'pdf') {
-      const newScale = Math.max(scale - 0.25, 0.5);
-      setScale(newScale);
-      setTimeout(() => renderPDFPages(currentPage), 0);
-    }
-  };
+// ---- Zoom handlers (simplified)
+const handleZoomIn = () => {
+  if (fileKind === 'pdf') {
+    setScale(prev => Math.min(prev + 0.25, 3));
+  }
+};
 
-  const togglePageMode = async () => {
-    const newMode = pageMode === 'single' ? 'dual' : 'single';
-    setPageMode(newMode);
-    if (fileKind === 'pdf') {
-      setTimeout(() => renderPDFPages(currentPage), 0);
-    } else if (renditionRef.current && epubBookRef.current && isBook(item) && item.firebaseStoragePath) {
-      renditionRef.current.destroy();
-      await loadEPUB(item.firebaseStoragePath);
-    }
-  };
+const handleZoomOut = () => {
+  if (fileKind === 'pdf') {
+    setScale(prev => Math.max(prev - 0.25, 0.5));
+  }
+};
+
+// ---- Toggle page mode
+const togglePageMode = async () => {
+  const newMode = pageMode === 'single' ? 'dual' : 'single';
+  setPageMode(newMode);
+  
+
+};
 
   const addBookmark = () => {
     const newBookmark: Bookmark = {
@@ -684,7 +804,8 @@ const LibraryViewer: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [firebaseBooks, setFirebaseBooks] = useState<FirebaseBook[]>([]);
   const [firebaseTheses, setFirebaseTheses] = useState<FirebaseThesis[]>([]);
-
+  const [previewItem, setPreviewItem] = useState<ReadingItem | null>(null);
+  
   // Load data from Firebase
   useEffect(() => { 
     loadFirebaseBooks();
@@ -793,7 +914,7 @@ if (selectedLevel !== 'all' && contentType === 'theses') {
       if (contentType === 'books' && isBook(item)) {
         return item.publisher === selectedPublisher;
       } else if (contentType === 'theses' && !isBook(item)) {
-        return item.program === selectedPublisher; // or supervisor if you track that
+        return item.program === selectedPublisher;
       }
       return true;
     });
@@ -820,13 +941,11 @@ const paginatedContent = useMemo(() => {
     return stats;
   }, [firebaseBooks]);
 
-  // Get unique years for filtering
   const availableYears = useMemo(() => {
     const years = firebaseBooks.map(b => b.publishedYear).filter(y => y);
-    return [...new Set(years)].sort((a, b) => b - a); // Descending order
+    return [...new Set(years)].sort((a, b) => b - a);
   }, [firebaseBooks]);
 
-  // Get unique publishers for filtering
   const availablePublishers = useMemo(() => {
     const publishers = firebaseBooks.map(b => b.publisher).filter(p => p);
     return [...new Set(publishers)].sort();
@@ -855,7 +974,7 @@ const clearAllFilters = () => {
 
   return (
     <div className="h-full overflow-auto bg-gray-50">
-      <FloatingCarousel setReadingItem={setReadingItem} />
+      <FloatingCarousel setReadingItem={setReadingItem} setPreviewItem={setPreviewItem} />
       <div className="bg-white border-b border-gray-200 px-3 py-3">
         <div className="flex items-center justify-between mb-3">
           <h1 className="px-9 text-2xl font-bold text-gray-900">HSB Digital Library</h1>
@@ -885,8 +1004,6 @@ const clearAllFilters = () => {
     )}
   </div>
   
-
-  {/* Items per page selector */}
   <select 
     value={itemsPerPage} 
     onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -905,8 +1022,6 @@ const clearAllFilters = () => {
   </button>
 </div>
 
-        {/*"Books/Theses buttons" through "showFilters dropdown"*/}
-
         <div className="flex items-center gap-2 mb-3">
   <button onClick={() => setContentType('books')}
     className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
@@ -921,7 +1036,6 @@ const clearAllFilters = () => {
     <BookOpen size={18} />Theses ({firebaseTheses.length})
   </button>
 
-  {/* Active filter badges */}
   {hasActiveFilters && (
     <>
       {selectedCategory !== 'all' && (
@@ -943,7 +1057,6 @@ const clearAllFilters = () => {
         </span>
       )}
       
-      {/* Clear All button inline */}
       <button onClick={clearAllFilters}
         className="text-sm text-blue-600 hover:text-blue-800 font-medium">
         Clear All Filters
@@ -955,8 +1068,6 @@ const clearAllFilters = () => {
 
       <div className="p-3">
         
-
-       
 {showFilters && (
   <div className="bg-white rounded-lg border p-4 mb-3">
     <div className="flex justify-between mb-3">
@@ -1068,13 +1179,11 @@ const clearAllFilters = () => {
               </div>
 
               <div className="px-3 flex gap-2">
-                
                 <button onClick={() => setSelectedCategory('all')}
                   className="font-bold text-blue-600 hover:text-blue-800">View All</button>
               </div>
             </div>
             
-            {/* Collapsible content with smooth animation */}
             <div 
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
                 showCategoryBrowser ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
@@ -1102,19 +1211,16 @@ const clearAllFilters = () => {
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
     {paginatedContent.map((item) => (
       <div key={item.id} className="bg-white rounded-lg border p-4 hover:shadow-lg cursor-pointer transition-shadow"
-        onClick={() => setReadingItem(item)}>
+        onClick={() => setPreviewItem(item)}>
         
-        {/* Title - Full Width */}
         <h3 className="font-semibold mb-2 line-clamp-2 text-gray-900 min-h-[2.5rem]">{item.title}</h3>
         
         <div className="flex gap-3">
-          {/* Content Section */}
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-600 mb-2 line-clamp-1">
               {isBook(item) ? item.authors.join(', ') : item.student.name}
             </p>
             
-            {/* Category badge */}
             <div className="mb-2">
               <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200">
                 {isBook(item) ? item.catalogue : item.program}
@@ -1150,7 +1256,6 @@ const clearAllFilters = () => {
             )}
           </div>
           
-          {/* Book Cover - Right Side */}
           {isBook(item) && item.coverImage && (
             <div className="w-20 h-28 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
               <img 
@@ -1169,7 +1274,6 @@ const clearAllFilters = () => {
   </div>
 ) : (
           <div className="bg-white rounded-lg border overflow-hidden">
-            {/* Table Header */}
             <div className="bg-gray-50 border-b px-4 py-3">
               <div className="grid grid-cols-11 gap-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 <div className="col-span-4">Title / Author</div>
@@ -1182,16 +1286,12 @@ const clearAllFilters = () => {
               </div>
             </div>
             
-            {/* Table Body */}
             <div className="divide-y">
               {paginatedContent.map((item) => (
                 <div key={item.id} 
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => setReadingItem(item)}>
+                  onClick={() => setPreviewItem(item)}>
                   <div className="grid grid-cols-11 gap-4 items-center">
-                   
-                    
-                    {/* Title / Author */}
                     <div className="col-span-4 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-overflow text-sm">{item.title}</h3>
                       <p className="text-xs text-gray-600 truncate">
@@ -1199,14 +1299,12 @@ const clearAllFilters = () => {
                       </p>
                     </div>
                     
-                    {/* Category */}
                     <div className="col-span-1">
                       <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-full">
                         {isBook(item) ? item.catalogue : item.program}
                       </span>
                     </div>
                     
-                    {/* Publisher / Program */}
                     <div className="col-span-2">
                       <span className="text-sm text-gray-700 truncate block">
                         {isBook(item) ? item.publisher : item.program}
@@ -1216,21 +1314,18 @@ const clearAllFilters = () => {
                       )}
                     </div>
                     
-                    {/* Year */}
                     <div className="col-span-1">
                       <span className="text-sm text-gray-700">
                         {isBook(item) ? item.publicationYear : item.academicYear.split('-')[1]}
                       </span>
                     </div>
                     
-                    {/* Pages */}
                     <div className="col-span-1">
                       <span className="text-sm text-gray-700">
                         {item.pages || '-'}
                       </span>
                     </div>
                     
-                    {/* Available / Status */}
                     <div className="col-span-1">
                       {isBook(item) ? (
                         <div className="text-sm">
@@ -1250,7 +1345,6 @@ const clearAllFilters = () => {
                       )}
                     </div>
                     
-                    {/* Format */}
                     <div className="col-span-1">
                       {isBook(item) ? (
                         item.fileType ? (
@@ -1272,11 +1366,9 @@ const clearAllFilters = () => {
                     </div>
                   </div>
                   
-                  {/* Book type info */}
                   {isBook(item) && (
                     <div className="grid grid-cols-12 gap-4 mt-2">
                       <div className="col-span-1"></div>
-                      
                     </div>
                   )}
                 </div>
@@ -1328,6 +1420,139 @@ const clearAllFilters = () => {
           </div>
         )}
       </div>
+
+      {/* PREVIEW MODAL */}
+      {previewItem && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setPreviewItem(null)}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-3xl w-full max-h-[85vh] overflow-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-start z-10">
+              <div className="flex-1 pr-4">
+                <h3 className="text-2xl font-bold text-gray-900">{previewItem.title}</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {isBook(previewItem) ? `by ${previewItem.authors.join(', ')}` : `by ${previewItem.student.name}`}
+                </p>
+              </div>
+              <button onClick={() => setPreviewItem(null)} className="text-gray-500 hover:text-gray-700 p-1">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {isBook(previewItem) ? (
+                <div>
+                  <div className="flex gap-6 mb-6">
+                    {previewItem.coverImage && (
+                      <img src={previewItem.coverImage} alt={previewItem.title} 
+                        className="w-48 h-72 object-cover rounded-lg shadow-lg flex-shrink-0" />
+                    )}
+                    <div className="flex-1 space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">ISBN</span>
+                          <span className="text-gray-900">{previewItem.isbn || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Publisher</span>
+                          <span className="text-gray-900">{previewItem.publisher}</span>
+                        </div>
+                        <div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Year</span>
+                          <span className="text-gray-900">{previewItem.publicationYear || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Pages</span>
+                          <span className="text-gray-900">{previewItem.pages || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Category</span>
+                          <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                            {previewItem.catalogue}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Availability</span>
+                          <span className={`font-medium ${previewItem.availableCopies > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {previewItem.availableCopies}/{previewItem.totalCopies}
+                          </span>
+                        </div>
+                      </div>
+                      {previewItem.fileType && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <span className="text-sm font-medium text-green-700">
+                            📖 Available as {previewItem.fileType.toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {previewItem.description && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                      <p className="text-gray-700 leading-relaxed text-sm">{previewItem.description}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Student</span>
+                      <span className="text-gray-900">{previewItem.student.name}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Level</span>
+                      <span className="text-gray-900 capitalize">{previewItem.level}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Program</span>
+                      <span className="text-gray-900">{previewItem.program}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Year</span>
+                      <span className="text-gray-900">{previewItem.academicYear}</span>
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">Abstract</h4>
+                    <p className="text-gray-700 leading-relaxed text-sm">{previewItem.abstract}</p>
+                  </div>
+                  {previewItem.keywords && previewItem.keywords.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Keywords</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {previewItem.keywords.map((kw, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 border-t px-6 py-4">
+              <button 
+                onClick={() => {
+                  setPreviewItem(null);
+                  setReadingItem(previewItem);
+                }}
+                className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                disabled={!(isBook(previewItem) ? previewItem.firebaseStoragePath : previewItem.pdfUrl)}
+              >
+                {(isBook(previewItem) ? previewItem.firebaseStoragePath : previewItem.pdfUrl) ? '📖 Open & Read' : '⚠️ No Digital Copy'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
