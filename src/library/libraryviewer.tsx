@@ -11,7 +11,6 @@ import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 import pdfjsWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { bookService, type Book as FirebaseBook } from '../firebase/book.service';
 import { thesisService, type Thesis as FirebaseThesis } from '../firebase/thesis.service';
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
 
@@ -512,59 +511,6 @@ const renderPDFPages = async (pageNum: number) => {
     }
   }
 
-// In your PDF rendering JSX:
-<div className="flex-1 overflow-auto bg-gray-100">
-  <TransformWrapper
-    initialScale={1}
-    minScale={0.5}
-    maxScale={4}
-    centerOnInit
-    wheel={{ step: 0.1 }}
-    pinch={{ step: 5 }}
-    doubleClick={{ disabled: false, step: 0.7 }}
-  >
-    {({ zoomIn, zoomOut, resetTransform }) => (
-      <>
-        {/* Zoom Controls */}
-        <div className="fixed bottom-20 right-4 flex flex-col gap-2 z-10">
-          <button
-            onClick={() => zoomIn()}
-            className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center"
-          >
-            <ZoomIn size={20} />
-          </button>
-          <button
-            onClick={() => zoomOut()}
-            className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center"
-          >
-            <ZoomOut size={20} />
-          </button>
-          <button
-            onClick={() => resetTransform()}
-            className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-xs"
-          >
-            Reset
-          </button>
-        </div>
-
-        <TransformComponent>
-          <div className={`flex gap-4 justify-center items-start p-4`}>
-            <canvas 
-              ref={canvasRef} 
-              className="border shadow-lg"
-            />
-            {pageMode === 'dual' && (
-              <canvas 
-                ref={canvas2Ref} 
-                className="border shadow-lg"
-              />
-            )}
-          </div>
-        </TransformComponent>
-      </>
-    )}
-  </TransformWrapper>
-</div>
   setCurrentPage(validPageNum);
 };
 
@@ -580,15 +526,27 @@ const renderPDFPage = async (
 
   try {
     const page = await pdfDocRef.current.getPage(pageNum);
-    const viewport = page.getViewport({ scale });
+    
+    // Use device pixel ratio for sharper rendering
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const viewport = page.getViewport({ scale: scale * devicePixelRatio });
 
     const context = canvas.getContext('2d');
     if (!context) return;
 
+    // Set canvas size with device pixel ratio
     canvas.width = viewport.width;
     canvas.height = viewport.height;
+    
+    // Scale CSS size back down
+    canvas.style.width = `${viewport.width / devicePixelRatio}px`;
+    canvas.style.height = `${viewport.height / devicePixelRatio}px`;
 
-    await page.render({ canvasContext: context, viewport }).promise;
+    await page.render({ 
+      canvasContext: context, 
+      viewport,
+      intent: 'display' // Better rendering quality
+    }).promise;
   } catch (error) {
     console.error(`Error rendering page ${pageNum}:`, error);
   }
@@ -629,13 +587,13 @@ const handleNextPage = () => {
 // ---- Zoom handlers (simplified)
 const handleZoomIn = () => {
   if (fileKind === 'pdf') {
-    setScale(prev => Math.min(prev + 0.25, 3));
+    setScale(prev => Math.min(prev + 0.1, 3));
   }
 };
 
 const handleZoomOut = () => {
   if (fileKind === 'pdf') {
-    setScale(prev => Math.max(prev - 0.25, 0.5));
+    setScale(prev => Math.max(prev - 0.1, 0.5));
   }
 };
 

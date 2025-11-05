@@ -155,7 +155,7 @@ const BookManagement: React.FC = () => {
     useState<CatalogueCategory | "all">("all");
 
   // Pagination
-  const [pageSize] = useState<20 | 50 | 100>(20);
+const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState<BookFilterOptions>({
@@ -631,6 +631,102 @@ const BookManagement: React.FC = () => {
               ))}
             </tbody>
           </table>
+          {/* Pagination Controls */}
+{/* Modern Styled Pagination Controls */}
+<div className="mb-4 flex flex-col sm:flex-row items-center justify-between bg-white p-4 rounded-lg border gap-4">
+  {/* Left side - Info & Items per page */}
+  <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+    <span className="text-sm text-gray-600">
+      Showing {startIdx + 1}-{endIdx} of {totalItems} books
+    </span>
+    
+    <div className="flex items-center gap-2">
+      <label className="text-sm text-gray-600">Items per page:</label>
+      <select
+        value={pageSize}
+        onChange={(e) => {
+          setPageSize(Number(e.target.value));
+          setCurrentPage(1);
+        }}
+        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+        <option value={50}>50</option>
+        <option value={100}>100</option>
+      </select>
+    </div>
+  </div>
+
+  {/* Right side - Pagination buttons with page numbers */}
+  <div className="flex items-center gap-1">
+    {/* First button */}
+    <button
+      onClick={() => setCurrentPage(1)}
+      disabled={clampedPage === 1}
+      className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      First
+    </button>
+
+    {/* Previous button */}
+    <button
+      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+      disabled={clampedPage === 1}
+      className="px-2 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      <span className="text-lg">‹</span>
+    </button>
+
+    {/* Page numbers */}
+    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+      let pageNum;
+      
+      // Calculate which pages to show
+      if (totalPages <= 5) {
+        pageNum = i + 1;
+      } else if (clampedPage <= 3) {
+        pageNum = i + 1;
+      } else if (clampedPage >= totalPages - 2) {
+        pageNum = totalPages - 4 + i;
+      } else {
+        pageNum = clampedPage - 2 + i;
+      }
+
+      return (
+        <button
+          key={pageNum}
+          onClick={() => setCurrentPage(pageNum)}
+          className={`min-w-[40px] px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+            clampedPage === pageNum
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'text-gray-700 border border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          {pageNum}
+        </button>
+      );
+    })}
+
+    {/* Next button */}
+    <button
+      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+      disabled={clampedPage === totalPages}
+      className="px-2 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      <span className="text-lg">›</span>
+    </button>
+
+    {/* Last button */}
+    <button
+      onClick={() => setCurrentPage(totalPages)}
+      disabled={clampedPage === totalPages}
+      className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      Last
+    </button>
+  </div>
+</div>
         </div>
       </div>
 
