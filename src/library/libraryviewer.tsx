@@ -525,7 +525,7 @@ const renderPDFPage = async (
     
     // Use device pixel ratio for sharper rendering
     // Use device pixel ratio for high-DPI displays
-const devicePixelRatio = window.devicePixelRatio || 1;
+const devicePixelRatio = window.devicePixelRatio || 2;
 const viewport = page.getViewport({ scale: scale * devicePixelRatio });
 
 // Set canvas internal resolution (high-res)
