@@ -324,17 +324,26 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 const renderingLockRef = useRef<Promise<void> | null>(null);
+const [canvasReady, setCanvasReady] = useState(false); // ADD THIS LINE
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [scale, setScale] = useState(1.1);
+  const [scale, setScale] = useState(0.8);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState('');
   
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvas2Ref = useRef<HTMLCanvasElement>(null);
+const canvasRef = useRef<HTMLCanvasElement>(null);
+
+// Callback ref to track when canvas is mounted
+const setCanvasRef = (element: HTMLCanvasElement | null) => {
+  canvasRef.current = element;
+  if (element) {
+    console.log('Canvas mounted and ready');
+    setCanvasReady(true);
+  }
+};  const canvas2Ref = useRef<HTMLCanvasElement>(null);
   const epubContainerRef = useRef<HTMLDivElement>(null);
   const pdfDocRef = useRef<any>(null);
   const epubBookRef = useRef<any>(null);
@@ -363,6 +372,13 @@ const renderingLockRef = useRef<Promise<void> | null>(null);
       localStorage.setItem(storageKey, JSON.stringify(bookmarks));
     }
   }, [bookmarks, storageKey]);
+  // Render first page when both PDF and canvas are ready
+  useEffect(() => {
+  if (pdfDocRef.current && canvasReady && canvasRef.current && currentPage === 1 && totalPages > 0) {
+    console.log('Both PDF and canvas ready, rendering page 1');
+    renderPDFPages(1);
+  }
+}, [pdfDocRef.current, canvasReady, totalPages]);
 
   useEffect(() => {
     if (!hasFile) {
@@ -465,18 +481,16 @@ const getNumPages = () => pdfDocRef.current?.numPages ?? totalPages;
 // ============================================
 
 const loadPDF = async (url: string) => {
-  const loadingTask = getDocument({ url, withCredentials: false, cMapPacked: true });
+  const loadingTask = getDocument({ url, withCredentials: false });
   const pdf = await loadingTask.promise;
   pdfDocRef.current = pdf;
 
   const numPages = pdf.numPages;
-setTotalPages(numPages);
-setCurrentPage(1);
-
-// Ensure the canvas is in the DOM & laid out before first paint
-await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
-await renderPDFPages(1);
-
+  setTotalPages(numPages);
+  setCurrentPage(1);
+  
+  // Don't render here - let useEffect handle it when canvas is ready
+  console.log('PDF loaded, waiting for canvas');
 };
 
 // ---- render the spread (single/dual)
@@ -718,14 +732,14 @@ const togglePageMode = async () => {
       )}
 
       <div className="flex-1 overflow-auto bg-gray-100">
-        {loading && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600">Loading document...</p>
-            </div>
-          </div>
-        )}
+       {loading && (
+  <div className="flex items-center justify-center h-full absolute inset-0 bg-white/80 z-10">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading document...</p>
+    </div>
+  </div>
+)}
         {error && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
@@ -740,12 +754,12 @@ const togglePageMode = async () => {
         )}
         {!loading && !error && hasFile && (
             <div className="w-full px-4 py-8">
-              {fileKind === 'pdf'  ? (
-                <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : 'flex-col items-center'}`}>
-                  <canvas ref={canvasRef} className="shadow-2xl bg-white max-w-full h-auto" />
-                  {pageMode === 'dual' && currentPage < totalPages && (
-                    <canvas ref={canvas2Ref} className="shadow-2xl bg-white max-w-full h-auto" />
-                  )}
+               {fileKind === 'pdf' ? (
+      <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : 'flex-col items-center'}`}>
+        <canvas ref={setCanvasRef} className="shadow-2xl bg-white max-w-full h-auto" />
+        {pageMode === 'dual' && currentPage < totalPages && (
+          <canvas ref={canvas2Ref} className="shadow-2xl bg-white max-w-full h-auto" />
+        )}
             </div>
             ) : fileKind === 'epub'  ? (
             <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: pageMode === 'dual' ? '1400px' : '900px' }}>
@@ -783,6 +797,7 @@ const togglePageMode = async () => {
           </button>
         </div>
       )}
+      
     </div>
   );
 };
