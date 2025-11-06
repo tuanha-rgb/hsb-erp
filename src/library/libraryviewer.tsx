@@ -4,6 +4,7 @@ import {
   Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
 } from 'lucide-react';
+
 import { catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
 import { getFileUrl } from './googledrive';
 import ePub from 'epubjs';
@@ -523,19 +524,22 @@ const renderPDFPage = async (
     const page = await pdfDocRef.current.getPage(pageNum);
     
     // Use device pixel ratio for sharper rendering
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const viewport = page.getViewport({ scale: scale * devicePixelRatio });
+    // Use device pixel ratio for high-DPI displays
+const devicePixelRatio = window.devicePixelRatio || 1;
+const viewport = page.getViewport({ scale: scale * devicePixelRatio });
+
+// Set canvas internal resolution (high-res)
+canvas.width = viewport.width;
+canvas.height = viewport.height;
+
+// Set canvas display size (CSS size)
+canvas.style.width = `${viewport.width / devicePixelRatio}px`;
+canvas.style.height = `${viewport.height / devicePixelRatio}px`;
 
     const context = canvas.getContext('2d');
     if (!context) return;
 
-    // Set canvas size with device pixel ratio
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    
-    // Scale CSS size back down
-    canvas.style.width = `${viewport.width / devicePixelRatio}px`;
-    canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+  
 
     await page.render({ 
       canvasContext: context, 

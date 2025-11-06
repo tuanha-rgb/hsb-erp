@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import { setLogLevel } from 'firebase/app';
 
 // TODO: Replace with your Firebase project config
 // Get this from Firebase Console > Project Settings > General
@@ -17,6 +18,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+if (import.meta.env.VITE_FIREBASE_LOGGING === 'false') {
+  // Disable Firebase logging
+  setLogLevel('silent');
+}
 
 // Initialize services
 export const db = getFirestore(app);
