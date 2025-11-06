@@ -281,7 +281,7 @@ const LibraryDashboard: React.FC = () => {
       const recentBooks = books
         .filter(b => b.createdAt)
         .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
-        .slice(0, 2);
+        .slice(0, 5);
 
       recentBooks.forEach(book => {
         const timeDiff = Date.now() - (book.createdAt?.getTime() || 0);
@@ -448,9 +448,9 @@ const LibraryDashboard: React.FC = () => {
   const growth = calculateGrowth();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="px-4 py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Library Dashboard</h1>
           <p className="text-sm text-gray-600 mt-1">Real-time collection management & analytics</p>

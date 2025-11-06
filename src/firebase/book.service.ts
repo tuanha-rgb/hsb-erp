@@ -47,6 +47,8 @@ export interface Book {
   views?: number; // Track online views
   createdAt?: Date;
   updatedAt?: Date;
+            isInternational?: boolean;
+
 }
 
 export interface PdfPageData {

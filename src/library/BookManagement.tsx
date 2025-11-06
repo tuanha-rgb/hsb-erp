@@ -135,7 +135,8 @@ interface BookFilterOptions {
   status: "all" | "available" | "low_stock";
   yearFrom: string;
   yearTo: string;
-  language: string;
+  locale: "all" | "international" | "local";
+  sortBy: "latest" | "oldest" | "year_asc" | "year_desc";
 }
 
 /* ---------- Component ---------- */
@@ -155,7 +156,7 @@ const BookManagement: React.FC = () => {
     useState<CatalogueCategory | "all">("all");
 
   // Pagination
-const [pageSize, setPageSize] = useState<number>(10);
+const [pageSize, setPageSize] = useState<number>(5);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState<BookFilterOptions>({
@@ -165,7 +166,8 @@ const [pageSize, setPageSize] = useState<number>(10);
     status: "all",
     yearFrom: "",
     yearTo: "",
-    language: "all",
+    locale: "all",
+    sortBy: "latest",
   });
 
   // Sign in (anonymous) first, then load data
@@ -307,6 +309,7 @@ const [pageSize, setPageSize] = useState<number>(10);
           description: bookData.description,
           bookType: bookData.bookType || "Printed",
           featured: bookData.featured || false,
+          isInternational: bookData.isInternational ?? true,
         }
       );
 
@@ -356,10 +359,15 @@ const [pageSize, setPageSize] = useState<number>(10);
     const totalPhysicalCopies = books.reduce((s, b) => s + b.totalCopies, 0);
     const availableCopies = books.reduce((s, b) => s + b.availableCopies, 0);
     const borrowedCopies = books.reduce((s, b) => s + b.borrowedCopies, 0);
-    const utilizationRate =
-      totalPhysicalCopies === 0
-        ? "0.0"
-        : ((borrowedCopies / totalPhysicalCopies) * 100).toFixed(1);
+    
+    // Calculate books added this week
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const booksAddedThisWeek = books.filter(b => {
+      const addedDate = b.addedDate ? new Date(b.addedDate) : null;
+      return addedDate && addedDate >= oneWeekAgo;
+    }).length;
+    
     const uniquePublishers = new Set(
       books.map((b) => b.publisher).filter(Boolean)
     ).size;
@@ -371,7 +379,7 @@ const [pageSize, setPageSize] = useState<number>(10);
       totalPhysicalCopies,
       availableCopies,
       borrowedCopies,
-      utilizationRate,
+      booksAddedThisWeek,
       uniquePublishers,
       avgRating: avgRating.toFixed(1),
     };
@@ -379,7 +387,7 @@ const [pageSize, setPageSize] = useState<number>(10);
 
   /* ---------- Filtering ---------- */
   const filteredBooks = useMemo(() => {
-    return books.filter((book) => {
+    let filtered = books.filter((book) => {
       const matchesSearch =
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.authors.some((a) =>
@@ -395,8 +403,10 @@ const [pageSize, setPageSize] = useState<number>(10);
         filters.catalogue === "all" || book.catalogue === filters.catalogue;
       const matchesPublisher =
         filters.publisher === "all" || book.publisher === filters.publisher;
-      const matchesLanguage =
-        filters.language === "all" || book.language === filters.language;
+      const matchesLocale =
+        filters.locale === "all" || 
+        (filters.locale === "international" && (book.isInternational ?? true)) ||
+        (filters.locale === "local" && !(book.isInternational ?? true));
 
       const matchesStatus =
         filters.status === "all" ||
@@ -422,13 +432,31 @@ const [pageSize, setPageSize] = useState<number>(10);
         matchesType &&
         matchesCatalogue &&
         matchesPublisher &&
-        matchesLanguage &&
+        matchesLocale &&
         matchesStatus &&
         matchesYearFrom &&
         matchesYearTo &&
         matchesSelectedCatalogue
       );
     });
+
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      switch (filters.sortBy) {
+        case "latest":
+          return (b.addedDate || "").localeCompare(a.addedDate || "");
+        case "oldest":
+          return (a.addedDate || "").localeCompare(b.addedDate || "");
+        case "year_asc":
+          return (a.publishedYear || 0) - (b.publishedYear || 0);
+        case "year_desc":
+          return (b.publishedYear || 0) - (a.publishedYear || 0);
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
   }, [books, searchTerm, filters, selectedCatalogue]);
 
   /* ---------- Pagination ---------- */
@@ -468,13 +496,13 @@ const [pageSize, setPageSize] = useState<number>(10);
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Library Management
+          Book Management
         </h1>
-        <p className="text-gray-600">Manage your institution&apos;s books</p>
+        <p className="text-gray-600">Textbook and Reference books for HSB students and staff</p>
       </div>
 
       {/* Statistics */}
@@ -482,7 +510,7 @@ const [pageSize, setPageSize] = useState<number>(10);
         <StatCard icon={<Book className="w-5 h-5 text-blue-600" />} label="Total Books" value={statistics.total} />
         <StatCard icon={<Copy className="w-5 h-5 text-green-600" />} label="Total Copies" value={statistics.totalPhysicalCopies} />
         <StatCard icon={<CheckCircle className="w-5 h-5 text-emerald-600" />} label="Available" value={statistics.availableCopies} />
-        <StatCard icon={<TrendingUp className="w-5 h-5 text-orange-600" />} label="Utilization" value={`${statistics.utilizationRate}%`} />
+        <StatCard icon={<TrendingUp className="w-5 h-5 text-green-600" />} label="Books This Week" value={statistics.booksAddedThisWeek} />
       </div>
 
       {/* Controls */}
@@ -515,6 +543,143 @@ const [pageSize, setPageSize] = useState<number>(10);
             Add Book
           </button>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Sort By */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="latest">Latest Added</option>
+                  <option value="oldest">Oldest Added</option>
+                  <option value="year_desc">Year (Newest First)</option>
+                  <option value="year_asc">Year (Oldest First)</option>
+                </select>
+              </div>
+
+              {/* Publisher */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
+                <select
+                  value={filters.publisher}
+                  onChange={(e) => setFilters({ ...filters, publisher: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Publishers</option>
+                  {Array.from(new Set(books.map(b => b.publisher).filter(Boolean))).sort().map(pub => (
+                    <option key={pub} value={pub}>{pub}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={filters.catalogue}
+                  onChange={(e) => setFilters({ ...filters, catalogue: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Categories</option>
+                  {Object.keys(CATEGORY_ABBREV).sort().map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Book Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select
+                  value={filters.bookType}
+                  onChange={(e) => setFilters({ ...filters, bookType: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Types</option>
+                  <option value="Printed">Printed</option>
+                  <option value="E-Book">E-Book</option>
+                </select>
+              </div>
+
+              {/* Year From */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Year From</label>
+                <input
+                  type="number"
+                  value={filters.yearFrom}
+                  onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
+                  placeholder="1900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Year To */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Year To</label>
+                <input
+                  type="number"
+                  value={filters.yearTo}
+                  onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
+                  placeholder="2025"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => setFilters({ ...filters, status: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All</option>
+                  <option value="available">Available</option>
+                  <option value="low_stock">Low Stock</option>
+                </select>
+              </div>
+
+              {/* Language */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Locale</label>
+                <select
+                  value={filters.locale}
+                  onChange={(e) => setFilters({ ...filters, locale: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All</option>
+                  <option value="international">International</option>
+                  <option value="local">Local</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Reset Button */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => setFilters({
+                  bookType: "all",
+                  catalogue: "all",
+                  publisher: "all",
+                  status: "all",
+                  yearFrom: "",
+                  yearTo: "",
+                  locale: "all",
+                  sortBy: "latest",
+                })}
+                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Books Table */}
@@ -650,6 +815,7 @@ const [pageSize, setPageSize] = useState<number>(10);
         }}
         className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
+        <option value={5}>5</option>
         <option value={10}>10</option>
         <option value={20}>20</option>
         <option value={50}>50</option>
@@ -774,7 +940,7 @@ const Th: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({ icon, label, value }) => (
-  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+  <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
     <div className="flex items-center gap-3 mb-2">
       {icon}
       <span className="text-sm text-gray-600">{label}</span>

@@ -323,7 +323,7 @@ const isThesis = (item: ReadingItem): item is LibraryThesis => 'student' in item
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const renderingRef = useRef<boolean>(false); // Add this line
+const renderingLockRef = useRef<Promise<void> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -465,93 +465,81 @@ const getNumPages = () => pdfDocRef.current?.numPages ?? totalPages;
 // ============================================
 
 const loadPDF = async (url: string) => {
-  const loadingTask = getDocument({ url, withCredentials: false });
+  const loadingTask = getDocument({ url, withCredentials: false, cMapPacked: true });
   const pdf = await loadingTask.promise;
   pdfDocRef.current = pdf;
 
   const numPages = pdf.numPages;
-  setTotalPages(numPages);
-  setCurrentPage(0);
+setTotalPages(numPages);
+setCurrentPage(1);
 
-  // Small delay to ensure canvas refs are mounted
-  await new Promise(resolve => setTimeout(resolve, 100));
-  await renderPDFPages(0);
+// Ensure the canvas is in the DOM & laid out before first paint
+await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+await renderPDFPages(1);
+
 };
 
 // ---- render the spread (single/dual)
 const renderPDFPages = async (pageNum: number) => {
   if (!pdfDocRef.current) return;
 
-  const numPages = pdfDocRef.current.numPages;
-  
-  // Validate page number
-  const validPageNum = Math.max(1, Math.min(pageNum, numPages));
+  // Wait for any ongoing render to finish
+  if (renderingLockRef.current) await renderingLockRef.current;
 
-  // Clear first canvas before rendering
-  if (canvasRef.current) {
-    const ctx = canvasRef.current.getContext('2d');
-    if (ctx) {
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    }
-    await renderPDFPage(validPageNum, canvasRef.current);
-  }
+  const task = (async () => {
+    const numPages = pdfDocRef.current.numPages;
+    const validPageNum = Math.max(1, Math.min(pageNum, numPages));
 
-  // Handle second canvas for dual mode
-  if (pageMode === 'dual' && canvas2Ref.current) {
-    const ctx = canvas2Ref.current.getContext('2d');
-    if (ctx) {
-      ctx.clearRect(0, 0, canvas2Ref.current.width, canvas2Ref.current.height);
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      await renderPDFPage(validPageNum, canvasRef.current!);
     }
-    
-    if (validPageNum < numPages) {
-      await renderPDFPage(validPageNum + 1, canvas2Ref.current);
-    }
-  }
 
-  setCurrentPage(validPageNum);
+    if (pageMode === 'dual' && canvas2Ref.current && validPageNum < numPages) {
+      const ctx2 = canvas2Ref.current.getContext('2d');
+      if (ctx2) ctx2.clearRect(0, 0, canvas2Ref.current.width, canvas2Ref.current.height);
+      await renderPDFPage(validPageNum + 1, canvas2Ref.current!);
+    }
+
+    setCurrentPage(validPageNum);
+  })();
+
+  renderingLockRef.current = task;
+  await task;
+  renderingLockRef.current = null;
 };
+
 
 // ---- render a single page
 const renderPDFPage = async (
   pageNum: number,
-  canvas: HTMLCanvasElement,
-  numPages?: number
+  canvas: HTMLCanvasElement
 ) => {
   if (!pdfDocRef.current || !canvas) return;
   
-  // Prevent concurrent renders on same canvas
-  if (renderingRef.current) {
-    return;
-  }
+  const numPages = pdfDocRef.current.numPages;
+  if (pageNum < 1 || pageNum > numPages) return;
+
+  const page = await pdfDocRef.current.getPage(pageNum);
   
-  renderingRef.current = true;
+  // Use device pixel ratio for high-DPI displays
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  const viewport = page.getViewport({ scale: scale * devicePixelRatio });
+
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  // Set canvas internal resolution (high-res)
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
   
-  try {
-    const pages = numPages ?? getNumPages();
-    if (pageNum < 1 || pageNum > pages) return;
+  // Set canvas display size (CSS size)
+  canvas.style.width = `${viewport.width / devicePixelRatio}px`;
+  canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+  canvas.style.maxWidth = '100%';
 
-    const page = await pdfDocRef.current.getPage(pageNum);
-    
-    // Use device pixel ratio for high-DPI displays
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const viewport = page.getViewport({ scale: scale * devicePixelRatio });
-
-    const context = canvas.getContext('2d');
-    if (!context) return;
-
-    // Set canvas internal resolution (high-res)
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    
-    // Set canvas display size (CSS size)
-    canvas.style.width = `${viewport.width / devicePixelRatio}px`;
-    canvas.style.height = `${viewport.height / devicePixelRatio}px`;
-    canvas.style.maxWidth = '100%';
-
-    await page.render({ canvasContext: context, viewport }).promise;
-  } finally {
-    renderingRef.current = false;
-  }
+  await page.render({ canvasContext: context, viewport }).promise;
 };
 // ---- Add useEffect for scale/pageMode changes
 useEffect(() => {

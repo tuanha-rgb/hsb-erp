@@ -94,6 +94,8 @@ interface ThesisRecord {
 interface ThesisFilterOptions {
   level: ThesisLevel | "all";
   status: ThesisStatus | "all";
+  program: string;
+  year: string;
   department: string;
   yearFrom: string;
   yearTo: string;
@@ -640,6 +642,8 @@ const [pageSize, setPageSize] = useState<number>(10);
   const [filters, setFilters] = useState<ThesisFilterOptions>({
     level: "all",
     status: "all",
+    program: "all",
+    year: "all",
     department: "all",
     yearFrom: "",
     yearTo: "",
@@ -722,9 +726,9 @@ const [pageSize, setPageSize] = useState<number>(10);
     };
   }, [theses]);
 
-  // Filtering
+  // Filtering with sorting: PhD/Dissertations first, then Master, then Bachelor
   const filteredTheses = useMemo(() => {
-    return theses.filter((thesis) => {
+    const filtered = theses.filter((thesis) => {
       const matchesSearch =
         thesis.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         thesis.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -733,13 +737,25 @@ const [pageSize, setPageSize] = useState<number>(10);
 
       const matchesLevel = filters.level === "all" || thesis.level === filters.level;
       const matchesStatus = filters.status === "all" || thesis.status === filters.status;
-      const matchesProgram = filters.department === "all" || thesis.program === filters.department;
+      const matchesProgram = filters.program === "all" || thesis.program === filters.program;
+      const matchesYear = filters.year === "all" || thesis.year.toString() === filters.year;
+      const matchesDepartment = filters.department === "all" || thesis.program === filters.department;
       
-      const matchesYear = 
+      const matchesYearRange = 
         (!filters.yearFrom || thesis.year >= parseInt(filters.yearFrom)) &&
         (!filters.yearTo || thesis.year <= parseInt(filters.yearTo));
 
-      return matchesSearch && matchesLevel && matchesStatus && matchesProgram && matchesYear;
+      return matchesSearch && matchesLevel && matchesStatus && matchesProgram && matchesYear && matchesDepartment && matchesYearRange;
+    });
+
+    // Sort: PhD first, then Master, then Bachelor (descending by year within each level)
+    return filtered.sort((a, b) => {
+      const levelOrder = { phd: 0, master: 1, bachelor: 2 };
+      const levelDiff = levelOrder[a.level] - levelOrder[b.level];
+      if (levelDiff !== 0) return levelDiff;
+      
+      // Within same level, sort by year descending (newest first)
+      return b.year - a.year;
     });
   }, [theses, searchTerm, filters]);
 
@@ -767,7 +783,7 @@ const [pageSize, setPageSize] = useState<number>(10);
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -777,7 +793,7 @@ const [pageSize, setPageSize] = useState<number>(10);
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-3">
         <StatCard icon={<FileText className="w-5 h-5 text-blue-600" />} label="Total Theses" value={statistics.total} />
         <StatCard icon={<GraduationCap className="w-5 h-5 text-cyan-600" />} label="Bachelor" value={statistics.bachelor} />
         <StatCard icon={<GraduationCap className="w-5 h-5 text-indigo-600" />} label="Master" value={statistics.master} />
@@ -786,7 +802,7 @@ const [pageSize, setPageSize] = useState<number>(10);
       </div>
 
       {/* Controls */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-3">
         <div className="flex flex-wrap gap-3">
           <div className="flex-1 min-w-[200px]">
             <div className="relative">
@@ -816,6 +832,115 @@ const [pageSize, setPageSize] = useState<number>(10);
           </button>
         </div>
       </div>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-3">
+          <h3 className="text-lg font-semibold mb-4">Filter Theses</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Level Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+              <select
+                value={filters.level}
+                onChange={(e) => setFilters({ ...filters, level: e.target.value as ThesisLevel | "all" })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Levels</option>
+                <option value="phd">PhD/Dissertation</option>
+                <option value="master">Master Thesis</option>
+                <option value="bachelor">Bachelor Thesis</option>
+              </select>
+            </div>
+
+            {/* Program Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Program</label>
+              <select
+                value={filters.program}
+                onChange={(e) => setFilters({ ...filters, program: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Programs</option>
+                <optgroup label="Bachelor Programs">
+                  {programs.bachelor.map(p => (
+                    <option key={p.code} value={`${p.code} - ${p.name}`}>
+                      {p.code} - {p.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Master Programs">
+                  {programs.master.map(p => (
+                    <option key={p.code} value={`${p.code} - ${p.name}`}>
+                      {p.code} - {p.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="PhD Programs">
+                  {programs.phd.map(p => (
+                    <option key={p.code} value={`${p.code} - ${p.name}`}>
+                      {p.code} - {p.name}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            {/* Year Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
+              <select
+                value={filters.year}
+                onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Years</option>
+                {Array.from(
+                  new Set(theses.map(t => t.year))
+                ).sort((a, b) => b - a).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value as ThesisStatus | "all" })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under Review</option>
+                <option value="approved">Approved</option>
+                <option value="published">Published</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+          
+          {/* Clear Filters Button */}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setFilters({
+                level: "all",
+                status: "all",
+                program: "all",
+                year: "all",
+                department: "all",
+                yearFrom: "",
+                yearTo: "",
+              })}
+              className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Thesis Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
