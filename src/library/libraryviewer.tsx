@@ -513,42 +513,32 @@ const renderPDFPages = async (pageNum: number) => {
 // ---- render a single page
 const renderPDFPage = async (
   pageNum: number,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
+  numPages?: number
 ) => {
   if (!pdfDocRef.current || !canvas) return;
 
-  const numPages = pdfDocRef.current.numPages;
-  if (pageNum < 1 || pageNum > numPages) return;
+  const pages = numPages ?? getNumPages();
+  if (pageNum < 1 || pageNum > pages) return;
 
-  try {
-    const page = await pdfDocRef.current.getPage(pageNum);
-    
-    // Use device pixel ratio for sharper rendering
-    // Use device pixel ratio for high-DPI displays
-const devicePixelRatio = window.devicePixelRatio || 2;
-const viewport = page.getViewport({ scale: scale * devicePixelRatio });
-
-// Set canvas internal resolution (high-res)
-canvas.width = viewport.width;
-canvas.height = viewport.height;
-
-// Set canvas display size (CSS size)
-canvas.style.width = `${viewport.width / devicePixelRatio}px`;
-canvas.style.height = `${viewport.height / devicePixelRatio}px`;
-
-    const context = canvas.getContext('2d');
-    if (!context) return;
-
+  const page = await pdfDocRef.current.getPage(pageNum);
   
+  // Use device pixel ratio for high-DPI displays
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  const viewport = page.getViewport({ scale: scale * devicePixelRatio });
 
-    await page.render({ 
-      canvasContext: context, 
-      viewport,
-      intent: 'display' // Better rendering quality
-    }).promise;
-  } catch (error) {
-    console.error(`Error rendering page ${pageNum}:`, error);
-  }
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  // Set canvas internal resolution (high-res)
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  
+  // Set canvas display size (CSS size)
+  canvas.style.width = `${viewport.width / devicePixelRatio}px`;
+  canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+
+  await page.render({ canvasContext: context, viewport }).promise;
 };
 
 // ---- Add useEffect for scale/pageMode changes
