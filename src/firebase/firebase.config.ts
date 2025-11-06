@@ -23,4 +23,3 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
-console.log('Firebase options:', app.options); // projectId should be the one you expect

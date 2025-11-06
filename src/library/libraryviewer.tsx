@@ -397,9 +397,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       if (isBook(item)) {
         if (item.firebaseStoragePath) {
           fileUrl = item.firebaseStoragePath;
-          console.log('Loading book PDF:', fileUrl);
         } else if (item.driveFileId) {
-          console.log('Fetching Google Drive URL');
           fileUrl = await getFileUrl(item.driveFileId);
         }
         fileType = item.fileType!;
@@ -409,14 +407,13 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
       if (isThesis(item) && item.pdfUrl) {
         fileUrl = item.pdfUrl;
         fileType = 'pdf';
-        console.log('Loading thesis PDF:', fileUrl);
       }
       
       if (!fileUrl) throw new Error('No file source available');
       
       if (fileType === 'pdf') await loadPDF(fileUrl);
       
-      console.log('Document loaded successfully');
+ ;
       
       // Track view in Firebase (increment views counter) - only once per item
       if (!viewTrackedRef.current) {
@@ -431,7 +428,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
             
             if (firebaseBook?.id) {
               await bookService.incrementViews(firebaseBook.id);
-              console.log('Book view tracked:', firebaseBook.id);
             }
           } else if (isThesis(item)) {
             // For theses, find by title and student name
@@ -442,7 +438,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
             
             if (firebaseThesis?.id) {
               await thesisService.incrementViews(firebaseThesis.id);
-              console.log('Thesis view tracked:', firebaseThesis.id);
             }
           }
         } catch (viewErr) {
@@ -1204,7 +1199,6 @@ const clearAllFilters = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 px-6">
                 {catalogues.map((cat) => (
                   <button key={cat} onClick={() => {
-                    console.log('🔍 Selected category:', cat);
                     setSelectedCategory(cat);
                   }}
                     className={`p-3 rounded-xl border-2 transition-all ${
