@@ -333,7 +333,17 @@ const [canvasReady, setCanvasReady] = useState(false); // ADD THIS LINE
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState('');
-  
+  // Add state for page jump input
+const [pageJumpInput, setPageJumpInput] = useState('');
+
+// Add function to handle page jump
+const handlePageJump = () => {
+  const pageNum = parseInt(pageJumpInput);
+  if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+    renderPDFPages(pageNum);
+    setPageJumpInput('');
+  }
+};
 const canvasRef = useRef<HTMLCanvasElement>(null);
 
 // Callback ref to track when canvas is mounted
@@ -633,54 +643,79 @@ const togglePageMode = async () => {
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      <div className="border-b border-gray-200 p-3 flex items-center justify-between bg-white">
-        <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-          <ArrowLeft size={20} />
-          <span>Back to Library</span>
+  <div className="border-b border-gray-200 p-3 flex items-center bg-white">
+    {/* Left side - Back button */}
+    <div className="flex-1">
+      <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+        <ArrowLeft size={20} />
+        <span>Back to Library</span>
+      </button>
+    </div>
+    
+    {/* Center - Book Title */}
+    <div className="flex-1 flex justify-center">
+      <p className="text-lg font-semibold text-gray-900 truncate max-w-md text-center">
+        {item.title}
+      </p>
+    </div>
+    
+    {/* Right side - Controls */}
+    <div className="flex-1 flex items-center justify-end gap-3">
+      {fileKind === 'pdf' && hasFile && (
+        <button onClick={togglePageMode} className={`p-2 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}>
+          {pageMode === 'single' ? <Columns size={18} /> : <Square size={18} />}
         </button>
-        <div className="flex items-center gap-3">
-          {hasFile && totalPages > 0 && (
-            <span className="text-sm text-gray-500">
-              Page {currentPage}{pageMode === 'dual' && currentPage < totalPages && `-${currentPage + 1}`}{' / '}{totalPages}
-            </span>
-          )}
-          {fileKind === 'pdf' && hasFile && (
-            <button onClick={togglePageMode} className={`p-2 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}>
-              {pageMode === 'single' ? <Columns size={18} /> : <Square size={18} />}
-            </button>
-          )}
-          <button onClick={() => setShowBookmarks(!showBookmarks)} className={`p-2 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}>
-            <Menu size={18} />
-            {bookmarks.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {bookmarks.length}
-              </span>
-            )}
+      )}
+      <button onClick={() => setShowBookmarks(!showBookmarks)} className={`p-2 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}>
+        <Menu size={18} />
+        {bookmarks.length > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+            {bookmarks.length}
+          </span>
+        )}
+      </button>
+      <button
+        onClick={() => {
+          if (isBookmarked(currentPage)) {
+            const index = bookmarks.findIndex(b => b.page === currentPage);
+            removeBookmark(index);
+          } else addBookmark();
+        }}
+        className={`p-2 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
+      >
+        <BookmarkCheck size={18} />
+      </button>
+      {fileKind === 'pdf' && hasFile && (
+        <div className="flex items-center gap-1 border-l pl-3 ml-3">
+          <button onClick={handleZoomOut} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
+            <ZoomOut size={18} />
           </button>
-          <button
-            onClick={() => {
-              if (isBookmarked(currentPage)) {
-                const index = bookmarks.findIndex(b => b.page === currentPage);
-                removeBookmark(index);
-              } else addBookmark();
-            }}
-            className={`p-2 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
-          >
-            <BookmarkCheck size={18} />
+<input
+  type="number"
+  min="50"
+  max="300"
+  step="10"
+  value={Math.round(scale * 100)}
+  onChange={(e) => {
+    const newPercent = parseInt(e.target.value);
+    if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
+      setScale(newPercent / 100);
+    }
+  }}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  }}
+  className="w-16 px-2 py-1 text-sm text-gray-600 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+<span className="text-sm text-gray-600">%</span>          <button onClick={handleZoomIn} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
+            <ZoomIn size={18} />
           </button>
-          {fileKind === 'pdf' && hasFile && (
-            <div className="flex items-center gap-1 border-l pl-3 ml-3">
-              <button onClick={handleZoomOut} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
-                <ZoomOut size={18} />
-              </button>
-              <span className="text-sm text-gray-600 min-w-[60px] text-center">{Math.round(scale * 100)}%</span>
-              <button onClick={handleZoomIn} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
-                <ZoomIn size={18} />
-              </button>
-            </div>
-          )}
         </div>
-      </div>
+      )}
+    </div>
+  </div>
 
       {showBookmarks && (
         <div className="absolute right-0 top-16 bottom-0 w-80 bg-white border-l border-gray-200 shadow-lg z-10 overflow-hidden flex flex-col">
@@ -731,15 +766,15 @@ const togglePageMode = async () => {
         </div>
       )}
 
-      <div className="flex-1 overflow-auto bg-gray-100">
+    <div className="flex-1 overflow-auto bg-gray-100 pb-20">
        {loading && (
-  <div className="flex items-center justify-center h-full absolute inset-0 bg-white/80 z-10">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading document...</p>
-    </div>
-  </div>
-)}
+          <div className="flex items-center justify-center h-full absolute inset-0 bg-white/80 z-10">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading document...</p>
+            </div>
+          </div>
+        )}
         {error && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
@@ -782,21 +817,50 @@ const togglePageMode = async () => {
         )}
       </div>
 
-      {hasFile && totalPages > 0 && !loading && !error && (
-        <div className="border-t border-gray-200 p-3 flex items-center justify-center gap-4 bg-white">
-          <button onClick={handlePrevPage} disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-            <ChevronLeft size={18} />Previous
-          </button>
-          <span className="text-sm text-gray-600">
-            {currentPage}{pageMode === 'dual' && currentPage < totalPages && `-${currentPage + 1}`}{' / '}{totalPages}
-          </span>
-          <button onClick={handleNextPage} disabled={currentPage >= totalPages}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-            Next<ChevronRight size={18} />
-          </button>
-        </div>
-      )}
+      {/* Page Navigation Bar */}
+        {!loading && !error && hasFile && fileKind === 'pdf' && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg">
+  <div className="max-w-2xl mx-auto flex items-center justify-center gap-6">
+              {/* Previous Button */}
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <ChevronLeft size={18} />
+                Previous
+              </button>
+
+              {/* Page Input & Display */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">Page</span>
+                <input
+                  type="number"
+                  min="1"
+                  max={totalPages}
+                  value={pageJumpInput || currentPage}
+                  onChange={(e) => setPageJumpInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handlePageJump();
+                  }}
+                  onBlur={handlePageJump}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-600">of {totalPages}</span>
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                Next
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
       
     </div>
   );
