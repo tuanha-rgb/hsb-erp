@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import {
   Search, Filter, Plus, Eye, CheckCircle, Star, TrendingUp, GraduationCap, FileText,
-  Copy, BookOpen, X, Upload, Download, Award, Edit, Loader
+  Copy, BookOpen, X, Upload, Download, Award, Edit, Loader, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
@@ -794,10 +794,10 @@ const [pageSize, setPageSize] = useState<number>(10);
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-3">
-        <StatCard icon={<FileText className="w-5 h-5 text-blue-600" />} label="Total Theses" value={statistics.total} />
-        <StatCard icon={<GraduationCap className="w-5 h-5 text-cyan-600" />} label="Bachelor" value={statistics.bachelor} />
-        <StatCard icon={<GraduationCap className="w-5 h-5 text-indigo-600" />} label="Master" value={statistics.master} />
-        <StatCard icon={<Award className="w-5 h-5 text-purple-600" />} label="PhD" value={statistics.phd} />
+        <StatCard icon={<BookOpen className="w-5 h-5 text-blue-600" />} label="Total" value={statistics.total} />
+        <StatCard icon={<GraduationCap className="w-5 h-5 text-blue-600" />} label="Bachelor" value={statistics.bachelor} />
+        <StatCard icon={<GraduationCap className="w-5 h-5 text-red-600" />} label="Master" value={statistics.master} />
+        <StatCard icon={<GraduationCap className="w-5 h-5 text-green-600" />} label="PhD" value={statistics.phd} />
         <StatCard icon={<CheckCircle className="w-5 h-5 text-green-600" />} label="Approved" value={statistics.approved} />
       </div>
 
@@ -1068,11 +1068,11 @@ const [pageSize, setPageSize] = useState<number>(10);
   {/* Left side - Info & Items per page */}
   <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
     <span className="text-sm text-gray-600">
-      Showing {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredTheses.length)} of {filteredTheses.length} theses
+      Showing {Math.min(currentPage * pageSize, filteredTheses.length)} of {filteredTheses.length} 
     </span>
     
     <div className="flex items-center gap-2">
-      <label className="text-sm text-gray-600">Items per page:</label>
+      <label className="text-sm text-gray-600">Items/page:</label>
       <select
         value={pageSize}
         onChange={(e) => {
@@ -1081,6 +1081,7 @@ const [pageSize, setPageSize] = useState<number>(10);
         }}
         className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
+        <option value={5}>5</option>
         <option value={10}>10</option>
         <option value={20}>20</option>
         <option value={50}>50</option>
@@ -1095,7 +1096,7 @@ const [pageSize, setPageSize] = useState<number>(10);
     <button
       onClick={() => setCurrentPage(1)}
       disabled={currentPage === 1}
-      className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
     >
       First
     </button>
@@ -1104,9 +1105,8 @@ const [pageSize, setPageSize] = useState<number>(10);
     <button
       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
       disabled={currentPage === 1}
-      className="px-2 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      <span className="text-lg">‹</span>
+       className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+                <ChevronLeft size={16} />
     </button>
 
     {/* Page numbers */}
@@ -1128,10 +1128,9 @@ const [pageSize, setPageSize] = useState<number>(10);
         <button
           key={pageNum}
           onClick={() => setCurrentPage(pageNum)}
-          className={`min-w-[40px] px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-sm border rounded ${
             currentPage === pageNum
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'
           }`}
         >
           {pageNum}
@@ -1143,16 +1142,15 @@ const [pageSize, setPageSize] = useState<number>(10);
     <button
       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
       disabled={currentPage === totalPages}
-      className="px-2 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      <span className="text-lg">›</span>
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+                <ChevronRight size={16} />
     </button>
 
     {/* Last button */}
     <button
       onClick={() => setCurrentPage(totalPages)}
       disabled={currentPage === totalPages}
-      className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
     >
       Last
     </button>

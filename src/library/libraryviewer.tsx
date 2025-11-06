@@ -328,7 +328,7 @@ const [canvasReady, setCanvasReady] = useState(false); // ADD THIS LINE
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [scale, setScale] = useState(0.8);
+  const [scale, setScale] = useState(1);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
@@ -920,7 +920,7 @@ const filteredContent = useMemo(() => {
     bookType: (fb.bookType || 'textbook') as BookType,
     catalogue: fb.category as CatalogueCategory,
     publicationYear: fb.publishedYear,
-    pages: fb.pages || 200,
+    pages: fb.pages || 0,
     subjects: fb.subjects || [fb.category],
     totalCopies: fb.copies,
     availableCopies: fb.availableCopies,
@@ -928,7 +928,7 @@ const filteredContent = useMemo(() => {
     description: fb.description,
     coverImage: fb.coverImage,
     firebaseStoragePath: fb.pdfUrl,
-    fileType: fb.pdfUrl ? 'pdf' : undefined
+    fileType: fb.pdfUrl ? 'pdf': undefined
   }));
 
   const convertedTheses: LibraryThesis[] = firebaseTheses.map(ft => ({
@@ -1308,7 +1308,7 @@ const clearAllFilters = () => {
                 <div className="text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Book size={12} />
-                    {item.pages} pages • {item.publicationYear} • {item.fileType ? 'eBook' : 'Print'}
+                    {item.publicationYear} • {item.fileType ? 'eBook' : 'Print'}
                   </span>
                 </div>
                 <div className="text-xs text-gray-600 truncate pt-1 border-t">
