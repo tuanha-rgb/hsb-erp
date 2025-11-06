@@ -323,6 +323,8 @@ const isThesis = (item: ReadingItem): item is LibraryThesis => 'student' in item
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const renderingRef = useRef<boolean>(false); // Add this line
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(1.1);
@@ -469,12 +471,11 @@ const loadPDF = async (url: string) => {
 
   const numPages = pdf.numPages;
   setTotalPages(numPages);
-  setCurrentPage(1);
+  setCurrentPage(0);
 
-  // Only call once with a small delay
-  setTimeout(() => {
-    renderPDFPages(1);
-  }, 100);
+  // Small delay to ensure canvas refs are mounted
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await renderPDFPages(0);
 };
 
 // ---- render the spread (single/dual)
@@ -517,30 +518,41 @@ const renderPDFPage = async (
   numPages?: number
 ) => {
   if (!pdfDocRef.current || !canvas) return;
-
-  const pages = numPages ?? getNumPages();
-  if (pageNum < 1 || pageNum > pages) return;
-
-  const page = await pdfDocRef.current.getPage(pageNum);
   
-  // Use device pixel ratio for high-DPI displays
-  const devicePixelRatio = window.devicePixelRatio || 1;
-  const viewport = page.getViewport({ scale: scale * devicePixelRatio });
-
-  const context = canvas.getContext('2d');
-  if (!context) return;
-
-  // Set canvas internal resolution (high-res)
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+  // Prevent concurrent renders on same canvas
+  if (renderingRef.current) {
+    return;
+  }
   
-  // Set canvas display size (CSS size)
-  canvas.style.width = `${viewport.width / devicePixelRatio}px`;
-  canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+  renderingRef.current = true;
+  
+  try {
+    const pages = numPages ?? getNumPages();
+    if (pageNum < 1 || pageNum > pages) return;
 
-  await page.render({ canvasContext: context, viewport }).promise;
+    const page = await pdfDocRef.current.getPage(pageNum);
+    
+    // Use device pixel ratio for high-DPI displays
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const viewport = page.getViewport({ scale: scale * devicePixelRatio });
+
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    // Set canvas internal resolution (high-res)
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    
+    // Set canvas display size (CSS size)
+    canvas.style.width = `${viewport.width / devicePixelRatio}px`;
+    canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+    canvas.style.maxWidth = '100%';
+
+    await page.render({ canvasContext: context, viewport }).promise;
+  } finally {
+    renderingRef.current = false;
+  }
 };
-
 // ---- Add useEffect for scale/pageMode changes
 useEffect(() => {
   if (fileKind === 'pdf' && pdfDocRef.current && currentPage > 0) {
@@ -742,20 +754,20 @@ const togglePageMode = async () => {
           </div>
         )}
         {!loading && !error && hasFile && (
-          <div className="max-w-7xl mx-auto py-8">
-            {fileKind === 'pdf'  ? (
-              <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : ''}`}>
-                <canvas ref={canvasRef} className="shadow-2xl bg-white" />
-                {pageMode === 'dual' && currentPage < totalPages && (
-                  <canvas ref={canvas2Ref} className="shadow-2xl bg-white" />
-                )}
-              </div>
+            <div className="w-full px-4 py-8">
+              {fileKind === 'pdf'  ? (
+                <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : 'flex-col items-center'}`}>
+                  <canvas ref={canvasRef} className="shadow-2xl bg-white max-w-full h-auto" />
+                  {pageMode === 'dual' && currentPage < totalPages && (
+                    <canvas ref={canvas2Ref} className="shadow-2xl bg-white max-w-full h-auto" />
+                  )}
+            </div>
             ) : fileKind === 'epub'  ? (
-              <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: pageMode === 'dual' ? '1400px' : '900px' }}>
+            <div className="bg-white shadow-2xl mx-auto" style={{ maxWidth: pageMode === 'dual' ? '1400px' : '900px' }}>
                 <div ref={epubContainerRef} style={{ height: '800px', width: '100%' }} />
-              </div>
+                </div>
             ) : null}
-          </div>
+            </div>
         )}
         {!loading && !error && !hasFile && (
           <div className="max-w-4xl mx-auto px-6 py-8">
