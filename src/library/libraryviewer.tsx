@@ -324,7 +324,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [scale, setScale] = useState(1.25);
+  const [scale, setScale] = useState(1.1);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
@@ -633,7 +633,7 @@ const togglePageMode = async () => {
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-white">
+      <div className="border-b border-gray-200 p-3 flex items-center justify-between bg-white">
         <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
           <ArrowLeft size={20} />
           <span>Back to Library</span>
@@ -735,7 +735,7 @@ const togglePageMode = async () => {
         {loading && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="text-gray-600">Loading document...</p>
             </div>
           </div>
@@ -783,7 +783,7 @@ const togglePageMode = async () => {
       </div>
 
       {hasFile && totalPages > 0 && !loading && !error && (
-        <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-center gap-4 bg-white">
+        <div className="border-t border-gray-200 p-3 flex items-center justify-center gap-4 bg-white">
           <button onClick={handlePrevPage} disabled={currentPage === 1}
             className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             <ChevronLeft size={18} />Previous

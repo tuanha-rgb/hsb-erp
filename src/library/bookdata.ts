@@ -4,6 +4,7 @@ export type BookType = 'textbook' | 'reference' | 'lecture_notes' | 'E-Book';
 export type CatalogueCategory = 
    | 'Business'
   | 'Management'
+  | 'Technology'
   | 'Finance'
   | 'Marketing'
   | 'Economics'
@@ -19,7 +20,10 @@ export type CatalogueCategory =
   | 'Medicine & Health'
   | 'Architecture'
   | 'Arts & Design'
-  | 'Nontraditional Security';
+  | 'Nontraditional Security'
+    | 'Data Science'
+  | 'Vietnam'
+
 
 export interface Publisher {
   id: string;
@@ -83,16 +87,15 @@ export const publishers: Publisher[] = [
 
 // Catalogue Categories
 export const catalogues: CatalogueCategory[] = [
-    "Business", "Management", "Finance", "Marketing",
-"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Cybersecurity' ,'Engineering', 
+     "Business", "Management", 'Nontraditional Security','Technology',"Finance", "Marketing",
+"Economics", "Accounting", "Entrepreneurship",  'Computer Science','Data Science','Cybersecurity' ,'Engineering', 
    'Mathematics' ,
    'Social Sciences',
    'Humanities',
    'Language',
    'Medicine & Health',
-   'Architecture',
-   'Arts & Design',
-    'Nontraditional Security'
+   'Arts & Design', 
+   'Vietnam',
 ];
 
 // Book Records
