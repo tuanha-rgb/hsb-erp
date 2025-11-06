@@ -534,10 +534,7 @@ const renderPDFPage = async (
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   
-  // Set canvas display size (CSS size)
-  canvas.style.width = `${viewport.width / devicePixelRatio}px`;
-  canvas.style.height = `${viewport.height / devicePixelRatio}px`;
-  canvas.style.maxWidth = '100%';
+
 
   await page.render({ canvasContext: context, viewport }).promise;
 };
