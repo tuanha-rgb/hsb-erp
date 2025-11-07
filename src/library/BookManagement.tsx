@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import {
   Search, Filter, Plus, Eye, CheckCircle, Star, TrendingUp, Library, Book,
-  Copy, BookOpen, X, Upload, Image as ImageIcon, Download, FileText, Loader, Edit
+  Copy, BookOpen, X, Upload, Image as ImageIcon, Download, FileText, Loader, Edit, ChevronRight, ChevronLeft
 } from "lucide-react";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
@@ -802,11 +802,11 @@ const [pageSize, setPageSize] = useState<number>(5);
   {/* Left side - Info & Items per page */}
   <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
     <span className="text-sm text-gray-600">
-      Showing {startIdx + 1}-{endIdx} of {totalItems} books
+      Showing {endIdx} of {totalItems} 
     </span>
     
     <div className="flex items-center gap-2">
-      <label className="text-sm text-gray-600">Items per page:</label>
+      <label className="text-sm text-gray-600">Items/page:</label>
       <select
         value={pageSize}
         onChange={(e) => {
@@ -830,7 +830,7 @@ const [pageSize, setPageSize] = useState<number>(5);
     <button
       onClick={() => setCurrentPage(1)}
       disabled={clampedPage === 1}
-      className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
     >
       First
     </button>
@@ -839,9 +839,8 @@ const [pageSize, setPageSize] = useState<number>(5);
     <button
       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
       disabled={clampedPage === 1}
-      className="px-2 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      <span className="text-lg">‹</span>
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+                <ChevronLeft size={16} />
     </button>
 
     {/* Page numbers */}
@@ -863,10 +862,9 @@ const [pageSize, setPageSize] = useState<number>(5);
         <button
           key={pageNum}
           onClick={() => setCurrentPage(pageNum)}
-          className={`min-w-[40px] px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-sm border rounded ${
             clampedPage === pageNum
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'
           }`}
         >
           {pageNum}
@@ -878,16 +876,15 @@ const [pageSize, setPageSize] = useState<number>(5);
     <button
       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
       disabled={clampedPage === totalPages}
-      className="px-2 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      <span className="text-lg">›</span>
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+                <ChevronRight size={16} />
     </button>
 
     {/* Last button */}
     <button
       onClick={() => setCurrentPage(totalPages)}
       disabled={clampedPage === totalPages}
-      className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50"
     >
       Last
     </button>

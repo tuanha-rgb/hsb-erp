@@ -369,45 +369,89 @@ const LibraryDashboard: React.FC = () => {
   }
 
   // Generate usage trends based on selected period
-  const getUsageTrends = (): UsageTrend[] => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentDay = today.getDate();
-    const currentYear = today.getFullYear();
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
-    const totalViews = stats.onlineAccess;
-    
-    if (usagePeriod === 'current') {
-      // Current month - show last 7 days, with all views on today
-      return Array.from({ length: 7 }, (_, i) => {
-        const day = new Date();
-        day.setDate(day.getDate() - (6 - i));
-        const isToday = i === 6;
-        return {
-          month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-          online: isToday ? totalViews : 0
-        };
-      });
-    } else if (usagePeriod === 'previous') {
-      // Previous month - no historical data
-      const daysToShow = 7;
-      return Array.from({ length: daysToShow }, (_, i) => {
-        const day = new Date(currentYear, currentMonth - 1, Math.floor((30 / daysToShow) * (i + 1)));
-        return {
-          month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-          online: 0
-        };
-      });
-    } else {
-      // Year to date - monthly breakdown
-      const monthsToShow = currentMonth + 1;
-      return Array.from({ length: monthsToShow }, (_, i) => ({
-        month: monthNames[i],
-        online: i === currentMonth ? totalViews : 0
-      }));
+const getUsageTrends = (): UsageTrend[] => {
+  
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  const totalViews = stats.onlineAccess;
+  
+  // Get or initialize daily view tracking
+  const dailyViewsKey = `library_daily_views_${currentYear}_${currentMonth}`;
+  let dailyViews: Record<string, number> = {};
+  
+  try {
+    const stored = localStorage.getItem(dailyViewsKey);
+    if (stored) {
+      dailyViews = JSON.parse(stored);
     }
-  };
+  } catch (e) {
+    console.error('Failed to load daily views:', e);
+  }
+  
+  // Update today's views
+  const todayKey = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  const previousTotal = parseInt(localStorage.getItem('library_total_views') || '0');
+  const newViewsToday = totalViews - previousTotal;
+  
+  if (newViewsToday > 0) {
+    dailyViews[todayKey] = (dailyViews[todayKey] || 0) + newViewsToday;
+    localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
+    localStorage.setItem('library_total_views', totalViews.toString());
+  }
+  
+  if (usagePeriod === 'current') {
+    // Current month - show last 7 days with actual daily views
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date();
+      day.setDate(day.getDate() - (6 - i));
+      const dayKey = day.toISOString().split('T')[0];
+      return {
+        month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
+        online: dailyViews[dayKey] || 0
+      };
+    });
+  } else if (usagePeriod === 'previous') {
+    // Previous month - get from previous month's storage
+    const prevMonthKey = `library_daily_views_${currentMonth === 0 ? currentYear - 1 : currentYear}_${currentMonth === 0 ? 11 : currentMonth - 1}`;
+    let prevMonthViews: Record<string, number> = {};
+    try {
+      const stored = localStorage.getItem(prevMonthKey);
+      if (stored) prevMonthViews = JSON.parse(stored);
+    } catch (e) {}
+    
+    const daysToShow = 7;
+    return Array.from({ length: daysToShow }, (_, i) => {
+      const day = new Date(currentYear, currentMonth - 1, Math.floor((30 / daysToShow) * (i + 1)));
+      const dayKey = day.toISOString().split('T')[0];
+      return {
+        month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
+        online: prevMonthViews[dayKey] || 0
+      };
+    });
+  } else {
+    // Year to date - sum up each month
+    const monthsToShow = currentMonth + 1;
+  return Array.from({ length: monthsToShow }, (_, i) => {
+    const monthKey = `library_daily_views_${currentYear}_${i}`;
+    let monthTotal = 0;
+    try {
+      const stored = localStorage.getItem(monthKey);
+      if (stored) {
+        const monthData: Record<string, number> = JSON.parse(stored);
+        monthTotal = Object.values(monthData).reduce((sum, val) => sum + val, 0);
+      }
+    } catch (e) {}
+    
+    return {
+      month: monthNames[i],
+      online: monthTotal
+    };
+    });
+  }
+};
 
   const usageTrends = getUsageTrends();
   
