@@ -13,14 +13,26 @@ import Documents from "./documents/documenthandbook";
 import LibraryViewer from "./library/libraryviewer";
 import PollSystem from './PollSystem';
 
-export default function Student() {
+type UserRole = 'student' | 'staff' | 'management';
+type User = { id: string; role: UserRole; name?: string; email?: string };
+
+export default function Student({ user: injectedUser }: { user?: User }) {
   const [activePage, setActivePage] = useState('calendar');
   const [academicSubTab, setAcademicSubTab] = useState('courses');
   const [calendarView, setCalendarView] = useState('month');
-// Sidebar collapse/lock
-const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
-const [sidebarLocked, setSidebarLocked] = useState<boolean>(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [sidebarLocked, setSidebarLocked] = useState<boolean>(true);
 
+  const user = injectedUser ?? null;
+
+  // Dummy student for testing (fallback if no auth)
+  const mockStudent = {
+    id: user?.id || 'student-test-001',
+    role: (user?.role || 'student') as 'student' | 'staff' | 'management'
+  };
+
+  
+  
 const toggleLock = () => setSidebarLocked(v => !v);
 const toggleCollapse = () => {
   if (sidebarLocked) return;         // ignore while locked
@@ -6541,7 +6553,7 @@ return (
         { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
         { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
         { id: 'documents', icon: Notebook, label: 'Documents' },
-        
+        {id: 'polling', icon: Vote, label: 'Poll/Vote'},
         { id: 'scholarship', icon: Gem, label: 'Scholarship' },
         { id: 'matriculation', icon: User, label: 'Identity' },
       ].map(item => (
@@ -6588,35 +6600,42 @@ return (
   </div>
 
   {/* Main Content Area */}
-  <div className="flex-1 flex flex-col overflow-hidden">
-    <main className="flex-1 p-2 w-full space-y-6 overflow-visible min-h-screen">
-      {/* ... Content rendering based on activePage ... */}
-      {activePage === 'dashboard' && <Dashboard />}
-      {activePage === 'profile' && <Profile />}
-      {activePage === 'library' && <LibraryViewer />}
-      {activePage === 'academic' && <Academic />}
-      {activePage === 'feedback' && <StudentFeedbackPortal />}
-      {activePage === 'finance' && <Finance />}
-      {activePage === 'activities' && <Activities />}
-      {activePage === 'calendar' && <Calendars />}
-      {activePage === 'scholarship' && <ScholarshipManagement />}
-      {activePage === 'canvas' && (
-        <Canvas
-          canvasSidebarOpen={canvasSidebarOpen}
-          setCanvasSidebarOpen={setCanvasSidebarOpen}
-          canvasTab={canvasTab}
-          setCanvasTab={setCanvasTab}
-          selectedCourse={selectedCourse}
-          setSelectedCourse={setSelectedCourse}
-          courseSection={courseSection}
-          setCourseSection={setCourseSection}
-        />
-      )}
-      {activePage === 'onestop' && <OneStop />}
-      {activePage === 'documents' && <Documents />}
-      {activePage === 'matriculation' && <Matriculation />}
-    </main>
-  </div>
+   <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 p-2 w-full space-y-6 overflow-visible min-h-screen">
+          {/* Content rendering based on activePage */}
+          {activePage === 'dashboard' && <Dashboard />}
+          {activePage === 'profile' && <Profile />}
+          {activePage === 'library' && <LibraryViewer />}
+          {activePage === 'academic' && <Academic />}
+          {activePage === 'feedback' && <StudentFeedbackPortal />}
+          {activePage === 'finance' && <Finance />}
+          {activePage === 'activities' && <Activities />}
+          {activePage === 'calendar' && <Calendars />}
+          {activePage === 'scholarship' && <ScholarshipManagement />}
+          {activePage === 'canvas' && (
+            <Canvas
+              canvasSidebarOpen={canvasSidebarOpen}
+              setCanvasSidebarOpen={setCanvasSidebarOpen}
+              canvasTab={canvasTab}
+              setCanvasTab={setCanvasTab}
+              selectedCourse={selectedCourse}
+              setSelectedCourse={setSelectedCourse}
+              courseSection={courseSection}
+              setCourseSection={setCourseSection}
+            />
+          )}
+          {activePage === 'onestop' && <OneStop />}
+          {activePage === 'documents' && <Documents />}
+          {activePage === 'polling' && (
+            <PollSystem 
+              userId={mockStudent.id} 
+              userLevel={mockStudent.role} 
+            />
+          )}
+          {activePage === 'matriculation' && <Matriculation />}
+        </main>
+      </div>
+   
 </div>
   );
 }

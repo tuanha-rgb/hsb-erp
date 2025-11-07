@@ -29,7 +29,7 @@ interface Poll {
 
 interface PollSystemProps {
   userId: string;
-  userLevel: UserLevel;
+  userLevel?: UserLevel;
 }
 
 export default function PollSystem({ userId, userLevel }: PollSystemProps) {
