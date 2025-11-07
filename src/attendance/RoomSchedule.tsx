@@ -44,6 +44,7 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
 
   const parseGoogleSheetsData = (data: any[][]): WeeklyScheduleData => {
     const weeklyData: WeeklyScheduleData = {};
+    
     if (!data || data.length < 2) return weeklyData;
 
     const headerRow = data[0];
@@ -75,13 +76,18 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       const sessionType = (row[1] || '').toString().trim().toUpperCase();
 
       if (dateCell) {
-        const dateMatch = dateCell.match(/ngày (\d+)\.(\d+)\.(\d+)/);
-        if (dateMatch) {
-          const [, day, month, year] = dateMatch;
-          currentDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-          if (!weeklyData[currentDate]) weeklyData[currentDate] = [];
-        }
-      }
+  console.log('🔍 Raw dateCell:', JSON.stringify(dateCell)); // ADD THIS
+  const dateMatch = dateCell.match(/date (\d+)\.(\d+)\.(\d+)/);
+  if (dateMatch) {
+    const [, day, month, year] = dateMatch;
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    currentDate = `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    console.log('✅ Matched:', currentDate); // ADD THIS
+    if (!weeklyData[currentDate]) weeklyData[currentDate] = [];
+  } else {
+    console.log('❌ No match for:', dateCell); // ADD THIS
+  }
+}
 
       if (!currentDate || !['S', 'C', 'T'].includes(sessionType)) continue;
 
@@ -107,42 +113,39 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
     return weeklyData;
   };
 
-  const loadDemoData = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setScheduleData({
-      [today]: [
-        { roomCode: "Chu Văn An B1", floor: "Floor 2", sessions: { morning: "", afternoon: "MAS3", evening: "MET6 - Tiếng Hàn" } },
-        { roomCode: "Nguyễn Văn Đạo B1", floor: "Floor 2", sessions: { morning: "", afternoon: "", evening: "MET6 - Tiếng Trung" } },
-        { roomCode: "MET T4 B1", floor: "Floor 4", sessions: { morning: "", afternoon: "MET7", evening: "" } }
-      ]
-    });
-    setAvailableDates([today]);
-    setSelectedDate(today);
-    setError("Using demo data. Configure .env to connect to Google Sheets.");
-  };
+  
 
   // Helper to find closest date to today
-  const findClosestDate = (dates: string[]): string => {
-    if (dates.length === 0) return "";
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toISOString().split('T')[0];
-    
-    // Check if today exists in dates
-    if (dates.includes(todayStr)) return todayStr;
-    
-    // Find closest future date
-    const futureDates = dates.filter(d => d >= todayStr).sort();
-    if (futureDates.length > 0) return futureDates[0];
-    
-    // If no future dates, return the most recent past date
-    return dates.sort().reverse()[0];
-  };
-
+// Helper to find closest date to today
+const findClosestDate = (dates: string[]): string => {
+  if (dates.length === 0) return "";
+  
+  // Get today's date in YYYY-MM-DD format (local timezone)
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+  
+ 
+  
+  // Check if today exists in dates
+  if (dates.includes(todayStr)) {
+    return todayStr;
+  }
+  
+  // Find closest future date
+  const futureDates = dates.filter(d => d >= todayStr).sort();
+  if (futureDates.length > 0) {
+    return futureDates[0];
+  }
+  
+  // If no future dates, return the most recent past date
+  const mostRecent = dates.sort().reverse()[0];
+  return mostRecent;
+};
   const fetchScheduleData = async () => {
     if (!googleSheetUrl || !apiKey) {
-      loadDemoData();
       return;
     }
     
@@ -180,7 +183,6 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
       setTimeout(() => setDebugInfo(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
-      loadDemoData();
     } finally {
       setLoading(false);
     }
@@ -213,10 +215,15 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-1">HSB Class Schedule</h1>
             {selectedDate && (
-              <p className="text-lg text-gray-600">
-                {getDayOfWeek(selectedDate)}, {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-            )}
+  <p className="text-lg text-gray-600">
+    {getDayOfWeek(selectedDate)}, {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric',
+      timeZone: 'Asia/Ho_Chi_Minh'
+    })}
+  </p>
+)}
           </div>
           
           <button 
@@ -256,9 +263,15 @@ const RoomSchedule: React.FC<RoomScheduleProps> = ({
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {availableDates.map(date => (
-                  <option key={date} value={date}>
-                    {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                  </option>
+  <option key={date} value={date}>
+    {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      timeZone: 'Asia/Ho_Chi_Minh'
+    })}
+  </option>
                 ))}
               </select>
             )}
