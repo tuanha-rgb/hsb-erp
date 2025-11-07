@@ -392,15 +392,29 @@ const getUsageTrends = (): UsageTrend[] => {
   }
   
   // Update today's views
-  const todayKey = today.toISOString().split('T')[0]; // YYYY-MM-DD
-  const previousTotal = parseInt(localStorage.getItem('library_total_views') || '0');
-  const newViewsToday = totalViews - previousTotal;
-  
-  if (newViewsToday > 0) {
-    dailyViews[todayKey] = (dailyViews[todayKey] || 0) + newViewsToday;
-    localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
-    localStorage.setItem('library_total_views', totalViews.toString());
+ // Update today's views - only once per day
+const todayKey = today.toISOString().split('T')[0]; // YYYY-MM-DD
+const lastUpdateDate = localStorage.getItem('library_last_update_date');
+const previousTotal = parseInt(localStorage.getItem('library_total_views') || '0');
+
+// Only update if it's a new day OR total views increased
+if (lastUpdateDate !== todayKey) {
+  // New day - record yesterday's final count
+  if (lastUpdateDate && previousTotal > 0) {
+    dailyViews[lastUpdateDate] = previousTotal;
   }
+  
+  // Start fresh for today
+  localStorage.setItem('library_last_update_date', todayKey);
+  localStorage.setItem('library_total_views', totalViews.toString());
+}
+
+// Update today's running total (this will change throughout the day)
+dailyViews[todayKey] = totalViews - Object.entries(dailyViews)
+  .filter(([date]) => date !== todayKey)
+  .reduce((sum, [_, count]) => sum + count, 0);
+
+localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
   
   if (usagePeriod === 'current') {
     // Current month - show last 7 days with actual daily views

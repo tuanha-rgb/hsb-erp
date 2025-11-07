@@ -7,10 +7,11 @@ import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search,
   ChevronRight, TrendingUp, Clock, CheckCircle, AlertCircle, Mail, Phone, 
   CreditCard, Edit3, Briefcase, Award, Globe, LockIcon, UnlockIcon, ChevronLeftIcon, ChevronLeft, Play, 
 FileQuestion, FileDown, PieChart, Filter, XCircle, Pencil, Users, FileText, Gem, Notebook, Book, Building,
-Star, Send, MessageSquare} 
+Star, Send, MessageSquare, Vote} 
 from 'lucide-react';
 import Documents from "./documents/documenthandbook";
 import LibraryViewer from "./library/libraryviewer";
+import PollSystem from './PollSystem';
 
 export default function Student() {
   const [activePage, setActivePage] = useState('calendar');

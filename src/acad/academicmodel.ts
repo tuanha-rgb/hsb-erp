@@ -6,7 +6,6 @@ export interface Faculty {
   name: string;
 }
 
-export type ProgramLevel = "bachelor" | "master" | "phd";
 
 export interface ProgramItem {
   code: string;

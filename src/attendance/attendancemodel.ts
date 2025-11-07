@@ -1,4 +1,4 @@
-// attendanceModel.ts
+// attendancemodel.ts - Updated with proper structure
 import { studentdata, sampleStudents } from "../student/studentdata";
 import { courseData } from "../acad/courses";
 import { FacultyCode, CourseLevel, CourseItem } from "../acad/academicmodel";
@@ -17,13 +17,17 @@ export interface AttendanceRecord {
   cameraId?: string;
   lecturerVerified?: boolean;
   notes?: string;
+  confidence?: number;
+  bbox?: { x: number; y: number; w: number; h: number };
+  imageUrl?: string;
+  videoUrl?: string;
 }
 
 export interface StudentAttendanceStats {
   studentId: string;
   studentName: string;
   program: string;
-  level: CourseLevel;
+  level: "Bachelor" | "Master" | "PhD"; // Match your existing CourseLevel
   year: string;
   totalSessions: number;
   attended: number;
@@ -43,7 +47,7 @@ export interface CourseAttendance {
   instructor: string;
   program: string;
   faculty: FacultyCode;
-  level: CourseLevel;
+  level: "Bachelor" | "Master" | "PhD"; // Match your existing CourseLevel
   totalStudents: number;
   averageAttendance: number;
   sessionsHeld: number;
@@ -82,20 +86,15 @@ export function generateAttendanceRecords(
   const now = new Date();
   let recordId = 1;
 
-  // For each course, generate attendance records
   courses.forEach(course => {
-    // Number of sessions for this course (3-5 sessions per week over the period)
     const sessionsCount = Math.floor((daysBack / 7) * (3 + Math.random() * 2));
     
-    // Get students who might be in this course based on program and level
     const eligibleStudents = students.filter(s => {
-      // Match students to courses based on program
       const programMatch = course.program.includes(s.program) || s.program.includes(course.program);
       const levelMatch = s.level === course.level;
       return programMatch && levelMatch && s.status === "Active";
-    }).slice(0, Math.min(course.students, 30)); // Limit to course capacity
+    }).slice(0, Math.min(course.students, 30));
 
-    // Generate attendance records for each session
     for (let sessionNum = 0; sessionNum < sessionsCount; sessionNum++) {
       const daysAgo = Math.floor((sessionNum / sessionsCount) * daysBack);
       const sessionDate = new Date(now);
@@ -103,9 +102,8 @@ export function generateAttendanceRecords(
       sessionDate.setHours(8 + Math.floor(Math.random() * 8), 0, 0, 0);
 
       eligibleStudents.forEach(student => {
-        // Generate attendance with realistic patterns based on student GPA
         const gpa = parseFloat(student.gpa);
-        const attendanceProb = Math.min(0.95, 0.65 + (gpa / 4) * 0.25); // Higher GPA = better attendance
+        const attendanceProb = Math.min(0.95, 0.65 + (gpa / 4) * 0.25);
         const lateProb = 0.08;
         const rand = Math.random();
 
@@ -137,7 +135,8 @@ export function generateAttendanceRecords(
           sessionType: Math.random() > 0.3 ? "lecture" : Math.random() > 0.5 ? "lab" : "tutorial",
           timestamp: sessionDate,
           cameraId: source === "ai-camera" ? `CAM-${Math.floor(Math.random() * 5) + 1}` : undefined,
-          lecturerVerified: Math.random() > 0.15
+          lecturerVerified: Math.random() > 0.15,
+          confidence: source === "ai-camera" ? 0.75 + Math.random() * 0.24 : undefined
         });
       });
     }
@@ -184,14 +183,12 @@ export function calculateStudentStats(
 
       const baseAttendanceRate = (attended / totalSessions) * 100;
       
-      // Quiz bonus based on quiz/assignment attendance
       const quizRecords = studentRecords.filter(r => r.source === "quiz" || r.source === "assignment");
       const quizAttendance = quizRecords.filter(r => r.status === "present").length;
       const quizBonus = Math.min(10, Math.floor((quizAttendance / Math.max(1, quizRecords.length)) * 10));
       
       const attendanceRate = Math.min(100, baseAttendanceRate + quizBonus);
 
-      // Calculate trend based on recent vs older attendance
       const midpoint = Math.floor(studentRecords.length / 2);
       const recentRecords = studentRecords.slice(0, midpoint);
       const olderRecords = studentRecords.slice(midpoint);
@@ -229,7 +226,7 @@ export function calculateStudentStats(
         quizBonus
       };
     })
-    .filter(s => s.totalSessions > 0); // Only include students with attendance records
+    .filter(s => s.totalSessions > 0);
 }
 
 // Calculate course attendance statistics
@@ -260,10 +257,8 @@ export function calculateCourseStats(
     const totalPresent = courseRecords.filter(r => r.status === "present").length;
     const averageAttendance = (totalPresent / courseRecords.length) * 100;
     
-    // Calculate sessions held
     const uniqueDates = new Set(courseRecords.map(r => r.date.toISOString().split('T')[0])).size;
     
-    // Calculate at-risk students
     const studentAttendance = new Map<string, { present: number; total: number }>();
     courseRecords.forEach(record => {
       const current = studentAttendance.get(record.studentId) || { present: 0, total: 0 };
@@ -276,7 +271,6 @@ export function calculateCourseStats(
       .filter(stats => (stats.present / stats.total) * 100 < 70)
       .length;
 
-    // Determine trend based on recent vs historical data
     const midpoint = Math.floor(courseRecords.length / 2);
     const recentRecords = courseRecords.slice(0, midpoint);
     const olderRecords = courseRecords.slice(midpoint);

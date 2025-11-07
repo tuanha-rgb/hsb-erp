@@ -36,6 +36,7 @@ export default function RoleDropdown({ value, onChange, options, className }: Pr
   }, [open]);
 
   const current = options.find(o => o.value === value)?.label ?? "Select";
+const [currentRole, setCurrentRole] = useState<'student' | 'staff' | 'management'>('staff');
 
   return (
     <div className={`relative ${className ?? ""}`}>

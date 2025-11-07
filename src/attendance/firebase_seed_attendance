@@ -1,0 +1,173 @@
+// firebase-seed-attendance.ts
+// Run this once to populate Firebase with test data
+// Usage: node --loader ts-node/esm firebase-seed-attendance.ts
+
+import { db } from '../firebase/firebase.config'; // Use existing config
+import { collection, doc, setDoc, writeBatch, Timestamp } from 'firebase/firestore';
+import { initializeAttendanceData } from './attendancemodel';
+
+async function seedAttendanceData() {
+  console.log('🌱 Seeding Firebase with test attendance data...');
+
+  // Generate test data
+  const data = initializeAttendanceData();
+  
+  console.log(`📊 Generated:
+  - ${data.records.length} attendance records
+  - ${data.students.length} student stats
+  - ${data.courses.length} course stats
+  - ${data.alerts.length} alerts
+  - ${data.cameras.length} cameras`);
+
+  // Batch write (max 500 per batch)
+  const batchSize = 500;
+  let batch = writeBatch(db);
+  let batchCount = 0;
+  let totalWritten = 0;
+
+  // 1. Seed Attendance Records
+  console.log('\n📝 Seeding attendance records...');
+  for (let i = 0; i < data.records.length; i++) {
+    const record = data.records[i];
+    const docRef = doc(collection(db, 'attendance_records'), record.id);
+    
+    batch.set(docRef, {
+      ...record,
+      date: Timestamp.fromDate(record.date),
+      timestamp: record.timestamp ? Timestamp.fromDate(record.timestamp) : Timestamp.now(),
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    });
+
+    batchCount++;
+    if (batchCount === batchSize) {
+      await batch.commit();
+      totalWritten += batchCount;
+      console.log(`  ✓ Written ${totalWritten}/${data.records.length} records`);
+      batch = writeBatch(db);
+      batchCount = 0;
+    }
+  }
+  
+  if (batchCount > 0) {
+    await batch.commit();
+    totalWritten += batchCount;
+    console.log(`  ✓ Written ${totalWritten}/${data.records.length} records`);
+  }
+
+  // 2. Seed Cameras
+  console.log('\n📷 Seeding AI cameras...');
+  batch = writeBatch(db);
+  for (const camera of data.cameras) {
+    const docRef = doc(collection(db, 'ai_cameras'), camera.id);
+    batch.set(docRef, {
+      ...camera,
+      lastSync: Timestamp.fromDate(camera.lastSync),
+      registeredAt: Timestamp.now()
+    });
+  }
+  await batch.commit();
+  console.log(`  ✓ Created ${data.cameras.length} cameras`);
+
+  // 3. Seed Alerts
+  console.log('\n🚨 Seeding alerts...');
+  batch = writeBatch(db);
+  for (const alert of data.alerts) {
+    const docRef = doc(collection(db, 'attendance_alerts'), alert.id);
+    batch.set(docRef, {
+      ...alert,
+      date: Timestamp.fromDate(alert.date),
+      createdAt: Timestamp.now()
+    });
+  }
+  await batch.commit();
+  console.log(`  ✓ Created ${data.alerts.length} alerts`);
+
+  // 4. Create indexes info
+  console.log('\n📑 Creating composite indexes (manual step required)...');
+  console.log(`
+  ⚠️  IMPORTANT: Create these indexes in Firebase Console:
+  
+  1. attendance_records
+     - courseId (Ascending)
+     - date (Ascending)
+     - timestamp (Descending)
+     Collection: attendance_records
+  
+  2. attendance_alerts
+     - acknowledged (Ascending)
+     - severity (Ascending)
+     - date (Descending)
+     Collection: attendance_alerts
+  
+  Go to: Firebase Console → Firestore → Indexes → Composite
+  `);
+
+  console.log('\n✅ Seeding complete!');
+  console.log('\n📊 Summary:');
+  console.log(`   - Attendance Records: ${data.records.length}`);
+  console.log(`   - AI Cameras: ${data.cameras.length}`);
+  console.log(`   - Alerts: ${data.alerts.length}`);
+  console.log(`   - Courses tracked: ${data.courses.length}`);
+  console.log(`   - Students tracked: ${data.students.length}`);
+  
+  console.log('\n🎯 Next Steps:');
+  console.log('   1. Create composite indexes (see above)');
+  console.log('   2. Test the UI at /attendance');
+  console.log('   3. Configure ANSVIS webhook');
+  console.log('   4. Start receiving live attendance!');
+}
+
+// Alternative: Seed minimal data for testing
+async function seedMinimalData() {
+  console.log('🌱 Seeding minimal test data...');
+
+  const batch = writeBatch(db);
+
+  // Create 1 camera
+  const cameraRef = doc(db, 'ai_cameras', 'CAM-001');
+  batch.set(cameraRef, {
+    id: 'CAM-001',
+    location: 'Test Hall A',
+    status: 'online',
+    lastSync: Timestamp.now(),
+    sessionsToday: 0,
+    accuracy: 95.5,
+    registeredAt: Timestamp.now()
+  });
+
+  // Create 1 test attendance record
+  const attendanceRef = doc(db, 'attendance_records', 'ATT-TEST-001');
+  batch.set(attendanceRef, {
+    id: 'ATT-TEST-001',
+    studentId: 'STU-2024-001',
+    studentName: 'Test Student',
+    courseId: 'BUS101',
+    courseName: 'Introduction to Business',
+    date: Timestamp.now(),
+    status: 'present',
+    source: 'ai-camera',
+    sessionType: 'lecture',
+    timestamp: Timestamp.now(),
+    cameraId: 'CAM-001',
+    lecturerVerified: false,
+    confidence: 0.95,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now()
+  });
+
+  await batch.commit();
+  console.log('✅ Minimal data seeded!');
+}
+
+// Run seeder
+const args = process.argv.slice(2);
+const mode = args[0] || 'full';
+
+if (mode === 'minimal') {
+  seedMinimalData().catch(console.error);
+} else {
+  seedAttendanceData().catch(console.error);
+}
+
+export { seedAttendanceData, seedMinimalData };

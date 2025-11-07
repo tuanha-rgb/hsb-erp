@@ -1,7 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import { Home, Users, GraduationCap, BookOpen, Calendar, DollarSign, Award,
          Globe, Clock, FileText, TrendingUp, BarChart3, Settings, UserCheck, Briefcase,
-         Building, MessageSquare } from "lucide-react";
+         Building, MessageSquare, 
+         Vote} from "lucide-react";
 
 export type SubItem = { id: string; label: string };
 export type MenuItem = { id: string; label: string; icon: LucideIcon; submenu?: SubItem[] };
@@ -116,7 +117,7 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
           { id: 'one-stop-service', label: 'One-Stop Service', icon: UserCheck },
           { id: 'projects', label: 'Projects', icon: Briefcase },
           { id: 'shopping', label: 'HSB-Shop', icon: UserCheck },
-
+          { id: 'polling', label: 'Poll/Vote', icon: Vote },
           {
             id: 'alumni', label: 'Alumni', icon: Award,
             submenu: [

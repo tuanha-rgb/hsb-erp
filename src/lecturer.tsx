@@ -8,11 +8,12 @@ import {
   Mail, Phone, Building2, Edit, GraduationCap,
   Plus, Video, Coffee, Briefcase, Plane, X, Save, CheckSquare, DollarSign, Search, Filter, Eye, MoreVertical,
   User,Upload, Book, ClipboardList,BarChart3,Download, Send, LockIcon, UnlockIcon, ChevronLeftIcon, Pencil,
-  BookPlus
+  BookPlus, Vote
 } from 'lucide-react';
 import * as QRCode from "qrcode";
 import Documents from "./documents/documenthandbook";
 import LibraryViewer from "./library/libraryviewer";
+import PollSystem from './PollSystem';
 
 // ————————————————————————————————————————
 // Dashboard view (re-uses your original data)
@@ -2737,6 +2738,7 @@ const LecturerApp = () => {
     { name: 'Research', icon: TrendingUp },
     { name: 'Canvas/LMS', icon: Globe },
     { name: 'Online Library', icon: BookPlus },
+    { name: 'Poll/Vote', icon: Vote },
     { name: 'Identification', icon: UserIcon },
 
   ];
@@ -2759,6 +2761,7 @@ const LecturerApp = () => {
         return <CanvasView />;
        case 'Online Library':
         return <LibraryViewer/>; 
+      
       case 'Identification':
         return <Identification />;
       default:

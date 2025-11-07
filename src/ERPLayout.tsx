@@ -3,8 +3,7 @@ import Student from "./student";
 import Lecturer from "./lecturer";
 import './project.css';
 import './index.css';
-import {  AttendanceRecord,  StudentAttendanceStats,  CourseAttendance,  AttendanceAlert,  AICamera,  initializeAttendanceData
-} from "./attendance/attendancemodel";
+
 
 import {
   scholarships,
@@ -15,6 +14,9 @@ import {
   type ScholarshipStatus,
   type ApplicationStatus,
 } from "./student/scholarshipdata";
+
+import { AttendanceRecord, StudentAttendanceStats, CourseAttendance, AttendanceAlert, AICamera, initializeAttendanceData } from "./attendance/attendancemodel";
+import AttendanceLive from "./attendance/attendanceLive";
 
 import LibraryViewer from "./library/libraryviewer";
 import ThesisStorage from "./library/ThesisStorage";
@@ -53,6 +55,9 @@ import { patentData } from "./research/patent";
 
 import { ResearchProject, Publication, Patent } from "./research/research";
 import { getDisciplineColor, getStatusColor } from "./research/ResearchColors";
+
+import PollSystem from './PollSystem';
+
 
 import HSBShop from "./shop/HSBShop";
 
@@ -101,7 +106,24 @@ const ERPLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [sidebarLocked, setSidebarLocked] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+// At the top of ERPLayout.tsx, add mock user
+const mockUser = {
+  id: 'test-user-001',
+  role: 'staff' // or 'student' or 'management'
+};
+type UserLevel = 'student' | 'staff' | 'management';
 
+// Map your RoleDropdown values to UserLevel
+const roleToUserLevel = (role: string): UserLevel => {
+  switch(role) {
+    case 'admin': return 'management';
+    case 'lecturer': return 'staff';
+    case 'faculty': return 'staff';
+    case 'department': return 'management';
+    case 'student': return 'student';
+    default: return 'student';
+  }
+};
   // Compute navigation based on current user type
   const currentNav: MenuItem[] = useMemo(
     () => navigationConfig[userType] ?? navigationConfig.admin,
@@ -15617,7 +15639,7 @@ const AccountManagement = () => {
       return <Scholarship />;
     }
     if (activeTab === 'attendance') {
-      return <AttendanceStudent />;
+      return <AttendanceLive />;
     }
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;
@@ -15673,6 +15695,12 @@ const AccountManagement = () => {
     if (activeTab == 'shopping'){
       return <HSBShop/>;
     }
+    if (activeTab === 'polling'){
+  return <PollSystem 
+    userId={mockUser.id} 
+    userLevel={roleToUserLevel(mockUser.role)}
+  />;
+}
       if (activeTab == 'account'){
       return <AccountManagement/>;
     }

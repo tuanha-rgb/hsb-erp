@@ -1,11 +1,10 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, collection, query, where, orderBy } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { setLogLevel } from 'firebase/app';
 
-// TODO: Replace with your Firebase project config
-// Get this from Firebase Console > Project Settings > General
+// Config
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -15,17 +14,22 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-
-// Initialize Firebase
+// Initialize
 const app = initializeApp(firebaseConfig);
 
 if (import.meta.env.VITE_FIREBASE_LOGGING === 'false') {
-  // Disable Firebase logging
   setLogLevel('silent');
 }
 
-// Initialize services
+// Services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
+// Polls
+export const pollsRef = collection(db, 'polls');
+export const activePollsQuery = query(
+  pollsRef,
+  where('status', '==', 'active'),
+  orderBy('startTime', 'desc')
+);
