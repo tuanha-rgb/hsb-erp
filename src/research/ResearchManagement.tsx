@@ -1403,17 +1403,42 @@ const ResearchManagement = () => {
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <FileText className="w-6 h-6 text-green-600" />
+          <div className="h-12 flex items-center justify-center mb-3">
+            <div className="h-full flex items-center justify-center p-2">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fwos.jpg?alt=media&token=fa4e5314-b51b-46f5-9e4c-f18044cdda67"
+                alt="Web of Science"
+                className="max-h-full max-w-full object-contain"
+              />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Total Publications</p>
-          <p className="text-3xl font-bold text-gray-900">{publications.length}</p>
-          <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">{scopusWosCount} SCOPUS+WoS</p>
-            <p className="text-xs text-gray-600">{otherPublicationsCount} Other</p>
+          <p className="text-3xl font-bold text-gray-900 text-center">
+            {publications.filter(p => p.wosranking && p.wosranking !== 'N/A').length}
+          </p>
+          <p className="text-xs text-gray-600 mt-2 text-center">WoS indexed</p>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-center mb-3">
+            <div className="h-full flex items-center justify-center p-2">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fscopus.jpg?alt=media&token=f856a81c-19ad-43df-afdf-afa8acc4d982"
+                alt="Scopus"
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
           </div>
+          <p className="text-3xl font-bold text-gray-900 text-center">
+            {publications.filter(p =>
+              p.quartile === 'Q1' ||
+              p.quartile === 'Q2' ||
+              p.quartile === 'Q3' ||
+              p.quartile === 'Q4' ||
+              p.quartile === 'Scopus-indexed' ||
+              p.scopusIndexed === true
+            ).length}
+          </p>
+          <p className="text-xs text-gray-600 mt-2 text-center">Scopus indexed</p>
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -1426,36 +1451,6 @@ const ResearchManagement = () => {
           <p className="text-3xl font-bold text-gray-900">{patents.length}</p>
           <p className="text-xs text-gray-600 mt-2">
             {patents.filter(p => p.status === 'Granted').length} granted
-          </p>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Award className="w-6 h-6 text-orange-600" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mb-1">Reputable Journals</p>
-          <p className="text-3xl font-bold text-gray-900">
-            {publications.filter(p =>
-              p.quartile === 'Q1' ||
-              p.quartile === 'Q2' ||
-              p.wosranking === 'SSCI' ||
-              p.wosranking === 'SCIE' ||
-              p.wosranking === 'AHCI'
-            ).length}
-          </p>
-          <p className="text-xs text-gray-600 mt-2">
-            {publications.length > 0
-              ? `${Math.round((publications.filter(p =>
-                  p.quartile === 'Q1' ||
-                  p.quartile === 'Q2' ||
-                  p.wosranking === 'SSCI' ||
-                  p.wosranking === 'SCIE' ||
-                  p.wosranking === 'AHCI'
-                ).length / publications.length) * 100)}% of total`
-              : '0% of total'
-            }
           </p>
         </div>
 
@@ -1484,7 +1479,7 @@ const ResearchManagement = () => {
 
     
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Projects by Department</h3>
           <div className="space-y-4">
@@ -1505,13 +1500,75 @@ const ResearchManagement = () => {
                 <div key={i}>
                   <div className="flex justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">{item.dept}</span>
-                    <span className="text-sm font-semibold text-gray-900">{item.count} projects</span>
+                    <span className="text-sm font-semibold text-gray-900">{item.count}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="h-2 rounded-full bg-blue-500" style={{width: `${(item.count / total) * 100}%`}}></div>
                   </div>
                 </div>
               )) : <p className="text-sm text-gray-500">No projects yet</p>;
+            })()}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Publications by Discipline</h3>
+          <div className="space-y-4">
+            {(() => {
+              const disciplineCounts: { [key: string]: number } = {};
+              publications.forEach(pub => {
+                if (pub.discipline) {
+                  disciplineCounts[pub.discipline] = (disciplineCounts[pub.discipline] || 0) + 1;
+                }
+              });
+              const disciplineArray = Object.entries(disciplineCounts)
+                .map(([discipline, count]) => ({ discipline, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+              const total = publications.length || 1;
+
+              return disciplineArray.length > 0 ? disciplineArray.map((item, i) => (
+                <div key={i}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{item.discipline}</span>
+                    <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 rounded-full bg-green-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                  </div>
+                </div>
+              )) : <p className="text-sm text-gray-500">No publications yet</p>;
+            })()}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Patents by Faculty</h3>
+          <div className="space-y-4">
+            {(() => {
+              const facultyCounts: { [key: string]: number } = {};
+              patents.forEach(patent => {
+                if (patent.faculty) {
+                  facultyCounts[patent.faculty] = (facultyCounts[patent.faculty] || 0) + 1;
+                }
+              });
+              const facultyArray = Object.entries(facultyCounts)
+                .map(([faculty, count]) => ({ faculty, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+              const total = patents.length || 1;
+
+              return facultyArray.length > 0 ? facultyArray.map((item, i) => (
+                <div key={i}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{item.faculty}</span>
+                    <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 rounded-full bg-purple-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                  </div>
+                </div>
+              )) : <p className="text-sm text-gray-500">No patents yet</p>;
             })()}
           </div>
         </div>
@@ -1540,7 +1597,7 @@ const ResearchManagement = () => {
                     <span className="text-sm font-semibold text-gray-900">{item.count}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full bg-green-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                    <div className="h-2 rounded-full bg-orange-500" style={{width: `${(item.count / total) * 100}%`}}></div>
                   </div>
                 </div>
               )) : <p className="text-sm text-gray-500">No publications yet</p>;
@@ -1700,10 +1757,10 @@ const ResearchManagement = () => {
             </div>
           </div>
         </div>
-          <div className="grid grid-cols-4 gap-4 p-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Briefcase className="w-6 h-6 text-blue-600" />
             </div>
             <div className="text-right">
@@ -1717,9 +1774,9 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <TrendingUp className="w-6 h-6 text-green-600" />
             </div>
             <div className="text-right">
@@ -1740,9 +1797,9 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Award className="w-6 h-6 text-purple-600" />
             </div>
             <div className="text-right">
@@ -1763,9 +1820,9 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <FileText className="w-6 h-6 text-orange-600" />
             </div>
             <div className="text-right">
@@ -2665,8 +2722,8 @@ const ResearchManagement = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <input
@@ -2698,16 +2755,18 @@ const ResearchManagement = () => {
                 <option value="Utility Model">Utility Model</option>
               </select>
             </div>
-            <button onClick={() => setShowAddPatentModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              <Plus size={18} />
-              Add Patent
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setShowAddPatentModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Plus size={18} />
+                Add Patent
+              </button>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-4 p-4">
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="h-16 flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Award className="w-6 h-6 text-blue-600" />
               </div>
               <div className="text-right">
@@ -2721,9 +2780,9 @@ const ResearchManagement = () => {
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="h-16 flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Award className="w-6 h-6 text-green-600" />
               </div>
               <div className="text-right">
@@ -2744,9 +2803,9 @@ const ResearchManagement = () => {
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="h-16 flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <FileText className="w-6 h-6 text-yellow-600" />
               </div>
               <div className="text-right">
@@ -2767,9 +2826,9 @@ const ResearchManagement = () => {
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="h-16 flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Globe className="w-6 h-6 text-purple-600" />
               </div>
               <div className="text-right">
@@ -3442,19 +3501,123 @@ const ResearchManagement = () => {
         {/* Edit Project Modal */}
         {showEditProjectModal && editingItem && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowEditProjectModal(false)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="h-16 bg-gradient-to-br from-green-500 to-green-700 p-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">Edit Project</h2>
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="h-20 bg-gradient-to-br from-green-500 to-green-700 p-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Edit Project</h2>
+                  <p className="text-green-100 text-sm mt-1">Update project information</p>
+                </div>
                 <button onClick={() => setShowEditProjectModal(false)} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
-                  <X size={20} />
+                  <X size={24} />
                 </button>
               </div>
+
               <div className="p-6 space-y-4">
+                {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-                  <input type="text" value={editingItem.title || ''} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Project Title *</label>
+                  <input type="text" required value={editingItem.title || ''} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
+
+                {/* PI and Department */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Principal Investigator *</label>
+                    <input type="text" required value={editingItem.pi || ''} onChange={(e) => setEditingItem({...editingItem, pi: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Department *</label>
+                    <select required value={editingItem.department || ''} onChange={(e) => setEditingItem({...editingItem, department: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="">Select Department</option>
+                      {faculties.map(faculty => (
+                        <option key={faculty.code} value={faculty.name}>{faculty.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Co-Investigators */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Co-Investigators (comma-separated)</label>
+                  <input type="text" value={editingItem.coInvestigators?.join(', ') || ''}
+                    onChange={(e) => setEditingItem({...editingItem, coInvestigators: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+
+                {/* Type and Status */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
+                    <select value={editingItem.type || 'Applied Research'} onChange={(e) => setEditingItem({...editingItem, type: e.target.value as any})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="Applied Research">Applied Research</option>
+                      <option value="Basic Research">Basic Research</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
+                    <select value={editingItem.status || 'Pending'} onChange={(e) => setEditingItem({...editingItem, status: e.target.value as any})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="Active">Active</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Pending">Pending</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Start and End Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Start Date *</label>
+                    <input type="date" required value={editingItem.startDate || ''} onChange={(e) => setEditingItem({...editingItem, startDate: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">End Date *</label>
+                    <input type="date" required value={editingItem.endDate || ''} onChange={(e) => setEditingItem({...editingItem, endDate: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+
+                {/* Funding and Source */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Funding Amount *</label>
+                    <input type="text" required placeholder="e.g., $250,000" value={editingItem.funding || ''} onChange={(e) => setEditingItem({...editingItem, funding: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Funding Source *</label>
+                    <input type="text" required value={editingItem.fundingSource || ''} onChange={(e) => setEditingItem({...editingItem, fundingSource: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+
+                {/* Progress and Publications */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Progress (0-100) *</label>
+                    <input type="number" required min="0" max="100" value={editingItem.progress || 0} onChange={(e) => setEditingItem({...editingItem, progress: parseInt(e.target.value) || 0})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Publications Count</label>
+                    <input type="number" min="0" value={editingItem.publications || 0} onChange={(e) => setEditingItem({...editingItem, publications: parseInt(e.target.value) || 0})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Description *</label>
+                  <textarea required rows={4} value={editingItem.description || ''} onChange={(e) => setEditingItem({...editingItem, description: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+
+                {/* PDF Upload */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Upload PDF (Optional)</label>
                   <input type="file" accept=".pdf" onChange={(e) => setProjectPdfFile(e.target.files?.[0] || null)}
@@ -3462,8 +3625,13 @@ const ResearchManagement = () => {
                   {projectPdfFile && <p className="text-xs text-green-600 mt-1">Selected: {projectPdfFile.name}</p>}
                   {editingItem.pdfUrl && <p className="text-xs text-blue-600 mt-1">Current PDF: {editingItem.pdfUrl.split('/').pop()}</p>}
                 </div>
-                <div className="flex gap-3 pt-4">
-                  <button onClick={() => setShowEditProjectModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg">Cancel</button>
+
+                {/* Submit Button */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                  <button type="button" onClick={() => setShowEditProjectModal(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    Cancel
+                  </button>
                   <button onClick={async () => {
                     try {
                       if (projectPdfFile) {
@@ -3479,7 +3647,9 @@ const ResearchManagement = () => {
                     } catch (err) {
                       alert('Error updating project: ' + (err instanceof Error ? err.message : 'Unknown error'));
                     }
-                  }} className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Save Changes</button>
+                  }} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Save Changes
+                  </button>
                 </div>
               </div>
             </div>
@@ -3489,19 +3659,143 @@ const ResearchManagement = () => {
         {/* Edit Patent Modal */}
         {showEditPatentModal && editingItem && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowEditPatentModal(false)}>
-            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="h-16 bg-gradient-to-br from-green-500 to-green-700 p-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">Edit Patent</h2>
+            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="h-20 bg-gradient-to-br from-green-500 to-green-700 p-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Edit Patent</h2>
+                  <p className="text-green-100 text-sm mt-1">Update patent information</p>
+                </div>
                 <button onClick={() => setShowEditPatentModal(false)} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
-                  <X size={20} />
+                  <X size={24} />
                 </button>
               </div>
+
               <div className="p-6 space-y-4">
+                {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-                  <input type="text" value={editingItem.title || ''} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Patent Title *</label>
+                  <input type="text" required value={editingItem.title || ''} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
+
+                {/* Inventors */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Inventors (comma-separated) *</label>
+                  <input type="text" required value={editingItem.inventors?.join(', ') || ''}
+                    onChange={(e) => setEditingItem({...editingItem, inventors: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+
+                {/* Application Number and Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Application Number *</label>
+                    <input type="text" required value={editingItem.applicationNumber || ''} onChange={(e) => setEditingItem({...editingItem, applicationNumber: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Application Date *</label>
+                    <input type="date" required value={editingItem.applicationDate || ''} onChange={(e) => setEditingItem({...editingItem, applicationDate: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+
+                {/* Type and Status */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
+                    <select value={editingItem.type || 'Invention Patent'} onChange={(e) => setEditingItem({...editingItem, type: e.target.value as any})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="Invention Patent">Invention Patent</option>
+                      <option value="Utility Model">Utility Model</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
+                    <select value={editingItem.status || 'Pending'} onChange={(e) => setEditingItem({...editingItem, status: e.target.value as any})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="Granted">Granted</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Under Examination">Under Examination</option>
+                      <option value="International Filing">International Filing</option>
+                      <option value="International">International</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Patent Number and Grant Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Patent Number {editingItem.status === 'Granted' && '*'}</label>
+                    <input type="text" value={editingItem.patentNumber || ''} onChange={(e) => setEditingItem({...editingItem, patentNumber: e.target.value})}
+                      required={editingItem.status === 'Granted'}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Grant Date {editingItem.status === 'Granted' && '*'}</label>
+                    <input type="date" value={editingItem.grantDate || ''} onChange={(e) => setEditingItem({...editingItem, grantDate: e.target.value})}
+                      required={editingItem.status === 'Granted'}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+
+                {/* Faculty and Discipline */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Faculty *</label>
+                    <select required value={editingItem.faculty || ''} onChange={(e) => setEditingItem({...editingItem, faculty: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="">Select Faculty</option>
+                      {faculties.map(faculty => (
+                        <option key={faculty.code} value={faculty.name}>{faculty.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline *</label>
+                    <select required value={editingItem.discipline || 'Nontraditional Security'} onChange={(e) => setEditingItem({...editingItem, discipline: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <option value="Nontraditional Security">Nontraditional Security</option>
+                      <option value="Business">Business</option>
+                      <option value="Management Science">Management Science</option>
+                      <option value="Economics">Economics</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Communication">Communication</option>
+                      <option value="Psychology">Psychology</option>
+                      <option value="Law">Law</option>
+                      <option value="Cybersecurity">Cybersecurity</option>
+                      <option value="Water Security">Water Security</option>
+                      <option value="Data Science">Data Science</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Human Resources">Human Resources</option>
+                      <option value="IT">IT</option>
+                      <option value="Technology Management">Technology Management</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Country and IP Office */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Country *</label>
+                    <input type="text" required value={editingItem.country || ''} onChange={(e) => setEditingItem({...editingItem, country: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">IP Office *</label>
+                    <input type="text" required value={editingItem.ipOffice || ''} onChange={(e) => setEditingItem({...editingItem, ipOffice: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  </div>
+                </div>
+
+                {/* Abstract */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Abstract *</label>
+                  <textarea required rows={4} value={editingItem.abstract || ''} onChange={(e) => setEditingItem({...editingItem, abstract: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+
+                {/* PDF Upload */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Upload PDF (Optional)</label>
                   <input type="file" accept=".pdf" onChange={(e) => setPatentPdfFile(e.target.files?.[0] || null)}
@@ -3509,8 +3803,13 @@ const ResearchManagement = () => {
                   {patentPdfFile && <p className="text-xs text-green-600 mt-1">Selected: {patentPdfFile.name}</p>}
                   {editingItem.pdfUrl && <p className="text-xs text-blue-600 mt-1">Current PDF: {editingItem.pdfUrl.split('/').pop()}</p>}
                 </div>
-                <div className="flex gap-3 pt-4">
-                  <button onClick={() => setShowEditPatentModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg">Cancel</button>
+
+                {/* Submit Button */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                  <button type="button" onClick={() => setShowEditPatentModal(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    Cancel
+                  </button>
                   <button onClick={async () => {
                     try {
                       if (patentPdfFile) {
@@ -3526,7 +3825,9 @@ const ResearchManagement = () => {
                     } catch (err) {
                       alert('Error updating patent: ' + (err instanceof Error ? err.message : 'Unknown error'));
                     }
-                  }} className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Save Changes</button>
+                  }} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Save Changes
+                  </button>
                 </div>
               </div>
             </div>

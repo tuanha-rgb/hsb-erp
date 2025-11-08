@@ -255,7 +255,7 @@ const [canvasReady, setCanvasReady] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Start at 1.2 scale for better readability on desktop screens
+  // Start at 1.2 scale (120%) for balanced readability
   const [scale, setScale] = useState(1.2);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -278,8 +278,12 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
 const setCanvasRef = (element: HTMLCanvasElement | null) => {
   canvasRef.current = element;
   if (element) {
-    console.log('Canvas mounted and ready');
+    console.log('[CANVAS MOUNT] Canvas element mounted and ready');
+    console.log('[CANVAS MOUNT] Canvas dimensions:', element.width, 'x', element.height);
     setCanvasReady(true);
+  } else {
+    console.log('[CANVAS MOUNT] Canvas element unmounted');
+    setCanvasReady(false);
   }
 };  const canvas2Ref = useRef<HTMLCanvasElement>(null);
   const epubContainerRef = useRef<HTMLDivElement>(null);
@@ -313,11 +317,21 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
   }, [bookmarks, storageKey]);
   // Render first page when both PDF and canvas are ready
   useEffect(() => {
-  if (pdfDocRef.current && canvasReady && canvasRef.current && currentPage === 1 && totalPages > 0) {
-    console.log('Both PDF and canvas ready, rendering page 1');
-    renderPDFPages(1);
-  }
-}, [pdfDocRef.current, canvasReady, totalPages]);
+    console.log('[FIRST PAGE EFFECT] Triggered with:', {
+      canvasReady,
+      totalPages,
+      currentPage,
+      hasPdfDoc: !!pdfDocRef.current,
+      hasCanvas: !!canvasRef.current
+    });
+
+    if (canvasReady && totalPages > 0 && currentPage === 1) {
+      console.log('[FIRST PAGE EFFECT] All conditions met, rendering page 1');
+      renderPDFPages(1);
+    } else {
+      console.log('[FIRST PAGE EFFECT] Conditions not met, skipping render');
+    }
+  }, [canvasReady, totalPages]);
 
   useEffect(() => {
     if (!hasFile) {
@@ -334,13 +348,18 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
   }, [item, hasFile]);
 
   const loadDocument = async () => {
+    console.log('[LOAD DOCUMENT] Starting document load for:', item.title);
+
     // Check if item has a valid file source
     const hasValidSource =
       (isBook(item) && item.fileType && (item.firebaseStoragePath || item.driveFileId)) ||
       (isThesis(item) && item.pdfUrl) ||
       (isPublication(item) && item.pdfUrl);
 
+    console.log('[LOAD DOCUMENT] Has valid source:', hasValidSource);
+
     if (!hasValidSource) {
+      console.log('[LOAD DOCUMENT] No valid source, aborting');
       setLoading(false);
       return;
     }
@@ -348,6 +367,7 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
     try {
       setLoading(true);
       setError(null);
+      console.log('[LOAD DOCUMENT] Loading state set to true');
 
       let fileUrl: string | null = null;
       let fileType: 'pdf' | 'epub' = 'pdf';
@@ -356,8 +376,10 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
       if (isBook(item)) {
         if (item.firebaseStoragePath) {
           fileUrl = item.firebaseStoragePath;
+          console.log('[LOAD DOCUMENT] Book - using Firebase storage path');
         } else if (item.driveFileId) {
           fileUrl = await getFileUrl(item.driveFileId);
+          console.log('[LOAD DOCUMENT] Book - fetched Google Drive URL');
         }
         fileType = item.fileType!;
       }
@@ -366,17 +388,25 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
       if (isThesis(item) && item.pdfUrl) {
         fileUrl = item.pdfUrl;
         fileType = 'pdf';
+        console.log('[LOAD DOCUMENT] Thesis - using PDF URL');
       }
 
       // Handle journals (always PDF)
       if (isPublication(item) && item.pdfUrl) {
         fileUrl = item.pdfUrl;
         fileType = 'pdf';
+        console.log('[LOAD DOCUMENT] Publication - using PDF URL');
       }
-      
+
+      console.log('[LOAD DOCUMENT] File type:', fileType);
+      console.log('[LOAD DOCUMENT] File URL:', fileUrl);
+
       if (!fileUrl) throw new Error('No file source available');
-      
-      if (fileType === 'pdf') await loadPDF(fileUrl);
+
+      if (fileType === 'pdf') {
+        console.log('[LOAD DOCUMENT] Calling loadPDF');
+        await loadPDF(fileUrl);
+      }
       
  ;
       
@@ -431,47 +461,75 @@ const getNumPages = () => pdfDocRef.current?.numPages ?? totalPages;
 // ============================================
 
 const loadPDF = async (url: string) => {
+  console.log('[LOAD PDF] Starting PDF load from URL:', url);
+
   const loadingTask = getDocument({ url, withCredentials: false });
   const pdf = await loadingTask.promise;
   pdfDocRef.current = pdf;
 
   const numPages = pdf.numPages;
+  console.log('[LOAD PDF] PDF loaded successfully');
+  console.log('[LOAD PDF] Total pages:', numPages);
+  console.log('[LOAD PDF] Canvas ready status:', canvasReady);
+  console.log('[LOAD PDF] Canvas ref exists:', !!canvasRef.current);
+
   setTotalPages(numPages);
   setCurrentPage(1);
-  
-  // Don't render here - let useEffect handle it when canvas is ready
-  console.log('PDF loaded, waiting for canvas');
+
+  console.log('[LOAD PDF] State updated - totalPages set to:', numPages, 'currentPage set to: 1');
+  console.log('[LOAD PDF] Waiting for useEffect to trigger first page render');
 };
 
 // ---- render the spread (single/dual)
 const renderPDFPages = async (pageNum: number) => {
-  if (!pdfDocRef.current) return;
+  console.log('[RENDER PAGES] Called with pageNum:', pageNum);
+  console.log('[RENDER PAGES] PDF doc exists:', !!pdfDocRef.current);
+  console.log('[RENDER PAGES] Canvas exists:', !!canvasRef.current);
+
+  if (!pdfDocRef.current) {
+    console.log('[RENDER PAGES] No PDF document, aborting');
+    return;
+  }
 
   // Wait for any ongoing render to finish
-  if (renderingLockRef.current) await renderingLockRef.current;
+  if (renderingLockRef.current) {
+    console.log('[RENDER PAGES] Waiting for previous render to complete');
+    await renderingLockRef.current;
+  }
 
   const task = (async () => {
     const numPages = pdfDocRef.current.numPages;
     const validPageNum = Math.max(1, Math.min(pageNum, numPages));
 
+    console.log('[RENDER PAGES] Valid page number:', validPageNum, 'of', numPages);
+    console.log('[RENDER PAGES] Page mode:', pageMode);
+
     if (canvasRef.current) {
+      console.log('[RENDER PAGES] Rendering page', validPageNum, 'on canvas 1');
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
       await renderPDFPage(validPageNum, canvasRef.current!);
+      console.log('[RENDER PAGES] Page', validPageNum, 'rendered on canvas 1');
+    } else {
+      console.log('[RENDER PAGES] Canvas 1 not available');
     }
 
     if (pageMode === 'dual' && canvas2Ref.current && validPageNum < numPages) {
+      console.log('[RENDER PAGES] Rendering page', validPageNum + 1, 'on canvas 2');
       const ctx2 = canvas2Ref.current.getContext('2d');
       if (ctx2) ctx2.clearRect(0, 0, canvas2Ref.current.width, canvas2Ref.current.height);
       await renderPDFPage(validPageNum + 1, canvas2Ref.current!);
+      console.log('[RENDER PAGES] Page', validPageNum + 1, 'rendered on canvas 2');
     }
 
     setCurrentPage(validPageNum);
+    console.log('[RENDER PAGES] Current page set to:', validPageNum);
   })();
 
   renderingLockRef.current = task;
   await task;
   renderingLockRef.current = null;
+  console.log('[RENDER PAGES] Rendering complete');
 };
 
 
@@ -480,32 +538,63 @@ const renderPDFPage = async (
   pageNum: number,
   canvas: HTMLCanvasElement
 ) => {
-  if (!pdfDocRef.current || !canvas) return;
+  console.log('[RENDER PAGE] Starting render for page:', pageNum);
+
+  if (!pdfDocRef.current || !canvas) {
+    console.log('[RENDER PAGE] Missing requirements - PDF:', !!pdfDocRef.current, 'Canvas:', !!canvas);
+    return;
+  }
 
   const numPages = pdfDocRef.current.numPages;
-  if (pageNum < 1 || pageNum > numPages) return;
+  if (pageNum < 1 || pageNum > numPages) {
+    console.log('[RENDER PAGE] Invalid page number:', pageNum, 'Total pages:', numPages);
+    return;
+  }
 
+  console.log('[RENDER PAGE] Getting page object for page:', pageNum);
   const page = await pdfDocRef.current.getPage(pageNum);
+  console.log('[RENDER PAGE] Page object retrieved');
 
-  // Get viewport at desired scale (for CSS display size)
-  const displayViewport = page.getViewport({ scale: scale });
+  // Use actual devicePixelRatio for crisp rendering on high-DPI screens
+  // Cap at 3 for very high-DPI displays to balance quality and performance
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
 
-  // Use device pixel ratio for rendering quality (capped at 2 for performance)
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-  const renderViewport = page.getViewport({ scale: scale * pixelRatio });
+  // Calculate viewport with combined scale
+  const renderScale = scale * pixelRatio;
+  const viewport = page.getViewport({ scale: renderScale });
+
+  console.log('[RENDER PAGE] Render settings:', {
+    scale,
+    pixelRatio,
+    renderScale,
+    viewportWidth: viewport.width,
+    viewportHeight: viewport.height
+  });
 
   const context = canvas.getContext('2d');
-  if (!context) return;
+  if (!context) {
+    console.log('[RENDER PAGE] Failed to get canvas context');
+    return;
+  }
 
-  // Set canvas internal resolution (for rendering)
-  canvas.width = renderViewport.width;
-  canvas.height = renderViewport.height;
+  // Set canvas internal resolution to match render scale
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
 
-  // Set CSS display size (what user sees)
-  canvas.style.width = `${displayViewport.width}px`;
-  canvas.style.height = `${displayViewport.height}px`;
+  // Set CSS display size to scale/pixelRatio to get crisp rendering
+  canvas.style.width = `${viewport.width / pixelRatio}px`;
+  canvas.style.height = `${viewport.height / pixelRatio}px`;
 
-  await page.render({ canvasContext: context, viewport: renderViewport }).promise;
+  console.log('[RENDER PAGE] Canvas configured:', {
+    internalWidth: canvas.width,
+    internalHeight: canvas.height,
+    cssWidth: canvas.style.width,
+    cssHeight: canvas.style.height
+  });
+
+  console.log('[RENDER PAGE] Starting PDF.js render operation');
+  await page.render({ canvasContext: context, viewport: viewport }).promise;
+  console.log('[RENDER PAGE] PDF.js render complete for page:', pageNum);
 };
 // ---- Add useEffect for scale/pageMode changes
 useEffect(() => {
@@ -542,13 +631,13 @@ const handleNextPage = () => {
 // ---- Zoom handlers (optimized for desktop)
 const handleZoomIn = () => {
   if (fileKind === 'pdf') {
-    setScale(prev => Math.min(prev + 0.1, 2.5));
+    setScale(prev => Math.min(prev + 0.1, 3.0));
   }
 };
 
 const handleZoomOut = () => {
   if (fileKind === 'pdf') {
-    setScale(prev => Math.max(prev - 0.1, 0.8));
+    setScale(prev => Math.max(prev - 0.1, 0.5));
   }
 };
 
@@ -637,13 +726,13 @@ const togglePageMode = async () => {
           </button>
 <input
   type="number"
-  min="80"
-  max="250"
+  min="50"
+  max="300"
   step="10"
   value={Math.round(scale * 100)}
   onChange={(e) => {
     const newPercent = parseInt(e.target.value);
-    if (!isNaN(newPercent) && newPercent >= 80 && newPercent <= 250) {
+    if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
       setScale(newPercent / 100);
     }
   }}
