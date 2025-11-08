@@ -1,15 +1,16 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  updateDoc, 
-  deleteDoc, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
   doc,
   query,
   where,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
-import { db } from '../firebase/firebase.config';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from './firebase.config';
 
 export interface Publication {
   id?: string;
@@ -34,6 +35,7 @@ export interface Publication {
   volume?: string;
   issue?: string;
   url?: string;
+  pdfUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -148,12 +150,23 @@ export async function fetchPublicationByISBN(isbn: string): Promise<Partial<Publ
 export const publicationService = {
   // Add new publication
   async addPublication(publication: Omit<Publication, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const cleanedData = Object.fromEntries(
+      Object.entries(publication).filter(([_, v]) => v != null && v !== undefined)
+    );
     const docRef = await addDoc(collection(db, PUBLICATIONS_COLLECTION), {
-      ...publication,
+      ...cleanedData,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     });
     return docRef.id;
+  },
+
+  // Upload journal PDF
+  async uploadJournalPdf(file: File, publicationId: string): Promise<string> {
+    const storageRef = ref(storage, `journals/${publicationId}-${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
   },
 
   // Get all publications

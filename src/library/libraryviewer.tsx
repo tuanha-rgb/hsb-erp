@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { 
+import {
   Book, BookOpen, Search, Filter, X, ChevronDown, ChevronRight,
   Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
+  FileText,
 } from 'lucide-react';
 
 import { catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
@@ -12,6 +13,7 @@ import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 import pdfjsWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { bookService, type Book as FirebaseBook } from '../firebase/book.service';
 import { thesisService, type Thesis as FirebaseThesis } from '../firebase/thesis.service';
+import { publicationService, type Publication } from '../firebase/publication.service';
 
 GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
 
@@ -39,8 +41,8 @@ export interface LibraryThesis {
 }
 
 type ViewMode = 'grid' | 'list';
-type ContentType = 'books' | 'theses';
-type ReadingItem = BookRecord | LibraryThesis;
+type ContentType = 'books' | 'theses' | 'journals';
+type ReadingItem = BookRecord | LibraryThesis | Publication;
 
 interface CarouselSlide {
   id: string;
@@ -317,8 +319,18 @@ type PageMode = 'single' | 'dual';
 interface Bookmark { page: number; note?: string; timestamp: number; }
 interface ReadingViewProps { item: ReadingItem; onClose: () => void; }
 
-const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
-const isThesis = (item: ReadingItem): item is LibraryThesis => 'student' in item;
+// Type guard functions to identify each type
+const isBook = (item: ReadingItem): item is BookRecord => {
+  return 'isbn' in item && 'catalogue' in item;
+};
+
+const isThesis = (item: ReadingItem): item is LibraryThesis => {
+  return 'student' in item && typeof (item as any).student === 'object';
+};
+
+const isPublication = (item: ReadingItem): item is Publication => {
+  return 'wosranking' in item || 'quartile' in item;
+};
 
 const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -364,7 +376,8 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
   const fileKind: 'pdf' | 'epub' | null =
     (isBook(item) && item.firebaseStoragePath && item.fileType
       ? (item.fileType as 'pdf' | 'epub')
-      : (isThesis(item) && item.pdfUrl ? 'pdf' : null));
+      : (isThesis(item) && item.pdfUrl ? 'pdf'
+      : (isPublication(item) && item.pdfUrl ? 'pdf' : null)));
   
   const hasFile = fileKind !== null;
   const storageKey = `bookmarks_${item.id}`;
@@ -406,22 +419,23 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
 
   const loadDocument = async () => {
     // Check if item has a valid file source
-    const hasValidSource = 
+    const hasValidSource =
       (isBook(item) && item.fileType && (item.firebaseStoragePath || item.driveFileId)) ||
-      (isThesis(item) && item.pdfUrl);
-    
+      (isThesis(item) && item.pdfUrl) ||
+      (isPublication(item) && item.pdfUrl);
+
     if (!hasValidSource) {
       setLoading(false);
       return;
     }
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       let fileUrl: string | null = null;
       let fileType: 'pdf' | 'epub' = 'pdf';
-      
+
       // Handle books
       if (isBook(item)) {
         if (item.firebaseStoragePath) {
@@ -431,9 +445,15 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
         }
         fileType = item.fileType!;
       }
-      
+
       // Handle theses (always PDF)
       if (isThesis(item) && item.pdfUrl) {
+        fileUrl = item.pdfUrl;
+        fileType = 'pdf';
+      }
+
+      // Handle journals (always PDF)
+      if (isPublication(item) && item.pdfUrl) {
         fileUrl = item.pdfUrl;
         fileType = 'pdf';
       }
@@ -451,23 +471,27 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
           if (isBook(item)) {
             // For books, find Firebase book by matching title/author
             const allBooks = await bookService.getAllBooks();
-            const firebaseBook = allBooks.find(b => 
+            const firebaseBook = allBooks.find(b =>
               b.title === item.title && b.author === item.authors[0]
             );
-            
+
             if (firebaseBook?.id) {
               await bookService.incrementViews(firebaseBook.id);
             }
           } else if (isThesis(item)) {
             // For theses, find by title and student name
             const allTheses = await thesisService.getAllTheses();
-            const firebaseThesis = allTheses.find(t => 
+            const firebaseThesis = allTheses.find(t =>
               t.title === item.title && t.studentName === item.student.name
             );
-            
+
             if (firebaseThesis?.id) {
               await thesisService.incrementViews(firebaseThesis.id);
             }
+          } else if (isPublication(item) && item.id) {
+            // For journals, we already have the ID
+            // Note: publicationService doesn't have incrementViews yet, so we skip for now
+            // You can add this method to publicationService if needed
           }
         } catch (viewErr) {
           // Don't block document viewing if view tracking fails
@@ -881,12 +905,14 @@ const LibraryViewer: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [firebaseBooks, setFirebaseBooks] = useState<FirebaseBook[]>([]);
   const [firebaseTheses, setFirebaseTheses] = useState<FirebaseThesis[]>([]);
+  const [firebaseJournals, setFirebaseJournals] = useState<Publication[]>([]);
   const [previewItem, setPreviewItem] = useState<ReadingItem | null>(null);
-  
+
   // Load data from Firebase
-  useEffect(() => { 
+  useEffect(() => {
     loadFirebaseBooks();
     loadFirebaseTheses();
+    loadFirebaseJournals();
   }, []);
 
   const loadFirebaseBooks = async () => {
@@ -904,6 +930,16 @@ const LibraryViewer: React.FC = () => {
       setFirebaseTheses(theses.filter(t => t.status === 'approved'));
     } catch (error) {
       console.error('Failed to load theses:', error);
+    }
+  };
+
+  const loadFirebaseJournals = async () => {
+    try {
+      const publications = await publicationService.getAllPublications();
+      // Only show publications with PDF URLs
+      setFirebaseJournals(publications.filter(p => p.pdfUrl && p.status === 'Published'));
+    } catch (error) {
+      console.error('Failed to load journals:', error);
     }
   };
 
@@ -950,7 +986,10 @@ const filteredContent = useMemo(() => {
     grade: ft.grade
   }));
 
-  let items: ReadingItem[] = contentType === 'books' ? convertedBooks : convertedTheses;
+  let items: ReadingItem[] =
+    contentType === 'books' ? convertedBooks :
+    contentType === 'theses' ? convertedTheses :
+    firebaseJournals;
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
@@ -959,11 +998,17 @@ const filteredContent = useMemo(() => {
         return item.title.toLowerCase().includes(q) ||
                item.authors.some(a => a.toLowerCase().includes(q)) ||
                item.subjects.some(s => s.toLowerCase().includes(q));
-      } else {
+      } else if (isThesis(item)) {
         return item.title.toLowerCase().includes(q) ||
                item.student.name.toLowerCase().includes(q) ||
                item.keywords.some(k => k.toLowerCase().includes(q));
+      } else if (isPublication(item)) {
+        return item.title.toLowerCase().includes(q) ||
+               item.authors.some(a => a.toLowerCase().includes(q)) ||
+               (item.journal && item.journal.toLowerCase().includes(q)) ||
+               (item.keywords && item.keywords.some(k => k.toLowerCase().includes(q)));
       }
+      return false;
     });
   }
 
@@ -972,15 +1017,17 @@ const filteredContent = useMemo(() => {
 }
 
 if (selectedLevel !== 'all' && contentType === 'theses') {
-  items = items.filter(item => !isBook(item) && item.level === selectedLevel);
+  items = items.filter(item => isThesis(item) && item.level === selectedLevel);
 }
 
   if (selectedYear !== 'all') {
   items = items.filter(item => {
     if (contentType === 'books' && isBook(item)) {
       return item.publicationYear.toString() === selectedYear;
-    } else if (contentType === 'theses' && !isBook(item)) {
+    } else if (contentType === 'theses' && isThesis(item)) {
       return item.academicYear.toString() === selectedYear;
+    } else if (contentType === 'journals' && isPublication(item)) {
+      return item.year.toString() === selectedYear;
     }
     return true;
   });
@@ -990,15 +1037,17 @@ if (selectedLevel !== 'all' && contentType === 'theses') {
     items = items.filter(item => {
       if (contentType === 'books' && isBook(item)) {
         return item.publisher === selectedPublisher;
-      } else if (contentType === 'theses' && !isBook(item)) {
+      } else if (contentType === 'theses' && isThesis(item)) {
         return item.program === selectedPublisher;
+      } else if (contentType === 'journals' && isPublication(item)) {
+        return item.journal === selectedPublisher;
       }
       return true;
     });
   }
 
   return items;
-}, [searchQuery, contentType, selectedCategory, selectedYear, selectedPublisher, firebaseBooks, firebaseTheses]);
+}, [searchQuery, contentType, selectedCategory, selectedYear, selectedPublisher, selectedLevel, firebaseBooks, firebaseTheses, firebaseJournals]);
   const totalPages = Math.ceil(filteredContent.length / itemsPerPage);
 
 const paginatedContent = useMemo(() => {
@@ -1008,7 +1057,7 @@ const paginatedContent = useMemo(() => {
 
   
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, contentType, selectedCategory, selectedYear, selectedPublisher, itemsPerPage]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, contentType, selectedCategory, selectedYear, selectedPublisher, selectedLevel, itemsPerPage]);
 
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
@@ -1031,9 +1080,10 @@ const paginatedContent = useMemo(() => {
   const stats = useMemo(() => ({
     totalBooks: firebaseBooks.length,
     totalTheses: firebaseTheses.length,
+    totalJournals: firebaseJournals.length,
     availableCopies: firebaseBooks.reduce((sum, b) => sum + b.availableCopies, 0),
     digitalBooks: firebaseBooks.filter(b => b.pdfUrl).length,
-  }), [firebaseBooks, firebaseTheses]);
+  }), [firebaseBooks, firebaseTheses, firebaseJournals]);
 
   if (readingItem) {
     return <ReadingView item={readingItem} onClose={() => setReadingItem(null)} />;
@@ -1071,7 +1121,7 @@ const clearAllFilters = () => {
   <div className="flex-1 relative">
     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-      placeholder={contentType === 'books' ? "Search books..." : "Search theses..."}
+      placeholder={contentType === 'books' ? "Search books..." : contentType === 'theses' ? "Search theses..." : "Search journals..."}
       className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
     {searchQuery && (
       <button onClick={() => setSearchQuery('')}
@@ -1111,6 +1161,12 @@ const clearAllFilters = () => {
       contentType === 'theses' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
     }`}>
     <BookOpen size={18} />Theses ({firebaseTheses.length})
+  </button>
+  <button onClick={() => setContentType('journals')}
+    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+      contentType === 'journals' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+    }`}>
+    <FileText size={18} />Journals ({firebaseJournals.length})
   </button>
 
   {hasActiveFilters && (
@@ -1290,19 +1346,19 @@ const clearAllFilters = () => {
         onClick={() => setPreviewItem(item)}>
         
         <h3 className="font-semibold mb-2 line-clamp-2 text-gray-900 min-h-[2.5rem]">{item.title}</h3>
-        
+
         <div className="flex gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-600 mb-2 line-clamp-1">
-              {isBook(item) ? item.authors.join(', ') : item.student.name}
+              {isBook(item) ? item.authors.join(', ') : isThesis(item) ? item.student.name : isPublication(item) ? item.authors.join(', ') : ''}
             </p>
-            
+
             <div className="mb-2">
               <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200">
-                {isBook(item) ? item.catalogue : item.program}
+                {isBook(item) ? item.catalogue : isThesis(item) ? item.program : isPublication(item) ? item.discipline : ''}
               </span>
             </div>
-            
+
             {isBook(item) ? (
               <div className="space-y-1">
                 <div className="text-xs text-gray-500">
@@ -1315,7 +1371,7 @@ const clearAllFilters = () => {
                   {item.publisher}
                 </div>
               </div>
-            ) : (
+            ) : isThesis(item) ? (
               <div className="space-y-1">
                 <div className="text-xs text-gray-500">
                   {item.academicYear} • {item.pages || 0} pages
@@ -1329,7 +1385,21 @@ const clearAllFilters = () => {
                   )}
                 </div>
               </div>
-            )}
+            ) : isPublication(item) ? (
+              <div className="space-y-1">
+                <div className="text-xs text-gray-500">
+                  {item.year} • {item.journal}
+                </div>
+                <div className="flex justify-between items-center text-xs pt-1 border-t">
+                  <span className="text-xs text-gray-600">
+                    {item.quartile !== 'N/A' ? item.quartile : ''} {item.impactFactor ? `IF: ${item.impactFactor}` : ''}
+                  </span>
+                  {item.pdfUrl && (
+                    <span className="text-green-600 font-medium">PDF</span>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
           
           {isBook(item) && item.coverImage && (
@@ -1371,37 +1441,37 @@ const clearAllFilters = () => {
                     <div className="col-span-4 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-overflow text-sm">{item.title}</h3>
                       <p className="text-xs text-gray-600 truncate">
-                        {isBook(item) ? item.authors.join(', ') : item.student.name}
+                        {isBook(item) ? item.authors.join(', ') : isThesis(item) ? item.student.name : isPublication(item) ? item.authors.join(', ') : ''}
                       </p>
                     </div>
-                    
+
                     <div className="col-span-1">
                       <span className="inline-block px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-full">
-                        {isBook(item) ? item.catalogue : item.program}
+                        {isBook(item) ? item.catalogue : isThesis(item) ? item.program : isPublication(item) ? item.discipline : ''}
                       </span>
                     </div>
-                    
+
                     <div className="col-span-2">
                       <span className="text-sm text-gray-700 truncate block">
-                        {isBook(item) ? item.publisher : item.program}
+                        {isBook(item) ? item.publisher : isThesis(item) ? item.program : isPublication(item) ? item.journal : ''}
                       </span>
                       {isBook(item) && item.publisherCode && (
                         <span className="text-xs text-gray-500">({item.publisherCode})</span>
                       )}
                     </div>
-                    
+
                     <div className="col-span-1">
                       <span className="text-sm text-gray-700">
-                        {isBook(item) ? item.publicationYear : item.academicYear.split('-')[1]}
+                        {isBook(item) ? item.publicationYear : isThesis(item) ? item.academicYear.split('-')[1] : isPublication(item) ? item.year : ''}
                       </span>
                     </div>
-                    
+
                     <div className="col-span-1">
                       <span className="text-sm text-gray-700">
                         {item.pages || '-'}
                       </span>
                     </div>
-                    
+
                     <div className="col-span-1">
                       {isBook(item) ? (
                         <div className="text-sm">
@@ -1412,15 +1482,19 @@ const clearAllFilters = () => {
                           </span>
                           <span className="text-gray-500">/{item.totalCopies}</span>
                         </div>
-                      ) : (
+                      ) : isThesis(item) ? (
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           item.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                         }`}>
                           {item.status}
                         </span>
-                      )}
+                      ) : isPublication(item) ? (
+                        <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                          {item.status}
+                        </span>
+                      ) : null}
                     </div>
-                    
+
                     <div className="col-span-1">
                       {isBook(item) ? (
                         item.fileType ? (
@@ -1430,7 +1504,7 @@ const clearAllFilters = () => {
                         ) : (
                           <span className="text-xs text-gray-400">-</span>
                         )
-                      ) : (
+                      ) : (isThesis(item) || isPublication(item)) ? (
                         item.pdfUrl ? (
                           <span className="px-2 py-1 rounded text-xs font-medium bg-green-50 text-green-700">
                             PDF
@@ -1438,7 +1512,7 @@ const clearAllFilters = () => {
                         ) : (
                           <span className="text-xs text-gray-400">-</span>
                         )
-                      )}
+                      ) : null}
                     </div>
                   </div>
                   
@@ -1511,7 +1585,7 @@ const clearAllFilters = () => {
               <div className="flex-1 pr-4">
                 <h3 className="text-2xl font-bold text-gray-900">{previewItem.title}</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  {isBook(previewItem) ? `by ${previewItem.authors.join(', ')}` : `by ${previewItem.student.name}`}
+                  {isBook(previewItem) ? `by ${previewItem.authors.join(', ')}` : isThesis(previewItem) ? `by ${previewItem.student.name}` : isPublication(previewItem) ? `by ${previewItem.authors.join(', ')}` : ''}
                 </p>
               </div>
               <button onClick={() => setPreviewItem(null)} className="text-gray-500 hover:text-gray-700 p-1">
@@ -1574,7 +1648,7 @@ const clearAllFilters = () => {
                     </div>
                   )}
                 </div>
-              ) : (
+              ) : isThesis(previewItem) ? (
                 <div>
                   <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                     <div>
@@ -1611,7 +1685,66 @@ const clearAllFilters = () => {
                     </div>
                   )}
                 </div>
-              )}
+              ) : isPublication(previewItem) ? (
+                <div>
+                  <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Journal</span>
+                      <span className="text-gray-900">{previewItem.journal}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Year</span>
+                      <span className="text-gray-900">{previewItem.year}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Type</span>
+                      <span className="text-gray-900">{previewItem.type}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Discipline</span>
+                      <span className="text-gray-900">{previewItem.discipline}</span>
+                    </div>
+                    {previewItem.impactFactor && (
+                      <div>
+                        <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Impact Factor</span>
+                        <span className="text-gray-900">{previewItem.impactFactor}</span>
+                      </div>
+                    )}
+                    {previewItem.quartile && previewItem.quartile !== 'N/A' && (
+                      <div>
+                        <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">Quartile</span>
+                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                          {previewItem.quartile}
+                        </span>
+                      </div>
+                    )}
+                    {previewItem.doi && (
+                      <div className="col-span-2">
+                        <span className="text-xs font-semibold text-gray-500 uppercase block mb-1">DOI</span>
+                        <span className="text-gray-900 text-xs font-mono">{previewItem.doi}</span>
+                      </div>
+                    )}
+                  </div>
+                  {previewItem.abstract && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Abstract</h4>
+                      <p className="text-gray-700 leading-relaxed text-sm">{previewItem.abstract}</p>
+                    </div>
+                  )}
+                  {previewItem.keywords && previewItem.keywords.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Keywords</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {previewItem.keywords.map((kw, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
 
             <div className="sticky bottom-0 bg-gray-50 border-t px-6 py-4">
@@ -1621,9 +1754,9 @@ const clearAllFilters = () => {
                   setReadingItem(previewItem);
                 }}
                 className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                disabled={!(isBook(previewItem) ? previewItem.firebaseStoragePath : previewItem.pdfUrl)}
+                disabled={!(isBook(previewItem) ? previewItem.firebaseStoragePath : (isThesis(previewItem) || isPublication(previewItem)) ? previewItem.pdfUrl : false)}
               >
-                {(isBook(previewItem) ? previewItem.firebaseStoragePath : previewItem.pdfUrl) ? '📖 Open & Read' : '⚠️ No Digital Copy'}
+                {(isBook(previewItem) ? previewItem.firebaseStoragePath : (isThesis(previewItem) || isPublication(previewItem)) ? previewItem.pdfUrl : false) ? '📖 Open & Read' : '⚠️ No Digital Copy'}
               </button>
             </div>
           </div>

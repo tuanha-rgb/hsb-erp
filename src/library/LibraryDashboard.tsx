@@ -6,24 +6,28 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/firebase.config";
 import type { Book } from "../firebase/book.service";
 import type { Thesis } from "../firebase/thesis.service";
+import type { Publication } from "../firebase/publication.service";
+import { analyticsService, type DailyStats } from "../firebase/analytics.service";
 
 /* ---------- Types ---------- */
 interface DashboardStats {
   totalCollection: number;
   totalBooks: number;
   totalTheses: number;
+  totalJournals: number;
   physicalBooks: number;
   digitalBooks: number;
   activeUsers: number;
   offlineBorrows: number;
   onlineAccess: number;
   overdueItems: number;
-  
+
   business: { physical: number; digital: number; offline: number; online: number };
   technology: { physical: number; digital: number; offline: number; online: number };
   nts: { physical: number; digital: number; offline: number; online: number };
   others: { physical: number; digital: number; offline: number; online: number };
   thesis: { physical: number; digital: number; offline: number; online: number };
+  journals: { physical: number; digital: number; offline: number; online: number };
 }
 
 interface UsageTrend {
@@ -48,12 +52,39 @@ interface Activity {
 const LibraryDashboard: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [theses, setTheses] = useState<Thesis[]>([]);
+  const [publications, setPublications] = useState<Publication[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [popularResources, setPopularResources] = useState<PopularResource[]>([]);
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
-  const [usagePeriod, setUsagePeriod] = useState<'current' | 'previous' | 'ytd'>('current');
+  const [usagePeriod, setUsagePeriod] = useState<'24h' | '7d' | '30d'>('7d');
+  const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
+
+  // Password protection
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  // Check if already authenticated on mount
+  useEffect(() => {
+    const authStatus = sessionStorage.getItem('library_dashboard_auth');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === '123456789') {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('library_dashboard_auth', 'true');
+      setPasswordError('');
+    } else {
+      setPasswordError('Incorrect password. Please try again.');
+      setPasswordInput('');
+    }
+  };
 
   // Setup auth and real-time listeners
   useEffect(() => {
@@ -104,16 +135,35 @@ const LibraryDashboard: React.FC = () => {
       }
     );
 
+    // Real-time publications listener
+    const publicationsUnsub = onSnapshot(
+      collection(db, 'publications'),
+      (snapshot) => {
+        const publicationData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate(),
+          updatedAt: doc.data().updatedAt?.toDate()
+        } as Publication));
+        setPublications(publicationData);
+      },
+      (err) => {
+        console.error("Publications listener error:", err);
+        setError("Failed to load publications");
+      }
+    );
+
     return () => {
       authUnsub();
       booksUnsub();
       thesesUnsub();
+      publicationsUnsub();
     };
   }, []);
 
-  // Recalculate stats whenever books or theses change
+  // Recalculate stats whenever books, theses, or publications change
   useEffect(() => {
-    if (books.length === 0 && theses.length === 0) {
+    if (books.length === 0 && theses.length === 0 && publications.length === 0) {
       setLoading(true);
       return;
     }
@@ -198,12 +248,19 @@ const LibraryDashboard: React.FC = () => {
       const ntsOnline = books.filter(b => isNTS(b)).reduce((sum, b) => sum + (b.views || 0), 0);
       const othersOnline = books.filter(b => othersCategories.includes(b.category)).reduce((sum, b) => sum + (b.views || 0), 0);
 
+      // Journals stats (all publications with PDFs are considered digital journals)
+      const journalsPhysical = 0; // Journals are typically digital
+      const journalsDigital = publications.filter(p => p.pdfUrl).length;
+      const journalsOffline = 0; // Journals don't have offline borrows
+      const journalsOnline = publications.reduce((sum, p) => sum + (p.citations || 0), 0);
+
       setStats({
-        totalCollection: books.length + theses.length,
+        totalCollection: books.length + theses.length + publications.length,
         totalBooks: books.length,
         totalTheses: theses.length,
+        totalJournals: publications.length,
         physicalBooks: physicalBooks + physicalTheses,
-        digitalBooks: digitalBooks + digitalTheses,
+        digitalBooks: digitalBooks + digitalTheses + journalsDigital,
         activeUsers: estimatedActiveUsers,
         offlineBorrows: totalBorrowed,
         onlineAccess: totalOnlineAccess,
@@ -238,6 +295,12 @@ const LibraryDashboard: React.FC = () => {
           digital: digitalTheses,
           offline: Math.floor(thesisBorrowed),
           online: totalThesisViews
+        },
+        journals: {
+          physical: journalsPhysical,
+          digital: journalsDigital,
+          offline: journalsOffline,
+          online: journalsOnline
         }
       });
 
@@ -330,7 +393,78 @@ const LibraryDashboard: React.FC = () => {
       setError(error?.message ?? "Failed to calculate dashboard stats");
       setLoading(false);
     }
-  }, [books, theses]);
+  }, [books, theses, publications]);
+
+  // Load usage trends from Firebase based on selected period
+  useEffect(() => {
+    const loadUsageTrends = async () => {
+      try {
+        let data: DailyStats[] = [];
+
+        console.log('Loading usage trends for period:', usagePeriod);
+
+        if (usagePeriod === '24h') {
+          data = await analyticsService.getLast24HoursStats();
+        } else if (usagePeriod === '7d') {
+          data = await analyticsService.getLast7DaysStats();
+        } else if (usagePeriod === '30d') {
+          data = await analyticsService.getLast30DaysStats();
+        }
+
+        console.log('Loaded daily stats from Firebase:', data);
+        setDailyStats(data);
+      } catch (err) {
+        console.error('Error loading usage trends:', err);
+      }
+    };
+
+    loadUsageTrends();
+  }, [usagePeriod]);
+
+  // Record daily stats to Firebase when stats change (debounced to once per day)
+  useEffect(() => {
+    if (!stats) return;
+
+    const recordStats = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const lastRecordedDate = localStorage.getItem('last_analytics_record_date');
+
+        // Only record once per day
+        if (lastRecordedDate === today) {
+          return;
+        }
+
+        const bookViews = books.reduce((sum, b) => sum + (b.views || 0), 0);
+        const thesisViews = theses.reduce((sum, t) => sum + (t.views || 0), 0);
+        const journalCitations = publications.reduce((sum, p) => sum + (p.citations || 0), 0);
+
+        console.log('Recording daily stats for', today, {
+          totalViews: stats.onlineAccess,
+          bookViews,
+          thesisViews,
+          journalCitations,
+          activeUsers: stats.activeUsers
+        });
+
+        await analyticsService.recordDailyStats({
+          date: today,
+          totalViews: stats.onlineAccess,
+          bookViews,
+          thesisViews,
+          journalCitations,
+          activeUsers: stats.activeUsers
+        });
+
+        localStorage.setItem('last_analytics_record_date', today);
+        console.log('Successfully recorded daily stats to Firebase');
+      } catch (err) {
+        console.error('Error recording daily stats:', err);
+      }
+    };
+
+    recordStats();
+  }, [stats, books, theses, publications]);
 
   // Loading state
   if (loading) {
@@ -368,138 +502,112 @@ const LibraryDashboard: React.FC = () => {
     );
   }
 
-  // Generate usage trends based on selected period
-const getUsageTrends = (): UsageTrend[] => {
-  
-  const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
-  const totalViews = stats.onlineAccess;
-  
-  // Get or initialize daily view tracking
-  const dailyViewsKey = `library_daily_views_${currentYear}_${currentMonth}`;
-  let dailyViews: Record<string, number> = {};
-  
-  try {
-    const stored = localStorage.getItem(dailyViewsKey);
-    if (stored) {
-      dailyViews = JSON.parse(stored);
-    }
-  } catch (e) {
-    console.error('Failed to load daily views:', e);
-  }
-  
-  // Update today's views
- // Update today's views - only once per day
-const todayKey = today.toISOString().split('T')[0]; // YYYY-MM-DD
-const lastUpdateDate = localStorage.getItem('library_last_update_date');
-const previousTotal = parseInt(localStorage.getItem('library_total_views') || '0');
+  // Generate usage trends from Firebase data
+  const getUsageTrends = (): UsageTrend[] => {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-// Only update if it's a new day OR total views increased
-if (lastUpdateDate !== todayKey) {
-  // New day - record yesterday's final count
-  if (lastUpdateDate && previousTotal > 0) {
-    dailyViews[lastUpdateDate] = previousTotal;
-  }
-  
-  // Start fresh for today
-  localStorage.setItem('library_last_update_date', todayKey);
-  localStorage.setItem('library_total_views', totalViews.toString());
-}
+    if (usagePeriod === '24h') {
+      // Last 24 hours - show hourly data or daily if not enough granularity
+      const now = new Date();
+      const hoursToShow = 12; // Show 12 time points for last 24 hours
 
-// Update today's running total (this will change throughout the day)
-dailyViews[todayKey] = totalViews - Object.entries(dailyViews)
-  .filter(([date]) => date !== todayKey)
-  .reduce((sum, [_, count]) => sum + count, 0);
-
-localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
-  
-  if (usagePeriod === 'current') {
-    // Current month - show last 7 days with actual daily views
-    return Array.from({ length: 7 }, (_, i) => {
-      const day = new Date();
-      day.setDate(day.getDate() - (6 - i));
-      const dayKey = day.toISOString().split('T')[0];
-      return {
-        month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-        online: dailyViews[dayKey] || 0
-      };
-    });
-  } else if (usagePeriod === 'previous') {
-    // Previous month - get from previous month's storage
-    const prevMonthKey = `library_daily_views_${currentMonth === 0 ? currentYear - 1 : currentYear}_${currentMonth === 0 ? 11 : currentMonth - 1}`;
-    let prevMonthViews: Record<string, number> = {};
-    try {
-      const stored = localStorage.getItem(prevMonthKey);
-      if (stored) prevMonthViews = JSON.parse(stored);
-    } catch (e) {}
-    
-    const daysToShow = 7;
-    return Array.from({ length: daysToShow }, (_, i) => {
-      const day = new Date(currentYear, currentMonth - 1, Math.floor((30 / daysToShow) * (i + 1)));
-      const dayKey = day.toISOString().split('T')[0];
-      return {
-        month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-        online: prevMonthViews[dayKey] || 0
-      };
-    });
-  } else {
-    // Year to date - sum up each month
-    const monthsToShow = currentMonth + 1;
-  return Array.from({ length: monthsToShow }, (_, i) => {
-    const monthKey = `library_daily_views_${currentYear}_${i}`;
-    let monthTotal = 0;
-    try {
-      const stored = localStorage.getItem(monthKey);
-      if (stored) {
-        const monthData: Record<string, number> = JSON.parse(stored);
-        monthTotal = Object.values(monthData).reduce((sum, val) => sum + val, 0);
+      if (dailyStats.length === 0) {
+        return Array.from({ length: hoursToShow }, (_, i) => {
+          const hour = new Date(now.getTime() - (hoursToShow - 1 - i) * 2 * 60 * 60 * 1000);
+          return {
+            month: `${hour.getHours()}:00`,
+            online: 0
+          };
+        });
       }
-    } catch (e) {}
-    
-    return {
-      month: monthNames[i],
-      online: monthTotal
-    };
-    });
-  }
-};
+
+      // Since we store daily, for 24h we'll interpolate or show the latest data point
+      const latestStat = dailyStats[dailyStats.length - 1];
+      const viewsPerHour = latestStat ? Math.floor(latestStat.totalViews / 24) : 0;
+
+      return Array.from({ length: hoursToShow }, (_, i) => {
+        const hour = new Date(now.getTime() - (hoursToShow - 1 - i) * 2 * 60 * 60 * 1000);
+        return {
+          month: `${String(hour.getHours()).padStart(2, '0')}:00`,
+          online: viewsPerHour * (i + 1)
+        };
+      });
+
+    } else if (usagePeriod === '7d') {
+      // Last 7 days - show daily data
+      const now = new Date();
+      const daysToShow = 7;
+
+      // Create map of dates from dailyStats
+      const statsMap = new Map(dailyStats.map(stat => [stat.date, stat.totalViews]));
+
+      console.log('Stats map for 7 days:', Array.from(statsMap.entries()));
+
+      const result = Array.from({ length: daysToShow }, (_, i) => {
+        const day = new Date(now.getTime() - (daysToShow - 1 - i) * 24 * 60 * 60 * 1000);
+        const dateKey = day.toISOString().split('T')[0];
+        const views = statsMap.get(dateKey) || 0;
+        console.log(`Day ${i}: ${dateKey} (${monthNames[day.getMonth()]} ${day.getDate()}) - ${views} views`);
+        return {
+          month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
+          online: views
+        };
+      });
+
+      console.log('Generated 7-day trends:', result);
+      return result;
+
+    } else {
+      // Last 30 days - show weekly aggregates (4-5 weeks)
+      const now = new Date();
+      const weeksToShow = 5;
+      const weeklyData: number[] = new Array(weeksToShow).fill(0);
+
+      // Group dailyStats into weeks
+      dailyStats.forEach(stat => {
+        const date = new Date(stat.date);
+        const daysAgo = Math.floor((now.getTime() - date.getTime()) / (24 * 60 * 60 * 1000));
+        const weekIndex = Math.floor(daysAgo / 7);
+        if (weekIndex < weeksToShow) {
+          weeklyData[weeksToShow - 1 - weekIndex] += stat.totalViews;
+        }
+      });
+
+      return Array.from({ length: weeksToShow }, (_, i) => {
+        const weekStart = new Date(now.getTime() - (weeksToShow - 1 - i) * 7 * 24 * 60 * 60 * 1000);
+        return {
+          month: `Week ${i + 1}`,
+          online: weeklyData[i]
+        };
+      });
+    }
+  };
 
   const usageTrends = getUsageTrends();
   
-  // Track month-start baseline for growth calculation
-  const getMonthStartBaseline = (): number => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const storageKey = `library_baseline_${currentYear}_${currentMonth}`;
-    
-    // Get stored baseline for current month
-    const stored = localStorage.getItem(storageKey);
-    
-    if (stored) {
-      return parseInt(stored, 10);
-    } else {
-      // First time this month - set current views as baseline
-      localStorage.setItem(storageKey, stats.onlineAccess.toString());
-      return stats.onlineAccess;
-    }
+  // Track period-start baseline for growth calculation from Firebase data
+  const getPeriodStartBaseline = (): number => {
+    if (dailyStats.length === 0) return 0;
+
+    // Get the first entry in the current period
+    const firstStat = dailyStats[0];
+    return firstStat ? firstStat.totalViews : 0;
   };
   
-  // Calculate growth percentage (current vs month start)
+  // Calculate growth percentage (current vs period start)
   const calculateGrowth = (): { percentage: number; direction: 'up' | 'down' | 'neutral' } => {
-    if (stats.onlineAccess === 0) return { percentage: 0, direction: 'neutral' };
-    
-    const monthStartViews = getMonthStartBaseline();
-    
-    if (monthStartViews === 0) {
+    if (dailyStats.length === 0 || stats.onlineAccess === 0) return { percentage: 0, direction: 'neutral' };
+
+    const periodStartViews = getPeriodStartBaseline();
+    const currentViews = dailyStats.length > 0 ? dailyStats[dailyStats.length - 1].totalViews : stats.onlineAccess;
+
+    if (periodStartViews === 0) {
       return { percentage: 100, direction: 'up' };
     }
-    
-    const growth = ((stats.onlineAccess - monthStartViews) / monthStartViews) * 100;
+
+    const growth = ((currentViews - periodStartViews) / periodStartViews) * 100;
     const direction = growth > 0 ? 'up' : growth < 0 ? 'down' : 'neutral';
-    
+
     return { percentage: Math.abs(Math.round(growth)), direction };
   };
   
@@ -527,6 +635,7 @@ localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
           <div className="mt-2 space-y-0.5">
             <p className="text-xs text-gray-600">Books: {stats.totalBooks.toLocaleString()}</p>
             <p className="text-xs text-gray-600">Theses: {stats.totalTheses.toLocaleString()}</p>
+            <p className="text-xs text-gray-600">Journals: {stats.totalJournals.toLocaleString()}</p>
           </div>
         </div>
 
@@ -543,21 +652,23 @@ localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
           <p className="text-xs text-gray-500 mb-1">Online Access</p>
           <p className="text-2xl font-bold text-gray-900">{stats.onlineAccess.toLocaleString()}</p>
           <div className="mt-2 space-y-0.5">
-            <p className="text-xs text-gray-600">This month</p>
+            <p className="text-xs text-gray-600">
+              {usagePeriod === '24h' ? 'Last 24 hours' : usagePeriod === '7d' ? 'Last 7 days' : 'Last 30 days'}
+            </p>
             {growth.direction !== 'neutral' && (
               <p className={`text-xs ${growth.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                {growth.direction === 'up' ? '↑' : '↓'} {growth.percentage}% since month start
+                {growth.direction === 'up' ? '↑' : '↓'} {growth.percentage}% since period start
               </p>
             )}
             {growth.direction === 'neutral' && (
-              <p className="text-xs text-gray-500">No change since month start</p>
+              <p className="text-xs text-gray-500">No change since period start</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Category Breakdown */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
         <CategoryCard
           title="Business & Management"
           icon={<BookOpen className="text-blue-600" size={24} />}
@@ -603,6 +714,15 @@ localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
           onlineAccess={stats.thesis.online}
           color="orange"
         />
+        <CategoryCard
+          title="Journals & Publications"
+          icon={<FileText className="text-pink-600" size={24} />}
+          total={stats.journals.physical + stats.journals.digital}
+          physical={stats.journals.physical}
+          digital={stats.journals.digital}
+          onlineAccess={stats.journals.online}
+          color="pink"
+        />
       </div>
 
       {/* Usage Trends & Popular Resources */}
@@ -610,14 +730,14 @@ localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Usage Trends</h3>
-            <select 
+            <select
               value={usagePeriod}
-              onChange={(e) => setUsagePeriod(e.target.value as 'current' | 'previous' | 'ytd')}
+              onChange={(e) => setUsagePeriod(e.target.value as '24h' | '7d' | '30d')}
               className="text-sm border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="current">Current Month</option>
-              <option value="previous">Previous Month</option>
-              <option value="ytd">Year to Date</option>
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
             </select>
           </div>
           
@@ -667,16 +787,35 @@ localStorage.setItem(dailyViewsKey, JSON.stringify(dailyViews));
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500 rounded"></div>
               <span className="text-sm text-gray-600">Online Access</span>
             </div>
-            {stats.onlineAccess > 0 && (
-              <span className="text-xs text-gray-500 italic">
-                Historical tracking started: {new Date().toLocaleDateString()}
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              {stats.onlineAccess > 0 && (
+                <span className="text-xs text-gray-500 italic">
+                  Historical tracking started: 5/11/2025
+                </span>
+              )}
+              {dailyStats.length === 0 && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await analyticsService.backfillData(7, 100);
+                      alert('Data backfilled successfully! Refresh to see the chart.');
+                      window.location.reload();
+                    } catch (err) {
+                      console.error('Error backfilling data:', err);
+                      alert('Error backfilling data. Check console.');
+                    }
+                  }}
+                  className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Generate Test Data
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
