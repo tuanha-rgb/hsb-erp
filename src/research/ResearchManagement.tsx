@@ -1390,10 +1390,10 @@ const ResearchManagement = () => {
 
     return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
-        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Briefcase className="w-6 h-6 text-blue-600" />
             </div>
           </div>
@@ -1402,9 +1402,9 @@ const ResearchManagement = () => {
           <p className="text-xs text-gray-600 mt-2">{projects.filter(p => p.status === 'Active').length} active</p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <FileText className="w-6 h-6 text-green-600" />
             </div>
           </div>
@@ -1416,9 +1416,9 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6 text-indigo-600" />
             </div>
           </div>
@@ -1429,9 +1429,9 @@ const ResearchManagement = () => {
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Award className="w-6 h-6 text-orange-600" />
             </div>
           </div>
@@ -1459,9 +1459,9 @@ const ResearchManagement = () => {
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <DollarSign className="w-6 h-6 text-purple-600" />
             </div>
           </div>
@@ -1470,9 +1470,9 @@ const ResearchManagement = () => {
           <p className="text-xs text-gray-600 mt-2">Active grants</p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="h-12 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <TrendingUp className="w-6 h-6 text-teal-600" />
             </div>
           </div>
@@ -1660,8 +1660,8 @@ const ResearchManagement = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-3">
         <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <input
@@ -1692,10 +1692,12 @@ const ResearchManagement = () => {
                 <option value="pending">Pending</option>
               </select>
             </div>
-            <button onClick={() => setShowAddProjectModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              <Plus size={18} />
-              New Project
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setShowAddProjectModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Plus size={18} />
+                New Project
+              </button>
+            </div>
           </div>
         </div>
           <div className="grid grid-cols-4 gap-4 p-4">
@@ -2112,7 +2114,7 @@ const ResearchManagement = () => {
       patentNumber: null,
       type: 'Invention Patent',
       faculty: '',
-      discipline: '',
+      discipline: 'Nontraditional Security',
       abstract: '',
       country: '',
       ipOffice: ''
@@ -2249,12 +2251,23 @@ const ResearchManagement = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline *</label>
-                <select required value={newPatent.discipline || ''} onChange={(e) => setNewPatent({...newPatent, discipline: e.target.value})}
+                <select required value={newPatent.discipline || 'Nontraditional Security'} onChange={(e) => setNewPatent({...newPatent, discipline: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                  <option value="">Select Discipline</option>
-                  {faculties.map(faculty => (
-                    <option key={faculty.code} value={faculty.name}>{faculty.name}</option>
-                  ))}
+                  <option value="Nontraditional Security">Nontraditional Security</option>
+                  <option value="Business">Business</option>
+                  <option value="Management Science">Management Science</option>
+                  <option value="Economics">Economics</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Communication">Communication</option>
+                  <option value="Psychology">Psychology</option>
+                  <option value="Law">Law</option>
+                  <option value="Cybersecurity">Cybersecurity</option>
+                  <option value="Water Security">Water Security</option>
+                  <option value="Data Science">Data Science</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="IT">IT</option>
+                  <option value="Technology Management">Technology Management</option>
                 </select>
               </div>
             </div>
@@ -2308,8 +2321,8 @@ const ResearchManagement = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <input
@@ -2342,7 +2355,7 @@ const ResearchManagement = () => {
                 <option value="review">Under Review</option>
               </select>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={fetchCitationsForAll}
                 disabled={isBatchFetching || publications.filter(p => p.doi).length === 0}
@@ -2377,33 +2390,34 @@ const ResearchManagement = () => {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-5 gap-4 p-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+        {/*Stat cards*/}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 p-4">
+        <div className="bg-white p-2 rounded-lg shadow-sm border">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <FileText className="w-6 h-6 text-blue-600" />
             </div>
             <div className="text-right">
               <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">Total</span>
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{publications.length}</p>
+          <p className="text-3xl font-bold text-gray-900 text-center">{publications.length}</p>
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">All publications in database</p>
+            <p className="text-xs text-gray-600 text-center">All publications in database</p>
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div className="w-39 h-24 rounded-lg flex items-center justify-center">
-              <img src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fwos.jpg?alt=media&token=fa4e5314-b51b-46f5-9e4c-f18044cdda67" alt="Web of Science" className="w-full h-full object-contain" />
+        <div className="bg-white p-2 rounded-lg shadow-sm border">
+          <div className="h-16 flex items-center justify-center mb-3">
+            <div className="h-full flex items-center justify-center p-2">
+              <img src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fwos.jpg?alt=media&token=fa4e5314-b51b-46f5-9e4c-f18044cdda67" alt="Web of Science" className="max-h-full max-w-full object-contain" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 text-center">
             {publications.filter(p => p.wosranking && p.wosranking !== 'N/A').length}
           </p>
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 text-center">
               {publications.length > 0
                 ? `${Math.round((publications.filter(p => p.wosranking && p.wosranking !== 'N/A' ).length / publications.length) * 100)}% of total`
                 : '0% of total'
@@ -2412,13 +2426,13 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div className="w-54 h-24 rounded-lg flex items-center justify-center">
-              <img src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fscopus.jpg?alt=media&token=f856a81c-19ad-43df-afdf-afa8acc4d982" alt="Scopus" className="w-full h-full object-contain" />
+        <div className="bg-white p-2 rounded-lg shadow-sm border">
+          <div className="h-16 flex items-center justify-center mb-3">
+            <div className="h-full flex items-center justify-center p-2">
+              <img src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fscopus.jpg?alt=media&token=f856a81c-19ad-43df-afdf-afa8acc4d982" alt="Scopus" className="max-h-full max-w-full object-contain" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 text-center">
             {publications.filter(p =>
               p.quartile === 'Q1' ||
               p.quartile === 'Q2' ||
@@ -2426,11 +2440,11 @@ const ResearchManagement = () => {
               p.quartile === 'Q4' ||
               p.quartile === 'Scopus-indexed' ||
               p.scopusIndexed === true
-              
+
             ).length}
           </p>
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 text-center">
               {publications.length > 0
                 ? `${Math.round((publications.filter(p =>
                     p.quartile === 'Q1' ||
@@ -2446,20 +2460,20 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-2 rounded-lg shadow-sm border">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <FileText className="w-6 h-6 text-purple-600" />
             </div>
             <div className="text-right">
               <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">DOI</span>
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 text-center">
             {publications.filter(p => p.doi).length}
           </p>
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 text-center">
               {publications.length > 0
                 ? `${Math.round((publications.filter(p => p.doi).length / publications.length) * 100)}% of total`
                 : '0% of total'
@@ -2468,16 +2482,16 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+        <div className="bg-white p-2 rounded-lg shadow-sm border">
+          <div className="h-16 flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <FileText className="w-6 h-6 text-orange-600" />
             </div>
             <div className="text-right">
               <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">Reputable</span>
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 text-center">
             {publications.filter(p =>
               p.quartile === 'Q1' ||
               p.quartile === 'Q2' ||
@@ -2487,7 +2501,7 @@ const ResearchManagement = () => {
             ).length}
           </p>
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 text-center">
               {publications.length > 0
                 ? `${Math.round((publications.filter(p =>
                     p.quartile === 'Q1' ||

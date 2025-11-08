@@ -54,19 +54,14 @@ interface CarouselSlide {
   color: string;
 }
 
-// AFTER  
-const FloatingCarousel: React.FC<{ 
-  onSlideClick?: (slideId: string) => void;
-  onBookClick?: (bookId: string) => void;
+const FloatingCarousel: React.FC<{
   setReadingItem?: (item: ReadingItem | null) => void;
-  setPreviewItem?: (item: ReadingItem | null) => void;  // ADD THIS
-}> = ({ onSlideClick, onBookClick, setReadingItem, setPreviewItem }) => {  // ADD setPreviewItem here
+  setPreviewItem?: (item: ReadingItem | null) => void;
+}> = ({ setReadingItem, setPreviewItem }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [featuredBooks, setFeaturedBooks] = useState<FirebaseBook[]>([]);
   const [carouselSlides, setCarouselSlide] = useState<CarouselSlide[]>([]);
-const [showPreview, setShowPreview] = useState(false);
-const [previewBook, setPreviewBook] = useState<FirebaseBook | null>(null);
   useEffect(() => {
     loadFeaturedBooks();
   }, []);
@@ -113,34 +108,39 @@ const [previewBook, setPreviewBook] = useState<FirebaseBook | null>(null);
     setIsAutoPlaying(false);
   };
 
+  const convertBookToRecord = (book: FirebaseBook): BookRecord => ({
+    id: book.id!,
+    isbn: book.isbn || '',
+    title: book.title,
+    authors: [book.author],
+    publisher: book.publisher || 'Unknown',
+    publisherCode: book.publisherCode || 'UNKN',
+    bookType: (book.bookType as BookType) || 'textbook',
+    catalogue: book.category as CatalogueCategory,
+    publicationYear: book.publishedYear,
+    pages: book.pages || 0,
+    subjects: book.subjects || [book.category],
+    totalCopies: book.copies,
+    availableCopies: book.availableCopies,
+    rating: book.rating || 0,
+    description: book.description,
+    coverImage: book.coverImage,
+    firebaseStoragePath: book.pdfUrl,
+    fileType: book.pdfUrl ? 'pdf' : undefined
+  });
+
+  const handlePreview = (e: React.MouseEvent, slideId: string) => {
+    e.stopPropagation();
+    const book = featuredBooks.find(b => b.id === slideId);
+    if (book && setPreviewItem) {
+      setPreviewItem(convertBookToRecord(book));
+    }
+  };
+
   const handleViewBook = (slideId: string) => {
     const book = featuredBooks.find(b => b.id === slideId);
     if (book && setReadingItem) {
-      const bookRecord: BookRecord = {
-  id: book.id!,
-  isbn: book.isbn || '',
-  title: book.title,
-  authors: [book.author],
-  publisher: book.publisher || 'Unknown',
-  publisherCode: 'UNKN',
-  bookType: (book.bookType as BookType) || 'textbook',
-  catalogue: book.category as CatalogueCategory,
-  
-  // Optional fields
-  publicationYear: book.publishedYear,
-  pages: 0,
-  subjects: [book.category],
-  totalCopies: book.copies,
-  availableCopies: book.availableCopies,
-  rating: 0,
-  firebaseStoragePath: book.pdfUrl,
-  fileType: book.pdfUrl ? 'pdf' : undefined
-};
-      setReadingItem(bookRecord);
-    } else if (onBookClick) {
-      onBookClick(slideId);
-    } else {
-      onSlideClick?.(slideId);
+      setReadingItem(convertBookToRecord(book));
     }
   };
 
@@ -151,14 +151,6 @@ const [previewBook, setPreviewBook] = useState<FirebaseBook | null>(null);
       </div>
     );
   }
-  const handlePreview = (e: React.MouseEvent, slideId: string) => {
-  e.stopPropagation();
-  const book = featuredBooks.find(b => b.id === slideId);
-  if (book) {
-    setPreviewBook(book);
-    setShowPreview(true);
-  }
-};
   const slide = carouselSlides[currentSlide];
 
   return (
@@ -196,84 +188,7 @@ const [previewBook, setPreviewBook] = useState<FirebaseBook | null>(null);
             </div>
           )}
         </div>
-        {/* Preview Modal */}
-{showPreview && previewBook && (
-  <div 
-    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-    onClick={() => setShowPreview(false)}
-  >
-    <div 
-      className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-auto p-6 shadow-2xl"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900">{previewBook.title}</h3>
-          <p className="text-sm text-gray-600 mt-1">by {previewBook.author}</p>
-        </div>
-        <button 
-          onClick={() => setShowPreview(false)} 
-          className="text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          <X size={24} />
-        </button>
-      </div>
-      
-      <div className="flex gap-6 mb-6">
-        <img 
-          src={previewBook.coverImage || 'https://via.placeholder.com/200x300'} 
-          alt={previewBook.title} 
-          className="w-48 h-72 object-cover rounded-lg shadow-lg"
-        />
-        <div className="flex-1">
-          <div className="space-y-3 text-sm">
-            <div>
-              <span className="font-semibold text-gray-700">ISBN:</span>
-              <span className="text-gray-600 ml-2">{previewBook.isbn || 'N/A'}</span>
-            </div>
-            <div>
-              <span className="font-semibold text-gray-700">Publisher:</span>
-              <span className="text-gray-600 ml-2">{previewBook.publisher || 'Unknown'}</span>
-            </div>
-            <div>
-              <span className="font-semibold text-gray-700">Year:</span>
-              <span className="text-gray-600 ml-2">{previewBook.publishedYear || 'N/A'}</span>
-            </div>
-            <div>
-              <span className="font-semibold text-gray-700">Category:</span>
-              <span className="inline-block ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                {previewBook.category}
-              </span>
-            </div>
-            <div>
-              <span className="font-semibold text-gray-700">Available:</span>
-              <span className={`ml-2 font-medium ${previewBook.availableCopies > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {previewBook.availableCopies}/{previewBook.copies}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="mb-6">
-        <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
-        <p className="text-gray-700 leading-relaxed">
-          {previewBook.description || 'No description available.'}
-        </p>
-      </div>
-
-      <button 
-        onClick={() => {
-          setShowPreview(false);
-          handleViewBook(previewBook.id!);
-        }}
-        className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
-      >
-        Open & Read Book
-      </button>
-    </div>
-  </div>
-)}
         <div className="relative">
           {slide.image.startsWith('http') || slide.image.startsWith('https') || slide.image.startsWith('/') ? (
             <img 
@@ -336,11 +251,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ item, onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 const renderingLockRef = useRef<Promise<void> | null>(null);
-const [canvasReady, setCanvasReady] = useState(false); // ADD THIS LINE
+const [canvasReady, setCanvasReady] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [scale, setScale] = useState(1);
+  // Start at 1.2 scale for better readability on desktop screens
+  const [scale, setScale] = useState(1.2);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
@@ -565,26 +481,31 @@ const renderPDFPage = async (
   canvas: HTMLCanvasElement
 ) => {
   if (!pdfDocRef.current || !canvas) return;
-  
+
   const numPages = pdfDocRef.current.numPages;
   if (pageNum < 1 || pageNum > numPages) return;
 
   const page = await pdfDocRef.current.getPage(pageNum);
-  
-  // Use device pixel ratio for high-DPI displays
-  const devicePixelRatio = window.devicePixelRatio || 1;
-  const viewport = page.getViewport({ scale: scale * devicePixelRatio });
+
+  // Get viewport at desired scale (for CSS display size)
+  const displayViewport = page.getViewport({ scale: scale });
+
+  // Use device pixel ratio for rendering quality (capped at 2 for performance)
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const renderViewport = page.getViewport({ scale: scale * pixelRatio });
 
   const context = canvas.getContext('2d');
   if (!context) return;
 
-  // Set canvas internal resolution (high-res)
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  
+  // Set canvas internal resolution (for rendering)
+  canvas.width = renderViewport.width;
+  canvas.height = renderViewport.height;
 
+  // Set CSS display size (what user sees)
+  canvas.style.width = `${displayViewport.width}px`;
+  canvas.style.height = `${displayViewport.height}px`;
 
-  await page.render({ canvasContext: context, viewport }).promise;
+  await page.render({ canvasContext: context, viewport: renderViewport }).promise;
 };
 // ---- Add useEffect for scale/pageMode changes
 useEffect(() => {
@@ -618,16 +539,16 @@ const handleNextPage = () => {
   }
 };
 
-// ---- Zoom handlers (simplified)
+// ---- Zoom handlers (optimized for desktop)
 const handleZoomIn = () => {
   if (fileKind === 'pdf') {
-    setScale(prev => Math.min(prev + 0.1, 3));
+    setScale(prev => Math.min(prev + 0.1, 2.5));
   }
 };
 
 const handleZoomOut = () => {
   if (fileKind === 'pdf') {
-    setScale(prev => Math.max(prev - 0.1, 0.5));
+    setScale(prev => Math.max(prev - 0.1, 0.8));
   }
 };
 
@@ -716,13 +637,13 @@ const togglePageMode = async () => {
           </button>
 <input
   type="number"
-  min="50"
-  max="300"
+  min="80"
+  max="250"
   step="10"
   value={Math.round(scale * 100)}
   onChange={(e) => {
     const newPercent = parseInt(e.target.value);
-    if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
+    if (!isNaN(newPercent) && newPercent >= 80 && newPercent <= 250) {
       setScale(newPercent / 100);
     }
   }}
@@ -815,9 +736,9 @@ const togglePageMode = async () => {
             <div className="w-full px-4 py-8">
                {fileKind === 'pdf' ? (
       <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : 'flex-col items-center'}`}>
-        <canvas ref={setCanvasRef} className="shadow-2xl bg-white max-w-full h-auto" />
+        <canvas ref={setCanvasRef} className="shadow-2xl bg-white" />
         {pageMode === 'dual' && currentPage < totalPages && (
-          <canvas ref={canvas2Ref} className="shadow-2xl bg-white max-w-full h-auto" />
+          <canvas ref={canvas2Ref} className="shadow-2xl bg-white" />
         )}
             </div>
             ) : fileKind === 'epub'  ? (
@@ -942,8 +863,6 @@ const LibraryViewer: React.FC = () => {
       console.error('Failed to load journals:', error);
     }
   };
-
-  const isBook = (item: ReadingItem): item is BookRecord => 'isbn' in item;
 
 const filteredContent = useMemo(() => {
   const convertedBooks: BookRecord[] = firebaseBooks.map(fb => ({
