@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Briefcase, FileText, DollarSign, TrendingUp, Calendar, Building, Users,
-  Search, Plus, Award, ChevronDown, Globe, Target, X, Loader, AlertCircle
+  Search, Plus, Award, ChevronDown, Globe, Target, X, Loader, AlertCircle, Eye, Edit, Trash2, Quote
 } from "lucide-react";
 import { getDisciplineColor, getStatusColor } from "./ResearchColors";
 import {
@@ -14,13 +14,24 @@ import { projectService, Project } from "../firebase/project.service";
 import { patentService, Patent } from "../firebase/patent.service";
 import { sampleUsers } from "../useraccounts";
 import { citationService } from "../services/citation.service";
+import { faculties } from "../acad/faculties";
 
 const ResearchManagement = () => {
   const [activeView, setActiveView] = useState('overview');
-  const [filterType, setFilterType] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
+
+  // Separate state for each tab to prevent input focus issues
+  const [projectsSearchTerm, setProjectsSearchTerm] = useState('');
+  const [projectsFilterType, setProjectsFilterType] = useState('all');
+  const [projectsFilterStatus, setProjectsFilterStatus] = useState('all');
+
+  const [publicationsSearchTerm, setPublicationsSearchTerm] = useState('');
+  const [publicationsFilterType, setPublicationsFilterType] = useState('all');
+  const [publicationsFilterStatus, setPublicationsFilterStatus] = useState('all');
+
+  const [patentsSearchTerm, setPatentsSearchTerm] = useState('');
+  const [patentsFilterType, setPatentsFilterType] = useState('all');
+  const [patentsFilterStatus, setPatentsFilterStatus] = useState('all');
 
   // Publications data from Firebase
   const [publications, setPublications] = useState<Publication[]>([]);
@@ -36,6 +47,8 @@ const ResearchManagement = () => {
 
   // Publication modal states
   const [showAddPublicationModal, setShowAddPublicationModal] = useState(false);
+  const [showBulkAddModal, setShowBulkAddModal] = useState(false);
+  const [entryMode, setEntryMode] = useState<'auto' | 'manual'>('auto');
   const [identifierType, setIdentifierType] = useState<'doi' | 'isbn'>('doi');
   const [identifier, setIdentifier] = useState('');
   const [isLoadingPublication, setIsLoadingPublication] = useState(false);
@@ -46,12 +59,39 @@ const ResearchManagement = () => {
   const [firstAuthorEmail, setFirstAuthorEmail] = useState('');
   const [correspondingAuthorEmail, setCorrespondingAuthorEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [manualFormData, setManualFormData] = useState<Partial<Publication>>({
+    title: '',
+    authors: [],
+    type: 'Journal Article',
+    journal: '',
+    publisher: '',
+    year: new Date().getFullYear(),
+    citations: 0,
+    impactFactor: null,
+    status: 'Published',
+    doi: '',
+    isbn: '',
+    quartile: 'N/A',
+    wosranking: 'N/A',
+    scopusIndexed: false,
+    discipline: 'Nontraditional Security',
+    volume: '',
+    issue: '',
+    pages: ''
+  });
+
+  // Bulk addition states
+  const [bulkPublications, setBulkPublications] = useState<Array<Partial<Publication> & { tempId: number }>>([
+    { tempId: 1, title: '', authors: [], journal: '', year: new Date().getFullYear(), type: 'Journal Article', status: 'Published', quartile: 'N/A', wosranking: 'N/A', citations: 0, discipline: 'Nontraditional Security' }
+  ]);
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
 
   // Additional publication fields
   const [formData, setFormData] = useState<Partial<Publication>>({
     impactFactor: null,
     quartile: 'N/A',
     wosranking: 'N/A',
+    scopusIndexed: false,
     status: 'Published',
     citations: 0,
     discipline: 'Nontraditional Security'
@@ -67,6 +107,10 @@ const ResearchManagement = () => {
   const [showEditProjectModal, setShowEditProjectModal] = useState(false);
   const [showEditPatentModal, setShowEditPatentModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+
+  // Add modal states for Projects and Patents
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [showAddPatentModal, setShowAddPatentModal] = useState(false);
 
   // Citation fetching states
   const [fetchingCitations, setFetchingCitations] = useState<Set<string>>(new Set());
@@ -304,6 +348,7 @@ const ResearchManagement = () => {
         project: formData.project || null,
         quartile: formData.quartile || 'N/A',
         wosranking: formData.wosranking || 'N/A',
+        scopusIndexed: false,
         discipline: formData.discipline || 'Nontraditional Security',
         abstract: fetchedPublication.abstract,
         keywords: fetchedPublication.keywords,
@@ -348,18 +393,40 @@ const ResearchManagement = () => {
     setFirstAuthorEmail('');
     setCorrespondingAuthorEmail('');
     setError('');
+    setEntryMode('auto');
     setFormData({
       impactFactor: null,
       quartile: 'N/A',
       wosranking: 'N/A',
+      scopusIndexed: false,
       status: 'Published',
       citations: 0,
       discipline: 'Nontraditional Security'
     });
+    setManualFormData({
+      title: '',
+      authors: [],
+      type: 'Journal Article',
+      journal: '',
+      publisher: '',
+      year: new Date().getFullYear(),
+      citations: 0,
+      impactFactor: null,
+      status: 'Published',
+      doi: '',
+      isbn: '',
+      quartile: 'N/A',
+      wosranking: 'N/A',
+      scopusIndexed: false,
+      discipline: 'Nontraditional Security',
+      volume: '',
+      issue: '',
+      pages: ''
+    });
   };
 
   // Add Publication Modal Component
-  const AddPublicationModal = () => {
+  const renderAddPublicationModal = () => {
     if (!showAddPublicationModal) return null;
 
     return (
@@ -378,20 +445,47 @@ const ResearchManagement = () => {
           <div className="h-24 bg-gradient-to-br from-blue-500 to-blue-700 p-6 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-white">Add New Publication</h2>
-              <p className="text-blue-100 text-sm mt-1">Search by DOI or ISBN</p>
+              <p className="text-blue-100 text-sm mt-1">
+                {entryMode === 'auto' ? 'Search by DOI or ISBN' : 'Manual entry'}
+              </p>
             </div>
-            <button
-              onClick={() => {
-                setShowAddPublicationModal(false);
-                resetPublicationForm();
-              }}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
-            >
-              <X size={24} />
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex bg-white bg-opacity-20 rounded-lg p-1">
+                <button
+                  onClick={() => setEntryMode('auto')}
+                  className={`px-3 py-1 text-sm rounded ${
+                    entryMode === 'auto'
+                      ? 'bg-white text-blue-600 font-medium'
+                      : 'text-white hover:bg-white hover:bg-opacity-10'
+                  }`}
+                >
+                  Auto Fetch
+                </button>
+                <button
+                  onClick={() => setEntryMode('manual')}
+                  className={`px-3 py-1 text-sm rounded ${
+                    entryMode === 'manual'
+                      ? 'bg-white text-blue-600 font-medium'
+                      : 'text-white hover:bg-white hover:bg-opacity-10'
+                  }`}
+                >
+                  Manual Entry
+                </button>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddPublicationModal(false);
+                  resetPublicationForm();
+                }}
+                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+              >
+                <X size={24} />
+              </button>
+            </div>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6">{entryMode === 'auto' ? (
+            <>
             {/* Error Display */}
             {error && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -561,6 +655,7 @@ const ResearchManagement = () => {
                       <option value="Q2">Q2</option>
                       <option value="Q3">Q3</option>
                       <option value="Q4">Q4</option>
+                      <option value="Scopus-indexed">Scopus-indexed</option>
                       <option value="N/A">N/A</option>
                     </select>
                   </div>
@@ -577,6 +672,7 @@ const ResearchManagement = () => {
                       <option value="SCIE">SCIE</option>
                       <option value="AHCI">AHCI</option>
                       <option value="ESCI">ESCI</option>
+                      <option value="Scopus-indexed">Scopus-indexed</option>
                       <option value="N/A">N/A</option>
                     </select>
                   </div>
@@ -678,15 +774,623 @@ const ResearchManagement = () => {
                 )}
               </button>
             </div>
+            </>
+            ) : (
+              <>
+                {/* Error Display */}
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="text-red-600 mt-0.5" size={20} />
+                    <div>
+                      <p className="text-sm font-semibold text-red-800">Error</p>
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Manual Entry Form */}
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
+                    <input
+                      type="text"
+                      value={manualFormData.title || ''}
+                      onChange={(e) => setManualFormData({...manualFormData, title: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Authors */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Authors (comma-separated) *</label>
+                    <input
+                      type="text"
+                      value={manualFormData.authors?.join(', ') || ''}
+                      onChange={(e) => setManualFormData({...manualFormData, authors: e.target.value.split(',').map(a => a.trim())})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Type and Year */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
+                      <select
+                        value={manualFormData.type || 'Journal Article'}
+                        onChange={(e) => setManualFormData({...manualFormData, type: e.target.value as any})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Journal Article">Journal Article</option>
+                        <option value="Conference Paper">Conference Paper</option>
+                        <option value="Book Chapter">Book Chapter</option>
+                        <option value="Book">Book</option>
+                        <option value="Review Article">Review Article</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Year *</label>
+                      <input
+                        type="number"
+                        value={manualFormData.year || new Date().getFullYear()}
+                        onChange={(e) => setManualFormData({...manualFormData, year: parseInt(e.target.value)})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Journal and Publisher */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Journal/Venue *</label>
+                      <input
+                        type="text"
+                        value={manualFormData.journal || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, journal: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Publisher</label>
+                      <input
+                        type="text"
+                        value={manualFormData.publisher || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, publisher: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* DOI and ISBN */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">DOI</label>
+                      <input
+                        type="text"
+                        value={manualFormData.doi || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, doi: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">ISBN</label>
+                      <input
+                        type="text"
+                        value={manualFormData.isbn || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, isbn: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Impact Factor, Quartile, WoS Ranking */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Impact Factor</label>
+                      <input
+                        type="number"
+                        step="0.001"
+                        value={manualFormData.impactFactor || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, impactFactor: e.target.value ? parseFloat(e.target.value) : null})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Quartile</label>
+                      <select
+                        value={manualFormData.quartile || 'N/A'}
+                        onChange={(e) => setManualFormData({...manualFormData, quartile: e.target.value as any})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Q1">Q1</option>
+                        <option value="Q2">Q2</option>
+                        <option value="Q3">Q3</option>
+                        <option value="Q4">Q4</option>
+                        <option value="Scopus-indexed">Scopus-indexed</option>
+                        <option value="N/A">N/A</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">WoS Ranking</label>
+                      <select
+                        value={manualFormData.wosranking || 'N/A'}
+                        onChange={(e) => setManualFormData({...manualFormData, wosranking: e.target.value as any})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="SSCI">SSCI</option>
+                        <option value="SCIE">SCIE</option>
+                        <option value="AHCI">AHCI</option>
+                        <option value="ESCI">ESCI</option>
+                        <option value="Scopus-indexed">Scopus-indexed</option>
+                        <option value="N/A">N/A</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Citations, Status, Discipline */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Citations</label>
+                      <input
+                        type="number"
+                        value={manualFormData.citations || 0}
+                        onChange={(e) => setManualFormData({...manualFormData, citations: parseInt(e.target.value) || 0})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+                      <select
+                        value={manualFormData.status || 'Published'}
+                        onChange={(e) => setManualFormData({...manualFormData, status: e.target.value as any})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Published">Published</option>
+                        <option value="Under Review">Under Review</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline</label>
+                      <select
+                        value={manualFormData.discipline || 'Nontraditional Security'}
+                        onChange={(e) => setManualFormData({...manualFormData, discipline: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Nontraditional Security">Nontraditional Security</option>
+                        <option value="Business">Business</option>
+                        <option value="Management Science">Management Science</option>
+                        <option value="Economics">Economics</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Communication">Communication</option>
+                        <option value="Psychology">Psychology</option>
+                        <option value="Law">Law</option>
+                        <option value="Cybersecurity">Cybersecurity</option>
+                        <option value="Water Security">Water Security</option>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="IT">IT</option>
+                        <option value="Technology Management">Technology Management</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Scopus Indexed */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Scopus Indexed</label>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={manualFormData.scopusIndexed || false}
+                        onChange={(e) => setManualFormData({...manualFormData, scopusIndexed: e.target.checked})}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label className="ml-2 text-sm text-gray-600">Indexed in Scopus</label>
+                    </div>
+                  </div>
+
+                  {/* Volume, Issue, Pages */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Volume</label>
+                      <input
+                        type="text"
+                        value={manualFormData.volume || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, volume: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Issue</label>
+                      <input
+                        type="text"
+                        value={manualFormData.issue || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, issue: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Pages</label>
+                      <input
+                        type="text"
+                        value={manualFormData.pages || ''}
+                        onChange={(e) => setManualFormData({...manualFormData, pages: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* PDF Upload */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Upload Publication PDF (Optional)
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => setPublicationPdfFile(e.target.files?.[0] || null)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                    {publicationPdfFile && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Selected: {publicationPdfFile.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      setShowAddPublicationModal(false);
+                      resetPublicationForm();
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!manualFormData.title || !manualFormData.authors?.length || !manualFormData.journal) {
+                        setError('Please fill in all required fields (Title, Authors, Journal)');
+                        return;
+                      }
+
+                      setIsSubmitting(true);
+                      setError('');
+
+                      try {
+                        let pdfUrl = '';
+                        if (publicationPdfFile) {
+                          const timestamp = Date.now();
+                          pdfUrl = await publicationService.uploadJournalPdf(publicationPdfFile, `publication-${timestamp}`);
+                        }
+
+                        await publicationService.addPublication({
+                          ...manualFormData,
+                          pdfUrl: pdfUrl || undefined
+                        } as any);
+
+                        setShowAddPublicationModal(false);
+                        resetPublicationForm();
+                        loadPublications();
+                      } catch (err) {
+                        setError(`Error adding publication: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                      } finally {
+                        setIsSubmitting(false);
+                      }
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader className="animate-spin" size={18} />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add Publication'
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
     );
   };
 
-  const OverviewDashboard = () => (
+  // Bulk Addition Modal Component
+  const renderBulkAddModal = () => {
+    if (!showBulkAddModal) return null;
+
+    const addRow = () => {
+      const newId = Math.max(...bulkPublications.map(p => p.tempId), 0) + 1;
+      setBulkPublications([...bulkPublications, {
+        tempId: newId,
+        title: '',
+        authors: [],
+        journal: '',
+        year: new Date().getFullYear(),
+        type: 'Journal Article',
+        status: 'Published',
+        quartile: 'N/A',
+        wosranking: 'N/A',
+        citations: 0,
+        discipline: 'Nontraditional Security'
+      }]);
+    };
+
+    const removeRow = (tempId: number) => {
+      if (bulkPublications.length > 1) {
+        setBulkPublications(bulkPublications.filter(p => p.tempId !== tempId));
+      }
+    };
+
+    const updateRow = (tempId: number, field: string, value: any) => {
+      setBulkPublications(bulkPublications.map(pub =>
+        pub.tempId === tempId ? { ...pub, [field]: value } : pub
+      ));
+    };
+
+    const handleBulkSubmit = async () => {
+      const validPublications = bulkPublications.filter(p => p.title && p.authors && p.authors.length > 0 && p.journal);
+
+      if (validPublications.length === 0) {
+        alert('Please fill in at least one complete row (Title, Authors, Journal are required)');
+        return;
+      }
+
+      setIsBulkSubmitting(true);
+
+      try {
+        for (const pub of validPublications) {
+          const { tempId, ...publicationData } = pub;
+          await publicationService.addPublication(publicationData as any);
+        }
+
+        setShowBulkAddModal(false);
+        setBulkPublications([
+          { tempId: 1, title: '', authors: [], journal: '', year: new Date().getFullYear(), type: 'Journal Article', status: 'Published', quartile: 'N/A', wosranking: 'N/A', citations: 0, discipline: 'Nontraditional Security' }
+        ]);
+        loadPublications();
+      } catch (err) {
+        alert(`Error adding publications: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      } finally {
+        setIsBulkSubmitting(false);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowBulkAddModal(false)}>
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+          {/* Header */}
+          <div className="h-20 bg-gradient-to-br from-green-500 to-green-700 p-6 flex items-center justify-between flex-shrink-0">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Bulk Add Publications</h2>
+              <p className="text-green-100 text-sm mt-1">Add multiple publications at once</p>
+            </div>
+            <button
+              onClick={() => setShowBulkAddModal(false)}
+              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Table Container */}
+          <div className="flex-1 overflow-auto p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead className="bg-gray-100 sticky top-0">
+                  <tr>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-8">#</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 min-w-[200px]">Title *</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 min-w-[150px]">Authors * (comma-sep)</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 min-w-[120px]">Journal *</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-20">Year</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-32">Type</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-24">Quartile</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-24">WoS</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-20">Cites</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-28">Discipline</th>
+                    <th className="border border-gray-300 px-2 py-2 text-xs font-semibold text-gray-700 w-20">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bulkPublications.map((pub, index) => (
+                    <tr key={pub.tempId} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-2 py-1 text-center text-sm">{index + 1}</td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="text"
+                          value={pub.title || ''}
+                          onChange={(e) => updateRow(pub.tempId, 'title', e.target.value)}
+                          className="w-full px-2 py-1 text-sm border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          placeholder="Publication title"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="text"
+                          value={pub.authors?.join(', ') || ''}
+                          onChange={(e) => updateRow(pub.tempId, 'authors', e.target.value.split(',').map(a => a.trim()))}
+                          className="w-full px-2 py-1 text-sm border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          placeholder="Author1, Author2"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="text"
+                          value={pub.journal || ''}
+                          onChange={(e) => updateRow(pub.tempId, 'journal', e.target.value)}
+                          className="w-full px-2 py-1 text-sm border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          placeholder="Journal name"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="number"
+                          value={pub.year || ''}
+                          onChange={(e) => updateRow(pub.tempId, 'year', parseInt(e.target.value))}
+                          className="w-full px-2 py-1 text-sm border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <select
+                          value={pub.type || 'Journal Article'}
+                          onChange={(e) => updateRow(pub.tempId, 'type', e.target.value)}
+                          className="w-full px-1 py-1 text-xs border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        >
+                          <option value="Journal Article">Journal</option>
+                          <option value="Conference Paper">Conference</option>
+                          <option value="Book Chapter">Book Chapter</option>
+                          <option value="Book">Book</option>
+                        </select>
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <select
+                          value={pub.quartile || 'N/A'}
+                          onChange={(e) => updateRow(pub.tempId, 'quartile', e.target.value)}
+                          className="w-full px-1 py-1 text-xs border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        >
+                          <option value="Q1">Q1</option>
+                          <option value="Q2">Q2</option>
+                          <option value="Q3">Q3</option>
+                          <option value="Q4">Q4</option>
+                          <option value="Scopus-indexed">Scopus-indexed</option>
+                          <option value="N/A">N/A</option>
+                        </select>
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <select
+                          value={pub.wosranking || 'N/A'}
+                          onChange={(e) => updateRow(pub.tempId, 'wosranking', e.target.value)}
+                          className="w-full px-1 py-1 text-xs border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        >
+                          <option value="SSCI">SSCI</option>
+                          <option value="SCIE">SCIE</option>
+                          <option value="AHCI">AHCI</option>
+                          <option value="ESCI">ESCI</option>
+                          <option value="Scopus-indexed">Scopus</option>
+                          <option value="N/A">N/A</option>
+                        </select>
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="number"
+                          value={pub.citations || 0}
+                          onChange={(e) => updateRow(pub.tempId, 'citations', parseInt(e.target.value) || 0)}
+                          className="w-full px-2 py-1 text-sm border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <select
+                          value={pub.discipline || 'Nontraditional Security'}
+                          onChange={(e) => updateRow(pub.tempId, 'discipline', e.target.value)}
+                          className="w-full px-1 py-1 text-xs border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        >
+                          <option value="Nontraditional Security">NTS</option>
+                          <option value="Business">Business</option>
+                          <option value="Management Science">Management</option>
+                          <option value="Economics">Economics</option>
+                          <option value="Marketing">Marketing</option>
+                        </select>
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1 text-center">
+                        <button
+                          onClick={() => removeRow(pub.tempId)}
+                          className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          title="Delete row"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              onClick={addRow}
+              className="mt-4 flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            >
+              <Plus size={18} />
+              Add Row
+            </button>
+          </div>
+
+          {/* Footer */}
+          <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+            <button
+              onClick={() => {
+                setShowBulkAddModal(false);
+                setBulkPublications([
+                  { tempId: 1, title: '', authors: [], journal: '', year: new Date().getFullYear(), type: 'Journal Article', status: 'Published', quartile: 'N/A', wosranking: 'N/A', citations: 0, discipline: 'Nontraditional Security' }
+                ]);
+              }}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleBulkSubmit}
+              disabled={isBulkSubmitting}
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isBulkSubmitting ? (
+                <>
+                  <Loader className="animate-spin" size={18} />
+                  Adding {bulkPublications.filter(p => p.title && p.authors?.length && p.journal).length} publications...
+                </>
+              ) : (
+                `Add ${bulkPublications.filter(p => p.title && p.authors?.length && p.journal).length} Publications`
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const OverviewDashboard = () => {
+    // Calculate statistics from actual data
+    const totalCitations = publications.reduce((sum, pub) => sum + (pub.citations || 0), 0);
+    const avgCitations = publications.length > 0 ? (totalCitations / publications.length).toFixed(1) : '0';
+
+    // Extract total funding amount (parse funding strings like "$500,000")
+    const totalFunding = projects.reduce((sum, proj) => {
+      const fundingStr = proj.funding?.replace(/[$,]/g, '') || '0';
+      const amount = parseFloat(fundingStr);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+    const formattedFunding = totalFunding >= 1000000
+      ? `$${(totalFunding / 1000000).toFixed(1)}M`
+      : totalFunding >= 1000
+      ? `$${(totalFunding / 1000).toFixed(0)}K`
+      : `$${totalFunding.toFixed(0)}`;
+
+    // Calculate SCOPUS + WOS publications
+    const scopusWosCount = publications.filter(p =>
+      p.quartile === 'Q1' ||
+      p.quartile === 'Q2' ||
+      p.quartile === 'Q3' ||
+      p.quartile === 'Q4' ||
+      p.quartile === 'Scopus-indexed' ||
+      p.scopusIndexed === true ||
+      p.wosranking === 'SSCI' ||
+      p.wosranking === 'SCIE' ||
+      p.wosranking === 'AHCI' ||
+      p.wosranking === 'ESCI'
+    ).length;
+    const otherPublicationsCount = publications.length - scopusWosCount;
+
+    return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
         <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -694,8 +1398,8 @@ const ResearchManagement = () => {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Total Projects</p>
-          <p className="text-3xl font-bold text-gray-900">42</p>
-          <p className="text-xs text-green-600 mt-2">↑ 15% vs last year</p>
+          <p className="text-3xl font-bold text-gray-900">{projects.length}</p>
+          <p className="text-xs text-gray-600 mt-2">{projects.filter(p => p.status === 'Active').length} active</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
@@ -705,8 +1409,54 @@ const ResearchManagement = () => {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Total Publications</p>
-          <p className="text-3xl font-bold text-gray-900">156</p>
-          <p className="text-xs text-green-600 mt-2">↑ 22% vs last year</p>
+          <p className="text-3xl font-bold text-gray-900">{publications.length}</p>
+          <div className="mt-2 space-y-0.5">
+            <p className="text-xs text-gray-600">{scopusWosCount} SCOPUS+WoS</p>
+            <p className="text-xs text-gray-600">{otherPublicationsCount} Other</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Target className="w-6 h-6 text-indigo-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Total Patents</p>
+          <p className="text-3xl font-bold text-gray-900">{patents.length}</p>
+          <p className="text-xs text-gray-600 mt-2">
+            {patents.filter(p => p.status === 'Granted').length} granted
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <Award className="w-6 h-6 text-orange-600" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mb-1">Reputable Journals</p>
+          <p className="text-3xl font-bold text-gray-900">
+            {publications.filter(p =>
+              p.quartile === 'Q1' ||
+              p.quartile === 'Q2' ||
+              p.wosranking === 'SSCI' ||
+              p.wosranking === 'SCIE' ||
+              p.wosranking === 'AHCI'
+            ).length}
+          </p>
+          <p className="text-xs text-gray-600 mt-2">
+            {publications.length > 0
+              ? `${Math.round((publications.filter(p =>
+                  p.quartile === 'Q1' ||
+                  p.quartile === 'Q2' ||
+                  p.wosranking === 'SSCI' ||
+                  p.wosranking === 'SCIE' ||
+                  p.wosranking === 'AHCI'
+                ).length / publications.length) * 100)}% of total`
+              : '0% of total'
+            }
+          </p>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
@@ -716,18 +1466,18 @@ const ResearchManagement = () => {
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Total Funding</p>
-          <p className="text-3xl font-bold text-gray-900">$8.5M</p>
+          <p className="text-3xl font-bold text-gray-900">{formattedFunding}</p>
           <p className="text-xs text-gray-600 mt-2">Active grants</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-orange-600" />
+            <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-teal-600" />
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-1">Avg Citations</p>
-          <p className="text-3xl font-bold text-gray-900">38.2</p>
+          <p className="text-3xl font-bold text-gray-900">{avgCitations}</p>
           <p className="text-xs text-gray-600 mt-2">Per publication</p>
         </div>
       </div>
@@ -736,123 +1486,175 @@ const ResearchManagement = () => {
 
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Active Projects by Faculty</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Projects by Department</h3>
           <div className="space-y-4">
-            {[
-              {dept: 'Faculty of Nontraditional Security', count: 18, percentage: 43},
-              {dept: 'Faculty of Management', count: 12, percentage: 29},
-              {dept: 'Faculty of Marketing and Communication', count: 8, percentage: 19},
-              {dept: 'Other Faculties', count: 4, percentage: 9}
-            ].map((item, i) => (
-              <div key={i}>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">{item.dept}</span>
-                  <span className="text-sm font-semibold text-gray-900">{item.count} projects</span>
+            {(() => {
+              const deptCounts: { [key: string]: number } = {};
+              projects.forEach(proj => {
+                if (proj.department) {
+                  deptCounts[proj.department] = (deptCounts[proj.department] || 0) + 1;
+                }
+              });
+              const deptArray = Object.entries(deptCounts)
+                .map(([dept, count]) => ({ dept, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+              const total = projects.length || 1;
+
+              return deptArray.length > 0 ? deptArray.map((item, i) => (
+                <div key={i}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{item.dept}</span>
+                    <span className="text-sm font-semibold text-gray-900">{item.count} projects</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 rounded-full bg-blue-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="h-2 rounded-full bg-blue-500" style={{width: `${item.percentage}%`}}></div>
-                </div>
-              </div>
-            ))}
+              )) : <p className="text-sm text-gray-500">No projects yet</p>;
+            })()}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Publication Types</h3>
           <div className="space-y-4">
-            {[
-              {type: 'Journal Articles', count: 92, percentage: 59},
-              {type: 'Conference Papers', count: 38, percentage: 24},
-              {type: 'Book Chapters', count: 18, percentage: 12},
-              {type: 'Patents', count: 8, percentage: 5}
-            ].map((item, i) => (
-              <div key={i}>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">{item.type}</span>
-                  <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+            {(() => {
+              const typeCounts: { [key: string]: number } = {
+                'Journal Article': publications.filter(p => p.type === 'Journal Article').length,
+                'Conference Paper': publications.filter(p => p.type === 'Conference Paper').length,
+                'Book Chapter': publications.filter(p => p.type === 'Book Chapter').length,
+                'Book': publications.filter(p => p.type === 'Book').length,
+                'Patents': patents.length
+              };
+              const typeArray = Object.entries(typeCounts)
+                .filter(([_, count]) => count > 0)
+                .map(([type, count]) => ({ type, count }))
+                .sort((a, b) => b.count - a.count);
+              const total = publications.length + patents.length || 1;
+
+              return typeArray.length > 0 ? typeArray.map((item, i) => (
+                <div key={i}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{item.type}</span>
+                    <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-2 rounded-full bg-green-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="h-2 rounded-full bg-green-500" style={{width: `${item.percentage}%`}}></div>
-                </div>
-              </div>
-            ))}
+              )) : <p className="text-sm text-gray-500">No publications yet</p>;
+            })()}
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Researchers</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Authors</h3>
           <div className="space-y-4">
-            {[
-              {name: 'Dr. Nguyen Van A', publications: 24, citations: 892},
-              {name: 'Dr. Vo Thi F', publications: 18, citations: 756},
-              {name: 'Dr. Pham Thi D', publications: 16, citations: 634}
-            ].map((researcher, i) => (
-              <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">
-                  {i + 1}
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900 text-sm">{researcher.name}</p>
-                  <div className="flex gap-3 mt-1">
-                    <span className="text-xs text-gray-600">{researcher.publications} pubs</span>
-                    <span className="text-xs text-gray-600">{researcher.citations} citations</span>
+            {(() => {
+              const authorStats: { [key: string]: { pubs: number, citations: number } } = {};
+              publications.forEach(pub => {
+                pub.authors?.forEach(author => {
+                  if (!authorStats[author]) {
+                    authorStats[author] = { pubs: 0, citations: 0 };
+                  }
+                  authorStats[author].pubs += 1;
+                  authorStats[author].citations += pub.citations || 0;
+                });
+              });
+              const topAuthors = Object.entries(authorStats)
+                .map(([name, stats]) => ({ name, ...stats }))
+                .sort((a, b) => b.pubs - a.pubs)
+                .slice(0, 5);
+
+              return topAuthors.length > 0 ? topAuthors.map((researcher, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 text-sm">{researcher.name}</p>
+                    <div className="flex gap-3 mt-1">
+                      <span className="text-xs text-gray-600">{researcher.pubs} pubs</span>
+                      <span className="text-xs text-gray-600">{researcher.citations} citations</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )) : <p className="text-sm text-gray-500">No authors yet</p>;
+            })()}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Funding Sources</h3>
           <div className="space-y-3">
-            {[
-              {source: 'Nafosted', amount: '$3.2M', percentage: 38},
-              {source: 'Ministry of Education', amount: '$2.8M', percentage: 33},
-              {source: 'Ministry of Science and Technology', amount: '$1.5M', percentage: 18},
-              {source: 'VNU', amount: '$1.0M', percentage: 11}
-            ].map((item, i) => (
-              <div key={i} className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700">{item.source}</span>
-                  <span className="text-sm font-bold text-gray-900">{item.amount}</span>
-                </div>
-                <div className="w-full bg-gray-300 rounded-full h-1.5">
-                  <div className="h-1.5 rounded-full bg-blue-600" style={{width: `${item.percentage}%`}}></div>
-                </div>
-              </div>
-            ))}
+            {(() => {
+              const fundingSources: { [key: string]: number } = {};
+              projects.forEach(proj => {
+                const source = proj.fundingSource || 'Other';
+                const fundingStr = proj.funding?.replace(/[$,]/g, '') || '0';
+                const amount = parseFloat(fundingStr);
+                if (!isNaN(amount)) {
+                  fundingSources[source] = (fundingSources[source] || 0) + amount;
+                }
+              });
+              const sourceArray = Object.entries(fundingSources)
+                .map(([source, amount]) => ({ source, amount }))
+                .sort((a, b) => b.amount - a.amount)
+                .slice(0, 5);
+              const totalFunding = sourceArray.reduce((sum, item) => sum + item.amount, 0) || 1;
+
+              return sourceArray.length > 0 ? sourceArray.map((item, i) => {
+                const formatted = item.amount >= 1000000
+                  ? `$${(item.amount / 1000000).toFixed(1)}M`
+                  : `$${(item.amount / 1000).toFixed(0)}K`;
+                return (
+                  <div key={i} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium text-gray-700">{item.source}</span>
+                      <span className="text-sm font-bold text-gray-900">{formatted}</span>
+                    </div>
+                    <div className="w-full bg-gray-300 rounded-full h-1.5">
+                      <div className="h-1.5 rounded-full bg-blue-600" style={{width: `${(item.amount / totalFunding) * 100}%`}}></div>
+                    </div>
+                  </div>
+                );
+              }) : <p className="text-sm text-gray-500">No funding sources yet</p>;
+            })()}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Publications by Discipline</h3>
           <div className="space-y-3">
-            {[
-              {discipline: 'Nontraditional Security', count: 42, color: 'blue'},
-              {discipline: 'Sustainable Development', count: 28, color: 'green'},
-              {discipline: 'Engineering & IT', count: 24, color: 'purple'},
-              {discipline: 'Human Resources', count: 18, color: 'green'},
-              {discipline: 'Finance', count: 16, color: 'green'},
-              {discipline: 'Marketing', count: 14, color: 'green'},
-              {discipline: 'Communication', count: 10, color: 'green'},
-              {discipline: 'Law & Criminology', count: 4, color: 'blue'}
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-1">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full bg-${item.color}-500`}></div>
-                  <span className="text-xs text-gray-700">{item.discipline}</span>
+            {(() => {
+              const disciplineCounts: { [key: string]: number } = {};
+              publications.forEach(pub => {
+                const disc = pub.discipline || 'Other';
+                disciplineCounts[disc] = (disciplineCounts[disc] || 0) + 1;
+              });
+              const disciplineArray = Object.entries(disciplineCounts)
+                .map(([discipline, count]) => ({ discipline, count }))
+                .sort((a, b) => b.count - a.count);
+
+              return disciplineArray.length > 0 ? disciplineArray.map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-xs text-gray-700">{item.discipline}</span>
+                  </div>
+                  <span className="text-xs font-bold text-gray-900">{item.count}</span>
                 </div>
-                <span className="text-xs font-bold text-gray-900">{item.count}</span>
-              </div>
-            ))}
+              )) : <p className="text-sm text-gray-500">No publications yet</p>;
+            })()}
           </div>
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   const ProjectsView = () => (
     <div className="space-y-6">
@@ -865,23 +1667,23 @@ const ResearchManagement = () => {
                 <input
                   type="text"
                   placeholder="Search projects..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={projectsSearchTerm}
+                  onChange={(e) => setProjectsSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <select 
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
+              <select
+                value={projectsFilterType}
+                onChange={(e) => setProjectsFilterType(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Types</option>
                 <option value="applied">Applied Research</option>
                 <option value="basic">Basic Research</option>
               </select>
-              <select 
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+              <select
+                value={projectsFilterStatus}
+                onChange={(e) => setProjectsFilterStatus(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Status</option>
@@ -890,7 +1692,7 @@ const ResearchManagement = () => {
                 <option value="pending">Pending</option>
               </select>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button onClick={() => setShowAddProjectModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               <Plus size={18} />
               New Project
             </button>
@@ -982,110 +1784,525 @@ const ResearchManagement = () => {
           </div>
         </div>
       </div>
-        <div className="p-6">
-          {isLoadingProjects ? (
-            <div className="text-center py-12 text-gray-500">
-              <Loader className="animate-spin mx-auto mb-2" size={24} />
-              <p className="text-sm">Loading projects...</p>
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <p className="text-lg font-semibold mb-2">No projects available</p>
-              <p className="text-sm">Click "New Project" to add your first project</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {projects
-                .filter(project => {
-                  const matchesSearch = searchTerm === '' ||
-                    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    project.pi.toLowerCase().includes(searchTerm.toLowerCase());
-                  const matchesType = filterType === 'all' ||
-                    project.type.toLowerCase().includes(filterType);
-                  const matchesStatus = filterStatus === 'all' ||
-                    project.status.toLowerCase() === filterStatus;
-                  return matchesSearch && matchesType && matchesStatus;
-                })
-                .map((project) => (
-                  <div key={project.id} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-bold text-gray-900">{project.title}</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
-                              {project.status}
-                            </span>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">PI</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Funding</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Progress</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Duration</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoadingProjects ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    <Loader className="animate-spin mx-auto mb-2" size={24} />
+                    <p className="text-sm">Loading projects...</p>
+                  </td>
+                </tr>
+              ) : projects.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    <p className="text-lg font-semibold mb-2">No projects available</p>
+                    <p className="text-sm">Click "New Project" to add your first project</p>
+                  </td>
+                </tr>
+              ) : (
+                projects
+                  .filter(project => {
+                    const matchesSearch = projectsSearchTerm === '' ||
+                      project.title.toLowerCase().includes(projectsSearchTerm.toLowerCase()) ||
+                      project.pi.toLowerCase().includes(projectsSearchTerm.toLowerCase());
+                    const matchesType = projectsFilterType === 'all' ||
+                      project.type.toLowerCase().includes(projectsFilterType);
+                    const matchesStatus = projectsFilterStatus === 'all' ||
+                      project.status.toLowerCase() === projectsFilterStatus;
+                    return matchesSearch && matchesType && matchesStatus;
+                  })
+                  .map((project) => (
+                    <tr key={project.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <p className="font-semibold text-sm text-gray-900 max-w-xs">{project.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">{project.type}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{project.pi}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                          {project.department}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-semibold text-gray-900">{project.funding}</p>
+                        <p className="text-xs text-gray-500">{project.fundingSource}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2 w-20">
+                            <div
+                              className="h-2 rounded-full bg-green-600"
+                              style={{width: `${project.progress}%`}}
+                            ></div>
                           </div>
-                          <p className="text-sm text-gray-600 mb-3">{project.description}</p>
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1.5">
-                              <Users size={16} />
-                              PI: {project.pi}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Building size={16} />
-                              {project.department}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Calendar size={16} />
-                              {new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}
-                            </span>
-                          </div>
+                          <span className="text-xs font-semibold text-gray-700">{project.progress}%</span>
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-4 mb-4">
-                        <div className="p-3 bg-blue-50 rounded-lg">
-                          <p className="text-xs text-gray-600 mb-1">Funding</p>
-                          <p className="text-lg font-bold text-gray-900">{project.funding}</p>
-                          <p className="text-xs text-gray-500">{project.fundingSource}</p>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-gray-600">
+                        {new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        <br />
+                        {new Date(project.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
+                          {project.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setSelectedItem({type: 'project', data: project})}
+                            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                            title="View Details"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingItem(project);
+                              setShowEditProjectModal(true);
+                            }}
+                            className="p-1 text-orange-600 hover:bg-orange-50 rounded"
+                            title="Edit Project"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (window.confirm('Are you sure you want to delete this project?')) {
+                                try {
+                                  await projectService.deleteProject(project.id!);
+                                  loadProjects();
+                                } catch (err) {
+                                  alert('Error deleting project: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                                }
+                              }
+                            }}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                            title="Delete Project"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
                         </div>
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <p className="text-xs text-gray-600 mb-1">Progress</p>
-                          <p className="text-lg font-bold text-gray-900">{project.progress}%</p>
-                          <div className="w-full bg-gray-300 rounded-full h-1.5 mt-2">
-                            <div className="h-1.5 rounded-full bg-green-600" style={{width: `${project.progress}%`}}></div>
-                          </div>
-                        </div>
-                        <div className="p-3 bg-purple-50 rounded-lg">
-                          <p className="text-xs text-gray-600 mb-1">Publications</p>
-                          <p className="text-lg font-bold text-gray-900">{project.publications}</p>
-                          <p className="text-xs text-gray-500">Published</p>
-                        </div>
-                        <div className="p-3 bg-orange-50 rounded-lg">
-                          <p className="text-xs text-gray-600 mb-1">Team Size</p>
-                          <p className="text-lg font-bold text-gray-900">{project.coInvestigators.length + 1}</p>
-                          <p className="text-xs text-gray-500">Researchers</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => setSelectedItem({type: 'project', data: project})}
-                          className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-medium"
-                        >
-                          View Details
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingItem(project);
-                            setShowEditProjectModal(true);
-                          }}
-                          className="px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 text-sm font-medium"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
+                      </td>
+                    </tr>
+                  ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   );
+
+  // Add Project Modal Component
+  const renderAddProjectModal = () => {
+    const [newProject, setNewProject] = useState<Partial<Project>>({
+      title: '',
+      pi: '',
+      coInvestigators: [],
+      type: 'Applied Research',
+      status: 'Pending',
+      startDate: '',
+      endDate: '',
+      funding: '',
+      fundingSource: '',
+      progress: 0,
+      publications: 0,
+      department: '',
+      description: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+
+      try {
+        let pdfUrl = '';
+        if (projectPdfFile) {
+          const timestamp = Date.now();
+          pdfUrl = await projectService.uploadProjectPdf(projectPdfFile, `project-${timestamp}`);
+        }
+
+        await projectService.addProject({
+          ...newProject,
+          pdfUrl: pdfUrl || undefined
+        } as any);
+
+        alert('Project added successfully!');
+        setShowAddProjectModal(false);
+        setProjectPdfFile(null);
+        loadProjects();
+      } catch (error) {
+        console.error('Error adding project:', error);
+        alert('Failed to add project');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    if (!showAddProjectModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowAddProjectModal(false)}>
+        <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="h-20 bg-gradient-to-br from-blue-500 to-blue-700 p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Add New Project</h2>
+              <p className="text-blue-100 text-sm mt-1">Create a new research project</p>
+            </div>
+            <button onClick={() => setShowAddProjectModal(false)} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
+              <X size={24} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Project Title *</label>
+              <input type="text" required value={newProject.title || ''} onChange={(e) => setNewProject({...newProject, title: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            {/* PI and Department */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Principal Investigator *</label>
+                <input type="text" required value={newProject.pi || ''} onChange={(e) => setNewProject({...newProject, pi: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Department *</label>
+                <select required value={newProject.department || ''} onChange={(e) => setNewProject({...newProject, department: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select Department</option>
+                  {faculties.map(faculty => (
+                    <option key={faculty.code} value={faculty.name}>{faculty.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Co-Investigators */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Co-Investigators (comma-separated)</label>
+              <input type="text" value={newProject.coInvestigators?.join(', ') || ''}
+                onChange={(e) => setNewProject({...newProject, coInvestigators: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            {/* Type and Status */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
+                <select value={newProject.type || 'Applied Research'} onChange={(e) => setNewProject({...newProject, type: e.target.value as any})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="Applied Research">Applied Research</option>
+                  <option value="Basic Research">Basic Research</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
+                <select value={newProject.status || 'Pending'} onChange={(e) => setNewProject({...newProject, status: e.target.value as any})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="Active">Active</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Start and End Date */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Start Date *</label>
+                <input type="date" required value={newProject.startDate || ''} onChange={(e) => setNewProject({...newProject, startDate: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">End Date *</label>
+                <input type="date" required value={newProject.endDate || ''} onChange={(e) => setNewProject({...newProject, endDate: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+
+            {/* Funding and Source */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Funding Amount *</label>
+                <input type="text" required placeholder="e.g., $250,000" value={newProject.funding || ''} onChange={(e) => setNewProject({...newProject, funding: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Funding Source *</label>
+                <input type="text" required value={newProject.fundingSource || ''} onChange={(e) => setNewProject({...newProject, fundingSource: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+
+            {/* Progress and Publications */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Progress (0-100) *</label>
+                <input type="number" required min="0" max="100" value={newProject.progress || 0} onChange={(e) => setNewProject({...newProject, progress: parseInt(e.target.value) || 0})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Publications Count</label>
+                <input type="number" min="0" value={newProject.publications || 0} onChange={(e) => setNewProject({...newProject, publications: parseInt(e.target.value) || 0})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Description *</label>
+              <textarea required rows={4} value={newProject.description || ''} onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            {/* PDF Upload */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Project PDF (Optional)</label>
+              <input type="file" accept=".pdf" onChange={(e) => setProjectPdfFile(e.target.files?.[0] || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <button type="button" onClick={() => setShowAddProjectModal(false)}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button type="submit" disabled={isSubmitting}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                {isSubmitting ? 'Adding...' : 'Add Project'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  // Add Patent Modal Component
+  const renderAddPatentModal = () => {
+    const [newPatent, setNewPatent] = useState<Partial<Patent>>({
+      title: '',
+      inventors: [],
+      applicationNumber: '',
+      applicationDate: '',
+      status: 'Pending',
+      grantDate: null,
+      patentNumber: null,
+      type: 'Invention Patent',
+      faculty: '',
+      discipline: '',
+      abstract: '',
+      country: '',
+      ipOffice: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+
+      try {
+        let pdfUrl = '';
+        if (patentPdfFile) {
+          const timestamp = Date.now();
+          pdfUrl = await patentService.uploadPatentPdf(patentPdfFile, `patent-${timestamp}`);
+        }
+
+        const patentData = {
+          ...newPatent,
+          grantDate: newPatent.grantDate || null,
+          patentNumber: newPatent.patentNumber || null,
+          pdfUrl: pdfUrl || undefined
+        };
+
+        await patentService.addPatent(patentData as any);
+
+        alert('Patent added successfully!');
+        setShowAddPatentModal(false);
+        setPatentPdfFile(null);
+        loadPatents();
+      } catch (error) {
+        console.error('Error adding patent:', error);
+        alert('Failed to add patent');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    if (!showAddPatentModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowAddPatentModal(false)}>
+        <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="h-20 bg-gradient-to-br from-purple-500 to-purple-700 p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Add New Patent</h2>
+              <p className="text-purple-100 text-sm mt-1">Create a new patent entry</p>
+            </div>
+            <button onClick={() => setShowAddPatentModal(false)} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
+              <X size={24} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Patent Title *</label>
+              <input type="text" required value={newPatent.title || ''} onChange={(e) => setNewPatent({...newPatent, title: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </div>
+
+            {/* Inventors */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Inventors (comma-separated) *</label>
+              <input type="text" required value={newPatent.inventors?.join(', ') || ''}
+                onChange={(e) => setNewPatent({...newPatent, inventors: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </div>
+
+            {/* Application Number and Date */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Application Number *</label>
+                <input type="text" required value={newPatent.applicationNumber || ''} onChange={(e) => setNewPatent({...newPatent, applicationNumber: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Application Date *</label>
+                <input type="date" required value={newPatent.applicationDate || ''} onChange={(e) => setNewPatent({...newPatent, applicationDate: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              </div>
+            </div>
+
+            {/* Type and Status */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
+                <select value={newPatent.type || 'Invention Patent'} onChange={(e) => setNewPatent({...newPatent, type: e.target.value as any})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <option value="Invention Patent">Invention Patent</option>
+                  <option value="Utility Model">Utility Model</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
+                <select value={newPatent.status || 'Pending'} onChange={(e) => setNewPatent({...newPatent, status: e.target.value as any})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <option value="Granted">Granted</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Under Examination">Under Examination</option>
+                  <option value="International Filing">International Filing</option>
+                  <option value="International">International</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Patent Number and Grant Date (conditional) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Patent Number {newPatent.status === 'Granted' && '*'}</label>
+                <input type="text" value={newPatent.patentNumber || ''} onChange={(e) => setNewPatent({...newPatent, patentNumber: e.target.value})}
+                  required={newPatent.status === 'Granted'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Grant Date {newPatent.status === 'Granted' && '*'}</label>
+                <input type="date" value={newPatent.grantDate || ''} onChange={(e) => setNewPatent({...newPatent, grantDate: e.target.value})}
+                  required={newPatent.status === 'Granted'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              </div>
+            </div>
+
+            {/* Faculty and Discipline */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Faculty *</label>
+                <select required value={newPatent.faculty || ''} onChange={(e) => setNewPatent({...newPatent, faculty: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <option value="">Select Faculty</option>
+                  {faculties.map(faculty => (
+                    <option key={faculty.code} value={faculty.name}>{faculty.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline *</label>
+                <select required value={newPatent.discipline || ''} onChange={(e) => setNewPatent({...newPatent, discipline: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <option value="">Select Discipline</option>
+                  {faculties.map(faculty => (
+                    <option key={faculty.code} value={faculty.name}>{faculty.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Country and IP Office */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Country *</label>
+                <input type="text" required value={newPatent.country || ''} onChange={(e) => setNewPatent({...newPatent, country: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">IP Office *</label>
+                <input type="text" required value={newPatent.ipOffice || ''} onChange={(e) => setNewPatent({...newPatent, ipOffice: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+              </div>
+            </div>
+
+            {/* Abstract */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Abstract *</label>
+              <textarea required rows={4} value={newPatent.abstract || ''} onChange={(e) => setNewPatent({...newPatent, abstract: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </div>
+
+            {/* PDF Upload */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Patent PDF (Optional)</label>
+              <input type="file" accept=".pdf" onChange={(e) => setPatentPdfFile(e.target.files?.[0] || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <button type="button" onClick={() => setShowAddPatentModal(false)}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button type="submit" disabled={isSubmitting}
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400">
+                {isSubmitting ? 'Adding...' : 'Add Patent'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
 
   const PublicationsView = () => (
     <div className="space-y-6">
@@ -1098,14 +2315,14 @@ const ResearchManagement = () => {
                 <input
                   type="text"
                   placeholder="Search publications..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={publicationsSearchTerm}
+                  onChange={(e) => setPublicationsSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <select 
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
+              <select
+                value={publicationsFilterType}
+                onChange={(e) => setPublicationsFilterType(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Types</option>
@@ -1115,9 +2332,9 @@ const ResearchManagement = () => {
                 <option value="book">Book</option>
 
               </select>
-              <select 
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+              <select
+                value={publicationsFilterStatus}
+                onChange={(e) => setPublicationsFilterStatus(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Status</option>
@@ -1139,7 +2356,7 @@ const ResearchManagement = () => {
                 ) : (
                   <>
                     <TrendingUp size={18} />
-                    Fetch All Citations
+                    All Citations
                   </>
                 )}
               </button>
@@ -1150,10 +2367,17 @@ const ResearchManagement = () => {
                 <Plus size={18} />
                 Add Publication
               </button>
+              <button
+                onClick={() => setShowBulkAddModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <FileText size={18} />
+                Bulk Addition
+              </button>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-4 p-4">
+        <div className="grid grid-cols-5 gap-4 p-4">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -1163,30 +2387,59 @@ const ResearchManagement = () => {
               <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">Total</span>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Total Publications</p>
           <p className="text-3xl font-bold text-gray-900">{publications.length}</p>
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-600">All publications in database</p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Award className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">WoS</span>
+        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div className="w-39 h-24 rounded-lg flex items-center justify-center">
+              <img src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fwos.jpg?alt=media&token=fa4e5314-b51b-46f5-9e4c-f18044cdda67" alt="Web of Science" className="w-full h-full object-contain" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Web of Science</p>
           <p className="text-3xl font-bold text-gray-900">
             {publications.filter(p => p.wosranking && p.wosranking !== 'N/A').length}
           </p>
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-600">
               {publications.length > 0
-                ? `${Math.round((publications.filter(p => p.wosranking && p.wosranking !== 'N/A').length / publications.length) * 100)}% of total`
+                ? `${Math.round((publications.filter(p => p.wosranking && p.wosranking !== 'N/A' ).length / publications.length) * 100)}% of total`
+                : '0% of total'
+              }
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div className="w-54 h-24 rounded-lg flex items-center justify-center">
+              <img src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fscopus.jpg?alt=media&token=f856a81c-19ad-43df-afdf-afa8acc4d982" alt="Scopus" className="w-full h-full object-contain" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-gray-900">
+            {publications.filter(p =>
+              p.quartile === 'Q1' ||
+              p.quartile === 'Q2' ||
+              p.quartile === 'Q3' ||
+              p.quartile === 'Q4' ||
+              p.quartile === 'Scopus-indexed' ||
+              p.scopusIndexed === true
+              
+            ).length}
+          </p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">
+              {publications.length > 0
+                ? `${Math.round((publications.filter(p =>
+                    p.quartile === 'Q1' ||
+                    p.quartile === 'Q2' ||
+                    p.quartile === 'Q3' ||
+                    p.quartile === 'Q4' ||
+                    p.quartile === 'Scopus-indexed' ||
+                    p.scopusIndexed === true
+                  ).length / publications.length) * 100)}% of total`
                 : '0% of total'
               }
             </p>
@@ -1202,7 +2455,6 @@ const ResearchManagement = () => {
               <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded">DOI</span>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">With DOI</p>
           <p className="text-3xl font-bold text-gray-900">
             {publications.filter(p => p.doi).length}
           </p>
@@ -1222,17 +2474,28 @@ const ResearchManagement = () => {
               <FileText className="w-6 h-6 text-orange-600" />
             </div>
             <div className="text-right">
-              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">Q1</span>
+              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">Reputable</span>
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Q1 Journals</p>
           <p className="text-3xl font-bold text-gray-900">
-            {publications.filter(p => p.quartile === 'Q1').length}
+            {publications.filter(p =>
+              p.quartile === 'Q1' ||
+              p.quartile === 'Q2' ||
+              p.wosranking === 'SSCI' ||
+              p.wosranking === 'SCIE' ||
+              p.wosranking === 'AHCI'
+            ).length}
           </p>
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-600">
               {publications.length > 0
-                ? `${Math.round((publications.filter(p => p.quartile === 'Q1').length / publications.length) * 100)}% of total`
+                ? `${Math.round((publications.filter(p =>
+                    p.quartile === 'Q1' ||
+                    p.quartile === 'Q2' ||
+                    p.wosranking === 'SSCI' ||
+                    p.wosranking === 'SCIE' ||
+                    p.wosranking === 'AHCI'
+                  ).length / publications.length) * 100)}% of total`
                 : '0% of total'
               }
             </p>
@@ -1273,11 +2536,11 @@ const ResearchManagement = () => {
               ) : (
                 publications
                   .filter(pub => {
-                    const matchesSearch = searchTerm === '' ||
-                      pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      pub.authors.some(a => a.toLowerCase().includes(searchTerm.toLowerCase()));
-                    const matchesType = filterType === 'all' || pub.type.toLowerCase().includes(filterType);
-                    const matchesStatus = filterStatus === 'all' || pub.status.toLowerCase() === filterStatus;
+                    const matchesSearch = publicationsSearchTerm === '' ||
+                      pub.title.toLowerCase().includes(publicationsSearchTerm.toLowerCase()) ||
+                      pub.authors.some(a => a.toLowerCase().includes(publicationsSearchTerm.toLowerCase()));
+                    const matchesType = publicationsFilterType === 'all' || pub.type.toLowerCase().includes(publicationsFilterType);
+                    const matchesStatus = publicationsFilterStatus === 'all' || pub.status.toLowerCase() === publicationsFilterStatus;
                     return matchesSearch && matchesType && matchesStatus;
                   })
                   .map((pub) => (
@@ -1296,7 +2559,7 @@ const ResearchManagement = () => {
                           {pub.type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{pub.journal}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">{pub.journal}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDisciplineColor(pub.discipline)}`}>
                           {pub.discipline}
@@ -1305,14 +2568,17 @@ const ResearchManagement = () => {
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">{pub.year}</td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">{pub.citations}</td>
                       <td className="px-6 py-4">
-                        {pub.impactFactor ? (
-                          <div className="text-sm">
-                            <p className="font-semibold text-gray-900">{pub.impactFactor}</p>
-                            <p className="text-xs text-gray-500">{pub.quartile}</p>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-gray-400">N/A</span>
-                        )}
+                        <div className="text-sm space-y-1">
+                          {pub.quartile && pub.quartile !== 'N/A' && (
+                            <div className="font-semibold text-gray-900">{pub.quartile}</div>
+                          )}
+                          {pub.wosranking && pub.wosranking !== 'N/A' && (
+                            <div className="text-xs text-gray-600">{pub.wosranking}</div>
+                          )}
+                          {(!pub.quartile || pub.quartile === 'N/A') && (!pub.wosranking || pub.wosranking === 'N/A') && (
+                            <span className="text-sm text-gray-400">N/A</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(pub.status)}`}>
@@ -1323,35 +2589,51 @@ const ResearchManagement = () => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => setSelectedItem({type: 'publication', data: pub})}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                            title="View Details"
                           >
-                            View
+                            <Eye className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => {
                               setEditingItem(pub);
                               setShowEditPublicationModal(true);
                             }}
-                            className="text-green-600 hover:text-green-800 text-sm font-medium"
+                            className="p-1 text-orange-600 hover:bg-orange-50 rounded"
+                            title="Edit Publication"
                           >
-                            Edit
+                            <Edit className="w-5 h-5" />
                           </button>
                           {pub.doi && (
                             <button
                               onClick={() => fetchCitationsForPublication(pub)}
                               disabled={fetchingCitations.has(pub.id!)}
-                              className="text-orange-600 hover:text-orange-800 text-sm font-medium disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                              className="p-1 text-purple-600 hover:bg-purple-50 rounded disabled:text-gray-400 disabled:cursor-not-allowed"
+                              title="Fetch Citations"
                             >
                               {fetchingCitations.has(pub.id!) ? (
-                                <>
-                                  <Loader size={14} className="animate-spin" />
-                                  <span>...</span>
-                                </>
+                                <Loader size={20} className="animate-spin" />
                               ) : (
-                                <span>Cite</span>
+                                <Quote className="w-5 h-5" />
                               )}
                             </button>
                           )}
+                          <button
+                            onClick={async () => {
+                              if (window.confirm('Are you sure you want to delete this publication?')) {
+                                try {
+                                  await publicationService.deletePublication(pub.id!);
+                                  loadPublications();
+                                } catch (err) {
+                                  alert('Error deleting publication: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                                }
+                              }
+                            }}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                            title="Delete Publication"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1376,14 +2658,14 @@ const ResearchManagement = () => {
                 <input
                   type="text"
                   placeholder="Search patents..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={patentsSearchTerm}
+                  onChange={(e) => setPatentsSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                value={patentsFilterStatus}
+                onChange={(e) => setPatentsFilterStatus(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Status</option>
@@ -1393,8 +2675,8 @@ const ResearchManagement = () => {
                 <option value="International">International</option>
               </select>
               <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
+                value={patentsFilterType}
+                onChange={(e) => setPatentsFilterType(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All Types</option>
@@ -1402,7 +2684,7 @@ const ResearchManagement = () => {
                 <option value="Utility Model">Utility Model</option>
               </select>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button onClick={() => setShowAddPatentModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               <Plus size={18} />
               Add Patent
             </button>
@@ -1528,11 +2810,11 @@ const ResearchManagement = () => {
               ) : (
                 patents
                   .filter(patent => {
-                    const matchesSearch = searchTerm === '' ||
-                      patent.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      patent.inventors.some(inv => inv.toLowerCase().includes(searchTerm.toLowerCase()));
-                    const matchesType = filterType === 'all' || patent.type === filterType;
-                    const matchesStatus = filterStatus === 'all' || patent.status === filterStatus;
+                    const matchesSearch = patentsSearchTerm === '' ||
+                      patent.title.toLowerCase().includes(patentsSearchTerm.toLowerCase()) ||
+                      patent.inventors.some(inv => inv.toLowerCase().includes(patentsSearchTerm.toLowerCase()));
+                    const matchesType = patentsFilterType === 'all' || patent.type === patentsFilterType;
+                    const matchesStatus = patentsFilterStatus === 'all' || patent.status === patentsFilterStatus;
                     return matchesSearch && matchesType && matchesStatus;
                   })
                   .map((patent) => (
@@ -1572,18 +2854,36 @@ const ResearchManagement = () => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => setSelectedItem({type: 'patent', data: patent})}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                            title="View Details"
                           >
-                            View
+                            <Eye className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => {
                               setEditingItem(patent);
                               setShowEditPatentModal(true);
                             }}
-                            className="text-green-600 hover:text-green-800 text-sm font-medium"
+                            className="p-1 text-orange-600 hover:bg-orange-50 rounded"
+                            title="Edit Patent"
                           >
-                            Edit
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (window.confirm('Are you sure you want to delete this patent?')) {
+                                try {
+                                  await patentService.deletePatent(patent.id!);
+                                  loadPatents();
+                                } catch (err) {
+                                  alert('Error deleting patent: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                                }
+                              }
+                            }}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                            title="Delete Patent"
+                          >
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
@@ -1875,7 +3175,16 @@ const ResearchManagement = () => {
         )}
 
         {/* Add Publication Modal */}
-        <AddPublicationModal />
+        {renderAddPublicationModal()}
+
+        {/* Bulk Addition Modal */}
+        {renderBulkAddModal()}
+
+        {/* Add Project Modal */}
+        {renderAddProjectModal()}
+
+        {/* Add Patent Modal */}
+        {renderAddPatentModal()}
 
         {/* Edit Publication Modal */}
         {showEditPublicationModal && editingItem && (
@@ -1969,6 +3278,7 @@ const ResearchManagement = () => {
                       <option value="Q2">Q2</option>
                       <option value="Q3">Q3</option>
                       <option value="Q4">Q4</option>
+                      <option value="Scopus-indexed">Scopus-indexed</option>
                       <option value="N/A">N/A</option>
                     </select>
                   </div>
@@ -2020,6 +3330,20 @@ const ResearchManagement = () => {
                       <option value="IT">IT</option>
                       <option value="Technology Management">Technology Management</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* Scopus Indexed */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Scopus Indexed</label>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={editingItem.scopusIndexed || false}
+                      onChange={(e) => setEditingItem({...editingItem, scopusIndexed: e.target.checked})}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <label className="ml-2 text-sm text-gray-600">Indexed in Scopus</label>
                   </div>
                 </div>
 
@@ -2114,7 +3438,7 @@ const ResearchManagement = () => {
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-                  <input type="text" defaultValue={editingItem.title} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
+                  <input type="text" value={editingItem.title || ''} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
                 <div>
@@ -2161,7 +3485,7 @@ const ResearchManagement = () => {
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-                  <input type="text" defaultValue={editingItem.title} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
+                  <input type="text" value={editingItem.title || ''} onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
                 <div>

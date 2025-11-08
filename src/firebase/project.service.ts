@@ -25,7 +25,7 @@ export interface Project extends Omit<ResearchProject, 'id'> {
 export const projectService = {
   // Upload project PDF
   async uploadProjectPdf(file: File, projectId: string): Promise<string> {
-    const storageRef = ref(storage, `projects/${projectId}-${file.name}`);
+    const storageRef = ref(storage, `research_projects/${projectId}-${file.name}`);
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
     return downloadURL;
