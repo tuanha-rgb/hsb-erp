@@ -107,16 +107,24 @@ export const navigationConfig: Record<UserType, MenuItem[]> = {
           {
             id: 'documents', label: 'Documents', icon: FileText,
             submenu: [
-              { id: 'docu-manage', label: 'Documents management' },
+              { id: 'documents-dashboard', label: 'Dashboard' },
+              { id: 'my-documents', label: 'My Documents' },
+              { id: 'upload-document', label: 'Upload Document' },
               { id: 'digital-signature', label: 'Digital Signature' },
-              { id: 'administrative-processes', label: 'Administrative Processes' },
+              { id: 'handbook', label: 'Handbook and Documents' },
               { id: 'regulations-decrees', label: 'Regulations & Decrees' },
-              
+
             ]
           },
           { id: 'one-stop-service', label: 'One-Stop Service', icon: UserCheck },
           { id: 'projects', label: 'Projects', icon: Briefcase },
-          { id: 'shopping', label: 'HSB-Shop', icon: UserCheck },
+          {
+            id: 'shopping', label: 'HSB-Shop', icon: UserCheck,
+            submenu: [
+              { id: 'shop-viewer', label: 'Browse Shop' },
+              { id: 'shop-admin', label: 'Shop Management' },
+            ]
+          },
           { id: 'polling', label: 'Poll/Vote', icon: Vote },
           {
             id: 'alumni', label: 'Alumni', icon: Award,

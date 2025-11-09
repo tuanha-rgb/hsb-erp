@@ -1,0 +1,107 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isRecipient(docId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/document_recipients/$(docId + '_' + request.auth.uid)) ||
+        existsAfter(/databases/$(database)/documents/document_recipients/$(docId + '_' + request.auth.uid));
+    }
+
+    // Documents collection
+    match /documents/{docId} {
+      // Allow read if:
+      // 1. User is the uploader (owner)
+      // 2. User is listed as a recipient in document_recipients
+      allow read: if isAuthenticated() && (
+        resource.data.uploaderId == request.auth.uid ||
+        exists(/databases/$(database)/documents/document_recipients/{recipientDoc}) &&
+        get(/databases/$(database)/documents/document_recipients/{recipientDoc}).data.recipientId == request.auth.uid &&
+        get(/databases/$(database)/documents/document_recipients/{recipientDoc}).data.docId == docId
+      );
+
+      // Allow create if authenticated (anyone can upload)
+      allow create: if isAuthenticated() &&
+        request.resource.data.uploaderId == request.auth.uid;
+
+      // Allow update if user is the uploader
+      allow update: if isAuthenticated() &&
+        resource.data.uploaderId == request.auth.uid;
+
+      // Allow delete if user is the uploader
+      allow delete: if isAuthenticated() &&
+        resource.data.uploaderId == request.auth.uid;
+    }
+
+    // Document recipients collection
+    match /document_recipients/{recipientId} {
+      // Allow read if:
+      // 1. User is the recipient
+      // 2. User is the uploader of the associated document
+      allow read: if isAuthenticated() && (
+        resource.data.recipientId == request.auth.uid ||
+        get(/databases/$(database)/documents/documents/$(resource.data.docId)).data.uploaderId == request.auth.uid
+      );
+
+      // Allow create if user is the uploader of the document
+      allow create: if isAuthenticated() &&
+        get(/databases/$(database)/documents/documents/$(request.resource.data.docId)).data.uploaderId == request.auth.uid;
+
+      // Allow update if:
+      // 1. User is the recipient (to mark as read)
+      // 2. User is the uploader of the document
+      allow update: if isAuthenticated() && (
+        resource.data.recipientId == request.auth.uid ||
+        get(/databases/$(database)/documents/documents/$(resource.data.docId)).data.uploaderId == request.auth.uid
+      );
+
+      // Allow delete if user is the uploader of the document
+      allow delete: if isAuthenticated() &&
+        get(/databases/$(database)/documents/documents/$(resource.data.docId)).data.uploaderId == request.auth.uid;
+    }
+
+    // Document categories collection
+    match /document_categories/{categoryId} {
+      // Anyone authenticated can read categories
+      allow read: if isAuthenticated();
+
+      // Only admins can create/update/delete categories
+      // For now, allow all authenticated users (you can add admin check later)
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Books collection (existing rules - keep as is)
+    match /books/{bookId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Theses collection (existing rules - keep as is)
+    match /theses/{thesisId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Publications collection (existing rules - keep as is)
+    match /publications/{publicationId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Library analytics collection (existing rules - keep as is)
+    match /library_analytics/{statsId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}

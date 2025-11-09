@@ -33,8 +33,6 @@ import { sampleEvents, type EventItem, getEventStatusColor } from "./student/eve
 // Document Management (Firebase-based)
 import DocumentList from './documents/DocumentList';
 import DocumentUpload from './documents/DocumentUpload';
-import DocumentDashboard from './documents/DocumentDashboard';
-import CategoryManager from './documents/CategoryManager';
 
 // ✅ Types (match your file name exactly)
 import {
@@ -65,7 +63,6 @@ import PollSystem from './PollSystem';
 
 
 import HSBShop from "./shop/HSBShop";
-import HSBShopViewer from "./shop/HSBShopViewer";
 
 import { sampleUsers,  getStatusaccColor } from "./useraccounts";
 import type { UserAccount} from "./useraccounts";
@@ -116,7 +113,6 @@ const ERPLayout: React.FC = () => {
 // At the top of ERPLayout.tsx, add mock user
 const mockUser = {
   id: 'test-user-001',
-  name: 'Test User',
   role: 'staff' // or 'student' or 'management'
 };
 type UserLevel = 'student' | 'staff' | 'management';
@@ -11511,6 +11507,941 @@ const OneStopService = () => {
 
 
 
+// Import types and data from documentData.ts
+
+const DocumentManagement: React.FC = () => {
+  const [documents, setDocuments] = useState<Document[]>(sampleDocuments);
+  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'pending'>('overview');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSource, setSelectedSource] = useState<DocumentSource | "ALL">("ALL");
+  const [selectedType, setSelectedType] = useState<DocumentType | "ALL">("ALL");
+  const [selectedStatus, setSelectedStatus] = useState<DocumentStatus | "ALL">("ALL");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
+
+  // Statistics
+  const stats = useMemo(() => {
+    const docStats = getDocumentStatistics();
+    return {
+      total: docStats.total,
+      pendingSignature: docStats.byStatus.pendingSignature,
+      pendingReview: docStats.byStatus.pendingReview,
+      urgent: docStats.byPriority.urgent,
+      issued: docStats.byStatus.issued,
+    };
+  }, []);
+
+  // Document type labels
+  const documentTypeLabels: Record<DocumentType, string> = {
+    CIRCULAR: "Thông tư",
+    DIRECTIVE: "Chỉ thị",
+    DECISION: "Quyết định",
+    DISPATCH: "Công văn",
+    GUIDELINE: "Hướng dẫn",
+    REGULATION: "Quy định",
+    REPORT: "Báo cáo",
+    REQUEST: "Đề nghị",
+    NOTIFICATION: "Thông báo",
+    RESOLUTION: "Nghị quyết",
+    INSTRUCTION: "Chỉ đạo"
+  };
+
+  // Document source labels
+  const documentSourceLabels: Record<DocumentSource, string> = {
+    VNU_HANOI: "ĐHQG Hà Nội",
+    MOE: "Bộ Giáo dục",
+    MPS: "Bộ Công an",
+    MOH: "Bộ Y tế",
+    MOET: "Bộ GD&ĐT",
+    MOST: "Bộ KH&CN",
+    MOF: "Bộ Tài chính",
+    MOLISA: "Bộ LĐ-TB&XH",
+    INTERNAL: "Nội bộ",
+    OTHER: "Khác"
+  };
+
+  // Document status labels
+  const documentStatusLabels: Record<DocumentStatus, string> = {
+    DRAFT: "Dự thảo",
+    PENDING_REVIEW: "Chờ xem xét",
+    PENDING_SIGNATURE: "Chờ ký",
+    SIGNED: "Đã ký",
+    ISSUED: "Đã ban hành",
+    ARCHIVED: "Đã lưu trữ",
+    REJECTED: "Từ chối",
+    EXPIRED: "Hết hiệu lực"
+  };
+
+  // Priority labels
+  const priorityLabels: Record<PriorityLevel, string> = {
+    LOW: "Thấp",
+    MEDIUM: "Trung bình",
+    HIGH: "Cao",
+    URGENT: "Khẩn cấp"
+  };
+
+  // Get status color
+  const getStatusColor = (status: DocumentStatus): string => {
+    const colors: Record<DocumentStatus, string> = {
+      DRAFT: "bg-gray-100 text-gray-700 border-gray-200",
+      PENDING_REVIEW: "bg-amber-100 text-amber-700 border-amber-200",
+      PENDING_SIGNATURE: "bg-blue-100 text-blue-700 border-blue-200",
+      SIGNED: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      ISSUED: "bg-purple-100 text-purple-700 border-purple-200",
+      ARCHIVED: "bg-gray-100 text-gray-600 border-gray-200",
+      REJECTED: "bg-red-100 text-red-700 border-red-200",
+      EXPIRED: "bg-gray-100 text-gray-500 border-gray-200"
+    };
+    return colors[status];
+  };
+
+  // Get priority color
+  const getPriorityColor = (priority: PriorityLevel): string => {
+    const colors: Record<PriorityLevel, string> = {
+      LOW: "bg-green-100 text-green-700 border-green-200",
+      MEDIUM: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      HIGH: "bg-orange-100 text-orange-700 border-orange-200",
+      URGENT: "bg-red-100 text-red-700 border-red-200"
+    };
+    return colors[priority];
+  };
+
+  // Format date
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  // Filter documents
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const matchesSearch = 
+        doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.documentNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.sourceOrganization.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesSource = selectedSource === "ALL" || doc.source === selectedSource;
+      const matchesType = selectedType === "ALL" || doc.type === selectedType;
+      const matchesStatus = selectedStatus === "ALL" || doc.status === selectedStatus;
+
+      return matchesSearch && matchesSource && matchesType && matchesStatus;
+    });
+  }, [documents, searchTerm, selectedSource, selectedType, selectedStatus]);
+
+  // Handle document click
+  const handleDocumentClick = (doc: Document) => {
+    setSelectedDocument(doc);
+    setShowDocumentModal(true);
+  };
+
+  // Render Overview Tab
+  const renderOverview = () => (
+    <div className="space-y-3">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <FileText className="text-blue-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Tổng số văn bản</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.total}</p>
+          <p className="text-sm text-gray-500">Tất cả văn bản trong hệ thống</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-amber-100 rounded-xl">
+              <Clock className="text-amber-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Chờ ký duyệt</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.pendingSignature}</p>
+          <p className="text-sm text-amber-600 font-medium">Cần xử lý ngay</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-purple-100 rounded-xl">
+              <Eye className="text-purple-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Chờ xem xét</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.pendingReview}</p>
+          <p className="text-sm text-gray-500">Đang được xem xét</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-red-100 rounded-xl">
+              <AlertTriangle className="text-red-600" size={24} />
+            </div>
+            <span className="text-sm font-semibold text-gray-600">Khẩn cấp</span>
+          </div>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{stats.urgent}</p>
+          <p className="text-sm text-red-600 font-medium">Ưu tiên cao nhất</p>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố trạng thái văn bản</h3>
+          <div className="space-y-3">
+            {Object.entries(documentStatusLabels).map(([status, label]) => {
+              const count = documents.filter(d => d.status === status).length;
+              const percentage = (count / documents.length) * 100;
+              return (
+                <div key={status} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{label}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${
+                          status === 'ISSUED' ? 'bg-purple-500' :
+                          status === 'PENDING_SIGNATURE' ? 'bg-blue-500' :
+                          status === 'PENDING_REVIEW' ? 'bg-amber-500' :
+                          status === 'SIGNED' ? 'bg-emerald-500' :
+                          status === 'REJECTED' ? 'bg-red-500' : 'bg-gray-400'
+                        }`}
+                        style={{width: `${percentage}%`}}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 w-8">{count}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Nguồn văn bản hàng đầu</h3>
+          <div className="space-y-4">
+            {Object.entries(
+              documents.reduce((acc, doc) => {
+                acc[doc.source] = (acc[doc.source] || 0) + 1;
+                return acc;
+              }, {} as Record<DocumentSource, number>)
+            )
+              .sort(([, a], [, b]) => b - a)
+              .slice(0, 5)
+              .map(([source, count], idx) => (
+                <div key={source} className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center font-bold text-indigo-600">
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {documentSourceLabels[source as DocumentSource]}
+                    </p>
+                    <p className="text-xs text-gray-500">Nguồn văn bản</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-gray-900">{count}</p>
+                    <p className="text-xs text-gray-500">văn bản</p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Documents */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Văn bản gần đây</h3>
+        <div className="space-y-2">
+          {documents.slice(0, 5).map(doc => (
+            <div 
+              key={doc.id} 
+              className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+              onClick={() => handleDocumentClick(doc)}
+            >
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                  <FileText size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{doc.title}</p>
+                  <p className="text-xs text-gray-500">{doc.documentNumber} • {documentSourceLabels[doc.source]}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500">{formatDate(doc.issuedDate)}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                  {documentStatusLabels[doc.status]}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Render Documents Tab
+  const renderDocuments = () => (
+    <div className="space-y-4">
+      {/* Search and Actions */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="relative flex-1 min-w-[300px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo số văn bản, tiêu đề, nội dung..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+              showFilters
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Filter size={18} />
+            Bộ lọc
+          </button>
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-all ${
+                viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+              }`}
+            >
+              <ListIcon size={18} />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-all ${
+                viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+              }`}
+            >
+              <Grid size={18} />
+            </button>
+          </div>
+          <button
+            onClick={() => setShowNewDocumentModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            <Plus size={18} />
+            Thêm văn bản
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      {showFilters && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Nguồn văn bản</label>
+              <select
+                value={selectedSource}
+                onChange={(e) => setSelectedSource(e.target.value as DocumentSource | "ALL")}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="ALL">Tất cả</option>
+                {Object.entries(documentSourceLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Loại văn bản</label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value as DocumentType | "ALL")}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="ALL">Tất cả</option>
+                {Object.entries(documentTypeLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Trạng thái</label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as DocumentStatus | "ALL")}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="ALL">Tất cả</option>
+                {Object.entries(documentStatusLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Documents List/Grid */}
+      {viewMode === 'list' ? (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Số văn bản</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tiêu đề</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Loại</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ngày BH</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ưu tiên</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Hành động</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredDocuments.map(doc => (
+                  <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-semibold text-indigo-600">{doc.documentNumber}</p>
+                    </td>
+                    <td className="px-6 py-4 max-w-md">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{doc.title}</p>
+                      <p className="text-xs text-gray-500 truncate">{doc.sourceOrganization}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                        {documentTypeLabels[doc.type]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-700">{formatDate(doc.issuedDate)}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(doc.priority)}`}>
+                        {priorityLabels[doc.priority]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                        {documentStatusLabels[doc.status]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDocumentClick(doc)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
+                      >
+                        <Eye size={14} />
+                        Xem
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {filteredDocuments.length === 0 && (
+            <div className="text-center py-12">
+              <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500">Không tìm thấy văn bản nào</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredDocuments.map(doc => (
+            <div
+              key={doc.id}
+              onClick={() => handleDocumentClick(doc)}
+              className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                  {documentTypeLabels[doc.type]}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(doc.priority)}`}>
+                  {priorityLabels[doc.priority]}
+                </span>
+              </div>
+
+              <p className="text-sm font-semibold text-indigo-600 mb-2">{doc.documentNumber}</p>
+              <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">{doc.title}</h3>
+
+              <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                <Building2 size={14} />
+                <span className="truncate">{doc.sourceOrganization}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                <Calendar size={14} />
+                <span>Ngày BH: {formatDate(doc.issuedDate)}</span>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                  {documentStatusLabels[doc.status]}
+                </span>
+                {doc.attachments && doc.attachments.length > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Paperclip size={14} />
+                    {doc.attachments.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {filteredDocuments.length === 0 && (
+            <div className="col-span-full text-center py-12 bg-white rounded-xl border border-gray-200">
+              <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500">Không tìm thấy văn bản nào</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  // Render Pending Tab
+  const renderPending = () => {
+    const pendingDocs = documents.filter(
+      d => d.status === 'PENDING_SIGNATURE' || d.status === 'PENDING_REVIEW'
+    );
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-amber-600 mt-0.5" size={20} />
+            <div>
+              <h3 className="text-sm font-semibold text-amber-900 mb-1">
+                Có {pendingDocs.length} văn bản cần xử lý
+              </h3>
+              <p className="text-sm text-amber-700">
+                Các văn bản đang chờ xem xét hoặc ký duyệt cần được xử lý sớm
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {pendingDocs.map(doc => (
+            <div key={doc.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-bold text-gray-900">{doc.title}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(doc.status)}`}>
+                      {documentStatusLabels[doc.status]}
+                    </span>
+                  </div>
+                  <p className="text-sm text-indigo-600 font-semibold mb-1">{doc.documentNumber}</p>
+                  <p className="text-sm text-gray-600">{documentSourceLabels[doc.source]} • {documentTypeLabels[doc.type]}</p>
+                </div>
+                <button
+                  onClick={() => handleDocumentClick(doc)}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                >
+                  <Eye size={16} />
+                  Xem chi tiết
+                </button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Cơ quan</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">{doc.sourceOrganization}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Ngày ban hành</p>
+                  <p className="text-sm font-semibold text-gray-900">{formatDate(doc.issuedDate)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Ưu tiên</p>
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(doc.priority)}`}>
+                    {priorityLabels[doc.priority]}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Người tạo</p>
+                  <p className="text-sm font-semibold text-gray-900">{doc.createdBy}</p>
+                </div>
+              </div>
+
+              {doc.signatories && doc.signatories.length > 0 && (
+                <div className="pt-4 border-t border-gray-200">
+                  <p className="text-xs font-semibold text-gray-500 mb-2">NGƯỜI KÝ DUYỆT</p>
+                  <div className="flex flex-wrap gap-2">
+                    {doc.signatories.map(sig => (
+                      <div key={sig.id} className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                        <User size={14} className="text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900">{sig.name}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          sig.status === 'SIGNED' ? 'bg-emerald-100 text-emerald-700' :
+                          sig.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {sig.status === 'SIGNED' ? 'Đã ký' : sig.status === 'PENDING' ? 'Chờ ký' : 'Từ chối'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {pendingDocs.length === 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+            <CheckCircle size={48} className="mx-auto text-emerald-500 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Tất cả đã được xử lý</h3>
+            <p className="text-gray-500">Không có văn bản nào đang chờ xử lý</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Document Detail Modal
+  const DocumentDetailModal = () => {
+    if (!selectedDocument) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+          {/* Modal Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-xs font-semibold rounded-full border border-white/30">
+                    {documentTypeLabels[selectedDocument.type]}
+                  </span>
+                  <span className={`px-3 py-1 bg-white text-xs font-semibold rounded-full ${
+                    selectedDocument.priority === 'URGENT' ? 'text-red-700' :
+                    selectedDocument.priority === 'HIGH' ? 'text-orange-700' :
+                    selectedDocument.priority === 'MEDIUM' ? 'text-yellow-700' :
+                    'text-green-700'
+                  }`}>
+                    {priorityLabels[selectedDocument.priority]}
+                  </span>
+                  <span className="px-3 py-1 bg-white text-indigo-700 text-xs font-semibold rounded-full">
+                    {documentStatusLabels[selectedDocument.status]}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">{selectedDocument.title}</h2>
+                <p className="text-indigo-100">{selectedDocument.documentNumber}</p>
+              </div>
+              <button 
+                onClick={() => setShowDocumentModal(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Body */}
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-280px)]">
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Cơ quan ban hành</p>
+                <p className="text-base font-bold text-gray-900">{selectedDocument.sourceOrganization}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Nguồn</p>
+                <p className="text-base font-bold text-gray-900">{documentSourceLabels[selectedDocument.source]}</p>
+              </div>
+              {selectedDocument.category && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Lĩnh vực</p>
+                  <p className="text-base font-bold text-gray-900">{selectedDocument.category}</p>
+                </div>
+              )}
+              {selectedDocument.confidentialityLevel && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Độ mật</p>
+                  <p className="text-base font-bold text-gray-900">
+                    {selectedDocument.confidentialityLevel === 'PUBLIC' ? 'Công khai' :
+                     selectedDocument.confidentialityLevel === 'INTERNAL' ? 'Nội bộ' :
+                     selectedDocument.confidentialityLevel === 'CONFIDENTIAL' ? 'Mật' : 'Tối mật'}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Ngày ban hành</p>
+                <p className="text-base font-bold text-gray-900">{formatDate(selectedDocument.issuedDate)}</p>
+              </div>
+              {selectedDocument.receivedDate && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Ngày nhận</p>
+                  <p className="text-base font-bold text-gray-900">{formatDate(selectedDocument.receivedDate)}</p>
+                </div>
+              )}
+              {selectedDocument.effectiveDate && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Ngày hiệu lực</p>
+                  <p className="text-base font-bold text-gray-900">{formatDate(selectedDocument.effectiveDate)}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Người tạo</p>
+                <p className="text-base font-bold text-gray-900">{selectedDocument.createdBy}</p>
+              </div>
+            </div>
+
+            {/* Recipient Departments */}
+            {selectedDocument.recipientDepartments && selectedDocument.recipientDepartments.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Phòng ban nhận văn bản</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedDocument.recipientDepartments.map((dept, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
+                      {dept}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Tóm tắt nội dung</h3>
+              <p className="text-sm text-gray-700 leading-relaxed p-4 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedDocument.summary}
+              </p>
+            </div>
+
+            {/* Full Content */}
+            {selectedDocument.content && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Nội dung chi tiết</h3>
+                <div className="text-sm text-gray-700 leading-relaxed p-4 bg-gray-50 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                  {selectedDocument.content}
+                </div>
+              </div>
+            )}
+
+            {/* Signatories */}
+            {selectedDocument.signatories.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Người ký duyệt</h3>
+                <div className="space-y-3">
+                  {selectedDocument.signatories.map(sig => (
+                    <div key={sig.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900">{sig.name}</p>
+                        <p className="text-xs text-gray-600 mt-1">{sig.position} {sig.department && `• ${sig.department}`}</p>
+                        {(sig.email || sig.phone) && (
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            {sig.email && (
+                              <div className="flex items-center gap-1">
+                                <Mail size={12} />
+                                {sig.email}
+                              </div>
+                            )}
+                            {sig.phone && (
+                              <div className="flex items-center gap-1">
+                                <Phone size={12} />
+                                {sig.phone}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {sig.signedAt && (
+                          <p className="text-xs text-gray-500 mt-2">Đã ký: {formatDate(sig.signedAt)}</p>
+                        )}
+                        {sig.comments && (
+                          <p className="text-xs text-gray-700 mt-2 italic bg-white p-2 rounded">💬 {sig.comments}</p>
+                        )}
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                        sig.status === 'SIGNED' ? 'bg-emerald-100 text-emerald-700' :
+                        sig.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {sig.status === 'SIGNED' ? 'Đã ký' : sig.status === 'PENDING' ? 'Chờ ký' : 'Từ chối'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Attachments */}
+            {selectedDocument.attachments && selectedDocument.attachments.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  File đính kèm ({selectedDocument.attachments.length})
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedDocument.attachments.map((attachment, idx) => {
+                    const fileName = typeof attachment === 'string' ? attachment : attachment.fileName;
+                    const fileSize = typeof attachment === 'string' ? null : attachment.fileSize;
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <Paperclip className="text-indigo-600 flex-shrink-0" size={18} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{fileName}</p>
+                            {fileSize && (
+                              <p className="text-xs text-gray-500">{(fileSize / 1024 / 1024).toFixed(2)} MB</p>
+                            )}
+                          </div>
+                        </div>
+                        <button className="ml-2 text-indigo-600 hover:text-indigo-700 flex-shrink-0">
+                          <Download size={16} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {selectedDocument.tags.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedDocument.tags.map((tag, idx) => (
+                    <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            {selectedDocument.notes && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="text-amber-600 mt-0.5 flex-shrink-0" size={18} />
+                  <div>
+                    <h3 className="text-sm font-semibold text-amber-900 mb-1">Ghi chú</h3>
+                    <p className="text-sm text-amber-700">{selectedDocument.notes}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
+            <div className="flex gap-3 justify-end">
+              <button 
+                onClick={() => setShowDocumentModal(false)}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Đóng
+              </button>
+              {selectedDocument.status === 'PENDING_SIGNATURE' && (
+                <>
+                  <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                    <Edit size={18} />
+                    Chỉnh sửa
+                  </button>
+                  <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                    <Send size={18} />
+                    Gửi duyệt
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-3">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 rounded-xl border sticky top-0 z-10 mb-3">
+        <div className="max-w mx-auto p-3">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Quản lý Văn bản</h1>
+              <p className="text-gray-600 mt-1">Hệ thống quản lý công văn, thông tư từ ĐHQG Hà Nội và các Bộ</p>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex gap-4">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'overview'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <BarChart3 size={20} />
+                Tổng quan
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('documents')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'documents'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <FileText size={20} />
+                Văn bản
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'pending'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Clock size={20} />
+                Chờ xử lý
+                {(stats.pendingSignature + stats.pendingReview) > 0 && (
+                  <span className="px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded-full">
+                    {stats.pendingSignature + stats.pendingReview}
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w mx-auto">
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'documents' && renderDocuments()}
+        {activeTab === 'pending' && renderPending()}
+      </div>
+
+      {/* Document Detail Modal */}
+      {showDocumentModal && <DocumentDetailModal />}
+    </div>
+  );
+};
+
+
+
+
+
+{/*project tab*/}
 
 
 // Types
@@ -12859,9 +13790,6 @@ const availableTabs = [
    if (activeTab == 'one-stop-service'){
       return <OneStopService/>;
     }
-    if (activeTab == 'documents-dashboard'){
-      return <DocumentDashboard userId={mockUser.id} userRole="admin" />;
-    }
     if (activeTab == 'my-documents'){
       return (
         <DocumentList
@@ -12884,18 +13812,12 @@ const availableTabs = [
           onClose={() => setActiveTab('my-documents')}
         />
       );
-    if (activeTab == 'category-manager'){
-      return <CategoryManager />;
-    }
     }
     if (activeTab == 'projects'){
       return <ProjectsTab/>;
     }
-    if (activeTab == 'shop-viewer'){
-      return <HSBShopViewer userId={mockUser.id} userName={mockUser.name} />;
-    }
-    if (activeTab == 'shop-admin'){
-      return <HSBShop />;
+    if (activeTab == 'shopping'){
+      return <HSBShop/>;
     }
     if (activeTab === 'polling'){
   return <PollSystem 

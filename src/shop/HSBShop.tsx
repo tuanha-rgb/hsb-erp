@@ -1,5 +1,5 @@
-// src/shop/HSBShop.tsx
-import React, { useMemo, useState } from "react";
+// src/shop/HSBShop.tsx - Firebase Connected
+import React, { useMemo, useState, useEffect } from "react";
 import {
   AlertOctagon,
   AlertTriangle,
@@ -20,7 +20,12 @@ import {
   TrendingUp,
   X,
   XCircle,
+  Loader,
+  Upload as UploadIcon,
 } from "lucide-react";
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { db } from '../firebase/firebase.config';
+import { shopService, ShopProduct } from '../firebase/shop.service';
 import {
   ActiveView,
   CATEGORIES,
@@ -32,7 +37,6 @@ import {
   StockStatus,
   emptyNewProduct,
   formatCurrency,
-  sampleProducts,
 } from "./inventory";
 
 const HSBShop: React.FC = () => {
@@ -45,8 +49,42 @@ const HSBShop: React.FC = () => {
   const [inventoryViewMode, setInventoryViewMode] =
     useState<InventoryViewMode>("grid");
 
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newProduct, setNewProduct] = useState<NewProductForm>(emptyNewProduct);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Load products from Firebase with real-time listener
+  useEffect(() => {
+    const q = query(
+      collection(db, 'shop_products'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          lastRestocked: doc.data().lastRestocked?.toDate(),
+          createdAt: doc.data().createdAt?.toDate(),
+          updatedAt: doc.data().updatedAt?.toDate()
+        })) as Product[];
+
+        setProducts(productsData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error loading products:', error);
+        showNotification('Failed to load products', 'error');
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   // Stats
   const stats = useMemo(() => {
@@ -64,7 +102,9 @@ const HSBShop: React.FC = () => {
     return products.filter((p) => {
       const q = searchTerm.toLowerCase();
       const matchesSearch =
-        p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+        p.name.toLowerCase().includes(q) ||
+        p.sku.toLowerCase().includes(q) ||
+        p.itemCode.toLowerCase().includes(q);
       const matchesCategory = filterCategory === "all" || p.category === filterCategory;
       return matchesSearch && matchesCategory;
     });
@@ -75,56 +115,113 @@ const HSBShop: React.FC = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleAddProduct = () => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+        showNotification('Please upload a JPG or PNG image', 'error');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showNotification('Image size must be less than 5MB', 'error');
+        return;
+      }
+      setImageFile(file);
+    }
+  };
+
+  const handleAddProduct = async () => {
     if (!newProduct.name || !newProduct.price || !newProduct.hsbPoints || !newProduct.stock || !newProduct.sku) {
       showNotification("Please fill in all required fields", "error");
       return;
     }
 
-    const parsedStock = parseInt(newProduct.stock, 10);
-    const parsedReorder = parseInt(newProduct.reorderLevel || "20", 10);
-    const status: StockStatus =
-      parsedStock === 0 ? "out-of-stock" : parsedStock > parsedReorder ? "in-stock" : "low-stock";
+    try {
+      setUploading(true);
+      let imageUrl = newProduct.image;
 
-    const product: Product = {
-      id: products.length ? Math.max(...products.map((p) => p.id)) + 1 : 1,
-      name: newProduct.name,
-      category: newProduct.category,
-      price: parseFloat(newProduct.price),
-      hsbPoints: parseInt(newProduct.hsbPoints, 10),
-      stock: parsedStock,
-      image: newProduct.image,
-      sku: newProduct.sku,
-      reorderLevel: parsedReorder,
-      supplier: newProduct.supplier,
-      sizes: newProduct.sizes,
-      sold: 0,
-      status,
-      lastRestocked: new Date().toISOString().split("T")[0],
-    };
+      // Upload image if file selected
+      if (imageFile) {
+        const { url } = await shopService.uploadProductImage(imageFile);
+        imageUrl = url;
+      }
 
-    setProducts((prev) => [...prev, product]);
-    setNewProduct(emptyNewProduct);
-    setActiveView("inventory");
-    showNotification("Product added successfully!");
+      const parsedStock = parseInt(newProduct.stock, 10);
+      const parsedReorder = parseInt(newProduct.reorderLevel || "20", 10);
+
+      const productData = {
+        name: newProduct.name,
+        category: newProduct.category,
+        price: parseFloat(newProduct.price),
+        hsbPoints: parseInt(newProduct.hsbPoints, 10),
+        stock: parsedStock,
+        image: imageUrl,
+        sku: newProduct.sku,
+        reorderLevel: parsedReorder,
+        supplier: newProduct.supplier,
+        sizes: newProduct.sizes,
+        sold: 0,
+        lastRestocked: new Date(),
+      };
+
+      await shopService.createProduct(productData);
+
+      setNewProduct(emptyNewProduct);
+      setImageFile(null);
+      setActiveView("inventory");
+      showNotification("Product added successfully!");
+    } catch (error) {
+      console.error('Error adding product:', error);
+      showNotification("Failed to add product", "error");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleUpdateStock = (productId: number, newStock: number) => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id !== productId) return p;
-        const status: StockStatus =
-          newStock === 0 ? "out-of-stock" : newStock > p.reorderLevel ? "in-stock" : "low-stock";
-        return { ...p, stock: newStock, status };
-      }),
-    );
-    showNotification("Stock updated successfully!");
+  const handleUpdateStock = async (productId: string, newStock: number) => {
+    try {
+      await shopService.updateStock(productId, newStock);
+      showNotification("Stock updated successfully!");
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      showNotification("Failed to update stock", "error");
+    }
   };
 
-  const handleDeleteProduct = (productId: number) => {
-    setProducts((prev) => prev.filter((p) => p.id !== productId));
-    setShowModal(false);
-    showNotification("Product deleted successfully!");
+  const handleSaveProduct = async () => {
+    if (!selectedProduct) return;
+
+    try {
+      await shopService.updateProduct(selectedProduct.id, {
+        name: selectedProduct.name,
+        category: selectedProduct.category,
+        sku: selectedProduct.sku,
+        supplier: selectedProduct.supplier,
+        stock: selectedProduct.stock,
+        price: selectedProduct.price,
+        hsbPoints: selectedProduct.hsbPoints,
+        reorderLevel: selectedProduct.reorderLevel,
+      });
+
+      setShowModal(false);
+      showNotification("Product updated successfully!");
+    } catch (error) {
+      console.error('Error updating product:', error);
+      showNotification("Failed to update product", "error");
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      await shopService.deleteProduct(productId);
+      setShowModal(false);
+      showNotification("Product deleted successfully!");
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      showNotification("Failed to delete product", "error");
+    }
   };
 
   const getStatusColor = (status: StockStatus) => {
@@ -153,7 +250,7 @@ const HSBShop: React.FC = () => {
     }
   };
 
-  // ---------- VIEWS (unchanged layout, typed) ----------
+  // ---------- VIEWS ----------
   const renderDashboard = () => (
     <div className="space-y-3">
       {/* Stats */}
@@ -258,7 +355,7 @@ const HSBShop: React.FC = () => {
         </div>
       )}
 
-      {/* Top selling (same as your layout) */}
+      {/* Top selling */}
       <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-gray-900">Top Selling Products</h3>
@@ -275,7 +372,7 @@ const HSBShop: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-gray-900">{p.name}</p>
-                <p className="text-sm text-gray-600">{p.sold} units sold</p>
+                <p className="text-sm text-gray-600">{p.sold} units sold • {p.itemCode}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-gray-900">{formatCurrency(p.price * p.sold)}</p>
@@ -284,6 +381,12 @@ const HSBShop: React.FC = () => {
               </div>
             </div>
           ))}
+          {products.length === 0 && (
+            <div className="text-center py-8">
+              <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500">No products yet</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -297,7 +400,7 @@ const HSBShop: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search by name or SKU..."
+              placeholder="Search by name, SKU, or item code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -354,7 +457,8 @@ const HSBShop: React.FC = () => {
                   </span>
                 </div>
                 <h4 className="font-bold text-gray-900 mb-1">{p.name}</h4>
-                <p className="text-sm text-gray-600 mb-3">SKU: {p.sku}</p>
+                <p className="text-sm text-gray-600 mb-1">SKU: {p.sku}</p>
+                <p className="text-xs text-blue-600 mb-3">Item Code: {p.itemCode}</p>
 
                 <div className="space-y-2 mb-4 text-sm">
                   <div className="flex justify-between">
@@ -419,6 +523,7 @@ const HSBShop: React.FC = () => {
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-900 truncate">{p.name}</p>
                     <p className="text-xs text-gray-500">SKU: {p.sku}</p>
+                    <p className="text-xs text-blue-600">{p.itemCode}</p>
                   </div>
                 </div>
 
@@ -472,7 +577,7 @@ const HSBShop: React.FC = () => {
         </div>
       )}
 
-      {filteredProducts.length === 0 && (
+      {filteredProducts.length === 0 && !loading && (
         <div className="bg-white rounded-2xl shadow-sm p-12 border border-gray-100 text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-gray-900 mb-2">No Products Found</h3>
@@ -489,7 +594,6 @@ const HSBShop: React.FC = () => {
 
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Inputs (typed) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
               <input
@@ -498,6 +602,7 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter product name"
+                disabled={uploading}
               />
             </div>
 
@@ -507,6 +612,7 @@ const HSBShop: React.FC = () => {
                 value={newProduct.category}
                 onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value as Category })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={uploading}
               >
                 <option value="Apparel">Apparel</option>
                 <option value="Stationery">Stationery</option>
@@ -523,7 +629,9 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="HSB-XXX-000"
+                disabled={uploading}
               />
+              <p className="text-xs text-gray-500 mt-1">Item code will be auto-generated</p>
             </div>
 
             <div>
@@ -534,6 +642,7 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, supplier: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter supplier name"
+                disabled={uploading}
               />
             </div>
 
@@ -546,6 +655,7 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0.00"
+                disabled={uploading}
               />
             </div>
 
@@ -557,6 +667,7 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, hsbPoints: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0"
+                disabled={uploading}
               />
             </div>
 
@@ -568,6 +679,7 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0"
+                disabled={uploading}
               />
             </div>
 
@@ -579,32 +691,89 @@ const HSBShop: React.FC = () => {
                 onChange={(e) => setNewProduct({ ...newProduct, reorderLevel: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="20"
+                disabled={uploading}
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Product Image URL</label>
-              <input
-                type="text"
-                value={newProduct.image}
-                onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://i.postimg.cc/..."
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Product Image</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                {!imageFile ? (
+                  <label className="cursor-pointer block">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                    <UploadIcon className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600">
+                      Click to upload image (JPG, PNG, max 5MB)
+                    </p>
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
+                      <div className="text-left">
+                        <p className="font-medium text-gray-800">{imageFile.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {(imageFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    {!uploading && (
+                      <button
+                        onClick={() => setImageFile(null)}
+                        className="p-2 hover:bg-gray-200 rounded-full transition"
+                      >
+                        <X className="w-5 h-5 text-gray-600" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+
+          {uploading && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Uploading...</span>
+                <span className="text-sm text-gray-600">{Math.round(uploadProgress)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-4 pt-6">
             <button
               onClick={handleAddProduct}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
+              disabled={uploading}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2 disabled:bg-gray-400"
             >
-              <Plus className="w-5 h-5" />
-              Add Product
+              {uploading ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" />
+                  Add Product
+                </>
+              )}
             </button>
             <button
               onClick={() => setActiveView("inventory")}
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-semibold"
+              disabled={uploading}
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-semibold disabled:bg-gray-100"
             >
               Cancel
             </button>
@@ -631,7 +800,7 @@ const HSBShop: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900">{p.name}</p>
-                  <p className="text-sm text-gray-600">{p.category}</p>
+                  <p className="text-sm text-gray-600">{p.category} • {p.itemCode}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-gray-900">{formatCurrency(p.price * p.sold)}</p>
@@ -652,6 +821,12 @@ const HSBShop: React.FC = () => {
                 </div>
               </div>
             ))}
+          {products.length === 0 && (
+            <div className="text-center py-8">
+              <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500">No sales data yet</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -664,7 +839,10 @@ const HSBShop: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900">Edit Product</h3>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Edit Product</h3>
+                <p className="text-sm text-gray-500 mt-1">Item Code: {selectedProduct.itemCode}</p>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
                 className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
@@ -676,36 +854,102 @@ const HSBShop: React.FC = () => {
 
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Stock Quantity</label>
+              <div className="col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
                 <input
-                  type="number"
-                  defaultValue={selectedProduct.stock}
+                  type="text"
+                  value={selectedProduct.name}
                   onChange={(e) =>
-                    setSelectedProduct({ ...selectedProduct, stock: parseInt(e.target.value, 10) })
+                    setSelectedProduct({ ...selectedProduct, name: e.target.value })
                   }
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                <select
+                  value={selectedProduct.category}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, category: e.target.value as Category })
+                  }
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Apparel">Apparel</option>
+                  <option value="Stationery">Stationery</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Vouchers">Vouchers</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">SKU</label>
+                <input
+                  type="text"
+                  value={selectedProduct.sku}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, sku: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Supplier</label>
+                <input
+                  type="text"
+                  value={selectedProduct.supplier}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, supplier: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Price ($)</label>
                 <input
                   type="number"
                   step="0.01"
-                  defaultValue={selectedProduct.price}
+                  value={selectedProduct.price}
                   onChange={(e) =>
                     setSelectedProduct({ ...selectedProduct, price: parseFloat(e.target.value) })
                   }
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div className="col-span-2">
+
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">HSB Points</label>
                 <input
                   type="number"
-                  defaultValue={selectedProduct.hsbPoints}
+                  value={selectedProduct.hsbPoints}
                   onChange={(e) =>
                     setSelectedProduct({ ...selectedProduct, hsbPoints: parseInt(e.target.value, 10) })
+                  }
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Stock Quantity</label>
+                <input
+                  type="number"
+                  value={selectedProduct.stock}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, stock: parseInt(e.target.value, 10) })
+                  }
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Reorder Level</label>
+                <input
+                  type="number"
+                  value={selectedProduct.reorderLevel}
+                  onChange={(e) =>
+                    setSelectedProduct({ ...selectedProduct, reorderLevel: parseInt(e.target.value, 10) })
                   }
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -714,10 +958,7 @@ const HSBShop: React.FC = () => {
 
             <div className="flex gap-3 pt-4">
               <button
-                onClick={() => {
-                  handleUpdateStock(selectedProduct.id, selectedProduct.stock);
-                  setShowModal(false);
-                }}
+                onClick={handleSaveProduct}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
               >
                 Save Changes
@@ -735,6 +976,17 @@ const HSBShop: React.FC = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading shop data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
