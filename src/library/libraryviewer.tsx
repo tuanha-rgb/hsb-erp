@@ -851,10 +851,10 @@ const togglePageMode = async () => {
   style={{
     WebkitOverflowScrolling: 'touch',
     paddingTop: '8px',
-    paddingRight: '20px',
+    paddingRight: '8px',
     paddingLeft: '8px',
-    paddingBottom: '20px',
-    marginBottom: '60px'
+    paddingBottom: '8px',
+    marginBottom: '48px'
   }}
 >
        {loading && (
