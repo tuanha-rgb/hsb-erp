@@ -507,50 +507,99 @@ const LibraryDashboard: React.FC = () => {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     if (usagePeriod === '24h') {
-      // Last 24 hours - show hourly data or daily if not enough granularity
+      // Last 24 hours - show actual hourly data in 2-hour increments (12 bars)
       const now = new Date();
-      const hoursToShow = 12; // Show 12 time points for last 24 hours
+      const todayStr = now.toISOString().split('T')[0];
+      const yesterdayStr = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-      if (dailyStats.length === 0) {
-        return Array.from({ length: hoursToShow }, (_, i) => {
-          const hour = new Date(now.getTime() - (hoursToShow - 1 - i) * 2 * 60 * 60 * 1000);
-          return {
-            month: `${hour.getHours()}:00`,
-            online: 0
-          };
+      // Find today's and yesterday's stats
+      const todayStats = dailyStats.find(s => s.date === todayStr);
+      const yesterdayStats = dailyStats.find(s => s.date === yesterdayStr);
+
+      console.log('24h view - Today stats:', todayStats);
+      console.log('24h view - Yesterday stats:', yesterdayStats);
+
+      // Combine hourly data from both days
+      const hourlyData: { [hour: string]: number } = {};
+
+      // Initialize all 24 hours to 0
+      for (let hour = 0; hour < 24; hour++) {
+        hourlyData[hour.toString()] = 0;
+      }
+
+      // Get current hour to determine which hours to show from yesterday
+      const currentHour = now.getHours();
+
+      // Add yesterday's data for hours after current hour (to complete 24h)
+      if (yesterdayStats?.hourlyViews) {
+        for (let hour = currentHour + 1; hour < 24; hour++) {
+          hourlyData[hour.toString()] = yesterdayStats.hourlyViews[hour.toString()] || 0;
+        }
+      }
+
+      // Add today's data for hours up to current hour
+      if (todayStats?.hourlyViews) {
+        for (let hour = 0; hour <= currentHour; hour++) {
+          hourlyData[hour.toString()] = todayStats.hourlyViews[hour.toString()] || 0;
+        }
+      }
+
+      console.log('Combined hourly data:', hourlyData);
+
+      // Group into 2-hour buckets (12 bars total)
+      const twoHourBuckets: UsageTrend[] = [];
+      for (let i = 0; i < 12; i++) {
+        const startHour = i * 2;
+        const endHour = startHour + 2;
+
+        // Sum views for this 2-hour period
+        const views = (hourlyData[startHour.toString()] || 0) + (hourlyData[(startHour + 1).toString()] || 0);
+
+        // Format label as "00-02", "02-04", etc.
+        const label = `${startHour.toString().padStart(2, '0')}-${endHour.toString().padStart(2, '0')}`;
+
+        twoHourBuckets.push({
+          month: label,
+          online: views
         });
       }
 
-      // Since we store daily, for 24h we'll interpolate or show the latest data point
-      const latestStat = dailyStats[dailyStats.length - 1];
-      const viewsPerHour = latestStat ? Math.floor(latestStat.totalViews / 24) : 0;
-
-      return Array.from({ length: hoursToShow }, (_, i) => {
-        const hour = new Date(now.getTime() - (hoursToShow - 1 - i) * 2 * 60 * 60 * 1000);
-        return {
-          month: `${String(hour.getHours()).padStart(2, '0')}:00`,
-          online: viewsPerHour * (i + 1)
-        };
-      });
+      console.log('Generated 24h trends (2-hour buckets):', twoHourBuckets);
+      return twoHourBuckets;
 
     } else if (usagePeriod === '7d') {
-      // Last 7 days - show daily data
+      // Last 7 days - show daily incremental views (delta from previous day)
       const now = new Date();
       const daysToShow = 7;
 
-      // Create map of dates from dailyStats
-      const statsMap = new Map(dailyStats.map(stat => [stat.date, stat.totalViews]));
+      // Sort dailyStats by date
+      const sortedStats = [...dailyStats].sort((a, b) => a.date.localeCompare(b.date));
 
-      console.log('Stats map for 7 days:', Array.from(statsMap.entries()));
+      // Create map of dates with daily deltas
+      const dailyDeltaMap = new Map<string, number>();
+
+      sortedStats.forEach((stat, index) => {
+        if (index === 0) {
+          // First day - assume all views are from that day
+          dailyDeltaMap.set(stat.date, stat.totalViews);
+        } else {
+          // Calculate delta from previous day
+          const previousViews = sortedStats[index - 1].totalViews;
+          const dailyViews = Math.max(0, stat.totalViews - previousViews);
+          dailyDeltaMap.set(stat.date, dailyViews);
+        }
+      });
+
+      console.log('Daily delta map for 7 days:', Array.from(dailyDeltaMap.entries()));
 
       const result = Array.from({ length: daysToShow }, (_, i) => {
         const day = new Date(now.getTime() - (daysToShow - 1 - i) * 24 * 60 * 60 * 1000);
         const dateKey = day.toISOString().split('T')[0];
-        const views = statsMap.get(dateKey) || 0;
-        console.log(`Day ${i}: ${dateKey} (${monthNames[day.getMonth()]} ${day.getDate()}) - ${views} views`);
+        const dailyViews = dailyDeltaMap.get(dateKey) || 0;
+        console.log(`Day ${i}: ${dateKey} (${monthNames[day.getMonth()]} ${day.getDate()}) - ${dailyViews} daily views`);
         return {
           month: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-          online: views
+          online: dailyViews
         };
       });
 
@@ -558,18 +607,29 @@ const LibraryDashboard: React.FC = () => {
       return result;
 
     } else {
-      // Last 30 days - show weekly aggregates (4-5 weeks)
+      // Last 30 days - show weekly aggregates (4-5 weeks) using daily deltas
       const now = new Date();
       const weeksToShow = 5;
       const weeklyData: number[] = new Array(weeksToShow).fill(0);
 
-      // Group dailyStats into weeks
-      dailyStats.forEach(stat => {
+      // Sort dailyStats by date
+      const sortedStats = [...dailyStats].sort((a, b) => a.date.localeCompare(b.date));
+
+      // Calculate daily deltas and group into weeks
+      sortedStats.forEach((stat, index) => {
+        let dailyViews = 0;
+        if (index === 0) {
+          dailyViews = stat.totalViews;
+        } else {
+          const previousViews = sortedStats[index - 1].totalViews;
+          dailyViews = Math.max(0, stat.totalViews - previousViews);
+        }
+
         const date = new Date(stat.date);
         const daysAgo = Math.floor((now.getTime() - date.getTime()) / (24 * 60 * 60 * 1000));
         const weekIndex = Math.floor(daysAgo / 7);
         if (weekIndex < weeksToShow) {
-          weeklyData[weeksToShow - 1 - weekIndex] += stat.totalViews;
+          weeklyData[weeksToShow - 1 - weekIndex] += dailyViews;
         }
       });
 

@@ -5,3 +5,47 @@
 /* Optional: smooth font rendering */
 html, body, #root { height: 100%; }
 body { @apply bg-gray-50 text-gray-900; }
+
+/* Custom scrollbar styles for reading view - Always visible */
+.reading-view-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+  overflow-x: scroll !important;
+  overflow-y: scroll !important;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.reading-view-scroll::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.reading-view-scroll::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.reading-view-scroll::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 8px;
+}
+
+.reading-view-scroll::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.reading-view-scroll::-webkit-scrollbar-corner {
+  background: #f3f4f6;
+}
+
+/* Hide number input spinner buttons */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

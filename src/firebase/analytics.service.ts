@@ -21,6 +21,7 @@ export interface DailyStats {
   thesisViews: number;
   journalCitations: number;
   activeUsers: number;
+  hourlyViews?: { [hour: string]: number }; // Track views by hour (0-23)
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -134,6 +135,44 @@ export const analyticsService = {
     return this.getDailyStats(startDate, endDate);
   },
 
+  // Record an hourly view increment
+  async recordHourlyView(): Promise<void> {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const hour = now.getHours().toString();
+
+    const docRef = doc(db, ANALYTICS_COLLECTION, dateStr);
+
+    // Increment the hourly counter
+    const currentDoc = await getDocs(query(collection(db, ANALYTICS_COLLECTION), where('date', '==', dateStr)));
+
+    if (currentDoc.empty) {
+      // Create new document with hourly view
+      await setDoc(docRef, {
+        date: dateStr,
+        totalViews: 1,
+        bookViews: 1,
+        thesisViews: 0,
+        journalCitations: 0,
+        activeUsers: 0,
+        hourlyViews: { [hour]: 1 },
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
+      });
+    } else {
+      // Update existing document
+      const existing = currentDoc.docs[0].data();
+      const hourlyViews = existing.hourlyViews || {};
+      hourlyViews[hour] = (hourlyViews[hour] || 0) + 1;
+
+      await setDoc(docRef, {
+        ...existing,
+        hourlyViews,
+        updatedAt: Timestamp.now()
+      }, { merge: true });
+    }
+  },
+
   // Backfill data for the past N days (for testing/initialization)
   async backfillData(days: number, baseViews: number): Promise<void> {
     console.log(`[Analytics Service] Backfilling ${days} days of data...`);
@@ -151,6 +190,22 @@ export const analyticsService = {
       const thesisViews = Math.floor(dayViews * 0.3);
       const journalCitations = Math.floor(dayViews * 0.1);
 
+      // Generate mock hourly views that sum to dayViews
+      const hourlyViews: { [hour: string]: number } = {};
+      let remainingViews = dayViews;
+      for (let hour = 0; hour < 24; hour++) {
+        if (hour === 23) {
+          hourlyViews[hour.toString()] = remainingViews;
+        } else {
+          // Distribute views somewhat realistically (more during day hours)
+          const isBusinessHours = hour >= 8 && hour <= 18;
+          const maxViews = isBusinessHours ? Math.floor(dayViews * 0.08) : Math.floor(dayViews * 0.02);
+          const views = Math.min(remainingViews, Math.floor(Math.random() * maxViews));
+          hourlyViews[hour.toString()] = views;
+          remainingViews -= views;
+        }
+      }
+
       promises.push(
         this.recordDailyStats({
           date: dateStr,
@@ -158,7 +213,8 @@ export const analyticsService = {
           bookViews,
           thesisViews,
           journalCitations,
-          activeUsers: Math.floor(dayViews * 0.15)
+          activeUsers: Math.floor(dayViews * 0.15),
+          hourlyViews
         })
       );
     }

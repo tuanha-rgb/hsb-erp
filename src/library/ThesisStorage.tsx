@@ -630,6 +630,7 @@ const ThesisStorage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [thesisToEdit, setThesisToEdit] = useState<ThesisRecord | null>(null);
   const [selectedThesis, setSelectedThesis] = useState<ThesisRecord | null>(null);
@@ -829,6 +830,13 @@ const [pageSize, setPageSize] = useState<number>(10);
           >
             <Plus className="w-5 h-5" />
             Add Thesis
+          </button>
+          <button
+            onClick={() => setShowBulkAddModal(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+          >
+            <Upload className="w-5 h-5" />
+            Bulk Add
           </button>
         </div>
       </div>
@@ -1261,6 +1269,57 @@ const [pageSize, setPageSize] = useState<number>(10);
         />
       )}
 
+      {/* Bulk Add Modal */}
+      {showBulkAddModal && (
+        <BulkAddThesisModal
+          onClose={() => setShowBulkAddModal(false)}
+          onSubmit={async (rows) => {
+            try {
+              // Add all theses to Firebase in sequence
+              for (const row of rows) {
+                // Build thesis data object, excluding undefined values
+                const thesisData: any = {
+                  title: row.title,
+                  studentName: row.studentName,
+                  studentId: row.studentId,
+                  level: row.level,
+                  program: row.program,
+                  year: row.year,
+                  submissionDate: row.submissionDate,
+                  status: row.status,
+                  abstract: row.abstract,
+                  keywords: row.keywords.split(',').map(k => k.trim()).filter(Boolean),
+                  pages: row.pages || 0,
+                  plagiarismScore: row.plagiarismScore || 0,
+                };
+
+                // Only add optional fields if they have values
+                if (row.defenseDate) {
+                  thesisData.defenseDate = row.defenseDate;
+                }
+                if (row.approvalDate) {
+                  thesisData.approvalDate = row.approvalDate;
+                }
+                if (row.grade) {
+                  thesisData.grade = row.grade;
+                }
+
+                await thesisService.addThesis(thesisData);
+              }
+
+              // Reload theses from Firebase
+              await loadTheses();
+              setShowBulkAddModal(false);
+              alert(`Successfully added ${rows.length} theses!`);
+            } catch (error: any) {
+              console.error("Error bulk adding theses:", error);
+              throw error; // Let the modal handle the error
+            }
+          }}
+          existingTheses={theses}
+        />
+      )}
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-6 flex justify-center gap-2">
@@ -1658,6 +1717,482 @@ const AddThesisModal: React.FC<{
 
 /* ---------- Edit Thesis Modal ---------- */
 // Replace the EditThesisModal (lines 920-945) in your ThesisStorage.tsx with this implementation:
+
+/* ---------- Bulk Add Thesis Modal ---------- */
+interface BulkThesisRow {
+  id: string; // Temp ID for tracking rows
+  title: string;
+  studentName: string;
+  studentId: string;
+  level: ThesisLevel;
+  program: string;
+  year: number;
+  submissionDate: string;
+  defenseDate?: string;
+  approvalDate?: string;
+  status: ThesisStatus;
+  abstract: string;
+  keywords: string;
+  pages?: number;
+  plagiarismScore?: number;
+  grade?: string;
+  errors: string[]; // Validation errors
+}
+
+const BulkAddThesisModal: React.FC<{
+  onClose: () => void;
+  onSubmit: (data: BulkThesisRow[]) => Promise<void>;
+  existingTheses: ThesisRecord[];
+}> = ({ onClose, onSubmit, existingTheses }) => {
+  const [rows, setRows] = useState<BulkThesisRow[]>([
+    {
+      id: crypto.randomUUID(),
+      title: "",
+      studentName: "",
+      studentId: "",
+      level: "bachelor",
+      program: "MET",
+      year: new Date().getFullYear(),
+      submissionDate: new Date().toISOString().split('T')[0],
+      status: "draft",
+      abstract: "",
+      keywords: "",
+      errors: []
+    }
+  ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const tableRef = React.useRef<HTMLDivElement>(null);
+
+  // Add a new empty row
+  const addRow = () => {
+    setRows([...rows, {
+      id: crypto.randomUUID(),
+      title: "",
+      studentName: "",
+      studentId: "",
+      level: "bachelor",
+      program: "MET",
+      year: new Date().getFullYear(),
+      submissionDate: new Date().toISOString().split('T')[0],
+      status: "draft",
+      abstract: "",
+      keywords: "",
+      errors: []
+    }]);
+  };
+
+  // Remove a row
+  const removeRow = (id: string) => {
+    setRows(rows.filter(r => r.id !== id));
+  };
+
+  // Update cell value
+  const updateCell = (id: string, field: keyof BulkThesisRow, value: any) => {
+    setRows(rows.map(r => r.id === id ? { ...r, [field]: value, errors: [] } : r));
+  };
+
+  // Handle paste from Excel
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    const lines = pastedData.split('\n').filter(line => line.trim());
+
+    if (lines.length === 0) return;
+
+    const newRows: BulkThesisRow[] = [];
+
+    lines.forEach(line => {
+      const cells = line.split('\t');
+      if (cells.length >= 3) { // At least title, student name, student ID
+        newRows.push({
+          id: crypto.randomUUID(),
+          title: cells[0]?.trim() || "",
+          studentName: cells[1]?.trim() || "",
+          studentId: cells[2]?.trim() || "",
+          level: (cells[3]?.toLowerCase().trim() as ThesisLevel) || "bachelor",
+          program: cells[4]?.trim() || "MET",
+          year: parseInt(cells[5]?.trim()) || new Date().getFullYear(),
+          submissionDate: cells[6]?.trim() || new Date().toISOString().split('T')[0],
+          defenseDate: cells[7]?.trim() || undefined,
+          approvalDate: cells[8]?.trim() || undefined,
+          status: (cells[9]?.toLowerCase().trim() as ThesisStatus) || "draft",
+          abstract: cells[10]?.trim() || "",
+          keywords: cells[11]?.trim() || "",
+          pages: parseInt(cells[12]?.trim()) || undefined,
+          plagiarismScore: parseFloat(cells[13]?.trim()) || undefined,
+          grade: cells[14]?.trim() || undefined,
+          errors: []
+        });
+      }
+    });
+
+    if (newRows.length > 0) {
+      setRows(newRows);
+    }
+  };
+
+  // Check if a row is completely empty
+  const isRowEmpty = (row: BulkThesisRow): boolean => {
+    return !row.title.trim() &&
+           !row.studentName.trim() &&
+           !row.studentId.trim() &&
+           !row.abstract.trim();
+  };
+
+  // Validate all rows
+  const validateRows = (): boolean => {
+    let isValid = true;
+    const validatedRows = rows.map(row => {
+      const errors: string[] = [];
+
+      // Skip validation for completely empty rows
+      if (isRowEmpty(row)) {
+        return { ...row, errors: [] };
+      }
+
+      if (!row.title.trim()) errors.push("Title required");
+      if (!row.studentName.trim()) errors.push("Student name required");
+      if (!row.studentId.trim()) errors.push("Student ID required");
+      if (!row.abstract.trim()) errors.push("Abstract required");
+      if (row.year < 2000 || row.year > 2100) errors.push("Invalid year");
+      if (!['bachelor', 'master', 'phd'].includes(row.level)) errors.push("Invalid level");
+      if (!['draft', 'submitted', 'under_review', 'approved', 'rejected', 'published'].includes(row.status)) {
+        errors.push("Invalid status");
+      }
+
+      if (errors.length > 0) isValid = false;
+
+      return { ...row, errors };
+    });
+
+    setRows(validatedRows);
+    return isValid;
+  };
+
+  // Handle submit
+  const handleSubmit = async () => {
+    if (!validateRows()) {
+      alert("Please fix all validation errors before submitting");
+      return;
+    }
+
+    // Filter out completely empty rows
+    const nonEmptyRows = rows.filter(row => !isRowEmpty(row));
+
+    if (nonEmptyRows.length === 0) {
+      alert("Please add at least one thesis before submitting");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(nonEmptyRows);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting bulk theses:", error);
+      alert("Failed to add theses. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-[95vw] w-full max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="border-b p-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Bulk Add Theses</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Paste from Excel or fill the table manually. Use Tab key to move between cells.
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Instructions */}
+        <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+          <p className="text-sm text-blue-900">
+            <strong>How to use:</strong> Copy rows from Excel and paste directly into the table below (Ctrl/Cmd+V).
+            Expected columns: Title, Student Name, Student ID, Level (bachelor/master/phd), Program Code, Year,
+            Submission Date, Defense Date, Approval Date, Status, Abstract, Keywords, Pages, Plagiarism %, Grade
+          </p>
+        </div>
+
+        {/* Scrollable Table */}
+        <div
+          ref={tableRef}
+          className="flex-1 overflow-auto p-6"
+          onPaste={handlePaste}
+          tabIndex={0}
+        >
+          <table className="w-full border-collapse border border-gray-300 text-sm">
+            <thead className="bg-gray-100 sticky top-0">
+              <tr>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold w-8">#</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[200px]">Title *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[120px]">Student Name *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[100px]">Student ID *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[100px]">Level *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[100px]">Program *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[80px]">Year *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[120px]">Submission *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[120px]">Defense</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[100px]">Status *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[200px]">Abstract *</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[150px]">Keywords</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[70px]">Pages</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[80px]">Plagiarism %</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold min-w-[70px]">Grade</th>
+                <th className="border border-gray-300 px-2 py-2 text-left font-semibold w-12">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={row.id} className={row.errors.length > 0 ? "bg-red-50" : ""}>
+                  <td className="border border-gray-300 px-2 py-1 text-center text-gray-600">{index + 1}</td>
+
+                  {/* Title */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={row.title}
+                      onChange={(e) => updateCell(row.id, 'title', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      placeholder="Thesis title..."
+                    />
+                  </td>
+
+                  {/* Student Name */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={row.studentName}
+                      onChange={(e) => updateCell(row.id, 'studentName', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      placeholder="Full name"
+                    />
+                  </td>
+
+                  {/* Student ID */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={row.studentId}
+                      onChange={(e) => updateCell(row.id, 'studentId', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      placeholder="ID"
+                    />
+                  </td>
+
+                  {/* Level */}
+                  <td className="border border-gray-300 p-0">
+                    <select
+                      value={row.level}
+                      onChange={(e) => updateCell(row.id, 'level', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="bachelor">Bachelor</option>
+                      <option value="master">Master</option>
+                      <option value="phd">PhD</option>
+                    </select>
+                  </td>
+
+                  {/* Program */}
+                  <td className="border border-gray-300 p-0">
+                    <select
+                      value={row.program}
+                      onChange={(e) => updateCell(row.id, 'program', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500 text-xs"
+                    >
+                      {programs[row.level].map(p => (
+                        <option key={p.code} value={p.code}>{p.code}</option>
+                      ))}
+                    </select>
+                  </td>
+
+                  {/* Year */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="number"
+                      value={row.year}
+                      onChange={(e) => updateCell(row.id, 'year', parseInt(e.target.value))}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      min={2000}
+                      max={2100}
+                    />
+                  </td>
+
+                  {/* Submission Date */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="date"
+                      value={row.submissionDate}
+                      onChange={(e) => updateCell(row.id, 'submissionDate', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500 text-xs"
+                    />
+                  </td>
+
+                  {/* Defense Date */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="date"
+                      value={row.defenseDate || ''}
+                      onChange={(e) => updateCell(row.id, 'defenseDate', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500 text-xs"
+                    />
+                  </td>
+
+                  {/* Status */}
+                  <td className="border border-gray-300 p-0">
+                    <select
+                      value={row.status}
+                      onChange={(e) => updateCell(row.id, 'status', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500 text-xs"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="submitted">Submitted</option>
+                      <option value="under_review">Under Review</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </td>
+
+                  {/* Abstract */}
+                  <td className="border border-gray-300 p-0">
+                    <textarea
+                      value={row.abstract}
+                      onChange={(e) => updateCell(row.id, 'abstract', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500 resize-none"
+                      rows={2}
+                      placeholder="Brief summary..."
+                    />
+                  </td>
+
+                  {/* Keywords */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={row.keywords}
+                      onChange={(e) => updateCell(row.id, 'keywords', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      placeholder="word1, word2"
+                    />
+                  </td>
+
+                  {/* Pages */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="number"
+                      value={row.pages || ''}
+                      onChange={(e) => updateCell(row.id, 'pages', parseInt(e.target.value) || undefined)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      min={0}
+                    />
+                  </td>
+
+                  {/* Plagiarism Score */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="number"
+                      value={row.plagiarismScore || ''}
+                      onChange={(e) => updateCell(row.id, 'plagiarismScore', parseFloat(e.target.value) || undefined)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      min={0}
+                      max={100}
+                      step={0.1}
+                    />
+                  </td>
+
+                  {/* Grade */}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={row.grade || ''}
+                      onChange={(e) => updateCell(row.id, 'grade', e.target.value)}
+                      className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-blue-500"
+                      placeholder="A, B+"
+                    />
+                  </td>
+
+                  {/* Actions */}
+                  <td className="border border-gray-300 px-2 py-1 text-center">
+                    <button
+                      onClick={() => removeRow(row.id)}
+                      className="text-red-600 hover:text-red-800"
+                      title="Remove row"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Validation Errors */}
+          {rows.some(r => r.errors.length > 0) && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <h3 className="font-semibold text-red-900 mb-2">Validation Errors:</h3>
+              {rows.map((row, index) => (
+                row.errors.length > 0 && (
+                  <div key={row.id} className="text-sm text-red-700">
+                    Row {index + 1}: {row.errors.join(", ")}
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="border-t p-6 flex justify-between items-center bg-gray-50">
+          <button
+            onClick={addRow}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Row
+          </button>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || rows.filter(row => !isRowEmpty(row)).length === 0}
+              className={`px-6 py-2 rounded-lg text-white flex items-center gap-2 ${
+                isSubmitting || rows.filter(row => !isRowEmpty(row)).length === 0
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  Saving {rows.filter(row => !isRowEmpty(row)).length} theses...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-5 h-5" />
+                  Save {rows.filter(row => !isRowEmpty(row)).length} Theses
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 /* ---------- Helper Components ---------- */

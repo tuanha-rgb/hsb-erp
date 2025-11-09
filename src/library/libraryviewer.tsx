@@ -3,7 +3,7 @@ import {
   Book, BookOpen, Search, Filter, X, ChevronDown, ChevronRight,
   Download, Eye, Grid, List, ArrowLeft, ChevronLeft,
   TrendingUp, Users, ZoomIn, ZoomOut, Columns, Square, Menu, BookmarkCheck,
-  FileText,
+  FileText, Hash,
 } from 'lucide-react';
 
 import { catalogues, type BookRecord, type CatalogueCategory, type BookType } from './bookdata';
@@ -263,13 +263,79 @@ const [canvasReady, setCanvasReady] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState('');
   // Add state for page jump input
 const [pageJumpInput, setPageJumpInput] = useState('');
+  // Page offset state (for when PDF pages don't match printed page numbers)
+  const [pageOffset, setPageOffset] = useState(0);
+  const [showOffsetInput, setShowOffsetInput] = useState(false);
+  const [offsetInput, setOffsetInput] = useState('');
 
-// Add function to handle page jump
+// Page offset calculation for dual-page mode
+// In book layout: page 1 is alone (cover), then pages are in pairs: 2-3, 4-5, etc.
+const getPageOffset = (page: number): { left: number | null; right: number } => {
+  if (pageMode === 'single') {
+    return { left: null, right: page };
+  }
+
+  // In dual mode: page 1 shows alone, then 2-3, 4-5, 6-7, etc.
+  if (page === 1) {
+    return { left: null, right: 1 };
+  }
+
+  // For page 2 and onwards, show in pairs
+  // If page is even: show (page, page+1)
+  // If page is odd and > 1: show (page-1, page) - but we navigate to even pages
+  const isEven = page % 2 === 0;
+  if (isEven) {
+    return { left: page, right: page + 1 <= totalPages ? page + 1 : page };
+  } else {
+    // Odd page > 1, adjust to previous even page
+    const leftPage = page;
+    const rightPage = page + 1 <= totalPages ? page + 1 : null;
+    return { left: leftPage, right: rightPage || leftPage };
+  }
+};
+
+// Get display page range for navigation (with offset adjustment)
+const getPageDisplay = (): string => {
+  const adjustedPage = currentPage + pageOffset;
+  if (pageMode === 'single' || currentPage === 1) {
+    return `${adjustedPage}`;
+  }
+  const offset = getPageOffset(currentPage);
+  if (offset.left && offset.right !== offset.left) {
+    return `${offset.left + pageOffset}-${offset.right + pageOffset}`;
+  }
+  return `${adjustedPage}`;
+};
+
+// Apply page offset
+const handleOffsetApply = () => {
+  const offset = parseInt(offsetInput);
+  if (!isNaN(offset)) {
+    setPageOffset(offset);
+    setShowOffsetInput(false);
+    setOffsetInput('');
+    setPageJumpInput(''); // Clear page jump input to show updated page number
+  }
+};
+
+// Reset page offset
+const handleOffsetReset = () => {
+  setPageOffset(0);
+  setOffsetInput('');
+  setShowOffsetInput(false);
+  setPageJumpInput(''); // Clear page jump input to show updated page number
+};
+
+// Add function to handle page jump (accounts for offset)
 const handlePageJump = () => {
-  const pageNum = parseInt(pageJumpInput);
-  if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
-    renderPDFPages(pageNum);
-    setPageJumpInput('');
+  const bookPageNum = parseInt(pageJumpInput);
+  if (!isNaN(bookPageNum)) {
+    // Convert book page to PDF page
+    const pdfPageNum = bookPageNum - pageOffset;
+    if (pdfPageNum >= 1 && pdfPageNum <= totalPages) {
+      renderPDFPages(pdfPageNum);
+      setPageJumpInput('');
+    }
   }
 };
 const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -278,11 +344,8 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
 const setCanvasRef = (element: HTMLCanvasElement | null) => {
   canvasRef.current = element;
   if (element) {
-    console.log('[CANVAS MOUNT] Canvas element mounted and ready');
-    console.log('[CANVAS MOUNT] Canvas dimensions:', element.width, 'x', element.height);
     setCanvasReady(true);
   } else {
-    console.log('[CANVAS MOUNT] Canvas element unmounted');
     setCanvasReady(false);
   }
 };  const canvas2Ref = useRef<HTMLCanvasElement>(null);
@@ -317,19 +380,8 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
   }, [bookmarks, storageKey]);
   // Render first page when both PDF and canvas are ready
   useEffect(() => {
-    console.log('[FIRST PAGE EFFECT] Triggered with:', {
-      canvasReady,
-      totalPages,
-      currentPage,
-      hasPdfDoc: !!pdfDocRef.current,
-      hasCanvas: !!canvasRef.current
-    });
-
     if (canvasReady && totalPages > 0 && currentPage === 1) {
-      console.log('[FIRST PAGE EFFECT] All conditions met, rendering page 1');
       renderPDFPages(1);
-    } else {
-      console.log('[FIRST PAGE EFFECT] Conditions not met, skipping render');
     }
   }, [canvasReady, totalPages]);
 
@@ -348,7 +400,6 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
   }, [item, hasFile]);
 
   const loadDocument = async () => {
-    console.log('[LOAD DOCUMENT] Starting document load for:', item.title);
 
     // Check if item has a valid file source
     const hasValidSource =
@@ -356,10 +407,8 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
       (isThesis(item) && item.pdfUrl) ||
       (isPublication(item) && item.pdfUrl);
 
-    console.log('[LOAD DOCUMENT] Has valid source:', hasValidSource);
 
     if (!hasValidSource) {
-      console.log('[LOAD DOCUMENT] No valid source, aborting');
       setLoading(false);
       return;
     }
@@ -367,7 +416,6 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
     try {
       setLoading(true);
       setError(null);
-      console.log('[LOAD DOCUMENT] Loading state set to true');
 
       let fileUrl: string | null = null;
       let fileType: 'pdf' | 'epub' = 'pdf';
@@ -376,10 +424,8 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
       if (isBook(item)) {
         if (item.firebaseStoragePath) {
           fileUrl = item.firebaseStoragePath;
-          console.log('[LOAD DOCUMENT] Book - using Firebase storage path');
         } else if (item.driveFileId) {
           fileUrl = await getFileUrl(item.driveFileId);
-          console.log('[LOAD DOCUMENT] Book - fetched Google Drive URL');
         }
         fileType = item.fileType!;
       }
@@ -388,23 +434,18 @@ const setCanvasRef = (element: HTMLCanvasElement | null) => {
       if (isThesis(item) && item.pdfUrl) {
         fileUrl = item.pdfUrl;
         fileType = 'pdf';
-        console.log('[LOAD DOCUMENT] Thesis - using PDF URL');
       }
 
       // Handle journals (always PDF)
       if (isPublication(item) && item.pdfUrl) {
         fileUrl = item.pdfUrl;
         fileType = 'pdf';
-        console.log('[LOAD DOCUMENT] Publication - using PDF URL');
       }
 
-      console.log('[LOAD DOCUMENT] File type:', fileType);
-      console.log('[LOAD DOCUMENT] File URL:', fileUrl);
 
       if (!fileUrl) throw new Error('No file source available');
 
       if (fileType === 'pdf') {
-        console.log('[LOAD DOCUMENT] Calling loadPDF');
         await loadPDF(fileUrl);
       }
       
@@ -461,39 +502,27 @@ const getNumPages = () => pdfDocRef.current?.numPages ?? totalPages;
 // ============================================
 
 const loadPDF = async (url: string) => {
-  console.log('[LOAD PDF] Starting PDF load from URL:', url);
 
   const loadingTask = getDocument({ url, withCredentials: false });
   const pdf = await loadingTask.promise;
   pdfDocRef.current = pdf;
 
   const numPages = pdf.numPages;
-  console.log('[LOAD PDF] PDF loaded successfully');
-  console.log('[LOAD PDF] Total pages:', numPages);
-  console.log('[LOAD PDF] Canvas ready status:', canvasReady);
-  console.log('[LOAD PDF] Canvas ref exists:', !!canvasRef.current);
 
   setTotalPages(numPages);
   setCurrentPage(1);
 
-  console.log('[LOAD PDF] State updated - totalPages set to:', numPages, 'currentPage set to: 1');
-  console.log('[LOAD PDF] Waiting for useEffect to trigger first page render');
 };
 
 // ---- render the spread (single/dual)
 const renderPDFPages = async (pageNum: number) => {
-  console.log('[RENDER PAGES] Called with pageNum:', pageNum);
-  console.log('[RENDER PAGES] PDF doc exists:', !!pdfDocRef.current);
-  console.log('[RENDER PAGES] Canvas exists:', !!canvasRef.current);
 
   if (!pdfDocRef.current) {
-    console.log('[RENDER PAGES] No PDF document, aborting');
     return;
   }
 
   // Wait for any ongoing render to finish
   if (renderingLockRef.current) {
-    console.log('[RENDER PAGES] Waiting for previous render to complete');
     await renderingLockRef.current;
   }
 
@@ -501,35 +530,35 @@ const renderPDFPages = async (pageNum: number) => {
     const numPages = pdfDocRef.current.numPages;
     const validPageNum = Math.max(1, Math.min(pageNum, numPages));
 
-    console.log('[RENDER PAGES] Valid page number:', validPageNum, 'of', numPages);
-    console.log('[RENDER PAGES] Page mode:', pageMode);
 
-    if (canvasRef.current) {
-      console.log('[RENDER PAGES] Rendering page', validPageNum, 'on canvas 1');
+    // Get page offset for book-style layout
+    const offset = getPageOffset(validPageNum);
+
+    // Render right page (or single page)
+    if (canvasRef.current && offset.right) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      await renderPDFPage(validPageNum, canvasRef.current!);
-      console.log('[RENDER PAGES] Page', validPageNum, 'rendered on canvas 1');
+      await renderPDFPage(offset.right, canvasRef.current!);
     } else {
-      console.log('[RENDER PAGES] Canvas 1 not available');
     }
 
-    if (pageMode === 'dual' && canvas2Ref.current && validPageNum < numPages) {
-      console.log('[RENDER PAGES] Rendering page', validPageNum + 1, 'on canvas 2');
+    // Render left page in dual mode
+    if (pageMode === 'dual' && canvas2Ref.current && offset.left && offset.left !== offset.right) {
       const ctx2 = canvas2Ref.current.getContext('2d');
       if (ctx2) ctx2.clearRect(0, 0, canvas2Ref.current.width, canvas2Ref.current.height);
-      await renderPDFPage(validPageNum + 1, canvas2Ref.current!);
-      console.log('[RENDER PAGES] Page', validPageNum + 1, 'rendered on canvas 2');
+      await renderPDFPage(offset.left, canvas2Ref.current!);
+    } else if (pageMode === 'dual' && canvas2Ref.current) {
+      // Clear canvas 2 if not needed
+      const ctx2 = canvas2Ref.current.getContext('2d');
+      if (ctx2) ctx2.clearRect(0, 0, canvas2Ref.current.width, canvas2Ref.current.height);
     }
 
     setCurrentPage(validPageNum);
-    console.log('[RENDER PAGES] Current page set to:', validPageNum);
   })();
 
   renderingLockRef.current = task;
   await task;
   renderingLockRef.current = null;
-  console.log('[RENDER PAGES] Rendering complete');
 };
 
 
@@ -538,42 +567,32 @@ const renderPDFPage = async (
   pageNum: number,
   canvas: HTMLCanvasElement
 ) => {
-  console.log('[RENDER PAGE] Starting render for page:', pageNum);
 
   if (!pdfDocRef.current || !canvas) {
-    console.log('[RENDER PAGE] Missing requirements - PDF:', !!pdfDocRef.current, 'Canvas:', !!canvas);
     return;
   }
 
   const numPages = pdfDocRef.current.numPages;
   if (pageNum < 1 || pageNum > numPages) {
-    console.log('[RENDER PAGE] Invalid page number:', pageNum, 'Total pages:', numPages);
     return;
   }
 
-  console.log('[RENDER PAGE] Getting page object for page:', pageNum);
   const page = await pdfDocRef.current.getPage(pageNum);
-  console.log('[RENDER PAGE] Page object retrieved');
 
-  // Use actual devicePixelRatio for crisp rendering on high-DPI screens
-  // Cap at 3 for very high-DPI displays to balance quality and performance
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+  // Smart pixel ratio: only use devicePixelRatio at higher zoom levels
+  // At normal reading zoom (100-150%), render at 1:1 to avoid blur
+  // At higher zoom (>150%), use devicePixelRatio for crisp details
+  let pixelRatio = 1;
+  if (scale > 1.5) {
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  }
 
   // Calculate viewport with combined scale
   const renderScale = scale * pixelRatio;
   const viewport = page.getViewport({ scale: renderScale });
 
-  console.log('[RENDER PAGE] Render settings:', {
-    scale,
-    pixelRatio,
-    renderScale,
-    viewportWidth: viewport.width,
-    viewportHeight: viewport.height
-  });
-
   const context = canvas.getContext('2d');
   if (!context) {
-    console.log('[RENDER PAGE] Failed to get canvas context');
     return;
   }
 
@@ -585,16 +604,7 @@ const renderPDFPage = async (
   canvas.style.width = `${viewport.width / pixelRatio}px`;
   canvas.style.height = `${viewport.height / pixelRatio}px`;
 
-  console.log('[RENDER PAGE] Canvas configured:', {
-    internalWidth: canvas.width,
-    internalHeight: canvas.height,
-    cssWidth: canvas.style.width,
-    cssHeight: canvas.style.height
-  });
-
-  console.log('[RENDER PAGE] Starting PDF.js render operation');
   await page.render({ canvasContext: context, viewport: viewport }).promise;
-  console.log('[RENDER PAGE] PDF.js render complete for page:', pageNum);
 };
 // ---- Add useEffect for scale/pageMode changes
 useEffect(() => {
@@ -605,10 +615,22 @@ useEffect(() => {
 
 // ---- Navigation handlers (remove async, not needed)
 const handlePrevPage = () => {
-  const step = pageMode === 'dual' ? 2 : 1;
   if (currentPage <= 1) return;
-  const newPage = Math.max(1, currentPage - step);
-  
+
+  let newPage: number;
+  if (pageMode === 'dual') {
+    // In dual mode with book layout: 1 alone, then 2-3, 4-5, 6-7...
+    if (currentPage === 2) {
+      newPage = 1; // From page 2 (showing 2-3) back to page 1
+    } else if (currentPage > 2) {
+      newPage = Math.max(2, currentPage - 2); // Step back by 2 pages
+    } else {
+      newPage = 1;
+    }
+  } else {
+    newPage = currentPage - 1; // Single mode: step back by 1
+  }
+
   if (fileKind === 'pdf') {
     renderPDFPages(newPage);
   } else if (renditionRef.current) {
@@ -617,10 +639,20 @@ const handlePrevPage = () => {
 };
 
 const handleNextPage = () => {
-  const step = pageMode === 'dual' ? 2 : 1;
   if (currentPage >= totalPages) return;
-  const newPage = currentPage + step;
-  
+
+  let newPage: number;
+  if (pageMode === 'dual') {
+    // In dual mode with book layout: 1 alone, then 2-3, 4-5, 6-7...
+    if (currentPage === 1) {
+      newPage = 2; // From page 1 to page 2 (showing 2-3)
+    } else {
+      newPage = Math.min(totalPages, currentPage + 2); // Step forward by 2 pages
+    }
+  } else {
+    newPage = Math.min(totalPages, currentPage + 1); // Single mode: step forward by 1
+  }
+
   if (fileKind === 'pdf') {
     renderPDFPages(newPage);
   } else if (renditionRef.current) {
@@ -677,33 +709,42 @@ const togglePageMode = async () => {
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
-  <div className="border-b border-gray-200 p-3 flex items-center bg-white">
-    {/* Left side - Back button */}
-    <div className="flex-1">
-      <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-        <ArrowLeft size={20} />
-        <span>Back to Library</span>
-      </button>
-    </div>
-    
-    {/* Center - Book Title */}
-    <div className="flex-1 flex justify-center">
-      <p className="text-lg font-semibold text-gray-900 truncate max-w-md text-center">
-        {item.title}
-      </p>
-    </div>
-    
-    {/* Right side - Controls */}
-    <div className="flex-1 flex items-center justify-end gap-3">
+  <div className="border-b border-gray-200 p-2 md:p-3 bg-white">
+    <div className="grid grid-cols-3 items-center gap-2">
+      {/* Left: Back button */}
+      <div className="flex justify-start">
+        <button onClick={onClose} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm">
+          <ArrowLeft size={18} />
+          <span className="hidden sm:inline">Back</span>
+        </button>
+      </div>
+
+      {/* Center: Book Title - absolutely centered */}
+      <div className="flex justify-center min-w-0">
+        <h1 className="text-sm md:text-base font-semibold text-gray-900 truncate text-center max-w-full" title={item.title}>
+          {item.title}
+        </h1>
+      </div>
+
+      {/* Right: Controls */}
+      <div className="flex justify-end items-center gap-1">
       {fileKind === 'pdf' && hasFile && (
-        <button onClick={togglePageMode} className={`p-2 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}>
-          {pageMode === 'single' ? <Columns size={18} /> : <Square size={18} />}
+        <button
+          onClick={togglePageMode}
+          className={`p-1.5 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}
+          title={pageMode === 'single' ? 'Dual page' : 'Single page'}
+        >
+          {pageMode === 'single' ? <Columns size={16} /> : <Square size={16} />}
         </button>
       )}
-      <button onClick={() => setShowBookmarks(!showBookmarks)} className={`p-2 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}>
-        <Menu size={18} />
+      <button
+        onClick={() => setShowBookmarks(!showBookmarks)}
+        className={`p-1.5 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}
+        title="Bookmarks"
+      >
+        <Menu size={16} />
         {bookmarks.length > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
             {bookmarks.length}
           </span>
         )}
@@ -715,39 +756,44 @@ const togglePageMode = async () => {
             removeBookmark(index);
           } else addBookmark();
         }}
-        className={`p-2 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
+        className={`p-1.5 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
+        title={isBookmarked(currentPage) ? 'Remove bookmark' : 'Add bookmark'}
       >
-        <BookmarkCheck size={18} />
+        <BookmarkCheck size={16} />
       </button>
       {fileKind === 'pdf' && hasFile && (
-        <div className="flex items-center gap-1 border-l pl-3 ml-3">
-          <button onClick={handleZoomOut} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
-            <ZoomOut size={18} />
+        <>
+          <div className="w-px h-6 bg-gray-300 mx-1"></div>
+          <button onClick={handleZoomOut} className="p-1.5 hover:bg-gray-100 rounded" disabled={loading} title="Zoom out">
+            <ZoomOut size={16} />
           </button>
-<input
-  type="number"
-  min="50"
-  max="300"
-  step="10"
-  value={Math.round(scale * 100)}
-  onChange={(e) => {
-    const newPercent = parseInt(e.target.value);
-    if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
-      setScale(newPercent / 100);
-    }
-  }}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter') {
-      e.currentTarget.blur();
-    }
-  }}
-  className="w-16 px-2 py-1 text-sm text-gray-600 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-/>
-<span className="text-sm text-gray-600">%</span>          <button onClick={handleZoomIn} className="p-2 hover:bg-gray-100 rounded" disabled={loading}>
-            <ZoomIn size={18} />
+          <input
+            type="number"
+            min="50"
+            max="300"
+            step="10"
+            value={Math.round(scale * 100)}
+            onChange={(e) => {
+              const newPercent = parseInt(e.target.value);
+              if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
+                setScale(newPercent / 100);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.currentTarget.blur();
+              }
+            }}
+            className="w-12 px-1 py-1 text-xs text-gray-600 text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            title="Zoom percentage"
+          />
+          <span className="text-xs text-gray-600">%</span>
+          <button onClick={handleZoomIn} className="p-1.5 hover:bg-gray-100 rounded" disabled={loading} title="Zoom in">
+            <ZoomIn size={16} />
           </button>
-        </div>
+        </>
       )}
+      </div>
     </div>
   </div>
 
@@ -800,7 +846,17 @@ const togglePageMode = async () => {
         </div>
       )}
 
-    <div className="flex-1 overflow-auto bg-gray-100 pb-20">
+    <div
+  className="flex-1 reading-view-scroll bg-gray-100"
+  style={{
+    WebkitOverflowScrolling: 'touch',
+    paddingTop: '8px',
+    paddingRight: '20px',
+    paddingLeft: '8px',
+    paddingBottom: '20px',
+    marginBottom: '60px'
+  }}
+>
        {loading && (
           <div className="flex items-center justify-center h-full absolute inset-0 bg-white/80 z-10">
             <div className="text-center">
@@ -822,12 +878,21 @@ const togglePageMode = async () => {
           </div>
         )}
         {!loading && !error && hasFile && (
-            <div className="w-full px-4 py-8">
+            <div className="w-full min-w-min px-4 py-8">
                {fileKind === 'pdf' ? (
-      <div className={`flex justify-center gap-4 ${pageMode === 'dual' ? 'flex-row' : 'flex-col items-center'}`}>
-        <canvas ref={setCanvasRef} className="shadow-2xl bg-white" />
-        {pageMode === 'dual' && currentPage < totalPages && (
-          <canvas ref={canvas2Ref} className="shadow-2xl bg-white" />
+      <div className={`flex gap-4 min-w-min ${
+        pageMode === 'dual'
+          ? 'flex-col md:flex-row items-center justify-center'
+          : 'flex-col items-center justify-center'
+      }`}>
+        {pageMode === 'dual' && (
+          <>
+            <canvas ref={canvas2Ref} className="shadow-2xl bg-white order-1 md:order-1" />
+            <canvas ref={setCanvasRef} className="shadow-2xl bg-white order-2 md:order-2" />
+          </>
+        )}
+        {pageMode === 'single' && (
+          <canvas ref={setCanvasRef} className="shadow-2xl bg-white" />
         )}
             </div>
             ) : fileKind === 'epub'  ? (
@@ -853,44 +918,106 @@ const togglePageMode = async () => {
 
       {/* Page Navigation Bar */}
         {!loading && !error && hasFile && fileKind === 'pdf' && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg">
-  <div className="max-w-2xl mx-auto flex items-center justify-center gap-6">
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 shadow-lg">
+  <div className="mx-auto flex items-center justify-center gap-2 flex-wrap">
               {/* Previous Button */}
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage <= 1}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-2 py-1.5 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
               >
-                <ChevronLeft size={18} />
-                Previous
+                <ChevronLeft size={16} />
+                <span className="hidden sm:inline">Prev</span>
               </button>
 
               {/* Page Input & Display */}
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">Page</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-600 hidden sm:inline">
+                  {pageMode === 'dual' ? 'Pages' : 'Page'}
+                </span>
                 <input
                   type="number"
-                  min="1"
-                  max={totalPages}
-                  value={pageJumpInput || currentPage}
+                  min={1 + pageOffset}
+                  max={totalPages + pageOffset}
+                  value={pageJumpInput || (currentPage + pageOffset)}
                   onChange={(e) => setPageJumpInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handlePageJump();
                   }}
                   onBlur={handlePageJump}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-14 px-2 py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder={pageJumpInput ? '' : getPageDisplay()}
                 />
-                <span className="text-sm text-gray-600">of {totalPages}</span>
+                <span className="text-xs text-gray-600">
+                  / {totalPages + pageOffset}
+                </span>
+              </div>
+
+              {/* Page Offset Button */}
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => setShowOffsetInput(!showOffsetInput)}
+                  className={`p-1.5 border rounded hover:bg-gray-50 transition-colors ${
+                    pageOffset !== 0 ? 'bg-blue-50 border-blue-300' : 'border-gray-300'
+                  }`}
+                  title={pageOffset !== 0 ? `Offset: ${pageOffset > 0 ? '+' : ''}${pageOffset}` : 'Set page offset'}
+                >
+                  <Hash size={16} className={pageOffset !== 0 ? 'text-blue-600' : 'text-gray-600'} />
+                </button>
+
+                {showOffsetInput && (
+                  <div className="absolute bottom-full mb-2 right-0 bg-white border border-gray-300 rounded-lg shadow-lg p-3 z-10">
+                    <div className="flex flex-col gap-2 min-w-[220px]">
+                      <label className="text-xs font-semibold text-gray-700">Page Offset</label>
+                      <input
+                        type="number"
+                        value={offsetInput}
+                        onChange={(e) => setOffsetInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleOffsetApply();
+                          if (e.key === 'Escape') setShowOffsetInput(false);
+                        }}
+                        placeholder="e.g., -30"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      {offsetInput && !isNaN(parseInt(offsetInput)) && (
+                        <div className="text-xs bg-blue-50 border border-blue-200 rounded p-2 text-blue-700">
+                          Preview: Page {currentPage} → Page {currentPage + parseInt(offsetInput)}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleOffsetApply}
+                          className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                        >
+                          Apply
+                        </button>
+                        {pageOffset !== 0 && (
+                          <button
+                            onClick={handleOffsetReset}
+                            className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Current: {pageOffset === 0 ? 'None' : `${pageOffset > 0 ? '+' : ''}${pageOffset}`}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Next Button */}
               <button
                 onClick={handleNextPage}
                 disabled={currentPage >= totalPages}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-2 py-1.5 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
               >
-                Next
-                <ChevronRight size={18} />
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
