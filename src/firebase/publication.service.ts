@@ -26,8 +26,8 @@ export interface Publication {
   doi: string | null;
   isbn?: string | null;
   project: string | null;
-  quartile: 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Scopus-indexed' | 'N/A';
-  wosranking:  'SSCI' | 'SCIE' | 'AHCI' | 'ESCI' | 'Scopus-indexed' | 'N/A';
+  quartile: 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Scopus-indexed'|'N/A';
+  wosranking:  'SSCI' | 'SCIE' | 'AHCI' | 'ESCI' | 'N/A';
   scopusIndexed: boolean;
   discipline: string;
   abstract?: string;

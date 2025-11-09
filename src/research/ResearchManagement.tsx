@@ -1403,7 +1403,7 @@ const ResearchManagement = () => {
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-center mb-3">
+          <div className="h-16 flex items-center justify-center mb-5">
             <div className="h-full flex items-center justify-center p-2">
               <img
                 src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fwos.jpg?alt=media&token=fa4e5314-b51b-46f5-9e4c-f18044cdda67"
@@ -1419,7 +1419,7 @@ const ResearchManagement = () => {
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-center mb-3">
+          <div className="h-16 flex items-center justify-center mb-5">
             <div className="h-full flex items-center justify-center p-2">
               <img
                 src="https://firebasestorage.googleapis.com/v0/b/hsb-library.firebasestorage.app/o/journals%2Fscopus.jpg?alt=media&token=f856a81c-19ad-43df-afdf-afa8acc4d982"

@@ -1,14 +1,21 @@
 // PollSystem.tsx
 import { useState, useEffect } from 'react';
 import { db } from './firebase/firebase.config';
-import { 
-  collection, addDoc, doc, getDoc, updateDoc, setDoc,
+import {
+  collection, addDoc, doc, getDoc, updateDoc, setDoc, getDocs,
   onSnapshot, increment, serverTimestamp, query, where, orderBy
 } from 'firebase/firestore';
-import { X, Plus, Trash2, BarChart3 } from 'lucide-react';
+import { X, Plus, Trash2, BarChart3, Wifi, WifiOff, Users, TrendingUp, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 type UserLevel = 'student' | 'staff' | 'management' | 'all';
 type PollType = 'course' | 'meeting' | 'event' | 'session';
+type ToastType = 'success' | 'error' | 'info';
+
+interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+}
 
 interface Poll {
   id: string;
@@ -23,23 +30,63 @@ interface Poll {
   anonymous: boolean;
   multipleChoice: boolean;
   maxSelections: number;
-  status: 'active' | 'closed' | 'scheduled';
+  status: 'draft' | 'active' | 'closed' | 'scheduled';
   options: Record<string, { text: string; voteCount: number }>;
+
+  // Targeting fields
+  targetCohorts?: string[];
+  targetDepartments?: string[];
+  targetPrograms?: string[];
+
+  // Analytics
+  viewCount?: number;
+  expectedRecipients?: number;
+
+  // Creator info
+  createdBy?: string;
+  createdAt?: any;
+
+  // Publishing
+  isLocked?: boolean;
+  publishedAt?: any;
 }
 
 interface PollSystemProps {
   userId: string;
   userLevel?: UserLevel;
+  userCohort?: string;
+  userDepartment?: string;
+  userProgram?: string;
 }
 
-export default function PollSystem({ userId, userLevel }: PollSystemProps) {
+export default function PollSystem({
+  userId,
+  userLevel,
+  userCohort,
+  userDepartment,
+  userProgram
+}: PollSystemProps) {
     const [polls, setPolls] = useState<Poll[]>([]);
     const [creating, setCreating] = useState(false);
-    const [filter, setFilter] = useState<'all' | 'active' | 'closed'>('active');
+    const [filter, setFilter] = useState<'all' | 'draft' | 'active' | 'closed'>('active');
+    const [editing, setEditing] = useState<Poll | null>(null);
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const [isConnected, setIsConnected] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [showAnalytics, setShowAnalytics] = useState<string | null>(null);
 
-    const levelValue = (level: UserLevel) => 
-    level === 'student' ? 1 : 
-    level === 'staff' ? 2 : 
+    // Toast notification helper
+    const showToast = (message: string, type: ToastType = 'info') => {
+      const id = Date.now().toString();
+      setToasts(prev => [...prev, { id, message, type }]);
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+      }, 4000);
+    };
+
+    const levelValue = (level: UserLevel) =>
+    level === 'student' ? 1 :
+    level === 'staff' ? 2 :
     level === 'management' ? 3 :
     level === 'all' ? 4 : 0;
    
@@ -51,30 +98,97 @@ export default function PollSystem({ userId, userLevel }: PollSystemProps) {
     }) as UserLevel[];
   return levels;
 })();
-  // Create poll
-  const createPoll = async (data: Omit<Poll, 'id' | 'options'> & { 
-    optionTexts: string[] 
+  // Create poll (as draft)
+  const createPoll = async (data: Omit<Poll, 'id' | 'options'> & {
+    optionTexts: string[]
   }) => {
-    if (levelValue(userLevel) < levelValue(data.targetLevel)) {
-      alert('Cannot create poll for higher level');
-      return;
+    try {
+      if (levelValue(userLevel) < levelValue(data.targetLevel)) {
+        showToast('Cannot create poll for higher level', 'error');
+        return;
+      }
+
+      const options: Record<string, { text: string; voteCount: number }> = {};
+      data.optionTexts.forEach((text, i) => {
+        options[`opt${i}`] = { text, voteCount: 0 };
+      });
+
+      const { optionTexts, ...pollData } = data;
+
+      await addDoc(collection(db, 'polls'), {
+        ...pollData,
+        options,
+        status: 'draft',
+        isLocked: false,
+        viewCount: 0,
+        createdAt: serverTimestamp(),
+        createdBy: userId
+      });
+
+      showToast('Poll saved as draft!', 'success');
+      setCreating(false);
+    } catch (error) {
+      console.error('Create poll error:', error);
+      showToast('Failed to create poll. Please try again.', 'error');
     }
+  };
 
-    const options: Record<string, { text: string; voteCount: number }> = {};
-    data.optionTexts.forEach((text, i) => {
-      options[`opt${i}`] = { text, voteCount: 0 };
-    });
+  // Update poll (only creator can edit unlocked drafts)
+  const updatePoll = async (pollId: string, updates: Partial<Poll>) => {
+    try {
+      const pollRef = doc(db, 'polls', pollId);
+      await updateDoc(pollRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      showToast('Poll updated successfully!', 'success');
+    } catch (error) {
+      console.error('Update poll error:', error);
+      showToast('Failed to update poll.', 'error');
+    }
+  };
 
-    const { optionTexts, ...pollData } = data;
-    
-    await addDoc(collection(db, 'polls'), {
-      ...pollData,
-      options,
-      createdAt: serverTimestamp(),
-      createdBy: userId
-    });
+  // Publish poll (lock and activate)
+  const publishPoll = async (pollId: string) => {
+    try {
+      const pollRef = doc(db, 'polls', pollId);
+      await updateDoc(pollRef, {
+        status: 'active',
+        isLocked: true,
+        publishedAt: serverTimestamp()
+      });
+      showToast('Poll published successfully!', 'success');
+    } catch (error) {
+      console.error('Publish poll error:', error);
+      showToast('Failed to publish poll.', 'error');
+    }
+  };
 
-    setCreating(false);
+  // Track view
+  const trackView = async (pollId: string) => {
+    try {
+      const viewRef = doc(db, `polls/${pollId}/views`, userId);
+      const viewSnap = await getDoc(viewRef);
+
+      if (!viewSnap.exists()) {
+        await setDoc(viewRef, {
+          userId,
+          userLevel,
+          userCohort,
+          userDepartment,
+          userProgram,
+          viewedAt: serverTimestamp()
+        });
+
+        // Increment view count
+        const pollRef = doc(db, 'polls', pollId);
+        await updateDoc(pollRef, {
+          viewCount: increment(1)
+        });
+      }
+    } catch (error) {
+      console.error('View tracking error:', error);
+    }
   };
 
   // Vote
@@ -108,26 +222,38 @@ export default function PollSystem({ userId, userLevel }: PollSystemProps) {
   // Real-time polls
   useEffect(() => {
     let q = collection(db, 'polls');
-    
-    const unsub = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Poll))
-        .filter(poll => {
-          // If poll target is "all", everyone can see it
-        if (poll.targetLevel === 'all') return true;
-        
-        // Otherwise use level hierarchy
-        const levelMatch = levelValue(userLevel) >= levelValue(poll.targetLevel);
-        const statusMatch = filter === 'all' || poll.status === filter;
-        return levelMatch && statusMatch;
-        })
-        .sort((a, b) => {
-          const aTime = a.startTime?.toDate?.() || new Date(a.startTime);
-          const bTime = b.startTime?.toDate?.() || new Date(b.startTime);
-          return bTime.getTime() - aTime.getTime();
-        });
-      setPolls(data);
-    });
+    setLoading(true);
+
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as Poll))
+          .filter(poll => {
+            // If poll target is "all", everyone can see it
+            if (poll.targetLevel === 'all') return true;
+
+            // Otherwise use level hierarchy
+            const levelMatch = levelValue(userLevel) >= levelValue(poll.targetLevel);
+            const statusMatch = filter === 'all' || poll.status === filter;
+            return levelMatch && statusMatch;
+          })
+          .sort((a, b) => {
+            const aTime = a.startTime?.toDate?.() || new Date(a.startTime);
+            const bTime = b.startTime?.toDate?.() || new Date(b.startTime);
+            return bTime.getTime() - aTime.getTime();
+          });
+        setPolls(data);
+        setLoading(false);
+        setIsConnected(true);
+      },
+      (error) => {
+        console.error('Firestore error:', error);
+        setIsConnected(false);
+        setLoading(false);
+        showToast('Connection error. Retrying...', 'error');
+      }
+    );
     return unsub;
   }, [userLevel, filter]);
 
@@ -135,10 +261,23 @@ export default function PollSystem({ userId, userLevel }: PollSystemProps) {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-3xl font-bold">Polls & Voting</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl font-bold">Polls & Voting</h2>
+            {isConnected ? (
+              <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                <Wifi size={12} />
+                Live
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                <WifiOff size={12} />
+                Offline
+              </span>
+            )}
+          </div>
           <p className="text-gray-600 mt-1">Create and participate in polls</p>
         </div>
-        <button 
+        <button
           onClick={() => setCreating(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
@@ -149,35 +288,50 @@ export default function PollSystem({ userId, userLevel }: PollSystemProps) {
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6 border-b">
-        {(['all', 'active', 'closed'] as const).map(status => (
+        {(['all', 'draft', 'active', 'closed'] as const).map(status => (
           <button
             key={status}
             onClick={() => setFilter(status)}
             className={`px-4 py-2 capitalize ${
-              filter === status 
-                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold' 
+              filter === status
+                ? 'border-b-2 border-blue-600 text-blue-600 font-semibold'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             {status}
+            {status === 'draft' && polls.filter(p => p.status === 'draft' && p.createdBy === userId).length > 0 && (
+              <span className="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full">
+                {polls.filter(p => p.status === 'draft' && p.createdBy === userId).length}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
       {/* Poll list */}
       <div className="space-y-4">
-        {polls.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p>Loading polls...</p>
+          </div>
+        ) : polls.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <BarChart3 size={48} className="mx-auto mb-4 opacity-50" />
             <p>No polls found</p>
           </div>
         ) : (
           polls.map(poll => (
-            <PollCard 
-              key={poll.id} 
-              poll={poll} 
+            <PollCard
+              key={poll.id}
+              poll={poll}
               onVote={vote}
+              onPublish={publishPoll}
+              onEdit={() => setEditing(poll)}
+              onTrackView={trackView}
+              onViewAnalytics={() => setShowAnalytics(poll.id)}
               userId={userId}
+              showToast={showToast}
             />
           ))
         )}
@@ -185,47 +339,102 @@ export default function PollSystem({ userId, userLevel }: PollSystemProps) {
 
       {/* Create modal */}
       {creating && (
-        <CreatePollModal 
+        <CreatePollModal
           userLevel={userLevel}
           onCreate={createPoll}
           onClose={() => setCreating(false)}
         />
       )}
+
+      {/* Edit modal */}
+      {editing && (
+        <CreatePollModal
+          userLevel={userLevel}
+          onCreate={async (data) => {
+            const { optionTexts, ...updates } = data;
+            const options: Record<string, { text: string; voteCount: number }> = {};
+            optionTexts.forEach((text, i) => {
+              options[`opt${i}`] = { text, voteCount: 0 };
+            });
+            await updatePoll(editing.id, { ...updates, options });
+            setEditing(null);
+          }}
+          onClose={() => setEditing(null)}
+          editingPoll={editing}
+        />
+      )}
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} />
     </div>
   );
 }
 
 // PollCard with live results
-function PollCard({ 
-  poll, 
-  onVote, 
-  userId 
-}: { 
-  poll: Poll; 
+function PollCard({
+  poll,
+  onVote,
+  onPublish,
+  onEdit,
+  onTrackView,
+  onViewAnalytics,
+  userId,
+  showToast
+}: {
+  poll: Poll;
   onVote: (id: string, opts: string[]) => void;
+  onPublish: (id: string) => void;
+  onEdit: () => void;
+  onTrackView: (id: string) => void;
+  onViewAnalytics: () => void;
   userId: string;
+  showToast: (message: string, type: ToastType) => void;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [totalVotes, setTotalVotes] = useState(0);
+
+  const isCreator = poll.createdBy === userId;
+  const isDraft = poll.status === 'draft';
+  const canEdit = isCreator && !poll.isLocked && isDraft;
+
+  // Track view when component mounts (only for active polls)
+  useEffect(() => {
+    if (poll.status === 'active') {
+      onTrackView(poll.id);
+    }
+  }, [poll.id, poll.status]);
 
   useEffect(() => {
     getDoc(doc(db, `polls/${poll.id}/votes`, userId))
       .then(snap => setHasVoted(snap.exists()));
   }, [poll.id, userId]);
 
-  const total = Object.values(poll.options)
-    .reduce((sum, opt) => sum + opt.voteCount, 0);
+  useEffect(() => {
+    const total = Object.values(poll.options)
+      .reduce((sum, opt) => sum + opt.voteCount, 0);
+    setTotalVotes(total);
+  }, [poll.options]);
 
   const handleVote = async () => {
-    if (selected.length === 0 || selected.length > poll.maxSelections) return;
+    if (selected.length === 0) {
+      showToast('Please select at least one option', 'error');
+      return;
+    }
+    if (selected.length > poll.maxSelections) {
+      showToast(`You can only select up to ${poll.maxSelections} option(s)`, 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       await onVote(poll.id, selected);
       setHasVoted(true);
+      showToast('Vote submitted successfully!', 'success');
     } catch (error) {
       console.error('Vote error:', error);
-      alert('Failed to submit vote');
+      showToast('Failed to submit vote. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -242,29 +451,62 @@ function PollCard({
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-xl font-semibold">{poll.title}</h3>
             <span className={`text-xs px-2 py-1 rounded ${
+              isDraft ? 'bg-orange-100 text-orange-700' :
               isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
             }`}>
               {poll.status}
             </span>
+            {poll.isLocked && <span className="text-xs bg-gray-200 px-2 py-1 rounded">🔒 Locked</span>}
           </div>
           <p className="text-gray-600 text-sm">{poll.description}</p>
           {poll.relatedTo && (
             <p className="text-xs text-gray-500 mt-1">Related: {poll.relatedTo}</p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-            {poll.type}
-          </span>
-          <span className="text-xs text-gray-500">
-            Target: {poll.targetLevel}
-          </span>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+              {poll.type}
+            </span>
+            <span className="text-xs text-gray-500">
+              Target: {poll.targetLevel}
+            </span>
+          </div>
+          {isCreator && (
+            <div className="flex gap-2">
+              {canEdit && (
+                <button
+                  onClick={onEdit}
+                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+              )}
+              {isDraft && !poll.isLocked && (
+                <button
+                  onClick={() => onPublish(poll.id)}
+                  className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                >
+                  Publish
+                </button>
+              )}
+              {poll.status === 'active' && (
+                <button
+                  onClick={onViewAnalytics}
+                  className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded flex items-center gap-1"
+                >
+                  <TrendingUp size={12} />
+                  Analytics
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="space-y-3 mb-4">
         {Object.entries(poll.options).map(([id, opt]) => {
-          const percentage = total ? ((opt.voteCount / total) * 100).toFixed(1) : '0';
+          const percentage = totalVotes ? ((opt.voteCount / totalVotes) * 100).toFixed(1) : '0';
           return (
             <div key={id} className="flex items-center gap-3">
               {!hasVoted && isActive && !hasEnded && (
@@ -305,7 +547,8 @@ function PollCard({
         })}
       </div>
 
-      {!hasVoted && isActive && !hasEnded && (
+      {/* Voting UI - only show for active/non-draft polls */}
+      {!isDraft && !hasVoted && isActive && !hasEnded && (
         <button
           onClick={handleVote}
           disabled={selected.length === 0 || loading}
@@ -315,14 +558,31 @@ function PollCard({
         </button>
       )}
 
-      {hasVoted && (
+      {!isDraft && hasVoted && (
         <div className="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm text-center">
           ✓ You have voted
         </div>
       )}
 
+      {isDraft && isCreator && (
+        <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-lg text-sm text-center">
+          📝 This poll is in draft mode. Edit and publish to make it available.
+        </div>
+      )}
+
       <div className="flex justify-between items-center mt-4 pt-4 border-t text-xs text-gray-500">
-        <span>Total votes: {total}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Users size={14} />
+            <span>{totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
+          </div>
+          {poll.viewCount > 0 && (
+            <div className="flex items-center gap-2">
+              <TrendingUp size={14} />
+              <span>{poll.viewCount} view{poll.viewCount !== 1 ? 's' : ''}</span>
+            </div>
+          )}
+        </div>
         <span>
           {poll.anonymous && '🔒 Anonymous • '}
           Ends: {endTime.toLocaleDateString()} {endTime.toLocaleTimeString()}
@@ -333,31 +593,43 @@ function PollCard({
 }
 
 // CreatePollModal
-function CreatePollModal({ 
-  userLevel, 
-  onCreate, 
-  onClose 
-}: { 
+function CreatePollModal({
+  userLevel,
+  onCreate,
+  onClose,
+  editingPoll
+}: {
   userLevel: UserLevel;
   onCreate: (data: any) => Promise<void>;
   onClose: () => void;
+  editingPoll?: Poll | null;
 }) {
+  const isEditing = !!editingPoll;
+
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'course' as PollType,
-    targetLevel: userLevel,
-    relatedTo: '',
-    startTime: new Date().toISOString().slice(0, 16),
-    endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-    anonymous: false,
-    multipleChoice: false,
-    maxSelections: 1,
-    status: 'active' as const,
-    creatorLevel: userLevel
+    title: editingPoll?.title || '',
+    description: editingPoll?.description || '',
+    type: (editingPoll?.type || 'course') as PollType,
+    targetLevel: editingPoll?.targetLevel || userLevel,
+    relatedTo: editingPoll?.relatedTo || '',
+    startTime: editingPoll?.startTime
+      ? new Date(editingPoll.startTime.toDate?.() || editingPoll.startTime).toISOString().slice(0, 16)
+      : new Date().toISOString().slice(0, 16),
+    endTime: editingPoll?.endTime
+      ? new Date(editingPoll.endTime.toDate?.() || editingPoll.endTime).toISOString().slice(0, 16)
+      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    anonymous: editingPoll?.anonymous || false,
+    multipleChoice: editingPoll?.multipleChoice || false,
+    maxSelections: editingPoll?.maxSelections || 1,
+    status: editingPoll?.status || 'draft',
+    creatorLevel: editingPoll?.creatorLevel || userLevel
   });
 
-  const [options, setOptions] = useState(['', '']);
+  const [options, setOptions] = useState(
+    editingPoll
+      ? Object.values(editingPoll.options).map(opt => opt.text)
+      : ['', '']
+  );
 
   const levelValue = (level: UserLevel) => 
     level === 'student' ? 1 : 
@@ -396,7 +668,7 @@ function CreatePollModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h3 className="text-2xl font-bold">Create New Poll</h3>
+          <h3 className="text-2xl font-bold">{isEditing ? 'Edit Poll' : 'Create New Poll'}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
@@ -590,7 +862,7 @@ function CreatePollModal({
               type="submit"
               className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              Create Poll
+              {isEditing ? 'Update Poll' : 'Create Poll'}
             </button>
           </div>
         </form>
@@ -599,3 +871,28 @@ function CreatePollModal({
   );
 }
 
+// Toast notification container
+function ToastContainer({ toasts }: { toasts: Toast[] }) {
+  return (
+    <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg
+            transform transition-all duration-300 ease-in-out
+            animate-slide-in-right
+            ${toast.type === 'success' ? 'bg-green-600 text-white' : ''}
+            ${toast.type === 'error' ? 'bg-red-600 text-white' : ''}
+            ${toast.type === 'info' ? 'bg-blue-600 text-white' : ''}
+          `}
+        >
+          {toast.type === 'success' && <CheckCircle size={20} />}
+          {toast.type === 'error' && <XCircle size={20} />}
+          {toast.type === 'info' && <AlertCircle size={20} />}
+          <span className="font-medium">{toast.message}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
