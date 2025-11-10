@@ -3291,21 +3291,7 @@ const ResearchManagement = () => {
           )}
 
           {/* Info Box */}
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-blue-900 mb-1">API Configuration Required</h4>
-                <p className="text-sm text-blue-800 mb-2">
-                  To use this feature, you need to configure API keys in your .env file:
-                </p>
-                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                  <li><code className="bg-blue-100 px-2 py-0.5 rounded">VITE_SCOPUS_API_KEY</code> - Get from <a href="https://dev.elsevier.com/" target="_blank" rel="noopener noreferrer" className="underline">Elsevier Developer Portal</a></li>
-                  <li><code className="bg-blue-100 px-2 py-0.5 rounded">VITE_WOS_API_KEY</code> - Get from <a href="https://developer.clarivate.com/" target="_blank" rel="noopener noreferrer" className="underline">Clarivate Developer Portal</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
     );

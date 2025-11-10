@@ -10,7 +10,8 @@
       "Bash(curl:*)",
       "Bash(npm install:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(unzip:*)"
     ],
     "deny": [],
     "ask": []

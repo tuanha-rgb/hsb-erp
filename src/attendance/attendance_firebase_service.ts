@@ -81,11 +81,14 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
 
   // Update camera last sync
   const cameraRef = doc(db, COLLECTIONS.cameras, payload.camera_id);
-  batch.update(cameraRef, {
+  const cameraDoc = await getDoc(cameraRef);
+  const currentSessions = cameraDoc.exists() ? (cameraDoc.data().sessionsToday || 0) : 0;
+
+  batch.set(cameraRef, {
     lastSync: Timestamp.now(),
-    sessionsToday: increment(1),
+    sessionsToday: currentSessions + 1,
     status: 'online'
-  });
+  }, { merge: true });
 
   await batch.commit();
 }
@@ -323,7 +326,5 @@ export async function acknowledgeAlert(alertId: string): Promise<void> {
   }, { merge: true });
 }
 
-// Helper for increment
-function increment(value: number) {
-  return { increment: value };
-}
+// Note: Firebase increment not directly used in current implementation
+// For increment operations, use updateDoc with serverTimestamp or fetch-update pattern
