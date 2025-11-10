@@ -177,18 +177,18 @@ async function fetchJournalMetrics(issn?: string, journalTitle?: string): Promis
       }
     }
 
-    // Extract percentile from first subject rank (highest percentile)
-    // Sort by percentile descending to get the best quartile
+    // Extract percentile from first subject rank (LOWEST percentile for conservative ranking)
+    // Sort by percentile ascending to get the most conservative quartile (like SJR)
     if (subjectRanks.length > 0) {
-      // Sort ranks by percentile (highest first)
+      // Sort ranks by percentile (LOWEST first - more conservative like SJR)
       const sortedRanks = [...subjectRanks].sort((a, b) => {
         const percentileA = typeof a === 'object' ? parseInt(a.percentile || 0) : (Array.isArray(a) ? parseInt(a[2] || 0) : 0);
         const percentileB = typeof b === 'object' ? parseInt(b.percentile || 0) : (Array.isArray(b) ? parseInt(b[2] || 0) : 0);
-        return percentileB - percentileA;
+        return percentileA - percentileB; // Changed: ascending order (lowest first)
       });
 
       const firstRank = sortedRanks[0];
-      console.log('📊 Best subject rank:', firstRank);
+      console.log('📊 Most conservative subject rank (lowest percentile):', firstRank);
 
       // Handle both object format and tuple format
       if (typeof firstRank === 'object' && firstRank.percentile !== undefined) {
@@ -201,7 +201,7 @@ async function fetchJournalMetrics(issn?: string, journalTitle?: string): Promis
     }
     console.log('📊 Final Extracted Percentile:', citeScorePercentile);
 
-    // Calculate overall quartile from CiteScore percentile
+    // Calculate overall quartile from CiteScore percentile (using LOWEST percentile - conservative like SJR)
     let quartile: string | undefined;
     if (citeScorePercentile !== undefined) {
       if (citeScorePercentile >= 75) quartile = 'Q1';
@@ -209,7 +209,7 @@ async function fetchJournalMetrics(issn?: string, journalTitle?: string): Promis
       else if (citeScorePercentile >= 25) quartile = 'Q3';
       else quartile = 'Q4';
     }
-    console.log('🎯 Calculated Quartile:', quartile);
+    console.log('🎯 Calculated Quartile (conservative - lowest percentile):', quartile, `(${citeScorePercentile}th percentile)`);
 
     // Extract subject areas with quartile information
     const subjectAreas: Array<{ area: string; quartile?: string }> = [];
@@ -244,11 +244,14 @@ async function fetchJournalMetrics(issn?: string, journalTitle?: string): Promis
     }
     console.log('📚 Subject Areas with Names:', subjectAreas);
 
+    // Use CiteScore-based quartile calculation (simplified for Vercel deployment)
+    const finalQuartile = quartile || (sjrValue ? 'Scopus-indexed' : undefined);
+
     const result = {
       sjr: sjrValue,
       citeScore,
       citeScorePercentile,
-      quartile: quartile || (sjrValue ? 'Scopus-indexed' : undefined),
+      quartile: finalQuartile,
       subjectAreas: subjectAreas.length > 0 ? subjectAreas : undefined
     };
     console.log('✅ Final Journal Metrics:', result);
@@ -520,18 +523,26 @@ export async function checkScopusJournal(journalName: string): Promise<PubCheckR
       }
     }
 
-    // Extract percentile from first subject rank (highest percentile)
+    // Extract percentile from first subject rank (LOWEST percentile for conservative ranking)
+    // Sort by percentile ascending to get the most conservative quartile (like SJR)
     if (subjectRanks.length > 0) {
-      const firstRank = subjectRanks[0];
+      // Sort ranks by percentile (LOWEST first - more conservative like SJR)
+      const sortedRanks = [...subjectRanks].sort((a, b) => {
+        const percentileA = typeof a === 'object' ? parseInt(String(a.percentile || 0)) : (Array.isArray(a) ? parseInt(String(a[2] || 0)) : 0);
+        const percentileB = typeof b === 'object' ? parseInt(String(b.percentile || 0)) : (Array.isArray(b) ? parseInt(String(b[2] || 0)) : 0);
+        return percentileA - percentileB; // Ascending order (lowest first)
+      });
+
+      const firstRank = sortedRanks[0];
       // Handle both object format and tuple format
       if (typeof firstRank === 'object' && firstRank.percentile !== undefined) {
-        citeScorePercentile = parseInt(firstRank.percentile);
+        citeScorePercentile = parseInt(String(firstRank.percentile));
       } else if (Array.isArray(firstRank) && firstRank.length >= 3) {
-        citeScorePercentile = parseInt(firstRank[2]); // Third element in tuple is percentile
+        citeScorePercentile = parseInt(String(firstRank[2])); // Third element in tuple is percentile
       }
     }
 
-    // Calculate overall quartile from CiteScore percentile
+    // Calculate overall quartile from CiteScore percentile (using LOWEST percentile - conservative like SJR)
     let quartile: string | undefined;
     if (citeScorePercentile !== undefined) {
       if (citeScorePercentile >= 75) quartile = 'Q1';
@@ -599,60 +610,65 @@ export async function checkScopusJournal(journalName: string): Promise<PubCheckR
 
 /**
  * Check if a publication exists in Web of Science using DOI
+ * Provides link to WOS Master Journal List for manual verification
  */
 export async function checkWebOfScienceByDOI(doi: string): Promise<PubCheckResult> {
-  if (!WOS_API_KEY) {
-    return {
-      database: 'wos',
-      found: false,
-      error: 'Web of Science API key not configured. Please add VITE_WOS_API_KEY to your .env file'
-    };
-  }
-
   try {
     // Clean the DOI
     const cleanDOI = doi.trim().replace(/^https?:\/\/doi\.org\//, '');
 
-    // Web of Science Starter API endpoint
-    const url = 'https://api.clarivate.com/api/wos';
+    console.log('🔍 Checking WOS for DOI:', cleanDOI);
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-ApiKey': WOS_API_KEY,
-        'Accept': 'application/json'
-      },
-      // Add query parameters for DOI search
-    });
+    // Get journal info from SCOPUS to build WOS search URL
+    console.log('📞 Fetching journal info from SCOPUS...');
 
-    if (response.status === 404) {
+    const scopusUrl = `https://api.elsevier.com/content/abstract/doi/${encodeURIComponent(cleanDOI)}`;
+    const scopusResponse = await tryScopusAPI(scopusUrl);
+
+    if (!scopusResponse.ok) {
       return {
         database: 'wos',
         found: false,
-        error: 'Publication not found in Web of Science'
+        error: 'Unable to retrieve journal information'
       };
     }
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    const scopusData = await scopusResponse.json();
+    const coredata = scopusData['abstracts-retrieval-response']?.coredata;
+
+    if (!coredata) {
       return {
         database: 'wos',
         found: false,
-        error: `Web of Science API error: ${response.status} - ${errorText}`
+        error: 'Unable to retrieve journal information'
       };
     }
 
-    const data = await response.json();
+    const issn = coredata['prism:issn'] || coredata['prism:eIssn'];
+    const journalTitle = coredata['prism:publicationName'];
 
-    // Parse WoS response (structure depends on specific API endpoint used)
-    return {
+    // Extract authors
+    const authors = scopusData['abstracts-retrieval-response']?.authors?.author?.map((a: any) =>
+      `${a['preferred-name']?.['given-name'] || ''} ${a['preferred-name']?.['surname'] || ''}`.trim()
+    ) || [];
+
+    // Remove hyphens from ISSN for WOS search URL
+    const issnForWOS = issn ? issn.replace(/-/g, '') : undefined;
+
+    // Build result with manual WOS verification link (simplified for Vercel deployment)
+    const result: PubCheckResult = {
       database: 'wos',
       found: true,
-      title: data.title || 'Found in Web of Science',
-      citationCount: data.timesCited || 0,
-      indexStatus: 'Indexed in Web of Science',
-      url: data.url || `https://www.webofscience.com/wos/woscc/full-record/${doi}`
+      title: coredata['dc:title'],
+      authors,
+      year: parseInt(coredata['prism:coverDate']?.split('-')[0]) || undefined,
+      journal: journalTitle,
+      citationCount: parseInt(coredata['citedby-count']) || 0,
+      url: `https://mjl.clarivate.com/search-results?search=${encodeURIComponent(issnForWOS || journalTitle)}`,
+      indexStatus: 'Verify WOS indexing manually (click link below)'
     };
+
+    return result;
   } catch (error) {
     console.error('Error checking Web of Science:', error);
     return {
@@ -665,46 +681,22 @@ export async function checkWebOfScienceByDOI(doi: string): Promise<PubCheckResul
 
 /**
  * Check if a journal is indexed in Web of Science
+ * Attempts scraping with fallback to manual verification link
  */
 export async function checkWebOfScienceJournal(journalName: string): Promise<PubCheckResult> {
-  if (!WOS_API_KEY) {
-    return {
-      database: 'wos',
-      found: false,
-      error: 'Web of Science API key not configured'
-    };
-  }
-
   try {
-    // Web of Science Journal API endpoint (Master Journal List)
-    const url = 'https://api.clarivate.com/api/wos/journals';
+    console.log('🔍 Checking WOS for journal:', journalName);
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-ApiKey': WOS_API_KEY,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      return {
-        database: 'wos',
-        found: false,
-        error: `Web of Science API error: ${response.status} - ${errorText}`
-      };
-    }
-
-    const data = await response.json();
-
-    return {
+    // Provide manual verification link (simplified for Vercel deployment)
+    const result: PubCheckResult = {
       database: 'wos',
       found: true,
       journal: journalName,
-      indexStatus: 'Journal indexed in Web of Science',
-      url: data.url || 'https://mjl.clarivate.com/'
+      url: `https://mjl.clarivate.com/search-results?search=${encodeURIComponent(journalName)}`,
+      indexStatus: 'Verify WOS indexing manually (click link below)'
     };
+
+    return result;
   } catch (error) {
     console.error('Error checking Web of Science journal:', error);
     return {

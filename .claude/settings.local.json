@@ -5,7 +5,12 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(npx tsc:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(node scimago-proxy.js:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
