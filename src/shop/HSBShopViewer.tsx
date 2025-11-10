@@ -198,7 +198,7 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
     const currentProduct = featuredProducts[carouselIndex];
 
     return (
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg overflow-hidden mb-8">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg overflow-hidden">
         <div className="relative h-96">
           <div className="absolute inset-0 flex items-center justify-between p-8">
             <div className="flex-1 text-white z-10">
@@ -327,57 +327,57 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
   );
 
   const renderBrowse = () => (
-    <div className="space-y-6">
-      {/* Featured Carousel */}
-      {renderFeaturedCarousel()}
+  <div className="space-y-6">
+    {/* Featured Carousel */}
+    {renderFeaturedCarousel()}
 
-      {/* Filters */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search products by name or item code..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex gap-2 items-center overflow-x-auto">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`px-4 py-2 rounded-xl font-medium text-sm transition-colors whitespace-nowrap ${
-                  filterCategory === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {typeof cat === 'string' ? cat.charAt(0).toUpperCase() + cat.slice(1) : cat}
-              </button>
-            ))}
-          </div>
+    {/* Filters */}
+    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search products by name or item code..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilterCategory(cat)}
+              className={`px-5 py-3 rounded-xl font-medium text-sm transition-colors whitespace-nowrap ${
+                filterCategory === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {typeof cat === 'string' ? cat.charAt(0).toUpperCase() + cat.slice(1) : cat}
+            </button>
+          ))}
         </div>
       </div>
-
-      {/* Products Grid */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader className="w-12 h-12 animate-spin text-blue-600" />
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm p-12 border border-gray-100 text-center">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-gray-900 mb-2">No Products Found</h3>
-          <p className="text-gray-600">Try adjusting your search or filters</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map(renderProductCard)}
-        </div>
-      )}
     </div>
-  );
+
+    {/* Products Grid */}
+    {loading ? (
+      <div className="flex items-center justify-center py-20">
+        <Loader className="w-12 h-12 animate-spin text-blue-600" />
+      </div>
+    ) : filteredProducts.length === 0 ? (
+      <div className="bg-white rounded-2xl shadow-sm p-12 border border-gray-100 text-center">
+        <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-bold text-gray-900 mb-2">No Products Found</h3>
+        <p className="text-gray-600">Try adjusting your search or filters</p>
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {filteredProducts.map(renderProductCard)}
+      </div>
+    )}
+  </div>
+);
 
   const renderCartSidebar = () => (
     <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
@@ -673,7 +673,7 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
@@ -702,7 +702,7 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w mx-auto p-3">
         {activeView === 'browse' && renderBrowse()}
         {activeView === 'checkout' && renderCheckout()}
         {activeView === 'success' && renderSuccess()}

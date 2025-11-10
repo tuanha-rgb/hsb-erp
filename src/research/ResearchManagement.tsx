@@ -14,6 +14,7 @@ import { projectService, Project } from "../firebase/project.service";
 import { patentService, Patent } from "../firebase/patent.service";
 import { sampleUsers } from "../useraccounts";
 import { citationService } from "../services/citation.service";
+import { checkPublication, PubCheckResult, PubCheckRequest } from "../services/pub-check.service";
 import { faculties } from "../acad/faculties";
 
 const ResearchManagement = () => {
@@ -2970,6 +2971,345 @@ const ResearchManagement = () => {
     </div>
   );
 
+  const PubCheckView = () => {
+    const [checkType, setCheckType] = useState<'doi' | 'isbn' | 'journal'>('doi');
+    const [inputValue, setInputValue] = useState('');
+    const [isChecking, setIsChecking] = useState(false);
+    const [results, setResults] = useState<{ scopus: PubCheckResult | null; wos: PubCheckResult | null } | null>(null);
+
+    const handleCheck = async () => {
+      if (!inputValue.trim()) {
+        alert('Please enter a value to check');
+        return;
+      }
+
+      setIsChecking(true);
+      setResults(null);
+
+      try {
+        const request: PubCheckRequest = {};
+
+        if (checkType === 'doi') {
+          request.doi = inputValue.trim();
+        } else if (checkType === 'isbn') {
+          request.isbn = inputValue.trim();
+        } else {
+          request.journalName = inputValue.trim();
+        }
+
+        const checkResults = await checkPublication(request);
+        setResults(checkResults);
+      } catch (error) {
+        console.error('Error checking publication:', error);
+        alert('Error checking publication. Please try again.');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    const renderResultCard = (result: PubCheckResult, database: 'SCOPUS' | 'Web of Science') => {
+      const bgColor = database === 'SCOPUS' ? 'bg-orange-50' : 'bg-blue-50';
+      const borderColor = database === 'SCOPUS' ? 'border-orange-200' : 'border-blue-200';
+      const textColor = database === 'SCOPUS' ? 'text-orange-700' : 'text-blue-700';
+      const iconBg = database === 'SCOPUS' ? 'bg-orange-100' : 'bg-blue-100';
+      const iconColor = database === 'SCOPUS' ? 'text-orange-600' : 'text-blue-600';
+
+      // Quartile badge colors
+      const getQuartileBadge = (quartile?: string) => {
+        if (!quartile) return null;
+
+        let badgeClass = '';
+        if (quartile === 'Q1') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+        else if (quartile === 'Q2') badgeClass = 'bg-blue-100 text-blue-800 border-blue-300';
+        else if (quartile === 'Q3') badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        else if (quartile === 'Q4') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
+        else badgeClass = 'bg-gray-100 text-gray-800 border-gray-300';
+
+        return (
+          <span className={`px-3 py-1 ${badgeClass} border-2 rounded-full text-xs font-bold uppercase`}>
+            {quartile}
+          </span>
+        );
+      };
+
+      return (
+        <div className={`${bgColor} ${borderColor} border-2 rounded-xl p-6`}>
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 ${iconBg} rounded-lg flex items-center justify-center`}>
+                <Globe className={`w-6 h-6 ${iconColor}`} />
+              </div>
+              <div>
+                <h3 className={`text-lg font-bold ${textColor}`}>{database}</h3>
+                <p className="text-sm text-gray-600">Academic Database</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 items-end">
+              {result.found ? (
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                  ✓ Found
+                </span>
+              ) : (
+                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                  ✗ Not Found
+                </span>
+              )}
+              {result.quartile && getQuartileBadge(result.quartile)}
+            </div>
+          </div>
+
+          {result.error ? (
+            <div className="bg-white rounded-lg p-4 border border-red-200">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-red-900">Error</p>
+                  <p className="text-sm text-red-700 mt-1">{result.error}</p>
+                </div>
+              </div>
+            </div>
+          ) : result.found ? (
+            <div className="bg-white rounded-lg p-4 space-y-3">
+              {result.title && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Title</p>
+                  <p className="text-sm font-semibold text-gray-900">{result.title}</p>
+                </div>
+              )}
+
+              {result.journal && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Journal</p>
+                  <p className="text-sm text-gray-900">{result.journal}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                {result.year && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Year</p>
+                    <p className="text-sm text-gray-900">{result.year}</p>
+                  </div>
+                )}
+
+                {result.citationCount !== undefined && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Citations</p>
+                    <p className="text-sm text-gray-900 font-semibold">{result.citationCount}</p>
+                  </div>
+                )}
+
+                {result.sjr !== undefined && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">SJR</p>
+                    <p className="text-sm text-gray-900 font-semibold">{result.sjr.toFixed(3)}</p>
+                  </div>
+                )}
+
+                {result.citeScore !== undefined && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">CiteScore</p>
+                    <p className="text-sm text-gray-900 font-semibold">{result.citeScore.toFixed(2)}</p>
+                  </div>
+                )}
+
+                {result.citeScorePercentile !== undefined && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Percentile</p>
+                    <p className="text-sm text-gray-900 font-semibold">{result.citeScorePercentile}th</p>
+                  </div>
+                )}
+              </div>
+
+              {result.authors && result.authors.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Authors</p>
+                  <p className="text-sm text-gray-900">{result.authors.slice(0, 5).join(', ')}{result.authors.length > 5 ? ` +${result.authors.length - 5} more` : ''}</p>
+                </div>
+              )}
+
+              {result.subjectAreas && result.subjectAreas.length > 0 && (
+                <div className="pt-3 border-t border-gray-200">
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Subject Area Quartiles</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.subjectAreas.slice(0, 5).map((area, idx) => (
+                      <div key={idx} className="inline-flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg">
+                        <span className="text-xs text-gray-700">{area.area}</span>
+                        {area.quartile && getQuartileBadge(area.quartile)}
+                      </div>
+                    ))}
+                    {result.subjectAreas.length > 5 && (
+                      <span className="text-xs text-gray-500 px-2 py-1">
+                        +{result.subjectAreas.length - 5} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {result.indexStatus && (
+                <div className="pt-3 border-t border-gray-200">
+                  <p className="text-sm font-semibold text-green-700">{result.indexStatus}</p>
+                </div>
+              )}
+
+              {result.url && (
+                <div className="pt-3">
+                  <a
+                    href={result.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-2 ${textColor} hover:underline text-sm font-medium`}
+                  >
+                    View in {database}
+                    <Globe size={14} />
+                  </a>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg p-4">
+              <p className="text-sm text-gray-600">This publication was not found in {database} database.</p>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Publication Verification</h2>
+            <p className="text-sm text-gray-600">Check if publications or journals are indexed in SCOPUS and Web of Science databases</p>
+          </div>
+
+          {/* Input Section */}
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setCheckType('doi');
+                  setInputValue('');
+                  setResults(null);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  checkType === 'doi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Check by DOI
+              </button>
+              <button
+                onClick={() => {
+                  setCheckType('isbn');
+                  setInputValue('');
+                  setResults(null);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  checkType === 'isbn' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Check by ISBN
+              </button>
+              <button
+                onClick={() => {
+                  setCheckType('journal');
+                  setInputValue('');
+                  setResults(null);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  checkType === 'journal' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Check Journal
+              </button>
+            </div>
+
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
+                  placeholder={
+                    checkType === 'doi'
+                      ? 'Enter DOI (e.g., 10.1234/example.2024.001)'
+                      : checkType === 'isbn'
+                      ? 'Enter ISBN (e.g., 978-3-16-148410-0)'
+                      : 'Enter Journal Name (e.g., Nature, Science)'
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isChecking}
+                />
+              </div>
+              <button
+                onClick={handleCheck}
+                disabled={isChecking || !inputValue.trim()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
+              >
+                {isChecking ? (
+                  <>
+                    <Loader className="animate-spin" size={18} />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <Search size={18} />
+                    Check
+                  </>
+                )}
+              </button>
+            </div>
+
+            {checkType === 'doi' && (
+              <p className="text-xs text-gray-500">
+                💡 Tip: You can paste the full DOI URL (https://doi.org/10.xxxx) or just the DOI identifier
+              </p>
+            )}
+            {checkType === 'isbn' && (
+              <p className="text-xs text-gray-500">
+                💡 Tip: ISBN can be entered with or without hyphens (e.g., 978-3-16-148410-0 or 9783161484100)
+              </p>
+            )}
+            {checkType === 'journal' && (
+              <p className="text-xs text-gray-500">
+                💡 Tip: Enter the full journal name or a significant part of it for best results
+              </p>
+            )}
+          </div>
+
+          {/* Results Section */}
+          {results && (
+            <div className="mt-8">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Verification Results</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {results.scopus && renderResultCard(results.scopus, 'SCOPUS')}
+                {results.wos && renderResultCard(results.wos, 'Web of Science')}
+              </div>
+            </div>
+          )}
+
+          {/* Info Box */}
+          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-blue-900 mb-1">API Configuration Required</h4>
+                <p className="text-sm text-blue-800 mb-2">
+                  To use this feature, you need to configure API keys in your .env file:
+                </p>
+                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                  <li><code className="bg-blue-100 px-2 py-0.5 rounded">VITE_SCOPUS_API_KEY</code> - Get from <a href="https://dev.elsevier.com/" target="_blank" rel="noopener noreferrer" className="underline">Elsevier Developer Portal</a></li>
+                  <li><code className="bg-blue-100 px-2 py-0.5 rounded">VITE_WOS_API_KEY</code> - Get from <a href="https://developer.clarivate.com/" target="_blank" rel="noopener noreferrer" className="underline">Clarivate Developer Portal</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-3">
@@ -3016,6 +3356,14 @@ const ResearchManagement = () => {
               >
                 Patents
               </button>
+              <button
+                onClick={() => setActiveView('pubcheck')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'pubcheck' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Pub Check
+              </button>
             </div>
           </div>
         </div>
@@ -3024,6 +3372,7 @@ const ResearchManagement = () => {
         {activeView === 'projects' && <ProjectsView />}
         {activeView === 'publications' && <PublicationsView />}
         {activeView === 'patents' && <PatentsView />}
+        {activeView === 'pubcheck' && <PubCheckView />}
 
         {selectedItem && selectedItem.type === 'project' && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedItem(null)}>
