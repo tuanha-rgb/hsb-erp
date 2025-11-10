@@ -258,11 +258,11 @@ export default function PollSystem({
   }, [userLevel, filter]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-3xl font-bold">Polls & Voting</h2>
+            <h2 className="text-3xl font-bold">HSB Polls & Voting</h2>
             {isConnected ? (
               <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
                 <Wifi size={12} />

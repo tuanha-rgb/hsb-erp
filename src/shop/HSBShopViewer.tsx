@@ -193,89 +193,89 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
 
   // Render functions
   const renderFeaturedCarousel = () => {
-    if (featuredProducts.length === 0) return null;
+  if (featuredProducts.length === 0) return null;
 
-    const currentProduct = featuredProducts[carouselIndex];
+  const currentProduct = featuredProducts[carouselIndex];
 
-    return (
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg overflow-hidden">
-        <div className="relative h-96">
-          <div className="absolute inset-0 flex items-center justify-between p-8">
-            <div className="flex-1 text-white z-10">
-              <span className="inline-block px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm font-semibold mb-4">
-                🌟 Featured New Product
-              </span>
-              <h2 className="text-4xl font-bold mb-4">{currentProduct.name}</h2>
-              <p className="text-xl mb-6 opacity-90">Item Code: {currentProduct.itemCode}</p>
-              <div className="flex items-center gap-6 mb-6">
-                <div>
-                  <p className="text-sm opacity-75">Price</p>
-                  <p className="text-3xl font-bold">{formatCurrency(currentProduct.price)}</p>
-                </div>
-                <div>
-                  <p className="text-sm opacity-75">HSB Points</p>
-                  <p className="text-3xl font-bold">{currentProduct.hsbPoints}</p>
-                </div>
-              </div>
+  return (
+    <div className="bg-gradient-to-r from-blue-500 to-blue-700 rounded-3xl shadow-lg overflow-hidden">
+      <div className="relative h-96">
+        <div className="absolute inset-0 flex items-center justify-between px-12 py-8">
+          {/* Left: Text Content */}
+          <div className="flex-1 max-w-lg text-white z-10 space-y-4">
+            <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold uppercase tracking-wide">
+              Featured
+            </span>
+            <h2 className="text-5xl font-bold leading-tight">{currentProduct.name}</h2>
+            <p className="text-lg opacity-90 leading-relaxed">
+  Discover our featured {currentProduct.category} product with exclusive benefits for HSB members.
+</p>
+            <div className="flex gap-4 pt-2">
+              <button className="px-6 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all">
+                Preview
+              </button>
               <button
                 onClick={() => addToCart(currentProduct)}
-                className="px-8 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-opacity-90 transition-all flex items-center gap-2"
+                className="px-6 py-2.5 bg-white text-blue-600 rounded-xl font-semibold hover:bg-gray-50 transition-all"
               >
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart
+                View Product
               </button>
             </div>
+          </div>
 
-            <div className="flex-1 flex items-center justify-center">
+          {/* Right: Product Image */}
+          <div className="flex-1 flex items-center justify-end">
+            <div className="relative">
               <img
                 src={currentProduct.image}
                 alt={currentProduct.name}
-                className="w-80 h-80 object-cover rounded-2xl shadow-2xl"
+                className="w-56 h-80 object-cover rounded-lg shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity"
               />
             </div>
           </div>
+        </div>
 
-          {/* Navigation buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center text-white transition-all z-20"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center text-white transition-all z-20"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+        {/* Navigation buttons */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all z-20"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all z-20"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
 
-          {/* Dots indicator */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-            {featuredProducts.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCarouselIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === carouselIndex ? 'w-8 bg-white' : 'bg-white bg-opacity-50'
-                }`}
-              />
-            ))}
-          </div>
+        {/* Slide indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {featuredProducts.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCarouselIndex(index)}
+              className={`h-2 rounded-full transition-all ${
+                carouselIndex === index ? 'w-8 bg-white' : 'w-2 bg-white/40'
+              }`}
+            />
+          ))}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   const renderProductCard = (product: Product) => (
     <div
       key={product.id}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all"
+      className="w-64 h-128 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all"
     >
-      <div className="relative">
+      <div className="w-64 h-56">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-64 h-48 object-cover"
         />
         <div className="absolute top-2 right-2">
           <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">

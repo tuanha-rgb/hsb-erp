@@ -255,14 +255,16 @@ const [canvasReady, setCanvasReady] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Start at 1.2 scale (120%) for balanced readability
-  const [scale, setScale] = useState(1.2);
+  // Start at 1.5 scale (150%) for sharp, readable text on all screens
+  const [scale, setScale] = useState(1.5);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState('');
   // Add state for page jump input
 const [pageJumpInput, setPageJumpInput] = useState('');
+  // Add state for zoom input
+  const [zoomInput, setZoomInput] = useState('');
   // Page offset state (for when PDF pages don't match printed page numbers)
   const [pageOffset, setPageOffset] = useState(0);
   const [showOffsetInput, setShowOffsetInput] = useState(false);
@@ -338,6 +340,18 @@ const handlePageJump = () => {
     }
   }
 };
+
+// Add function to handle zoom input change
+const handleZoomChange = () => {
+  if (zoomInput) {
+    const newPercent = parseInt(zoomInput);
+    if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
+      setScale(newPercent / 100);
+      setZoomInput('');
+    }
+  }
+};
+
 const canvasRef = useRef<HTMLCanvasElement>(null);
 
 // Callback ref to track when canvas is mounted
@@ -579,32 +593,41 @@ const renderPDFPage = async (
 
   const page = await pdfDocRef.current.getPage(pageNum);
 
-  // Smart pixel ratio: only use devicePixelRatio at higher zoom levels
-  // At normal reading zoom (100-150%), render at 1:1 to avoid blur
-  // At higher zoom (>150%), use devicePixelRatio for crisp details
-  let pixelRatio = 1;
-  if (scale > 1.5) {
-    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-  }
+  // ENHANCED: Use full device pixel ratio for maximum sharpness (up to 3x)
+  // This provides ultra-crisp rendering on all displays
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
 
-  // Calculate viewport with combined scale
+  // Calculate viewport with combined scale for high-quality rendering
   const renderScale = scale * pixelRatio;
   const viewport = page.getViewport({ scale: renderScale });
 
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', {
+    alpha: false,
+    desynchronized: true
+  });
+
   if (!context) {
     return;
   }
+
+  // Enable high-quality image smoothing
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
 
   // Set canvas internal resolution to match render scale
   canvas.width = viewport.width;
   canvas.height = viewport.height;
 
-  // Set CSS display size to scale/pixelRatio to get crisp rendering
+  // Set CSS display size to match logical pixels (accounts for device pixel ratio)
   canvas.style.width = `${viewport.width / pixelRatio}px`;
   canvas.style.height = `${viewport.height / pixelRatio}px`;
 
-  await page.render({ canvasContext: context, viewport: viewport }).promise;
+  // Render with intent for display (optimizes for screen viewing)
+  await page.render({
+    canvasContext: context,
+    viewport: viewport,
+    intent: 'display'
+  }).promise;
 };
 // ---- Add useEffect for scale/pageMode changes
 useEffect(() => {
@@ -709,46 +732,50 @@ const togglePageMode = async () => {
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
-  <div className="border-b border-gray-200 p-2 md:p-3 bg-white">
-    <div className="grid grid-cols-3 items-center gap-2">
-      {/* Left: Back button */}
+  {/* FIXED: Made header sticky and responsive with auto-hiding buttons on narrow screens */}
+  <div className="sticky top-0 z-20 border-b border-gray-200 p-2 md:p-4 bg-white shadow-sm">
+    <div className="grid grid-cols-3 items-center gap-1 md:gap-3">
+      {/* Left: Back button - compact on mobile */}
       <div className="flex justify-start">
-        <button onClick={onClose} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm">
-          <ArrowLeft size={18} />
+        <button onClick={onClose} className="flex items-center gap-1 px-2 py-2 md:px-3 md:py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors text-sm md:text-base font-medium">
+          <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
           <span className="hidden sm:inline">Back</span>
         </button>
       </div>
 
-      {/* Center: Book Title - absolutely centered */}
+      {/* Center: Book Title - smaller on mobile to prevent overlap */}
       <div className="flex justify-center min-w-0">
-        <h1 className="text-sm md:text-base font-semibold text-gray-900 truncate text-center max-w-full" title={item.title}>
+        <h1 className="text-xs sm:text-sm md:text-lg font-semibold text-gray-900 truncate text-center max-w-full px-1" title={item.title}>
           {item.title}
         </h1>
       </div>
 
-      {/* Right: Controls */}
-      <div className="flex justify-end items-center gap-1">
+      {/* Right: Controls - auto-hide on narrow screens except zoom */}
+      <div className="flex justify-end items-center gap-1 md:gap-2">
+      {/* Dual page button - hidden on small screens */}
       {fileKind === 'pdf' && hasFile && (
         <button
           onClick={togglePageMode}
-          className={`p-1.5 rounded hover:bg-gray-100 ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}
+          className={`hidden md:flex p-2 md:p-2.5 rounded-lg hover:bg-gray-100 transition-colors ${pageMode === 'dual' ? 'bg-blue-50 text-blue-600' : ''}`}
           title={pageMode === 'single' ? 'Dual page' : 'Single page'}
         >
-          {pageMode === 'single' ? <Columns size={16} /> : <Square size={16} />}
+          {pageMode === 'single' ? <Columns className="w-5 h-5 md:w-6 md:h-6" /> : <Square className="w-5 h-5 md:w-6 md:h-6" />}
         </button>
       )}
+      {/* Bookmark menu button - hidden on small screens */}
       <button
         onClick={() => setShowBookmarks(!showBookmarks)}
-        className={`p-1.5 rounded hover:bg-gray-100 relative ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}
+        className={`hidden md:flex p-2 md:p-2.5 rounded-lg hover:bg-gray-100 relative transition-colors ${showBookmarks ? 'bg-blue-50 text-blue-600' : ''}`}
         title="Bookmarks"
       >
-        <Menu size={16} />
+        <Menu className="w-5 h-5 md:w-6 md:h-6" />
         {bookmarks.length > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-semibold">
             {bookmarks.length}
           </span>
         )}
       </button>
+      {/* Bookmark button - hidden on small screens */}
       <button
         onClick={() => {
           if (isBookmarked(currentPage)) {
@@ -756,40 +783,40 @@ const togglePageMode = async () => {
             removeBookmark(index);
           } else addBookmark();
         }}
-        className={`p-1.5 rounded hover:bg-gray-100 ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
+        className={`hidden md:flex p-2 md:p-2.5 rounded-lg hover:bg-gray-100 transition-colors ${isBookmarked(currentPage) ? 'text-yellow-500' : ''}`}
         title={isBookmarked(currentPage) ? 'Remove bookmark' : 'Add bookmark'}
       >
-        <BookmarkCheck size={16} />
+        <BookmarkCheck className="w-5 h-5 md:w-6 md:h-6" />
       </button>
+      {/* Zoom controls - simplified on mobile (just +/- buttons) */}
       {fileKind === 'pdf' && hasFile && (
         <>
-          <div className="w-px h-6 bg-gray-300 mx-1"></div>
-          <button onClick={handleZoomOut} className="p-1.5 hover:bg-gray-100 rounded" disabled={loading} title="Zoom out">
-            <ZoomOut size={16} />
+          <div className="hidden md:block w-px h-6 bg-gray-300 mx-1"></div>
+          <button onClick={handleZoomOut} className="p-1.5 md:p-2.5 hover:bg-gray-100 rounded-lg transition-colors" disabled={loading} title="Zoom out">
+            <ZoomOut className="w-4 h-4 md:w-6 md:h-6" />
           </button>
+          {/* Zoom percentage input - hidden on small screens, editable */}
           <input
             type="number"
             min="50"
             max="300"
             step="10"
-            value={Math.round(scale * 100)}
-            onChange={(e) => {
-              const newPercent = parseInt(e.target.value);
-              if (!isNaN(newPercent) && newPercent >= 50 && newPercent <= 300) {
-                setScale(newPercent / 100);
-              }
-            }}
+            value={zoomInput || Math.round(scale * 100)}
+            onChange={(e) => setZoomInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
+                handleZoomChange();
                 e.currentTarget.blur();
               }
             }}
-            className="w-12 px-1 py-1 text-xs text-gray-600 text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            title="Zoom percentage"
+            onBlur={handleZoomChange}
+            className="hidden md:block w-14 px-1 py-1.5 text-sm text-gray-600 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            title="Zoom percentage (50-300)"
+            placeholder={zoomInput ? '' : Math.round(scale * 100).toString()}
           />
-          <span className="text-xs text-gray-600">%</span>
-          <button onClick={handleZoomIn} className="p-1.5 hover:bg-gray-100 rounded" disabled={loading} title="Zoom in">
-            <ZoomIn size={16} />
+          <span className="hidden md:inline text-sm text-gray-600">%</span>
+          <button onClick={handleZoomIn} className="p-1.5 md:p-2.5 hover:bg-gray-100 rounded-lg transition-colors" disabled={loading} title="Zoom in">
+            <ZoomIn className="w-4 h-4 md:w-6 md:h-6" />
           </button>
         </>
       )}
@@ -887,12 +914,24 @@ const togglePageMode = async () => {
       }`}>
         {pageMode === 'dual' && (
           <>
-            <canvas ref={canvas2Ref} className="shadow-2xl bg-white order-1 md:order-1" />
-            <canvas ref={setCanvasRef} className="shadow-2xl bg-white order-2 md:order-2" />
+            <canvas
+              ref={canvas2Ref}
+              className="shadow-2xl bg-white order-1 md:order-1"
+              style={{ imageRendering: 'crisp-edges' }}
+            />
+            <canvas
+              ref={setCanvasRef}
+              className="shadow-2xl bg-white order-2 md:order-2"
+              style={{ imageRendering: 'crisp-edges' }}
+            />
           </>
         )}
         {pageMode === 'single' && (
-          <canvas ref={setCanvasRef} className="shadow-2xl bg-white" />
+          <canvas
+            ref={setCanvasRef}
+            className="shadow-2xl bg-white"
+            style={{ imageRendering: 'crisp-edges' }}
+          />
         )}
             </div>
             ) : fileKind === 'epub'  ? (
@@ -916,23 +955,23 @@ const togglePageMode = async () => {
         )}
       </div>
 
-      {/* Page Navigation Bar */}
+      {/* Page Navigation Bar - FIXED: Made responsive with better touch targets */}
         {!loading && !error && hasFile && fileKind === 'pdf' && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 shadow-lg">
-  <div className="mx-auto flex items-center justify-center gap-2 flex-wrap">
-              {/* Previous Button */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 md:p-4 shadow-lg z-10">
+  <div className="mx-auto flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+              {/* Previous Button - larger on mobile */}
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage <= 1}
-                className="px-2 py-1.5 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
+                className="px-3 py-2 md:px-4 md:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 text-sm md:text-base font-medium transition-colors"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                 <span className="hidden sm:inline">Prev</span>
               </button>
 
-              {/* Page Input & Display */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-600 hidden sm:inline">
+              {/* Page Input & Display - responsive sizing */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs md:text-sm text-gray-600 hidden sm:inline font-medium">
                   {pageMode === 'dual' ? 'Pages' : 'Page'}
                 </span>
                 <input
@@ -945,24 +984,24 @@ const togglePageMode = async () => {
                     if (e.key === 'Enter') handlePageJump();
                   }}
                   onBlur={handlePageJump}
-                  className="w-14 px-2 py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-16 md:w-20 px-2 py-2 md:py-2.5 border border-gray-300 rounded-lg text-center text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={pageJumpInput ? '' : getPageDisplay()}
                 />
-                <span className="text-xs text-gray-600">
+                <span className="text-xs md:text-sm text-gray-600 font-medium">
                   / {totalPages + pageOffset}
                 </span>
               </div>
 
-              {/* Page Offset Button */}
+              {/* Page Offset Button - larger touch target */}
               <div className="relative flex items-center">
                 <button
                   onClick={() => setShowOffsetInput(!showOffsetInput)}
-                  className={`p-1.5 border rounded hover:bg-gray-50 transition-colors ${
+                  className={`p-2 md:p-2.5 border rounded-lg hover:bg-gray-50 transition-colors ${
                     pageOffset !== 0 ? 'bg-blue-50 border-blue-300' : 'border-gray-300'
                   }`}
                   title={pageOffset !== 0 ? `Offset: ${pageOffset > 0 ? '+' : ''}${pageOffset}` : 'Set page offset'}
                 >
-                  <Hash size={16} className={pageOffset !== 0 ? 'text-blue-600' : 'text-gray-600'} />
+                  <Hash className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2} style={{ color: pageOffset !== 0 ? '#2563eb' : '#4b5563' }} />
                 </button>
 
                 {showOffsetInput && (
@@ -1010,14 +1049,14 @@ const togglePageMode = async () => {
                 )}
               </div>
 
-              {/* Next Button */}
+              {/* Next Button - larger on mobile */}
               <button
                 onClick={handleNextPage}
                 disabled={currentPage >= totalPages}
-                className="px-2 py-1.5 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
+                className="px-3 py-2 md:px-4 md:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 text-sm md:text-base font-medium transition-colors"
               >
                 <span className="hidden sm:inline">Next</span>
-                <ChevronRight size={16} />
+                <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
           </div>
