@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
   Briefcase, FileText, DollarSign, TrendingUp, Calendar, Building, Users,
-  Search, Plus, Award, ChevronDown, Globe, Target, X, Loader, AlertCircle, Eye, Edit, Trash2, Quote
+  Search, Plus, Award, ChevronDown, Globe, Target, X, Loader, AlertCircle, Eye, Edit, Trash2, Quote, Filter,
+  BarChart3, List
 } from "lucide-react";
 import { getDisciplineColor, getStatusColor } from "./ResearchColors";
 import {
@@ -17,6 +18,18 @@ import { citationService } from "../services/citation.service";
 import { checkPublication, PubCheckResult, PubCheckRequest } from "../services/pub-check.service";
 import { faculties } from "../acad/faculties";
 
+// Helper function to display shorter publication type labels
+const getShortTypeName = (type: string): string => {
+  const typeMap: { [key: string]: string } = {
+    'Journal Article': 'Journal',
+    'Conference Paper': 'Conference',
+    'Book Chapter': 'Chapter',
+    'Book': 'Book',
+    'Review Article': 'Review'
+  };
+  return typeMap[type] || type;
+};
+
 const ResearchManagement = () => {
   const [activeView, setActiveView] = useState('overview');
   const [selectedItem, setSelectedItem] = useState(null);
@@ -29,6 +42,16 @@ const ResearchManagement = () => {
   const [publicationsSearchTerm, setPublicationsSearchTerm] = useState('');
   const [publicationsFilterType, setPublicationsFilterType] = useState('all');
   const [publicationsFilterStatus, setPublicationsFilterStatus] = useState('all');
+  const [publicationsPage, setPublicationsPage] = useState(1);
+  const [publicationsItemsPerPage, setPublicationsItemsPerPage] = useState(5);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filterDiscipline, setFilterDiscipline] = useState('all');
+  const [filterYear, setFilterYear] = useState('all');
+  const [filterQuartile, setFilterQuartile] = useState('all');
+  const [filterWOS, setFilterWOS] = useState('all');
+  const [filterPublisher, setFilterPublisher] = useState('all');
+  const [trendsViewMode, setTrendsViewMode] = useState<'chart' | 'list'>('chart');
+  const [hoveredYearData, setHoveredYearData] = useState<{year: number, x: number, y: number, scopus: number, wos: number, unique: number} | null>(null);
 
   const [patentsSearchTerm, setPatentsSearchTerm] = useState('');
   const [patentsFilterType, setPatentsFilterType] = useState('all');
@@ -822,11 +845,11 @@ const ResearchManagement = () => {
                         onChange={(e) => setManualFormData({...manualFormData, type: e.target.value as any})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="Journal Article">Journal Article</option>
-                        <option value="Conference Paper">Conference Paper</option>
-                        <option value="Book Chapter">Book Chapter</option>
+                        <option value="Journal Article">Journal</option>
+                        <option value="Conference Paper">Conference</option>
+                        <option value="Book Chapter">Chapter</option>
                         <option value="Book">Book</option>
-                        <option value="Review Article">Review Article</option>
+                        <option value="Review Article">Review</option>
                       </select>
                     </div>
                     <div>
@@ -1241,13 +1264,13 @@ const ResearchManagement = () => {
                       </td>
                       <td className="border border-gray-300 px-2 py-1">
                         <select
-                          value={pub.type || 'Journal Article'}
+                          value={pub.type || 'Journal'}
                           onChange={(e) => updateRow(pub.tempId, 'type', e.target.value)}
                           className="w-full px-1 py-1 text-xs border-0 focus:outline-none focus:ring-1 focus:ring-green-500"
                         >
-                          <option value="Journal Article">Journal</option>
-                          <option value="Conference Paper">Conference</option>
-                          <option value="Book Chapter">Book Chapter</option>
+                          <option value="Journal">Journal</option>
+                          <option value="Conference">Conference</option>
+                          <option value="Chapter">Chapter</option>
                           <option value="Book">Book</option>
                         </select>
                       </td>
@@ -1543,67 +1566,281 @@ const ResearchManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Patents by Faculty</h3>
-          <div className="space-y-4">
-            {(() => {
-              const facultyCounts: { [key: string]: number } = {};
-              patents.forEach(patent => {
-                if (patent.faculty) {
-                  facultyCounts[patent.faculty] = (facultyCounts[patent.faculty] || 0) + 1;
-                }
-              });
-              const facultyArray = Object.entries(facultyCounts)
-                .map(([faculty, count]) => ({ faculty, count }))
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 5);
-              const total = patents.length || 1;
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Publication Trends</h3>
 
-              return facultyArray.length > 0 ? facultyArray.map((item, i) => (
-                <div key={i}>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">{item.faculty}</span>
-                    <span className="text-sm font-semibold text-gray-900">{item.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full bg-purple-500" style={{width: `${(item.count / total) * 100}%`}}></div>
-                  </div>
-                </div>
-              )) : <p className="text-sm text-gray-500">No patents yet</p>;
-            })()}
+            {/* View Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTrendsViewMode('chart')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  trendsViewMode === 'chart'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <BarChart3 size={16} />
+                Chart
+              </button>
+              <button
+                onClick={() => setTrendsViewMode('list')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  trendsViewMode === 'list'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <List size={16} />
+                List
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Publication Types</h3>
-          <div className="space-y-4">
-            {(() => {
-              const typeCounts: { [key: string]: number } = {
-                'Journal Article': publications.filter(p => p.type === 'Journal Article').length,
-                'Conference Paper': publications.filter(p => p.type === 'Conference Paper').length,
-                'Book Chapter': publications.filter(p => p.type === 'Book Chapter').length,
-                'Book': publications.filter(p => p.type === 'Book').length,
-                'Patents': patents.length
-              };
-              const typeArray = Object.entries(typeCounts)
-                .filter(([_, count]) => count > 0)
-                .map(([type, count]) => ({ type, count }))
-                .sort((a, b) => b.count - a.count);
-              const total = publications.length + patents.length || 1;
+          {trendsViewMode === 'chart' ? (
+            // Chart View - Trendline and Total Only
+            <div className="space-y-8">
+              {/* Trendline Visualization */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-4">Publication Trendline</h4>
+                {(() => {
+                  const yearCounts: { [key: number]: number } = {};
+                  const yearBreakdown: { [key: number]: { scopus: number, wos: number, unique: number } } = {};
 
-              return typeArray.length > 0 ? typeArray.map((item, i) => (
-                <div key={i}>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">{item.type}</span>
-                    <span className="text-sm font-semibold text-gray-900">{item.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full bg-orange-500" style={{width: `${(item.count / total) * 100}%`}}></div>
-                  </div>
+                  publications.forEach(p => {
+                    if (p.year) {
+                      yearCounts[p.year] = (yearCounts[p.year] || 0) + 1;
+
+                      if (!yearBreakdown[p.year]) {
+                        yearBreakdown[p.year] = { scopus: 0, wos: 0, unique: 0 };
+                      }
+
+                      // Count Scopus publications (has quartile)
+                      const hasScopus = p.quartile && p.quartile !== 'N/A';
+                      if (hasScopus) {
+                        yearBreakdown[p.year].scopus++;
+                      }
+
+                      // Count WoS publications (has wosranking)
+                      const hasWos = p.wosranking && p.wosranking !== 'N/A';
+                      if (hasWos) {
+                        yearBreakdown[p.year].wos++;
+                      }
+
+                      // Count unique publications (in Scopus OR WoS, counted once even if in both)
+                      if (hasScopus || hasWos) {
+                        yearBreakdown[p.year].unique++;
+                      }
+                    }
+                  });
+
+                  const yearArray = Object.entries(yearCounts)
+                    .map(([year, count]) => ({
+                      year: Number(year),
+                      count,
+                      breakdown: yearBreakdown[Number(year)]
+                    }))
+                    .sort((a, b) => a.year - b.year); // Oldest to newest for trendline
+                  const maxCount = Math.max(...yearArray.map(y => y.count), 1);
+
+                  return yearArray.length >= 2 ? (
+                    <div className="bg-gray-50 rounded-lg p-6 relative" onMouseLeave={() => setHoveredYearData(null)}>
+                      <svg width="100%" height="200" className="overflow-visible">
+                        {yearArray.map((item, i) => {
+                          const x = (i / (yearArray.length - 1)) * 100;
+                          const y = 180 - ((item.count / maxCount) * 150);
+                          return (
+                            <g key={i}>
+                              <circle
+                                cx={`${x}%`}
+                                cy={y}
+                                r="5"
+                                fill="#10b981"
+                                style={{ cursor: 'pointer' }}
+                                onMouseEnter={(e) => {
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setHoveredYearData({
+                                    year: item.year,
+                                    x: rect.left + window.scrollX,
+                                    y: rect.top + window.scrollY,
+                                    scopus: item.breakdown.scopus,
+                                    wos: item.breakdown.wos,
+                                    unique: item.breakdown.unique
+                                  });
+                                }}
+                              />
+                              <text x={`${x}%`} y={y - 10} textAnchor="middle" fontSize="12" fill="#374151">
+                                {item.count}
+                              </text>
+                              {i < yearArray.length - 1 && (
+                                <line
+                                  x1={`${x}%`}
+                                  y1={y}
+                                  x2={`${((i + 1) / (yearArray.length - 1)) * 100}%`}
+                                  y2={180 - ((yearArray[i + 1].count / maxCount) * 150)}
+                                  stroke="#10b981"
+                                  strokeWidth="3"
+                                />
+                              )}
+                            </g>
+                          );
+                        })}
+                      </svg>
+                      <div className="flex justify-between text-sm text-gray-600 mt-4">
+                        <span>{yearArray[0].year}</span>
+                        <span>{yearArray[yearArray.length - 1].year}</span>
+                      </div>
+
+                      {/* Tooltip */}
+                      {hoveredYearData && (
+                        <div
+                          className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-3"
+                          style={{
+                            left: hoveredYearData.x - 95,
+                            top: hoveredYearData.y - 50,
+                            pointerEvents: 'none'
+                          }}
+                        >
+                          <div className="text-sm font-semibold text-gray-900 mb-2">
+                            Year {hoveredYearData.year}
+                          </div>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex justify-between gap-4">
+                              <span className="text-gray-600">Scopus:</span>
+                              <span className="font-semibold text-gray-900">{hoveredYearData.scopus}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                              <span className="text-gray-600">WoS:</span>
+                              <span className="font-semibold text-gray-900">{hoveredYearData.wos}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                              <span className="text-gray-600">Unique:</span>
+                              <span className="font-semibold text-gray-900">{hoveredYearData.unique}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : <p className="text-sm text-gray-500">Need at least 2 years of data to show trendline</p>;
+                })()}
+              </div>
+
+              {/* Last 3 Years */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Last 3 Years</h4>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  {(() => {
+                    const currentYear = new Date().getFullYear();
+                    const last3Years = [currentYear, currentYear - 1, currentYear - 2];
+                    const yearRange = `(${last3Years[2]} - ${last3Years[0]})`;
+                    const last3YearsPublications = publications.filter(p =>
+                      p.year && last3Years.includes(p.year)
+                    );
+                    const uniqueWosScoupus = last3YearsPublications.filter(p =>
+                      (p.wosranking && p.wosranking !== 'N/A') ||
+                      p.scopusIndexed ||
+                      ['Q1', 'Q2', 'Q3', 'Q4', 'Scopus-indexed'].includes(p.quartile)
+                    ).length;
+                    const other = last3YearsPublications.filter(p =>
+                      (!p.wosranking || p.wosranking === 'N/A') &&
+                      !p.scopusIndexed &&
+                      !['Q1', 'Q2', 'Q3', 'Q4', 'Scopus-indexed'].includes(p.quartile)
+                    ).length;
+                    const total = last3YearsPublications.length;
+
+                    return (
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-gray-900 mb-1">{total}</div>
+                          <div className="text-xs text-gray-600">
+                            Total {yearRange}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-blue-600 mb-1">{uniqueWosScoupus}</div>
+                          <div className="text-xs text-gray-700">WoS + Scopus {yearRange}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-gray-600 mb-1">{other}</div>
+                          <div className="text-xs text-gray-700">Other {yearRange}</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
-              )) : <p className="text-sm text-gray-500">No publications yet</p>;
-            })()}
-          </div>
+              </div>
+            </div>
+          ) : (
+            // List View
+            <div className="space-y-6">
+              {/* By Quartile */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">By Quartile</h4>
+                <div className="space-y-3">
+                  {(() => {
+                    const quartileCounts: { [key: string]: number } = {
+                      'Q1': publications.filter(p => p.quartile === 'Q1').length,
+                      'Q2': publications.filter(p => p.quartile === 'Q2').length,
+                      'Q3': publications.filter(p => p.quartile === 'Q3').length,
+                      'Q4 & Scopus indexed': publications.filter(p =>
+                        p.quartile === 'Q4' ||
+                        p.quartile === 'Scopus-indexed' ||
+                        !p.quartile ||
+                        p.quartile === 'N/A'
+                      ).length
+                    };
+                    const quartileArray = Object.entries(quartileCounts)
+                      .filter(([_, count]) => count > 0)
+                      .map(([quartile, count]) => ({ quartile, count }));
+                    const total = publications.length || 1;
+
+                    return quartileArray.length > 0 ? quartileArray.map((item, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-700">{item.quartile}</span>
+                          <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="h-2 rounded-full bg-blue-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                        </div>
+                      </div>
+                    )) : <p className="text-sm text-gray-500">No publications yet</p>;
+                  })()}
+                </div>
+              </div>
+
+              {/* By Year */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">By Year</h4>
+                <div className="space-y-3">
+                  {(() => {
+                    const yearCounts: { [key: number]: number } = {};
+                    publications.forEach(p => {
+                      if (p.year) {
+                        yearCounts[p.year] = (yearCounts[p.year] || 0) + 1;
+                      }
+                    });
+                    const yearArray = Object.entries(yearCounts)
+                      .map(([year, count]) => ({ year: Number(year), count }))
+                      .sort((a, b) => b.year - a.year); // Newest first
+                    const total = publications.length || 1;
+
+                    return yearArray.length > 0 ? yearArray.map((item, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-700">{item.year}</span>
+                          <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="h-2 rounded-full bg-green-500" style={{width: `${(item.count / total) * 100}%`}}></div>
+                        </div>
+                      </div>
+                    )) : <p className="text-sm text-gray-500">No publications yet</p>;
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -2403,15 +2640,120 @@ const ResearchManagement = () => {
                 <option value="book">Book</option>
 
               </select>
-              <select
-                value={publicationsFilterStatus}
-                onChange={(e) => setPublicationsFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="published">Published</option>
-                <option value="review">Under Review</option>
-              </select>
+              <div className="relative">
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm ${
+                    showAdvancedFilters ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Filter size={16} />
+                  Filters
+                  {(filterDiscipline !== 'all' || filterYear !== 'all' || filterQuartile !== 'all' || filterWOS !== 'all' || filterPublisher !== 'all') && (
+                    <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {[filterDiscipline, filterYear, filterQuartile, filterWOS, filterPublisher].filter(f => f !== 'all').length}
+                    </span>
+                  )}
+                </button>
+
+                {/* Advanced Filters Dropdown */}
+                {showAdvancedFilters && (
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-gray-900">Advanced Filters</h3>
+                      <button
+                        onClick={() => {
+                          setFilterDiscipline('all');
+                          setFilterYear('all');
+                          setFilterQuartile('all');
+                          setFilterWOS('all');
+                          setFilterPublisher('all');
+                        }}
+                        className="text-xs text-blue-600 hover:text-blue-700"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Discipline</label>
+                        <select
+                          value={filterDiscipline}
+                          onChange={(e) => setFilterDiscipline(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="all">All Disciplines</option>
+                          {Array.from(new Set(publications.map(p => p.discipline))).sort().map(disc => (
+                            <option key={disc} value={disc}>{disc}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Year</label>
+                        <select
+                          value={filterYear}
+                          onChange={(e) => setFilterYear(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="all">All Years</option>
+                          {Array.from(new Set(publications.map(p => p.year))).sort((a, b) => b - a).map(year => (
+                            <option key={year} value={year}>{year}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Quartile</label>
+                        <select
+                          value={filterQuartile}
+                          onChange={(e) => setFilterQuartile(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="all">All Quartiles</option>
+                          <option value="Q1">Q1</option>
+                          <option value="Q2">Q2</option>
+                          <option value="Q3">Q3</option>
+                          <option value="Q4">Q4</option>
+                          <option value="Scopus-indexed">Scopus-indexed</option>
+                          <option value="N/A">N/A</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">WOS Ranking</label>
+                        <select
+                          value={filterWOS}
+                          onChange={(e) => setFilterWOS(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="all">All WOS</option>
+                          <option value="SCIE">SCIE</option>
+                          <option value="SSCI">SSCI</option>
+                          <option value="AHCI">AHCI</option>
+                          <option value="ESCI">ESCI</option>
+                          <option value="N/A">N/A</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Publisher</label>
+                        <select
+                          value={filterPublisher}
+                          onChange={(e) => setFilterPublisher(e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="all">All Publishers</option>
+                          {Array.from(new Set(publications.map(p => p.publisher).filter(p => p))).sort().map(pub => (
+                            <option key={pub} value={pub}>{pub}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -2578,68 +2920,74 @@ const ResearchManagement = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Authors</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Journal/Venue</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Discipline</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Year</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Citations</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Impact</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase w-72">Title</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Authors</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Publisher</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Journal/Venue</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Discipline</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Year</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Citations</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Impact</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoadingPublications ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={11} className="px-3 py-12 text-center text-gray-500">
                     <Loader className="animate-spin mx-auto mb-2" size={24} />
                     <p className="text-sm">Loading publications...</p>
                   </td>
                 </tr>
               ) : publications.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={11} className="px-3 py-12 text-center text-gray-500">
                     <p className="text-lg font-semibold mb-2">No publications available</p>
                     <p className="text-sm">Click "Add Publication" to add your first publication</p>
                   </td>
                 </tr>
               ) : (
-                publications
-                  .filter(pub => {
+                (() => {
+                  const filteredPubs = publications.filter(pub => {
                     const matchesSearch = publicationsSearchTerm === '' ||
                       pub.title.toLowerCase().includes(publicationsSearchTerm.toLowerCase()) ||
                       pub.authors.some(a => a.toLowerCase().includes(publicationsSearchTerm.toLowerCase()));
                     const matchesType = publicationsFilterType === 'all' || pub.type.toLowerCase().includes(publicationsFilterType);
-                    const matchesStatus = publicationsFilterStatus === 'all' || pub.status.toLowerCase() === publicationsFilterStatus;
-                    return matchesSearch && matchesType && matchesStatus;
-                  })
+                    const matchesDiscipline = filterDiscipline === 'all' || pub.discipline === filterDiscipline;
+                    const matchesYear = filterYear === 'all' || pub.year === Number(filterYear);
+                    const matchesQuartile = filterQuartile === 'all' || pub.quartile === filterQuartile;
+                    const matchesWOS = filterWOS === 'all' || pub.wosranking === filterWOS;
+                    const matchesPublisher = filterPublisher === 'all' || pub.publisher === filterPublisher;
+                    return matchesSearch && matchesType && matchesDiscipline && matchesYear && matchesQuartile && matchesWOS && matchesPublisher;
+                  });
+                  const startIndex = (publicationsPage - 1) * publicationsItemsPerPage;
+                  const endIndex = startIndex + publicationsItemsPerPage;
+                  return filteredPubs.slice(startIndex, endIndex);
+                })()
                   .map((pub) => (
                     <tr key={pub.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-sm text-gray-900 max-w-xs">{pub.title}</p>
+                      <td className="px-3 py-3">
+                        <p className="font-semibold text-sm text-gray-900">{pub.title}</p>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-3">
                         <div className="text-sm text-gray-600">
                           {pub.authors.slice(0, 2).join(', ')}
                           {pub.authors.length > 2 && ` +${pub.authors.length - 2}`}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                          {pub.type}
-                        </span>
+                      <td className="px-3 py-3 text-sm text-gray-600">
+                        {getShortTypeName(pub.type)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">{pub.journal}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDisciplineColor(pub.discipline)}`}>
-                          {pub.discipline}
-                        </span>
+                      <td className="px-3 py-3 text-sm text-gray-600">{pub.publisher || '-'}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600 max-w-xs">{pub.journal}</td>
+                      <td className="px-3 py-3 text-sm text-gray-600">
+                        {pub.discipline}
                       </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{pub.year}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{pub.citations}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-3 text-sm font-semibold text-gray-900">{pub.year}</td>
+                      <td className="px-3 py-3 text-sm font-semibold text-gray-900">{pub.citations}</td>
+                      <td className="px-3 py-3">
                         <div className="text-sm space-y-1">
                           {pub.quartile && pub.quartile !== 'N/A' && (
                             <div className="font-semibold text-gray-900">{pub.quartile}</div>
@@ -2652,12 +3000,10 @@ const ResearchManagement = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(pub.status)}`}>
-                          {pub.status}
-                        </span>
+                      <td className="px-3 py-3 text-sm text-gray-600">
+                        {pub.status}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-3">
                         <div className="flex gap-2">
                           <button
                             onClick={() => setSelectedItem({type: 'publication', data: pub})}
@@ -2714,6 +3060,69 @@ const ResearchManagement = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {(() => {
+          const filteredCount = publications.filter(pub => {
+            const matchesSearch = publicationsSearchTerm === '' ||
+              pub.title.toLowerCase().includes(publicationsSearchTerm.toLowerCase()) ||
+              pub.authors.some(a => a.toLowerCase().includes(publicationsSearchTerm.toLowerCase()));
+            const matchesType = publicationsFilterType === 'all' || pub.type.toLowerCase().includes(publicationsFilterType);
+            const matchesDiscipline = filterDiscipline === 'all' || pub.discipline === filterDiscipline;
+            const matchesYear = filterYear === 'all' || pub.year === Number(filterYear);
+            const matchesQuartile = filterQuartile === 'all' || pub.quartile === filterQuartile;
+            const matchesWOS = filterWOS === 'all' || pub.wosranking === filterWOS;
+            const matchesPublisher = filterPublisher === 'all' || pub.publisher === filterPublisher;
+            return matchesSearch && matchesType && matchesDiscipline && matchesYear && matchesQuartile && matchesWOS && matchesPublisher;
+          }).length;
+          const totalPages = Math.ceil(filteredCount / publicationsItemsPerPage);
+
+          if (filteredCount === 0) return null;
+
+          return (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Show</span>
+                <select
+                  value={publicationsItemsPerPage}
+                  onChange={(e) => {
+                    setPublicationsItemsPerPage(Number(e.target.value));
+                    setPublicationsPage(1);
+                  }}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-sm text-gray-600">
+                  of {filteredCount} {filteredCount === 1 ? 'result' : 'results'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPublicationsPage(Math.max(1, publicationsPage - 1))}
+                  disabled={publicationsPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {publicationsPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPublicationsPage(Math.min(totalPages, publicationsPage + 1))}
+                  disabled={publicationsPage >= totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
@@ -3189,6 +3598,18 @@ const ResearchManagement = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => {
+                  setCheckType('journal');
+                  setInputValue('');
+                  setResults(null);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  checkType === 'journal' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Check Journal
+              </button>
+              <button
+                onClick={() => {
                   setCheckType('doi');
                   setInputValue('');
                   setResults(null);
@@ -3211,18 +3632,7 @@ const ResearchManagement = () => {
               >
                 Check by ISBN
               </button>
-              <button
-                onClick={() => {
-                  setCheckType('journal');
-                  setInputValue('');
-                  setResults(null);
-                }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  checkType === 'journal' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Check Journal
-              </button>
+              
             </div>
 
             <div className="flex gap-3">
@@ -3319,12 +3729,12 @@ const ResearchManagement = () => {
                 Overview
               </button>
               <button
-                onClick={() => setActiveView('projects')}
+                onClick={() => setActiveView('pubcheck')}
                 className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  activeView === 'projects' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                  activeView === 'pubcheck' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Projects
+                Pub Check
               </button>
               <button
                 onClick={() => setActiveView('publications')}
@@ -3334,6 +3744,16 @@ const ResearchManagement = () => {
               >
                 Publications
               </button>
+              
+             
+               <button
+                onClick={() => setActiveView('projects')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  activeView === 'projects' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Projects
+              </button>
               <button
                 onClick={() => setActiveView('patents')}
                 className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
@@ -3341,14 +3761,6 @@ const ResearchManagement = () => {
                 }`}
               >
                 Patents
-              </button>
-              <button
-                onClick={() => setActiveView('pubcheck')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  activeView === 'pubcheck' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Pub Check
               </button>
             </div>
           </div>
@@ -3629,11 +4041,11 @@ const ResearchManagement = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Type *</label>
                     <select value={editingItem.type || 'Journal Article'} onChange={(e) => setEditingItem({...editingItem, type: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                      <option value="Journal Article">Journal Article</option>
-                      <option value="Conference Paper">Conference Paper</option>
-                      <option value="Book Chapter">Book Chapter</option>
+                      <option value="Journal Article">Journal</option>
+                      <option value="Conference Paper">Conference</option>
+                      <option value="Book Chapter">Chapter</option>
                       <option value="Book">Book</option>
-                      <option value="Review Article">Review Article</option>
+                      <option value="Review Article">Review</option>
                     </select>
                   </div>
                   <div>

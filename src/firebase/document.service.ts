@@ -566,16 +566,16 @@ export const documentService = {
           description: 'Research papers, proposals, grants / Nghiên cứu khoa học'
         },
         {
-          name: 'International / HTQT',
+          name: 'International / HTPT',
           icon: '🌐',
           color: '#10B981',
-          description: 'International cooperation documents / Hợp tác quốc tế'
+          description: 'International cooperation documents / Hợp tác phát triển'
         },
         {
-          name: 'Administrative / HTPT',
+          name: 'Administrative / HTQT',
           icon: '📋',
           color: '#06B6D4',
-          description: 'Administrative office documents / Hành chính phòng ban'
+          description: 'Administrative office documents / Hành chính quản trị'
         },
         {
           name: 'General / Chung',
