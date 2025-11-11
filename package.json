@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.8.11",
+    "dotenv": "^17.2.3",
     "epubjs": "^0.3.93",
     "firebase": "^12.5.0",
     "localforage": "^1.10.0",

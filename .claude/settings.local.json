@@ -11,7 +11,9 @@
       "Bash(npm install:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []

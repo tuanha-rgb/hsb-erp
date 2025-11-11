@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Briefcase, FileText, DollarSign, TrendingUp, Calendar, Building, Users,
   Search, Plus, Award, ChevronDown, Globe, Target, X, Loader, AlertCircle, Eye, Edit, Trash2, Quote, Filter,
-  BarChart3, List
+  BarChart3, List, AlertTriangle
 } from "lucide-react";
 import { getDisciplineColor, getStatusColor } from "./ResearchColors";
 import {
@@ -16,6 +16,7 @@ import { patentService, Patent } from "../firebase/patent.service";
 import { sampleUsers } from "../useraccounts";
 import { citationService } from "../services/citation.service";
 import { checkPublication, PubCheckResult, PubCheckRequest } from "../services/pub-check.service";
+import { checkPredatory, PredatoryCheckResult } from "../firebase/predatory.service";
 import { faculties } from "../acad/faculties";
 
 // Helper function to display shorter publication type labels
@@ -3387,6 +3388,7 @@ const ResearchManagement = () => {
     const [inputValue, setInputValue] = useState('');
     const [isChecking, setIsChecking] = useState(false);
     const [results, setResults] = useState<{ scopus: PubCheckResult | null; wos: PubCheckResult | null } | null>(null);
+    const [predatoryResult, setPredatoryResult] = useState<PredatoryCheckResult | null>(null);
 
     const handleCheck = async () => {
       if (!inputValue.trim()) {
@@ -3396,8 +3398,32 @@ const ResearchManagement = () => {
 
       setIsChecking(true);
       setResults(null);
+      setPredatoryResult(null);
 
       try {
+        // For journal checks, check predatory list FIRST
+        if (checkType === 'journal') {
+          const predatoryCheck = await checkPredatory(inputValue.trim(), undefined);
+          setPredatoryResult(predatoryCheck);
+
+          // If predatory, skip SCOPUS/WOS checks
+          if (predatoryCheck.isPredatory) {
+            setResults({
+              scopus: {
+                database: 'scopus',
+                found: false,
+                error: 'Predatory journal detected - SCOPUS/WOS check skipped'
+              },
+              wos: {
+                database: 'wos',
+                found: false,
+                error: 'Predatory journal detected - SCOPUS/WOS check skipped'
+              }
+            });
+            return;
+          }
+        }
+
         const request: PubCheckRequest = {};
 
         if (checkType === 'doi') {
@@ -3410,6 +3436,15 @@ const ResearchManagement = () => {
 
         const checkResults = await checkPublication(request);
         setResults(checkResults);
+
+        // For DOI/ISBN checks, check predatory list AFTER getting journal name
+        if (checkType !== 'journal') {
+          const journalName = checkResults.scopus?.journal || checkResults.wos?.journal;
+          if (journalName) {
+            const predatoryCheck = await checkPredatory(journalName, undefined);
+            setPredatoryResult(predatoryCheck);
+          }
+        }
       } catch (error) {
         console.error('Error checking publication:', error);
         alert('Error checking publication. Please try again.');
@@ -3603,6 +3638,7 @@ const ResearchManagement = () => {
                   setCheckType('journal');
                   setInputValue('');
                   setResults(null);
+                  setPredatoryResult(null);
                 }}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   checkType === 'journal' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -3615,6 +3651,7 @@ const ResearchManagement = () => {
                   setCheckType('doi');
                   setInputValue('');
                   setResults(null);
+                  setPredatoryResult(null);
                 }}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   checkType === 'doi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -3627,6 +3664,7 @@ const ResearchManagement = () => {
                   setCheckType('isbn');
                   setInputValue('');
                   setResults(null);
+                  setPredatoryResult(null);
                 }}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   checkType === 'isbn' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -3695,6 +3733,35 @@ const ResearchManagement = () => {
           {results && (
             <div className="mt-8">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Verification Results</h3>
+
+              {/* Predatory Warning Banner */}
+              {predatoryResult && predatoryResult.isPredatory && (
+                <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-bold text-red-900 mb-1">⚠️ CAUTION</h4>
+                      <p className="text-sm font-semibold text-red-800 mb-2">
+                        Be careful - This {predatoryResult.matchedIn === 'both' ? 'journal and publisher are' : predatoryResult.matchedIn === 'journal' ? 'journal is' : 'publisher is'} in Beall's List or Predatory Journal List of 2025
+                      </p>
+                      <div className="text-sm text-red-700 space-y-1">
+                        {predatoryResult.journalMatch && (
+                          <p>• <span className="font-semibold">Journal:</span> {predatoryResult.journalMatch}</p>
+                        )}
+                        {predatoryResult.publisherMatch && (
+                          <p>• <span className="font-semibold">Publisher:</span> {predatoryResult.publisherMatch}</p>
+                        )}
+                      </div>
+                      <p className="text-xs text-red-600 mt-3">
+                        Publications in predatory journals may not meet academic quality standards and could harm your research reputation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {results.scopus && renderResultCard(results.scopus, 'SCOPUS')}
                 {results.wos && renderResultCard(results.wos, 'Web of Science')}
