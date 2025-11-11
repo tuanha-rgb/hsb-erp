@@ -84,6 +84,13 @@ const ResearchManagement = () => {
   const [firstAuthorEmail, setFirstAuthorEmail] = useState('');
   const [correspondingAuthorEmail, setCorrespondingAuthorEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Author roles management
+  type AuthorWithRole = {
+    name: string;
+    role: 'first' | 'corresponding' | 'first+corresponding' | 'other';
+  };
+  const [authorsWithRoles, setAuthorsWithRoles] = useState<AuthorWithRole[]>([]);
   const [manualFormData, setManualFormData] = useState<Partial<Publication>>({
     title: '',
     authors: [],
@@ -283,6 +290,16 @@ const ResearchManagement = () => {
     setFetchedPublication(null);
 
     try {
+      // Check for duplicate DOI first
+      if (identifierType === 'doi') {
+        const doiExists = await publicationService.checkDOIExists(identifier.trim());
+        if (doiExists) {
+          setError('This DOI already exists in the database. Each DOI can only be added once.');
+          setIsLoadingPublication(false);
+          return;
+        }
+      }
+
       let pubData: Partial<Publication> | null = null;
 
       if (identifierType === 'doi') {
@@ -294,6 +311,15 @@ const ResearchManagement = () => {
       if (pubData) {
         setFetchedPublication(pubData);
         setFormData({ ...formData, ...pubData });
+
+        // Initialize authors with roles - all start as 'other'
+        if (pubData.authors && pubData.authors.length > 0) {
+          const initialAuthorsWithRoles: AuthorWithRole[] = pubData.authors.map((authorName) => ({
+            name: authorName,
+            role: 'other' as const
+          }));
+          setAuthorsWithRoles(initialAuthorsWithRoles);
+        }
       } else {
         setError(`Could not find publication with ${identifierType.toUpperCase()}: ${identifier}`);
       }
@@ -302,6 +328,92 @@ const ResearchManagement = () => {
     } finally {
       setIsLoadingPublication(false);
     }
+  };
+
+  // Handle author role change
+  const handleAuthorRoleChange = (authorName: string, newRole: 'first' | 'corresponding' | 'first+corresponding' | 'other') => {
+    setAuthorsWithRoles(prevAuthors => {
+      // If setting to first+corresponding, clear any first or corresponding roles from others
+      if (newRole === 'first+corresponding') {
+        return prevAuthors.map(author => {
+          if (author.name === authorName) {
+            return { ...author, role: newRole };
+          } else if (author.role === 'first' || author.role === 'corresponding' || author.role === 'first+corresponding') {
+            // Remove conflicting roles from other authors
+            return { ...author, role: 'other' as const };
+          }
+          return author;
+        });
+      }
+      // If setting to first, ensure no other author has first or first+corresponding
+      else if (newRole === 'first') {
+        return prevAuthors.map(author => {
+          if (author.name === authorName) {
+            return { ...author, role: newRole };
+          } else if (author.role === 'first' || author.role === 'first+corresponding') {
+            return { ...author, role: 'other' as const };
+          }
+          return author;
+        });
+      }
+      // If setting to corresponding, ensure no other author has corresponding or first+corresponding
+      else if (newRole === 'corresponding') {
+        return prevAuthors.map(author => {
+          if (author.name === authorName) {
+            return { ...author, role: newRole };
+          } else if (author.role === 'corresponding' || author.role === 'first+corresponding') {
+            return { ...author, role: 'other' as const };
+          }
+          return author;
+        });
+      }
+      // Setting to 'other' - just update
+      else {
+        return prevAuthors.map(author =>
+          author.name === authorName ? { ...author, role: newRole } : author
+        );
+      }
+    });
+  };
+
+  // Get reordered authors list based on roles
+  const getOrderedAuthors = (): { authors: string[]; firstAuthor?: string; correspondingAuthor?: string } => {
+    const firstAndCorresponding = authorsWithRoles.find(a => a.role === 'first+corresponding');
+    const firstAuthor = authorsWithRoles.find(a => a.role === 'first');
+    const correspondingAuthor = authorsWithRoles.find(a => a.role === 'corresponding');
+    const otherAuthors = authorsWithRoles.filter(a => a.role === 'other');
+
+    // Build ordered list: first+corresponding (with *) OR first, then corresponding (with *), then others
+    const orderedList: string[] = [];
+
+    // If someone is both first and corresponding
+    if (firstAndCorresponding) {
+      orderedList.push(`${firstAndCorresponding.name}*`);
+      orderedList.push(...otherAuthors.map(a => a.name));
+
+      return {
+        authors: orderedList,
+        firstAuthor: firstAndCorresponding.name,
+        correspondingAuthor: firstAndCorresponding.name
+      };
+    }
+
+    // Otherwise, separate first and corresponding
+    if (firstAuthor) {
+      orderedList.push(firstAuthor.name);
+    }
+
+    if (correspondingAuthor) {
+      orderedList.push(`${correspondingAuthor.name}*`);
+    }
+
+    orderedList.push(...otherAuthors.map(a => a.name));
+
+    return {
+      authors: orderedList,
+      firstAuthor: firstAuthor?.name,
+      correspondingAuthor: correspondingAuthor?.name
+    };
   };
 
   // Validate if user can add this publication
@@ -316,26 +428,20 @@ const ResearchManagement = () => {
       return { allowed: true };
     }
 
-    // If user is other author, check if first and corresponding authors are outsiders
+    // If user is other author, verify first and corresponding authors are assigned
     if (authorRole === 'other') {
-      if (!firstAuthorEmail || !correspondingAuthorEmail) {
+      const hasFirstAuthor = authorsWithRoles.some(a => a.role === 'first' || a.role === 'first+corresponding');
+      const hasCorrespondingAuthor = authorsWithRoles.some(a => a.role === 'corresponding' || a.role === 'first+corresponding');
+
+      if (!hasFirstAuthor || !hasCorrespondingAuthor) {
         return {
           allowed: false,
-          reason: 'Please provide first author and corresponding author emails'
+          reason: 'Please assign First Author and Corresponding Author roles before submitting.'
         };
       }
 
-      const firstIsOutsider = !isHSBStaff(firstAuthorEmail);
-      const correspondingIsOutsider = !isHSBStaff(correspondingAuthorEmail);
-
-      if (firstIsOutsider && correspondingIsOutsider) {
-        return { allowed: true };
-      } else {
-        return {
-          allowed: false,
-          reason: 'Only first authors or corresponding authors can add this publication. If both are outsiders, other HSB authors can add it.'
-        };
-      }
+      // Allow co-authors to add if roles are assigned
+      return { allowed: true };
     }
 
     return { allowed: false, reason: 'Invalid author role' };
@@ -358,9 +464,14 @@ const ResearchManagement = () => {
     setError('');
 
     try {
+      // Get properly ordered authors with roles
+      const orderedAuthorsData = getOrderedAuthors();
+
       const publicationToSubmit: Omit<Publication, 'id' | 'createdAt' | 'updatedAt'> = {
         title: fetchedPublication.title || '',
-        authors: fetchedPublication.authors || [],
+        authors: orderedAuthorsData.authors,
+        firstAuthor: orderedAuthorsData.firstAuthor,
+        correspondingAuthor: orderedAuthorsData.correspondingAuthor,
         type: fetchedPublication.type || 'Journal Article',
         journal: fetchedPublication.journal || '',
         publisher: fetchedPublication.publisher || null,
@@ -419,6 +530,7 @@ const ResearchManagement = () => {
     setCorrespondingAuthorEmail('');
     setError('');
     setEntryMode('auto');
+    setAuthorsWithRoles([]);
     setFormData({
       impactFactor: null,
       quartile: 'N/A',
@@ -587,36 +699,12 @@ const ResearchManagement = () => {
                 </select>
               </div>
 
-              {/* Show additional fields if user is "other" author */}
+              {/* Show note if user is "other" author */}
               {authorRole === 'other' && (
-                <div className="space-y-3 pt-3 border-t border-yellow-300">
+                <div className="pt-3 border-t border-yellow-300">
                   <p className="text-sm text-gray-600 italic">
                     As a co-author, you can only add this publication if both the first author and corresponding author are outsiders (not HSB staff).
                   </p>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      First Author Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={firstAuthorEmail}
-                      onChange={(e) => setFirstAuthorEmail(e.target.value)}
-                      placeholder="first.author@example.com"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Corresponding Author Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={correspondingAuthorEmail}
-                      onChange={(e) => setCorrespondingAuthorEmail(e.target.value)}
-                      placeholder="corresponding.author@example.com"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
                 </div>
               )}
             </div>
@@ -632,10 +720,50 @@ const ResearchManagement = () => {
                     <p className="text-sm text-gray-900">{fetchedPublication.title}</p>
                   </div>
 
+                  {/* Author Role Assignment Table */}
                   <div>
-                    <p className="text-xs font-semibold text-gray-600">Authors</p>
-                    <p className="text-sm text-gray-900">{fetchedPublication.authors?.join(', ')}</p>
+                    <p className="text-xs font-semibold text-gray-600 mb-2">Authors - Assign Roles</p>
+                    <div className="border border-gray-300 rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Author Name</th>
+                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Role</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {authorsWithRoles.map((author, index) => (
+                            <tr key={index} className="border-t border-gray-200">
+                              <td className="px-3 py-2 text-gray-900">{author.name}</td>
+                              <td className="px-3 py-2">
+                                <select
+                                  value={author.role}
+                                  onChange={(e) => handleAuthorRoleChange(author.name, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                  <option value="other">Other</option>
+                                  <option value="first">First Author</option>
+                                  <option value="corresponding">Corresponding Author</option>
+                                  <option value="first+corresponding">First Author + Corresponding Author</option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 italic">
+                      Note: Corresponding author (and first+corresponding author) will have * next to their name in the final list
+                    </p>
                   </div>
+
+                  {/* Ordered Authors Preview */}
+                  {authorsWithRoles.length > 0 && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                      <p className="text-xs font-semibold text-blue-700 mb-2">Authors (Ordered: First* (if also corresponding) → First → Corresponding* → Others)</p>
+                      <p className="text-sm text-gray-900">{getOrderedAuthors().authors.join(', ')}</p>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-3 gap-4">
                     <div>
@@ -697,8 +825,8 @@ const ResearchManagement = () => {
                       <option value="SCIE">SCIE</option>
                       <option value="AHCI">AHCI</option>
                       <option value="ESCI">ESCI</option>
-                      <option value="Scopus-indexed">Scopus-indexed</option>
                       <option value="N/A">N/A</option>
+
                     </select>
                   </div>
                   <div>
@@ -826,15 +954,91 @@ const ResearchManagement = () => {
                     />
                   </div>
 
-                  {/* Authors */}
+                  {/* Authors - Role Assignment Table */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Authors (comma-separated) *</label>
-                    <input
-                      type="text"
-                      value={manualFormData.authors?.join(', ') || ''}
-                      onChange={(e) => setManualFormData({...manualFormData, authors: e.target.value.split(',').map(a => a.trim())})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-semibold text-gray-700">Authors - Assign Roles *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthorsWithRoles([...authorsWithRoles, { name: '', role: 'other' }]);
+                        }}
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        <Plus size={16} />
+                        Add Author
+                      </button>
+                    </div>
+
+                    {authorsWithRoles.length > 0 ? (
+                      <div className="border border-gray-300 rounded-lg overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="px-3 py-2 text-left font-semibold text-gray-700">Author Name</th>
+                              <th className="px-3 py-2 text-left font-semibold text-gray-700">Role</th>
+                              <th className="px-3 py-2 w-16"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {authorsWithRoles.map((author, index) => (
+                              <tr key={index} className="border-t border-gray-200">
+                                <td className="px-3 py-2">
+                                  <input
+                                    type="text"
+                                    value={author.name}
+                                    onChange={(e) => {
+                                      const updated = [...authorsWithRoles];
+                                      updated[index].name = e.target.value;
+                                      setAuthorsWithRoles(updated);
+                                    }}
+                                    placeholder="Enter author name"
+                                    className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                </td>
+                                <td className="px-3 py-2">
+                                  <select
+                                    value={author.role}
+                                    onChange={(e) => handleAuthorRoleChange(author.name, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    <option value="other">Other</option>
+                                    <option value="first">First Author</option>
+                                    <option value="corresponding">Corresponding Author</option>
+                                    <option value="first+corresponding">First Author + Corresponding Author</option>
+                                  </select>
+                                </td>
+                                <td className="px-3 py-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setAuthorsWithRoles(authorsWithRoles.filter((_, i) => i !== index));
+                                    }}
+                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">Click "Add Author" to add authors to your publication</p>
+                    )}
+
+                    <p className="text-xs text-gray-500 mt-2 italic">
+                      Note: Corresponding author (and first+corresponding author) will have * next to their name
+                    </p>
+
+                    {/* Ordered Authors Preview */}
+                    {authorsWithRoles.length > 0 && (
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                        <p className="text-xs font-semibold text-blue-700 mb-1">Preview (Ordered):</p>
+                        <p className="text-sm text-gray-900">{getOrderedAuthors().authors.join(', ')}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Type and Year */}
@@ -908,50 +1112,6 @@ const ResearchManagement = () => {
                     </div>
                   </div>
 
-                  {/* Impact Factor, Quartile, WoS Ranking */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Impact Factor</label>
-                      <input
-                        type="number"
-                        step="0.001"
-                        value={manualFormData.impactFactor || ''}
-                        onChange={(e) => setManualFormData({...manualFormData, impactFactor: e.target.value ? parseFloat(e.target.value) : null})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Quartile</label>
-                      <select
-                        value={manualFormData.quartile || 'N/A'}
-                        onChange={(e) => setManualFormData({...manualFormData, quartile: e.target.value as any})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="Q1">Q1</option>
-                        <option value="Q2">Q2</option>
-                        <option value="Q3">Q3</option>
-                        <option value="Q4">Q4</option>
-                        <option value="Scopus-indexed">Scopus-indexed</option>
-                        <option value="N/A">N/A</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">WoS Ranking</label>
-                      <select
-                        value={manualFormData.wosranking || 'N/A'}
-                        onChange={(e) => setManualFormData({...manualFormData, wosranking: e.target.value as any})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="SSCI">SSCI</option>
-                        <option value="SCIE">SCIE</option>
-                        <option value="AHCI">AHCI</option>
-                        <option value="ESCI">ESCI</option>
-                        <option value="Scopus-indexed">Scopus-indexed</option>
-                        <option value="N/A">N/A</option>
-                      </select>
-                    </div>
-                  </div>
-
                   {/* Citations, Status, Discipline */}
                   <div className="grid grid-cols-3 gap-4">
                     <div>
@@ -1000,19 +1160,7 @@ const ResearchManagement = () => {
                     </div>
                   </div>
 
-                  {/* Scopus Indexed */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Scopus Indexed</label>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={manualFormData.scopusIndexed || false}
-                        onChange={(e) => setManualFormData({...manualFormData, scopusIndexed: e.target.checked})}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <label className="ml-2 text-sm text-gray-600">Indexed in Scopus</label>
-                    </div>
-                  </div>
+                
 
                   {/* Volume, Issue, Pages */}
                   <div className="grid grid-cols-3 gap-4">
@@ -1077,8 +1225,15 @@ const ResearchManagement = () => {
                   </button>
                   <button
                     onClick={async () => {
-                      if (!manualFormData.title || !manualFormData.authors?.length || !manualFormData.journal) {
+                      if (!manualFormData.title || authorsWithRoles.length === 0 || !manualFormData.journal) {
                         setError('Please fill in all required fields (Title, Authors, Journal)');
+                        return;
+                      }
+
+                      // Check if all authors have names
+                      const hasEmptyAuthors = authorsWithRoles.some(a => !a.name.trim());
+                      if (hasEmptyAuthors) {
+                        setError('Please provide names for all authors');
                         return;
                       }
 
@@ -1086,6 +1241,9 @@ const ResearchManagement = () => {
                       setError('');
 
                       try {
+                        // Get ordered authors with roles
+                        const orderedAuthorsData = getOrderedAuthors();
+
                         let pdfUrl = '';
                         if (publicationPdfFile) {
                           const timestamp = Date.now();
@@ -1094,6 +1252,9 @@ const ResearchManagement = () => {
 
                         await publicationService.addPublication({
                           ...manualFormData,
+                          authors: orderedAuthorsData.authors,
+                          firstAuthor: orderedAuthorsData.firstAuthor,
+                          correspondingAuthor: orderedAuthorsData.correspondingAuthor,
                           pdfUrl: pdfUrl || undefined
                         } as any);
 
@@ -3018,6 +3179,40 @@ const ResearchManagement = () => {
                           <button
                             onClick={() => {
                               setEditingItem(pub);
+
+                              // Parse existing authors and set up roles
+                              if (pub.authors && pub.authors.length > 0) {
+                                const parsedAuthors: AuthorWithRole[] = pub.authors.map((authorName: string) => {
+                                  // Remove * if present (corresponding author marker)
+                                  const cleanName = authorName.replace('*', '').trim();
+
+                                  // Determine role based on position and markers
+                                  let role: 'first' | 'corresponding' | 'first+corresponding' | 'other' = 'other';
+
+                                  // Check if this is first+corresponding (both roles)
+                                  if (pub.firstAuthor === cleanName && pub.correspondingAuthor === cleanName) {
+                                    role = 'first+corresponding';
+                                  }
+                                  // Check if first author
+                                  else if (pub.firstAuthor === cleanName) {
+                                    role = 'first';
+                                  }
+                                  // Check if corresponding (has * in original or matches correspondingAuthor)
+                                  else if (authorName.includes('*') || pub.correspondingAuthor === cleanName) {
+                                    role = 'corresponding';
+                                  }
+
+                                  return {
+                                    name: cleanName,
+                                    role
+                                  };
+                                });
+
+                                setAuthorsWithRoles(parsedAuthors);
+                              } else {
+                                setAuthorsWithRoles([]);
+                              }
+
                               setShowEditPublicationModal(true);
                             }}
                             className="p-1 text-orange-600 hover:bg-orange-50 rounded"
@@ -3779,7 +3974,7 @@ const ResearchManagement = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-3">
       <div className="max-w mx-auto space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-3">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Research Management</h1>
             <p className="text-sm text-gray-500 mt-1">Manage faculty projects, publications, and research output</p>
@@ -4077,14 +4272,20 @@ const ResearchManagement = () => {
 
         {/* Edit Publication Modal */}
         {showEditPublicationModal && editingItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowEditPublicationModal(false)}>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => {
+            setShowEditPublicationModal(false);
+            setAuthorsWithRoles([]);
+          }}>
             <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="h-20 bg-gradient-to-br from-green-500 to-green-700 p-6 flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Edit Publication</h2>
                   <p className="text-green-100 text-sm mt-1">Update publication details</p>
                 </div>
-                <button onClick={() => setShowEditPublicationModal(false)} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
+                <button onClick={() => {
+                  setShowEditPublicationModal(false);
+                  setAuthorsWithRoles([]);
+                }} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
                   <X size={24} />
                 </button>
               </div>
@@ -4096,12 +4297,91 @@ const ResearchManagement = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
 
-                {/* Authors */}
+                {/* Authors - Role Assignment Table */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Authors (comma-separated) *</label>
-                  <input type="text" value={editingItem.authors?.join(', ') || ''}
-                    onChange={(e) => setEditingItem({...editingItem, authors: e.target.value.split(',').map(a => a.trim())})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-semibold text-gray-700">Authors - Assign Roles *</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthorsWithRoles([...authorsWithRoles, { name: '', role: 'other' }]);
+                      }}
+                      className="flex items-center gap-1 px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      <Plus size={16} />
+                      Add Author
+                    </button>
+                  </div>
+
+                  {authorsWithRoles.length > 0 ? (
+                    <div className="border border-gray-300 rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Author Name</th>
+                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Role</th>
+                            <th className="px-3 py-2 w-16"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {authorsWithRoles.map((author, index) => (
+                            <tr key={index} className="border-t border-gray-200">
+                              <td className="px-3 py-2">
+                                <input
+                                  type="text"
+                                  value={author.name}
+                                  onChange={(e) => {
+                                    const updated = [...authorsWithRoles];
+                                    updated[index].name = e.target.value;
+                                    setAuthorsWithRoles(updated);
+                                  }}
+                                  placeholder="Enter author name"
+                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                />
+                              </td>
+                              <td className="px-3 py-2">
+                                <select
+                                  value={author.role}
+                                  onChange={(e) => handleAuthorRoleChange(author.name, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
+                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                >
+                                  <option value="other">Other</option>
+                                  <option value="first">First Author</option>
+                                  <option value="corresponding">Corresponding Author</option>
+                                  <option value="first+corresponding">First Author + Corresponding Author</option>
+                                </select>
+                              </td>
+                              <td className="px-3 py-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAuthorsWithRoles(authorsWithRoles.filter((_, i) => i !== index));
+                                  }}
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">Click "Add Author" to add authors to your publication</p>
+                  )}
+
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Note: Corresponding author (and first+corresponding author) will have * next to their name
+                  </p>
+
+                  {/* Ordered Authors Preview */}
+                  {authorsWithRoles.length > 0 && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                      <p className="text-xs font-semibold text-blue-700 mb-1">Preview (Ordered):</p>
+                      <p className="text-sm text-gray-900">{getOrderedAuthors().authors.join(', ')}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Type and Year */}
@@ -4222,19 +4502,7 @@ const ResearchManagement = () => {
                   </div>
                 </div>
 
-                {/* Scopus Indexed */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Scopus Indexed</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={editingItem.scopusIndexed || false}
-                      onChange={(e) => setEditingItem({...editingItem, scopusIndexed: e.target.checked})}
-                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                    />
-                    <label className="ml-2 text-sm text-gray-600">Indexed in Scopus</label>
-                  </div>
-                </div>
+              
 
                 {/* Volume, Issue, Pages */}
                 <div className="grid grid-cols-3 gap-4">
@@ -4291,17 +4559,43 @@ const ResearchManagement = () => {
                   <button onClick={() => {
                     setShowEditPublicationModal(false);
                     setPublicationPdfFile(null);
+                    setAuthorsWithRoles([]);
                   }} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium">Cancel</button>
                   <button onClick={async () => {
                     try {
+                      // Validate authors
+                      if (authorsWithRoles.length === 0) {
+                        alert('Please add at least one author');
+                        return;
+                      }
+
+                      const hasEmptyAuthors = authorsWithRoles.some(a => !a.name.trim());
+                      if (hasEmptyAuthors) {
+                        alert('Please provide names for all authors');
+                        return;
+                      }
+
+                      // Get ordered authors with roles
+                      const orderedAuthorsData = getOrderedAuthors();
+
+                      // Prepare updated publication data
+                      const updatedData = {
+                        ...editingItem,
+                        authors: orderedAuthorsData.authors,
+                        firstAuthor: orderedAuthorsData.firstAuthor,
+                        correspondingAuthor: orderedAuthorsData.correspondingAuthor
+                      };
+
                       if (publicationPdfFile) {
                         const pdfUrl = await publicationService.uploadJournalPdf(publicationPdfFile, editingItem.id);
-                        await publicationService.updatePublication(editingItem.id, { ...editingItem, pdfUrl });
+                        await publicationService.updatePublication(editingItem.id, { ...updatedData, pdfUrl });
                       } else {
-                        await publicationService.updatePublication(editingItem.id, editingItem);
+                        await publicationService.updatePublication(editingItem.id, updatedData);
                       }
+
                       setShowEditPublicationModal(false);
                       setPublicationPdfFile(null);
+                      setAuthorsWithRoles([]);
                       loadPublications();
                       alert('Publication updated successfully!');
                     } catch (err) {

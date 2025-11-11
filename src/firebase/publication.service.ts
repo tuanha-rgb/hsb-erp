@@ -16,6 +16,8 @@ export interface Publication {
   id?: string;
   title: string;
   authors: string[];
+  firstAuthor?: string;
+  correspondingAuthor?: string;
   type: 'Journal Article' | 'Conference Paper' | 'Book Chapter' | 'Book' | 'Review Article';
   journal: string;
   publisher?: string | null;
@@ -56,22 +58,22 @@ export async function fetchPublicationByDOI(doi: string): Promise<Partial<Public
     
     if (!work) return null;
     
-    // Extract authors
-    const authors = work.author?.map((a: any) => 
+    // Extract authors with full names (in original order from DOI)
+    const authors = work.author?.map((a: any) =>
       `${a.given || ''} ${a.family || ''}`.trim()
     ) || [];
-    
+
     // Determine publication type
     let type: Publication['type'] = 'Journal Article';
     if (work.type === 'book-chapter') type = 'Book Chapter';
     else if (work.type === 'book') type = 'Book';
     else if (work.type === 'proceedings-article') type = 'Conference Paper';
-    
+
     // Extract year
-    const year = work.published?.['date-parts']?.[0]?.[0] || 
-                 work.created?.['date-parts']?.[0]?.[0] || 
+    const year = work.published?.['date-parts']?.[0]?.[0] ||
+                 work.created?.['date-parts']?.[0]?.[0] ||
                  new Date().getFullYear();
-    
+
     return {
       title: work.title?.[0] || '',
       authors,
@@ -226,5 +228,13 @@ export const publicationService = {
       citations,
       updatedAt: Timestamp.now()
     });
+  },
+
+  // Check if DOI already exists
+  async checkDOIExists(doi: string): Promise<boolean> {
+    if (!doi) return false;
+    const q = query(collection(db, PUBLICATIONS_COLLECTION), where('doi', '==', doi));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
   }
 };

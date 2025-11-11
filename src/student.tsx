@@ -12,6 +12,7 @@ from 'lucide-react';
 import Documents from "./documents/documenthandbook";
 import LibraryViewer from "./library/libraryviewer";
 import PollSystem from './PollSystem';
+import ProjectsTab from './projects/ProjectsTab';
 
 type UserRole = 'student' | 'staff' | 'management';
 type User = { id: string; role: UserRole; name?: string; email?: string };
@@ -6553,6 +6554,7 @@ return (
         { id: 'canvas', icon: BookOpen, label: 'Canvas/LMS' },
         { id: 'onestop', icon: Bell, label: 'One-Stop Service' },
         { id: 'documents', icon: Notebook, label: 'Documents' },
+        { id: 'projects', icon: Briefcase, label: 'Projects' },
         {id: 'polling', icon: Vote, label: 'Poll/Vote'},
         { id: 'scholarship', icon: Gem, label: 'Scholarship' },
         { id: 'matriculation', icon: User, label: 'Identity' },
@@ -6626,10 +6628,11 @@ return (
           )}
           {activePage === 'onestop' && <OneStop />}
           {activePage === 'documents' && <Documents />}
+          {activePage === 'projects' && <ProjectsTab userId={mockStudent.id} userName="Student User" />}
           {activePage === 'polling' && (
-            <PollSystem 
-              userId={mockStudent.id} 
-              userLevel={mockStudent.role} 
+            <PollSystem
+              userId={mockStudent.id}
+              userLevel={mockStudent.role}
             />
           )}
           {activePage === 'matriculation' && <Matriculation />}
