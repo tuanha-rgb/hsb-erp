@@ -1416,14 +1416,14 @@ const ResearchManagement = () => {
     <div className="space-y-3">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-between mb-3">
+          <div className="h-12 flex items-center justify-center mb-3">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Briefcase className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Total Projects</p>
-          <p className="text-3xl font-bold text-gray-900">{projects.length}</p>
-          <p className="text-xs text-gray-600 mt-2">{projects.filter(p => p.status === 'Active').length} active</p>
+          <p className="text-sm text-gray-500 mb-1 text-center">Total Projects</p>
+          <p className="text-3xl font-bold text-gray-900 text-center">{projects.length}</p>
+          <p className="text-xs text-gray-600 mt-2 text-center">{projects.filter(p => p.status === 'Active').length} active</p>
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -1466,38 +1466,38 @@ const ResearchManagement = () => {
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-between mb-3">
+          <div className="h-12 flex items-center justify-center mb-3">
             <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6 text-indigo-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Total Patents</p>
-          <p className="text-3xl font-bold text-gray-900">{patents.length}</p>
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="text-sm text-gray-500 mb-1 text-center">Total Patents</p>
+          <p className="text-3xl font-bold text-gray-900 text-center">{patents.length}</p>
+          <p className="text-xs text-gray-600 mt-2 text-center">
             {patents.filter(p => p.status === 'Granted').length} granted
           </p>
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-between mb-3">
+          <div className="h-12 flex items-center justify-center mb-3">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <DollarSign className="w-6 h-6 text-purple-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Total Funding</p>
-          <p className="text-3xl font-bold text-gray-900">{formattedFunding}</p>
-          <p className="text-xs text-gray-600 mt-2">Active grants</p>
+          <p className="text-sm text-gray-500 mb-1 text-center">Total Funding</p>
+          <p className="text-3xl font-bold text-gray-900 text-center">{formattedFunding}</p>
+          <p className="text-xs text-gray-600 mt-2 text-center">Active grants</p>
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="h-12 flex items-center justify-between mb-3">
+          <div className="h-12 flex items-center justify-center mb-3">
             <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <TrendingUp className="w-6 h-6 text-teal-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mb-1">Avg Citations</p>
-          <p className="text-3xl font-bold text-gray-900">{avgCitations}</p>
-          <p className="text-xs text-gray-600 mt-2">Per publication</p>
+          <p className="text-sm text-gray-500 mb-1 text-center">Avg Citations</p>
+          <p className="text-3xl font-bold text-gray-900 text-center">{avgCitations}</p>
+          <p className="text-xs text-gray-600 mt-2 text-center">Per publication</p>
         </div>
       </div>
 
@@ -1602,13 +1602,15 @@ const ResearchManagement = () => {
             <div className="space-y-8">
               {/* Trendline Visualization */}
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-4">Publication Trendline</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-4">Publication Trendline (Last 5 Years)</h4>
                 {(() => {
+                  const currentYear = new Date().getFullYear();
+                  const last5Years = [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4];
                   const yearCounts: { [key: number]: number } = {};
                   const yearBreakdown: { [key: number]: { scopus: number, wos: number, unique: number } } = {};
 
                   publications.forEach(p => {
-                    if (p.year) {
+                    if (p.year && last5Years.includes(p.year)) {
                       yearCounts[p.year] = (yearCounts[p.year] || 0) + 1;
 
                       if (!yearBreakdown[p.year]) {
@@ -3587,7 +3589,7 @@ const ResearchManagement = () => {
 
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Publication Verification</h2>
             <p className="text-sm text-gray-600">Check if publications or journals are indexed in SCOPUS and Web of Science databases</p>
@@ -3661,12 +3663,12 @@ const ResearchManagement = () => {
                 {isChecking ? (
                   <>
                     <Loader className="animate-spin" size={18} />
-                    Checking...
+                    ...
                   </>
                 ) : (
                   <>
                     <Search size={18} />
-                    Check
+                    
                   </>
                 )}
               </button>

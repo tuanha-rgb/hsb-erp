@@ -269,19 +269,15 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
   const renderProductCard = (product: Product) => (
     <div
       key={product.id}
-      className="w-64 h-128 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all"
+      className="w-64 h-96 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all"
     >
-      <div className="w-64 h-56">
+      <div className="w-36 h-36 items-center justify-center relative mx-auto">
         <img
           src={product.image}
           alt={product.name}
-          className="w-64 h-48 object-cover"
+          className="w-36 h-36 object-cover"
         />
-        <div className="absolute top-2 right-2">
-          <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
-            {product.itemCode}
-          </span>
-        </div>
+     
         {product.stock <= product.reorderLevel && (
           <div className="absolute top-2 left-2">
             <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
@@ -327,7 +323,7 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
   );
 
   const renderBrowse = () => (
-  <div className="space-y-6">
+  <div className="space-y-3">
     {/* Featured Carousel */}
     {renderFeaturedCarousel()}
 
@@ -490,7 +486,7 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
           {/* Order Summary */}
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h3>
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-3">
               {cart.map(item => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span className="text-gray-600">
@@ -673,7 +669,7 @@ export default function HSBShopViewer({ userId = 'guest', userName = 'Guest User
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w mx-auto px-6 py-4">
+        <div className="max-w mx-auto p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
