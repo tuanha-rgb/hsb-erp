@@ -17,7 +17,8 @@
       "Bash(firebase functions:log:*)",
       "Bash(/dev/null)",
       "Bash(dir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
