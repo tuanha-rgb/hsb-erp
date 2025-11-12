@@ -189,10 +189,10 @@ const FloatingCarousel: React.FC<{
           )}
         </div>
 
-        <div className="relative">
+        <div className="relative hidden md:block">
           {slide.image.startsWith('http') || slide.image.startsWith('https') || slide.image.startsWith('/') ? (
-            <img 
-              src={slide.image} 
+            <img
+              src={slide.image}
               alt={slide.title}
               className="w-64 h-96 object-cover rounded-lg shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity"
             />
@@ -1291,7 +1291,7 @@ const clearAllFilters = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-3">
   <div className="flex-1 relative">
     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
@@ -1304,43 +1304,45 @@ const clearAllFilters = () => {
       </button>
     )}
   </div>
-  
-  <select 
-    value={itemsPerPage} 
-    onChange={(e) => setItemsPerPage(Number(e.target.value))}
-    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-  >
-    <option value={10}>10 per page </option>
-    <option value={20}>20 per page </option>
-    <option value={50}>50 per page </option>
-  </select>
-  
-  <button onClick={() => setShowFilters(!showFilters)}
-    className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
-      showFilters ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
-    }`}>
-    <Filter size={18} />Filters
-  </button>
+
+  <div className="flex gap-3">
+    <select
+      value={itemsPerPage}
+      onChange={(e) => setItemsPerPage(Number(e.target.value))}
+      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+    >
+      <option value={10}>10 per page </option>
+      <option value={20}>20 per page </option>
+      <option value={50}>50 per page </option>
+    </select>
+
+    <button onClick={() => setShowFilters(!showFilters)}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg border whitespace-nowrap ${
+        showFilters ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
+      }`}>
+      <Filter size={18} /><span className="hidden sm:inline">Filters</span>
+    </button>
+  </div>
 </div>
 
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
   <button onClick={() => setContentType('books')}
-    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base ${
       contentType === 'books' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
     }`}>
-    <Book size={18} />Books ({firebaseBooks.length})
+    <Book size={18} /><span className="hidden xs:inline">Books</span> ({firebaseBooks.length})
   </button>
   <button onClick={() => setContentType('theses')}
-    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base ${
       contentType === 'theses' ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
     }`}>
-    <BookOpen size={18} />Theses ({firebaseTheses.length})
+    <BookOpen size={18} /><span className="hidden xs:inline">Theses</span> ({firebaseTheses.length})
   </button>
   <button onClick={() => setContentType('journals')}
-    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base ${
       contentType === 'journals' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
     }`}>
-    <FileText size={18} />Journals ({firebaseJournals.length})
+    <FileText size={18} /><span className="hidden xs:inline">Journals</span> ({firebaseJournals.length})
   </button>
 
   {hasActiveFilters && (
@@ -1363,9 +1365,9 @@ const clearAllFilters = () => {
           <X size={14} className="cursor-pointer" onClick={() => setSelectedPublisher('all')} />
         </span>
       )}
-      
+
       <button onClick={clearAllFilters}
-        className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+        className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap">
         Clear All Filters
       </button>
     </>
@@ -1709,37 +1711,45 @@ const clearAllFilters = () => {
         )}
 
         {totalPages > 1 && (
-          <div className="mt-3 flex justify-between items-center">
-            <div className="text-sm text-gray-600">
+          <div className="mt-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="text-sm text-gray-600 hidden sm:block">
               Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredContent.length)} of {filteredContent.length}
             </div>
             <div className="flex gap-2">
+              {/* Desktop: Show all controls */}
               <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}
-                className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">First</button>
+                className="hidden md:block px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">First</button>
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
                 className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
                 <ChevronLeft size={16} />
               </button>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum = i + 1;
-                if (totalPages > 5) {
-                  if (currentPage <= 3) pageNum = i + 1;
-                  else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                  else pageNum = currentPage - 2 + i;
-                }
-                return (
-                  <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1.5 text-sm border rounded ${
-                      currentPage === pageNum ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'
-                    }`}>{pageNum}</button>
-                );
-              })}
+              {/* Desktop: Show 5 page numbers */}
+              <div className="hidden md:flex gap-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1;
+                  if (totalPages > 5) {
+                    if (currentPage <= 3) pageNum = i + 1;
+                    else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                    else pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <button key={pageNum} onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1.5 text-sm border rounded ${
+                        currentPage === pageNum ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'
+                      }`}>{pageNum}</button>
+                  );
+                })}
+              </div>
+              {/* Mobile: Show only current page */}
+              <div className="md:hidden px-3 py-1.5 text-sm border rounded bg-blue-600 text-white">
+                {currentPage}
+              </div>
               <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
                 className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
                 <ChevronRight size={16} />
               </button>
               <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}
-                className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">Last</button>
+                className="hidden md:block px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">Last</button>
             </div>
           </div>
         )}
