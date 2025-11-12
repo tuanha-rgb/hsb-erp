@@ -15,7 +15,8 @@
       "Bash(npx ts-node:*)",
       "Bash(firebase deploy:*)",
       "Bash(firebase functions:log:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
