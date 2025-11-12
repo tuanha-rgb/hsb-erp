@@ -44,7 +44,7 @@ async function importToFirestore() {
       const batch = writeBatch(db);
       const chunk = publishersData.slice(i, i + BATCH_SIZE);
       
-      chunk.forEach(publisher => {
+      chunk.forEach((publisher: any) => {
         const docRef = doc(collection(db, 'predatory_publishers'));
         batch.set(docRef, {
           name: publisher.name,
@@ -66,7 +66,7 @@ async function importToFirestore() {
       const batch = writeBatch(db);
       const chunk = journalsData.slice(i, i + BATCH_SIZE);
       
-      chunk.forEach(journal => {
+      chunk.forEach((journal: any) => {
         const docRef = doc(collection(db, 'predatory_journals'));
         batch.set(docRef, {
           name: journal.name,

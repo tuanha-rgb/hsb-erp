@@ -115,7 +115,7 @@ const EditThesisModal: React.FC<{
     studentName: thesis.studentName,
     studentId: thesis.studentId,
     level: thesis.level,
-    program: thesis.program,
+    program: getProgramCode(thesis.program), // Extract code from "CODE - Name" format
     year: thesis.year,
     submissionDate: thesis.submissionDate,
     defenseDate: thesis.defenseDate || "",
@@ -180,11 +180,11 @@ const EditThesisModal: React.FC<{
   // Get program options based on level
   const programOptions = useMemo(() => {
     if (formData.level === "bachelor") {
-      return programs.bachelor.map(p => `${p.code} - ${p.name}`);
+      return programs.bachelor;
     } else if (formData.level === "master") {
-      return programs.master.map(p => `${p.code} - ${p.name}`);
+      return programs.master;
     } else {
-      return programs.phd.map(p => `${p.code} - ${p.name}`);
+      return programs.phd;
     }
   }, [formData.level]);
 
@@ -328,8 +328,8 @@ const EditThesisModal: React.FC<{
               className="w-full px-3 py-2 border rounded-lg"
             >
               {programOptions.map((prog) => (
-                <option key={prog} value={prog}>
-                  {prog}
+                <option key={prog.code} value={prog.code}>
+                  {prog.code} - {prog.name}
                 </option>
               ))}
             </select>
@@ -738,11 +738,21 @@ const [pageSize, setPageSize] = useState<number>(10);
 
       const matchesLevel = filters.level === "all" || thesis.level === filters.level;
       const matchesStatus = filters.status === "all" || thesis.status === filters.status;
-      const matchesProgram = filters.program === "all" || thesis.program === filters.program;
+
+      // Match program by code (handle both "MET" and "MET - Marine Engineering" formats)
+      const thesisProgramCode = getProgramCode(thesis.program);
+      const matchesProgram = filters.program === "all" ||
+        thesisProgramCode === filters.program ||
+        thesis.program === filters.program;
+
       const matchesYear = filters.year === "all" || thesis.year.toString() === filters.year;
-      const matchesDepartment = filters.department === "all" || thesis.program === filters.department;
-      
-      const matchesYearRange = 
+
+      // Department filter matches program code
+      const matchesDepartment = filters.department === "all" ||
+        thesisProgramCode === filters.department ||
+        thesis.program === filters.department;
+
+      const matchesYearRange =
         (!filters.yearFrom || thesis.year >= parseInt(filters.yearFrom)) &&
         (!filters.yearTo || thesis.year <= parseInt(filters.yearTo));
 
@@ -769,7 +779,7 @@ const [pageSize, setPageSize] = useState<number>(10);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, JSON.stringify(filters)]);
+  }, [searchTerm, filters.level, filters.status, filters.program, filters.year, filters.department, filters.yearFrom, filters.yearTo]);
 
   // UI
   if (loading) {
@@ -872,21 +882,21 @@ const [pageSize, setPageSize] = useState<number>(10);
                 <option value="all">All Programs</option>
                 <optgroup label="Bachelor Programs">
                   {programs.bachelor.map(p => (
-                    <option key={p.code} value={`${p.code} - ${p.name}`}>
+                    <option key={p.code} value={p.code}>
                       {p.code} - {p.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="Master Programs">
                   {programs.master.map(p => (
-                    <option key={p.code} value={`${p.code} - ${p.name}`}>
+                    <option key={p.code} value={p.code}>
                       {p.code} - {p.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="PhD Programs">
                   {programs.phd.map(p => (
-                    <option key={p.code} value={`${p.code} - ${p.name}`}>
+                    <option key={p.code} value={p.code}>
                       {p.code} - {p.name}
                     </option>
                   ))}

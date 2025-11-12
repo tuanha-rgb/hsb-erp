@@ -34,14 +34,20 @@ service firebase.storage {
       allow read, write: if true;
     }
 
+    // Allow anyone to read/write theses folder (plural - for testing)
+    match /theses/{allPaths=**} {
+      allow read, write: if true;
+    }
+
     // Allow anyone to read/write documents folder (for staff and student accounts)
     match /documents/{allPaths=**} {
       allow read, write: if true;
     }
 
-    // Default deny all other paths
+    // TESTING MODE: Allow all read/write to all paths
+    // ⚠️ WARNING: Change this before production!
     match /{allPaths=**} {
-      allow read, write: if false;
+      allow read, write: if true;
     }
   }
 }
