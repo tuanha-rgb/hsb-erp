@@ -11725,7 +11725,7 @@ const availableTabs = [
       return <LecturersOverview />;
     }
     if (activeTab === 'lecturer-research'){
-      return <ResearchManagement/>;
+      return <ResearchManagement userRole="admin" />;
     }
     if (activeTab == 'grade-management'){
       return <GradeManagement/>;

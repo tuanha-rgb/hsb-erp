@@ -30,8 +30,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
   // Modal state
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<HandbookDocument | null>(null);
-
-  // PDF Viewer state
+ // PDF Viewer state
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [pdfToView, setPdfToView] = useState<{ fileUrl: string; fileName: string } | null>(null);
 
@@ -112,7 +111,6 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
     setSelectedDocument(doc);
     setShowDocumentModal(true);
   };
-
   const handleReadPdf = (doc: HandbookDocument) => {
     setPdfToView({
       fileUrl: doc.fileUrl,
@@ -196,9 +194,9 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
   };
 
   return (
-    <div className="p-3 space-y-6">
+    <div className="p-3 space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Documents & Resources</h2>
           <p className="text-gray-600 mt-1">
@@ -272,14 +270,14 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
 
           {!loading && documentsByCategory.map((category, idx) => (
             <div key={idx} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className={`bg-gradient-to-r ${category.color} p-6 text-white`}>
+              <div className={`bg-gradient-to-r ${category.color} p-5 text-white`}>
                 <h3 className="text-2xl font-bold">{category.category}</h3>
                 <p className="text-white/90 text-sm mt-1">
                   {category.documents.length} documents available
                 </p>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div className="p-4 space-y-4">
                 {category.documents.map((doc) => (
                   <div
                     key={doc.id}
@@ -299,7 +297,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
                     </div>
 
                     <div className="flex gap-2">
-                      {doc.type === 'PDF' && (
+                       {doc.type === 'PDF' && (
                         <button
                           onClick={() => handleReadPdf(doc)}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
@@ -307,8 +305,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
                           <Eye className="w-4 h-4" />
                           Read
                         </button>
-                      )}
-                      <button
+                      )}                      <button
                         onClick={() => handleViewDocument(doc)}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
                       >
@@ -330,7 +327,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
           ))}
 
           {/* Help Section */}
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-8 text-white">
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
             <h3 className="text-2xl font-bold mb-2">Need Help Finding Documents?</h3>
             <p className="text-indigo-100 mb-4">
               Can't find what you're looking for? Contact student services or use the search feature above.
@@ -562,7 +559,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
               >
                 Close
               </button>
-              {selectedDocument.type === 'PDF' && (
+                {selectedDocument.type === 'PDF' && (
                 <button
                   onClick={() => handleReadPdf(selectedDocument)}
                   className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
@@ -584,7 +581,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
           </div>
         </div>
       )}
-
+      
       {/* PDF Viewer */}
       {showPdfViewer && pdfToView && (
         <HandbookPdfViewer

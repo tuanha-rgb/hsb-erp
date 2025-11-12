@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Allow anyone to read from handbook folder
+    match /handbook/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Allow authenticated users to read/write their own files
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow anyone to read/write books folder (for staff and student accounts)
+    match /books/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Allow anyone to read/write publications folder (for staff and student accounts)
+    match /publications/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Allow anyone to read/write journals folder (for staff and student accounts)
+    match /journals/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Allow anyone to read/write thesis folder (for staff and student accounts)
+    match /thesis/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Allow anyone to read/write documents folder (for staff and student accounts)
+    match /documents/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Default deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

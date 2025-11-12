@@ -31,7 +31,12 @@ const getShortTypeName = (type: string): string => {
   return typeMap[type] || type;
 };
 
-const ResearchManagement = () => {
+interface ResearchManagementProps {
+  userRole?: 'admin' | 'staff' | 'student';
+}
+
+const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'admin' }) => {
+  const isAdmin = userRole === 'admin';
   const [activeView, setActiveView] = useState('overview');
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -310,7 +315,9 @@ const ResearchManagement = () => {
 
       if (pubData) {
         setFetchedPublication(pubData);
-        setFormData({ ...formData, ...pubData });
+        // Preserve user-selected discipline when merging DOI data
+        const { discipline: _, ...pubDataWithoutDiscipline } = pubData;
+        setFormData({ ...formData, ...pubDataWithoutDiscipline });
 
         // Initialize authors with roles - all start as 'other'
         if (pubData.authors && pubData.authors.length > 0) {
@@ -2342,22 +2349,24 @@ const ResearchManagement = () => {
                           >
                             <Edit className="w-5 h-5" />
                           </button>
-                          <button
-                            onClick={async () => {
-                              if (window.confirm('Are you sure you want to delete this project?')) {
-                                try {
-                                  await projectService.deleteProject(project.id!);
-                                  loadProjects();
-                                } catch (err) {
-                                  alert('Error deleting project: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                          {isAdmin && (
+                            <button
+                              onClick={async () => {
+                                if (window.confirm('Are you sure you want to delete this project?')) {
+                                  try {
+                                    await projectService.deleteProject(project.id!);
+                                    loadProjects();
+                                  } catch (err) {
+                                    alert('Error deleting project: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                                  }
                                 }
-                              }
-                            }}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            title="Delete Project"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                              }}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              title="Delete Project"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -3234,22 +3243,24 @@ const ResearchManagement = () => {
                               )}
                             </button>
                           )}
-                          <button
-                            onClick={async () => {
-                              if (window.confirm('Are you sure you want to delete this publication?')) {
-                                try {
-                                  await publicationService.deletePublication(pub.id!);
-                                  loadPublications();
-                                } catch (err) {
-                                  alert('Error deleting publication: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                          {isAdmin && (
+                            <button
+                              onClick={async () => {
+                                if (window.confirm('Are you sure you want to delete this publication?')) {
+                                  try {
+                                    await publicationService.deletePublication(pub.id!);
+                                    loadPublications();
+                                  } catch (err) {
+                                    alert('Error deleting publication: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                                  }
                                 }
-                              }
-                            }}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            title="Delete Publication"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                              }}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              title="Delete Publication"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -3550,22 +3561,24 @@ const ResearchManagement = () => {
                           >
                             <Edit className="w-5 h-5" />
                           </button>
-                          <button
-                            onClick={async () => {
-                              if (window.confirm('Are you sure you want to delete this patent?')) {
-                                try {
-                                  await patentService.deletePatent(patent.id!);
-                                  loadPatents();
-                                } catch (err) {
-                                  alert('Error deleting patent: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                          {isAdmin && (
+                            <button
+                              onClick={async () => {
+                                if (window.confirm('Are you sure you want to delete this patent?')) {
+                                  try {
+                                    await patentService.deletePatent(patent.id!);
+                                    loadPatents();
+                                  } catch (err) {
+                                    alert('Error deleting patent: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                                  }
                                 }
-                              }
-                            }}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            title="Delete Patent"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                              }}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              title="Delete Patent"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

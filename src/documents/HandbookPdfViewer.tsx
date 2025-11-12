@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut,
-  Download, Printer, Loader, AlertCircle
+  Loader, AlertCircle
 } from 'lucide-react';
 import { GlobalWorkerOptions, getDocument, PDFDocumentProxy } from 'pdfjs-dist';
 import pdfjsWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -110,27 +110,6 @@ export default function HandbookPdfViewer({ fileUrl, fileName, onClose }: Handbo
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.25, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.25, 0.5));
 
-  // Download
-  const handleDownload = () => {
-    if (fileUrl) {
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = fileName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
-  // Print
-  const handlePrint = () => {
-    if (fileUrl) {
-      const printWindow = window.open(fileUrl, '_blank');
-      printWindow?.print();
-    }
-  };
-
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -177,26 +156,6 @@ export default function HandbookPdfViewer({ fileUrl, fileName, onClose }: Handbo
             title="Zoom In"
           >
             <ZoomIn className="w-5 h-5" />
-          </button>
-
-          <div className="w-px h-6 bg-gray-300 mx-2"></div>
-
-          {/* Download */}
-          <button
-            onClick={handleDownload}
-            className="p-2 hover:bg-gray-100 rounded transition"
-            title="Download"
-          >
-            <Download className="w-5 h-5" />
-          </button>
-
-          {/* Print */}
-          <button
-            onClick={handlePrint}
-            className="p-2 hover:bg-gray-100 rounded transition"
-            title="Print"
-          >
-            <Printer className="w-5 h-5" />
           </button>
 
           <div className="w-px h-6 bg-gray-300 mx-2"></div>

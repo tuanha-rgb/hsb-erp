@@ -2257,7 +2257,7 @@ const LecturerApp = () => {
       case 'Documents':
         return <DocumentHandbook userRole="staff" userId="lecturer-001" userName="Dr. Nguyen Van A" />;  
       case 'Research':
-        return <ResearchManagement />;
+        return <ResearchManagement userRole="staff" />;
       case 'Projects':
         return <ProjectsTab userId="lecturer-001" userName="Dr. Nguyen Van A" />;
       case 'Canvas/LMS':
