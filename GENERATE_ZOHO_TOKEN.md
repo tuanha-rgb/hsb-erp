@@ -50,8 +50,8 @@ VITE_ZOHO_APP_LINK_NAME=hsbvnu
 # OAuth Tokens
 VITE_ZOHO_OAUTH_TOKEN=1000.xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 VITE_ZOHO_REFRESH_TOKEN=1000.xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-VITE_ZOHO_CLIENT_ID=1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W
-VITE_ZOHO_CLIENT_SECRET=6b8d93c6733bcfa07327353341b038d70f7d97cdfe
+VITE_ZOHO_CLIENT_ID=YOUR_ZOHO_CLIENT_ID
+VITE_ZOHO_CLIENT_SECRET=YOUR_ZOHO_CLIENT_SECRET
 ```
 
 **Done!** Restart your dev server and test the account management.
@@ -90,8 +90,8 @@ You'll see error: `"Failed to initialize bulk read"`
 ```bash
 curl -X POST https://accounts.zoho.com/oauth/v2/token \
   -d "refresh_token=YOUR_REFRESH_TOKEN" \
-  -d "client_id=1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W" \
-  -d "client_secret=6b8d93c6733bcfa07327353341b038d70f7d97cdfe" \
+  -d "client_id=YOUR_ZOHO_CLIENT_ID" \
+  -d "client_secret=YOUR_ZOHO_CLIENT_SECRET" \
   -d "grant_type=refresh_token"
 ```
 
@@ -103,12 +103,12 @@ Or re-run the token generator.
 
 **Client ID:**
 ```
-1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W
+YOUR_ZOHO_CLIENT_ID
 ```
 
 **Client Secret:**
 ```
-6b8d93c6733bcfa07327353341b038d70f7d97cdfe
+YOUR_ZOHO_CLIENT_SECRET
 ```
 
 **Redirect URI:**

@@ -167,10 +167,10 @@
       <p>Your Zoho credentials:</p>
 
       <label>Client ID:</label>
-      <input type="text" id="clientId" value="1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W" readonly>
+      <input type="text" id="clientId" value="YOUR_ZOHO_CLIENT_ID" readonly>
 
       <label>Client Secret:</label>
-      <input type="text" id="clientSecret" value="6b8d93c6733bcfa07327353341b038d70f7d97cdfe" readonly>
+      <input type="text" id="clientSecret" value="YOUR_ZOHO_CLIENT_SECRET" readonly>
 
       <label>Redirect URI (auto-generated):</label>
       <input type="text" id="redirectUri" readonly placeholder="Enter Vercel URL above first">
@@ -181,7 +181,7 @@
       <div class="warning" style="margin-top: 15px;">
         <strong>⚠️ Add Redirect URI to Zoho:</strong><br>
         1. Go to <a href="https://api-console.zoho.com/" target="_blank">Zoho API Console</a><br>
-        2. Open your client: <code>1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W</code><br>
+        2. Open your client: <code>YOUR_ZOHO_CLIENT_ID</code><br>
         3. Add this redirect URI: <strong id="redirectUriDisplay">Enter Vercel URL first</strong><br>
         4. Click "Update"
       </div>
@@ -223,8 +223,8 @@
   </div>
 
   <script>
-    const CLIENT_ID = '1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W';
-    const CLIENT_SECRET = '6b8d93c6733bcfa07327353341b038d70f7d97cdfe';
+    const CLIENT_ID = 'YOUR_ZOHO_CLIENT_ID';
+    const CLIENT_SECRET = 'YOUR_ZOHO_CLIENT_SECRET';
     const SCOPE = 'ZohoCreator.bulk.READ,ZohoCreator.report.READ,ZohoCreator.report.CREATE,ZohoCreator.report.UPDATE';
 
     let REDIRECT_URI = '';

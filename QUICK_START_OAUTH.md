@@ -2,9 +2,9 @@
 
 ## What You Need
 
-Your Zoho credentials (already configured):
-- Client ID: `1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W`
-- Client Secret: `6b8d93c6733bcfa07327353341b038d70f7d97cdfe`
+Your Zoho credentials:
+- Client ID: `YOUR_ZOHO_CLIENT_ID`
+- Client Secret: `YOUR_ZOHO_CLIENT_SECRET`
 
 ---
 
@@ -30,7 +30,7 @@ vercel
 ### 2️⃣ Add Redirect URI to Zoho
 
 1. Go to [api-console.zoho.com](https://api-console.zoho.com/)
-2. Open client: `1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W`
+2. Open your Zoho OAuth client
 3. Add redirect URI: `https://your-vercel-url.vercel.app/api/oauth-callback`
 4. Click "Update"
 
@@ -98,8 +98,8 @@ npm run dev
 ```bash
 curl -X POST https://accounts.zoho.com/oauth/v2/token \
   -d "refresh_token=YOUR_REFRESH_TOKEN" \
-  -d "client_id=1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W" \
-  -d "client_secret=6b8d93c6733bcfa07327353341b038d70f7d97cdfe" \
+  -d "client_id=YOUR_ZOHO_CLIENT_ID" \
+  -d "client_secret=YOUR_ZOHO_CLIENT_SECRET" \
   -d "grant_type=refresh_token"
 ```
 

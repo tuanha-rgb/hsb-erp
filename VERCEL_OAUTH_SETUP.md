@@ -52,7 +52,7 @@ vercel
 ### Step 2: Add Redirect URI to Zoho API Console
 
 1. Go to [Zoho API Console](https://api-console.zoho.com/)
-2. Find your client: `1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W`
+2. Find your Zoho OAuth client
 3. Click on the client to edit
 4. Scroll to **"Authorized Redirect URIs"**
 5. Add: `https://YOUR-VERCEL-URL.vercel.app/api/oauth-callback`
@@ -92,8 +92,8 @@ VITE_ZOHO_ACCOUNT_OWNER=hsbvnu
 VITE_ZOHO_APP_LINK_NAME=hsbvnu
 
 # OAuth Credentials
-VITE_ZOHO_CLIENT_ID=1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W
-VITE_ZOHO_CLIENT_SECRET=6b8d93c6733bcfa07327353341b038d70f7d97cdfe
+VITE_ZOHO_CLIENT_ID=YOUR_ZOHO_CLIENT_ID
+VITE_ZOHO_CLIENT_SECRET=YOUR_ZOHO_CLIENT_SECRET
 
 # OAuth Tokens
 VITE_ZOHO_OAUTH_TOKEN=1000.xxxxxxxxxxxxxxxxxxxxxxxx
@@ -195,8 +195,8 @@ Access tokens expire after 1 hour. To get a new one:
 ```bash
 curl -X POST https://accounts.zoho.com/oauth/v2/token \
   -d "refresh_token=YOUR_REFRESH_TOKEN" \
-  -d "client_id=1000.RJQQGXZ5O9YWORFH1JUF4J616S1T4W" \
-  -d "client_secret=6b8d93c6733bcfa07327353341b038d70f7d97cdfe" \
+  -d "client_id=YOUR_ZOHO_CLIENT_ID" \
+  -d "client_secret=YOUR_ZOHO_CLIENT_SECRET" \
   -d "grant_type=refresh_token"
 ```
 
