@@ -1,0 +1,4 @@
+studentId,semester,morningCourse,afternoonCourse,nightCourse
+S001001,2024-2025-1,CS101,MATH201,
+S001002,2024-2025-1,PHYS301,,BIO401
+S001003,2024-2025-1,,ENG201,CHEM301

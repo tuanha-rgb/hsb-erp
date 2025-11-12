@@ -1,0 +1,58 @@
+# Vercel Ignore - Files to exclude from deployment
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files (use Vercel env vars instead)
+.env
+.env.local
+.env.production
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase (not needed on Vercel)
+firebase.json
+.firebaserc
+firestore.rules
+storage.rules
+functions/
+
+# Server files (we only need the api/ folder)
+server/
+
+# Documentation (not needed in deployment)
+*.md
+!README.md
+
+# Source files (Vite builds these)
+src/
+
+# Public files (Vite copies these to dist/)
+public/
+!public/oauth-callback.html
+
+# Config files (Vercel has its own)
+vite.config.ts
+tsconfig.json
+package-lock.json

@@ -1,7 +1,14 @@
 // Frontend API client for Zoho integration
-// Calls our backend proxy server instead of Zoho directly to avoid CORS issues
+// Direct API calls to Zoho Creator (no proxy server)
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const ZOHO_CONFIG = {
+  baseUrl: import.meta.env.VITE_ZOHO_BASE_URL || 'https://www.zohoapis.com',
+  accountOwner: import.meta.env.VITE_ZOHO_ACCOUNT_OWNER || 'hsbvnu',
+  appLinkName: import.meta.env.VITE_ZOHO_APP_LINK_NAME || 'hsbvnu',
+  oauthToken: import.meta.env.VITE_ZOHO_OAUTH_TOKEN || '',
+  studentsPublicKey: import.meta.env.VITE_ZOHO_STUDENTS_PUBLIC_KEY || '',
+  lecturersPublicKey: import.meta.env.VITE_ZOHO_LECTURERS_PUBLIC_KEY || ''
+};
 
 export interface ZohoUser {
   // Standard fields
@@ -40,35 +47,306 @@ export interface GetUsersOptions {
   type?: 'students' | 'lecturers';  // Which custom function to call
 }
 
+// ========== BULK READ API (Direct Zoho Calls) ==========
+
+export interface BulkReadJob {
+  job_id: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  report_link_name: string;
+}
+
+export interface BulkReadResult {
+  data: ZohoUser[];
+  totalRecords: number;
+  recordCursor?: string;
+}
+
 /**
- * Get all users from Zoho via our backend proxy (using custom Zoho Creator functions)
+ * Initialize bulk read job
  */
-export async function getZohoUsers(options?: GetUsersOptions): Promise<ZohoUser[]> {
+export async function initBulkRead(reportLinkName: string): Promise<BulkReadJob> {
   try {
-    const {
-      type = 'students'
-    } = options || {};
+    if (!ZOHO_CONFIG.oauthToken) {
+      throw new Error('OAuth token not configured. Set VITE_ZOHO_OAUTH_TOKEN in .env');
+    }
 
-    console.log('[Zoho API] Fetching users from backend proxy...', { type });
+    console.log('[Zoho API] Initializing bulk read for:', reportLinkName);
 
-    // Build query parameters
-    const queryParams = new URLSearchParams();
-    queryParams.append('type', type);
+    const url = `${ZOHO_CONFIG.baseUrl}/creator/v2.1/bulk/${ZOHO_CONFIG.accountOwner}/${ZOHO_CONFIG.appLinkName}/report/${reportLinkName}/read`;
 
-    const url = `${API_BASE_URL}/zoho/users?${queryParams.toString()}`;
-    console.log('[Zoho API] Request URL:', url);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${ZOHO_CONFIG.oauthToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Zoho API] Bulk read init error:', errorText);
+      throw new Error(`Failed to initialize bulk read: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('[Zoho API] Bulk read job created:', data.data?.job_id);
+
+    return {
+      job_id: data.data?.job_id,
+      status: 'PENDING',
+      report_link_name: reportLinkName
+    };
+  } catch (error: any) {
+    console.error('[Zoho API] Error initializing bulk read:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check bulk read job status
+ */
+export async function checkBulkReadStatus(
+  jobId: string,
+  reportLinkName: string
+): Promise<BulkReadJob> {
+  try {
+    if (!ZOHO_CONFIG.oauthToken) {
+      throw new Error('OAuth token not configured');
+    }
+
+    const url = `${ZOHO_CONFIG.baseUrl}/creator/v2.1/bulk/${ZOHO_CONFIG.accountOwner}/${ZOHO_CONFIG.appLinkName}/report/${reportLinkName}/read/${jobId}`;
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-      },
+        'Authorization': `Zoho-oauthtoken ${ZOHO_CONFIG.oauthToken}`
+      }
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('[Zoho API] Error response:', errorData);
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`Failed to check status: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      job_id: jobId,
+      status: data.data?.status || 'PENDING',
+      report_link_name: reportLinkName
+    };
+  } catch (error: any) {
+    console.error('[Zoho API] Error checking bulk read status:', error);
+    throw error;
+  }
+}
+
+/**
+ * Download and parse bulk read result
+ */
+export async function downloadBulkReadResult(
+  jobId: string,
+  reportLinkName: string
+): Promise<BulkReadResult> {
+  try {
+    if (!ZOHO_CONFIG.oauthToken) {
+      throw new Error('OAuth token not configured');
+    }
+
+    console.log('[Zoho API] Downloading bulk read result:', jobId);
+
+    const url = `${ZOHO_CONFIG.baseUrl}/creator/v2.1/bulk/${ZOHO_CONFIG.accountOwner}/${ZOHO_CONFIG.appLinkName}/report/${reportLinkName}/read/${jobId}/result`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${ZOHO_CONFIG.oauthToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to download result: ${response.statusText}`);
+    }
+
+    // Get ZIP file as blob
+    const zipBlob = await response.blob();
+    console.log('[Zoho API] Downloaded ZIP:', zipBlob.size, 'bytes');
+
+    // Extract CSV from ZIP using JSZip
+    const JSZip = (await import('jszip')).default;
+    const zip = await JSZip.loadAsync(zipBlob);
+
+    // Find CSV file in ZIP
+    const csvFileName = Object.keys(zip.files).find(name => name.endsWith('.csv'));
+
+    if (!csvFileName) {
+      throw new Error('No CSV file found in ZIP');
+    }
+
+    // Extract CSV content
+    const csvContent = await zip.files[csvFileName].async('string');
+    console.log('[Zoho API] Extracted CSV:', csvContent.length, 'characters');
+
+    // Parse CSV to JSON
+    const records = parseCSV(csvContent);
+    console.log('[Zoho API] Parsed records:', records.length);
+
+    // Get record cursor from response headers if available
+    const recordCursor = response.headers.get('record-cursor') || undefined;
+
+    return {
+      data: records,
+      totalRecords: records.length,
+      recordCursor
+    };
+  } catch (error: any) {
+    console.error('[Zoho API] Error downloading bulk read result:', error);
+    throw error;
+  }
+}
+
+/**
+ * Complete bulk read workflow (init + poll + download)
+ */
+export async function bulkReadUsers(
+  reportLinkName: string,
+  onProgress?: (status: string) => void
+): Promise<ZohoUser[]> {
+  try {
+    // Step 1: Initialize
+    onProgress?.('Initializing bulk read...');
+    const job = await initBulkRead(reportLinkName);
+
+    if (!job.job_id) {
+      throw new Error('No job ID received');
+    }
+
+    // Step 2: Poll status
+    const maxAttempts = 30;
+    const pollInterval = 2000; // 2 seconds
+    let attempts = 0;
+    let jobStatus: BulkReadJob | null = null;
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      onProgress?.(`Checking status (${attempts}/${maxAttempts})...`);
+
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+      jobStatus = await checkBulkReadStatus(job.job_id, reportLinkName);
+
+      console.log(`[Zoho API] Job status (${attempts}/${maxAttempts}):`, jobStatus.status);
+
+      if (jobStatus.status === 'COMPLETED') {
+        break;
+      } else if (jobStatus.status === 'FAILED') {
+        throw new Error('Bulk read job failed');
+      }
+    }
+
+    if (jobStatus?.status !== 'COMPLETED') {
+      throw new Error('Bulk read job did not complete in time');
+    }
+
+    // Step 3: Download result
+    onProgress?.('Downloading results...');
+    const result = await downloadBulkReadResult(job.job_id, reportLinkName);
+
+    onProgress?.(`Complete! Fetched ${result.totalRecords} records`);
+    return result.data;
+
+  } catch (error: any) {
+    console.error('[Zoho API] Bulk read workflow error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Helper: Parse CSV to JSON
+ */
+function parseCSV(csvContent: string): ZohoUser[] {
+  const lines = csvContent.trim().split('\n');
+  if (lines.length < 2) {
+    return [];
+  }
+
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const records: ZohoUser[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    // Handle CSV with quoted values
+    const values: string[] = [];
+    let currentValue = '';
+    let insideQuotes = false;
+
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+
+      if (char === '"') {
+        insideQuotes = !insideQuotes;
+      } else if (char === ',' && !insideQuotes) {
+        values.push(currentValue.trim().replace(/^"|"$/g, ''));
+        currentValue = '';
+      } else {
+        currentValue += char;
+      }
+    }
+
+    // Push last value
+    values.push(currentValue.trim().replace(/^"|"$/g, ''));
+
+    // Create record
+    const record: ZohoUser = {};
+    headers.forEach((header, index) => {
+      record[header] = values[index] || '';
+    });
+
+    records.push(record);
+  }
+
+  return records;
+}
+
+// ========== LEGACY CUSTOM FUNCTION API (Backward Compatibility) ==========
+
+/**
+ * Get all users from Zoho via custom function (uses public key authentication)
+ */
+export async function getZohoUsers(options?: GetUsersOptions): Promise<ZohoUser[]> {
+  try {
+    const { type = 'students' } = options || {};
+
+    console.log('[Zoho API] Fetching users via custom function:', type);
+
+    let customFunction: string;
+    let publicKey: string;
+
+    if (type === 'students') {
+      customFunction = 'getAllStudents';
+      publicKey = ZOHO_CONFIG.studentsPublicKey;
+    } else {
+      customFunction = 'getAllLecturers';
+      publicKey = ZOHO_CONFIG.lecturersPublicKey;
+    }
+
+    if (!publicKey) {
+      throw new Error(`Public key not configured for ${type}`);
+    }
+
+    const url = `${ZOHO_CONFIG.baseUrl}/creator/custom/${ZOHO_CONFIG.accountOwner}/${customFunction}?zc_PublicKey=${publicKey}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Zoho API] Error response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data: ZohoResponse<ZohoUser[]> = await response.json();
@@ -82,176 +360,18 @@ export async function getZohoUsers(options?: GetUsersOptions): Promise<ZohoUser[
 }
 
 /**
- * Get specific user by ID
+ * Check if Zoho configuration is valid
  */
-export async function getZohoUserById(id: string): Promise<ZohoUser | null> {
-  try {
-    console.log('[Zoho API] Fetching user:', id);
+export function checkZohoConfig(): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
 
-    const response = await fetch(`${API_BASE_URL}/zoho/users/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  if (!ZOHO_CONFIG.baseUrl) errors.push('VITE_ZOHO_BASE_URL not set');
+  if (!ZOHO_CONFIG.accountOwner) errors.push('VITE_ZOHO_ACCOUNT_OWNER not set');
+  if (!ZOHO_CONFIG.appLinkName) errors.push('VITE_ZOHO_APP_LINK_NAME not set');
+  if (!ZOHO_CONFIG.oauthToken) errors.push('VITE_ZOHO_OAUTH_TOKEN not set');
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data: ZohoResponse<ZohoUser> = await response.json();
-    return data.data || null;
-  } catch (error) {
-    console.error('[Zoho API] Error fetching user:', error);
-    throw error;
-  }
-}
-
-/**
- * Create new user in Zoho
- */
-export async function createZohoUser(userData: Partial<ZohoUser>): Promise<ZohoUser> {
-  try {
-    console.log('[Zoho API] Creating user:', userData);
-
-    const response = await fetch(`${API_BASE_URL}/zoho/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data: ZohoResponse<ZohoUser> = await response.json();
-    console.log('[Zoho API] User created successfully');
-
-    if (!data.data) {
-      throw new Error('No data returned from create operation');
-    }
-
-    return data.data;
-  } catch (error) {
-    console.error('[Zoho API] Error creating user:', error);
-    throw error;
-  }
-}
-
-/**
- * Update user in Zoho
- */
-export async function updateZohoUser(id: string, userData: Partial<ZohoUser>): Promise<ZohoUser> {
-  try {
-    console.log('[Zoho API] Updating user:', id, userData);
-
-    const response = await fetch(`${API_BASE_URL}/zoho/users/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data: ZohoResponse<ZohoUser> = await response.json();
-    console.log('[Zoho API] User updated successfully');
-
-    if (!data.data) {
-      throw new Error('No data returned from update operation');
-    }
-
-    return data.data;
-  } catch (error) {
-    console.error('[Zoho API] Error updating user:', error);
-    throw error;
-  }
-}
-
-/**
- * Delete user from Zoho
- */
-export async function deleteZohoUser(id: string): Promise<boolean> {
-  try {
-    console.log('[Zoho API] Deleting user:', id);
-
-    const response = await fetch(`${API_BASE_URL}/zoho/users/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    console.log('[Zoho API] User deleted successfully');
-    return true;
-  } catch (error) {
-    console.error('[Zoho API] Error deleting user:', error);
-    throw error;
-  }
-}
-
-/**
- * Check if backend server is healthy
- */
-export async function checkBackendHealth(): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/health`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      return false;
-    }
-
-    const data = await response.json();
-    console.log('[Zoho API] Backend health check:', data);
-    return data.status === 'ok';
-  } catch (error) {
-    console.error('[Zoho API] Backend health check failed:', error);
-    return false;
-  }
-}
-
-/**
- * List all available reports in the Zoho app
- */
-export async function listZohoReports(): Promise<any> {
-  try {
-    console.log('[Zoho API] Listing available reports...');
-
-    const response = await fetch(`${API_BASE_URL}/zoho/reports`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('[Zoho API] Error listing reports:', errorData);
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('[Zoho API] Available reports:', data);
-    return data;
-  } catch (error) {
-    console.error('[Zoho API] Error listing reports:', error);
-    throw error;
-  }
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
 }

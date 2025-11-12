@@ -20,6 +20,7 @@ import ResearchManagement from "./research/ResearchManagement";
 import { AttendanceRecord, StudentAttendanceStats, CourseAttendance, AttendanceAlert, AICamera, initializeAttendanceData } from "./attendance/attendancemodel";
 import AttendanceLive from "./attendance/attendanceLive";
 import AttendanceLoader from "./attendance/AttendanceLoader";
+import EnrollmentImporter from "./attendance/EnrollmentImporter";
 
 import LibraryViewer from "./library/libraryviewer";
 import ThesisStorage from "./library/ThesisStorage";
@@ -11765,6 +11766,9 @@ const availableTabs = [
     }
     if (activeTab === 'attendance-loader' || activeTab === 'load-attendance') {
       return <AttendanceLoader />;
+    }
+    if (activeTab === 'enrollment-importer' || activeTab === 'import-enrollment') {
+      return <EnrollmentImporter />;
     }
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;

@@ -4,7 +4,7 @@ import {
   CheckCircle, XCircle, AlertCircle, Search, Plus, ArrowRight, Eye, Edit,
   Save, ShieldCheck, Phone, Mail, Trash2, X, RefreshCw, Database, CloudOff
 } from 'lucide-react';
-import { getZohoUsers, checkBackendHealth, type ZohoUser, type GetUsersOptions } from '../zoho/zoho-api';
+import { getZohoUsers, bulkReadUsers, checkZohoConfig, type ZohoUser, type GetUsersOptions } from '../zoho/zoho-api';
 import { sampleUsers } from '../useraccounts';
 
 // ========== TYPES ==========
@@ -132,9 +132,9 @@ const AccountManagement: React.FC = () => {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const isHealthy = await checkBackendHealth();
-        setBackendConnected(isHealthy);
-        console.log('[AccountManagement] Backend health check:', isHealthy ? 'Connected' : 'Disconnected');
+        const config = checkZohoConfig();
+        setBackendConnected(config.isValid);
+        console.log('[AccountManagement] Zoho config check:', config.isValid ? 'Valid' : 'Invalid', config.errors);
       } catch (error) {
         console.error('[AccountManagement] Backend health check failed:', error);
         setBackendConnected(false);

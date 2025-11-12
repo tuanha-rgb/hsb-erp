@@ -256,7 +256,7 @@ const [canvasReady, setCanvasReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Start at 1.5 scale (150%) for sharp, readable text on all screens
-  const [scale, setScale] = useState(1.5);
+  const [scale, setScale] = useState(1.0);
   const [pageMode, setPageMode] = useState<PageMode>('single');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [showBookmarks, setShowBookmarks] = useState(false);
@@ -733,7 +733,7 @@ const togglePageMode = async () => {
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
   {/* FIXED: Made header sticky and responsive with auto-hiding buttons on narrow screens */}
-  <div className="sticky top-0 z-20 border-b border-gray-200 p-2 md:p-4 bg-white shadow-sm">
+  <div className="sticky top-0 z-20 border-b border-gray-200 p-2 bg-white shadow-sm">
     <div className="grid grid-cols-3 items-center gap-1 md:gap-3">
       {/* Left: Back button - compact on mobile */}
       <div className="flex justify-start">
@@ -957,7 +957,7 @@ const togglePageMode = async () => {
 
       {/* Page Navigation Bar - FIXED: Made responsive with better touch targets */}
         {!loading && !error && hasFile && fileKind === 'pdf' && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 md:p-4 shadow-lg z-10">
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 shadow-lg z-10">
   <div className="mx-auto flex items-center justify-center gap-2 md:gap-3 flex-wrap">
               {/* Previous Button - larger on mobile */}
               <button
