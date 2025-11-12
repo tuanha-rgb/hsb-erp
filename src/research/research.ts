@@ -8,6 +8,7 @@ export interface ResearchProject {
   coInvestigators: string[];
   type: ProjectType;
   status: ProjectStatus;
+  level: 'International' | 'National' | 'Ministry' | 'VNU' | 'HSB';
   startDate: string;  // ISO
   endDate: string;    // ISO
   funding: string;    // keep as formatted string (e.g., "$250,000")

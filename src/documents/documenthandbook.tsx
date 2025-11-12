@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, Upload, FileText, Trash2, X, Loader, Eye } from "lucide-react";
+import { Search, Upload, FileText, Trash2, X, Loader, Eye, Edit } from "lucide-react";
 import {
   getAllHandbookDocuments,
   createHandbookDocument,
   uploadHandbookFile,
   deleteHandbookDocument,
+  updateHandbookDocument,
   formatFileSize,
   subscribeToHandbookDocuments,
   type HandbookDocument
@@ -34,12 +35,23 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [pdfToView, setPdfToView] = useState<{ fileUrl: string; fileName: string } | null>(null);
 
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<HandbookDocument | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    abstract: '',
+    category: 'Handbook',
+    tags: ''
+  });
+
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
     title: '',
     description: '',
     abstract: '',
-    category: 'Student Handbook',
+    category: 'Handbook',
     type: 'PDF' as 'PDF' | 'Video' | 'Document',
     tags: ''
   });
@@ -86,7 +98,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
   function getCategoryColor(category: string): string {
     const colorMap: { [key: string]: string } = {
       'App Tutorials & Guides': 'from-blue-500 to-blue-600',
-      'Student Handbook': 'from-emerald-500 to-emerald-600',
+      'Handbook': 'from-emerald-500 to-emerald-600',
       'Government Regulations': 'from-red-500 to-red-600',
       'Academic Policies': 'from-purple-500 to-purple-600',
       'Campus Services': 'from-orange-500 to-orange-600'
@@ -166,7 +178,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
         title: '',
         description: '',
         abstract: '',
-        category: 'Student Handbook',
+        category: 'Handbook',
         type: 'PDF',
         tags: ''
       });
@@ -190,6 +202,39 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
     } catch (error) {
       console.error('Error deleting document:', error);
       alert('Failed to delete document. Please try again.');
+    }
+  };
+
+  const handleEdit = (doc: HandbookDocument) => {
+    setEditingDocument(doc);
+    setEditForm({
+      title: doc.title,
+      description: doc.description,
+      abstract: doc.abstract || '',
+      category: doc.category,
+      tags: doc.tags?.join(', ') || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateDocument = async () => {
+    if (!editingDocument) return;
+
+    try {
+      await updateHandbookDocument(editingDocument.id, {
+        title: editForm.title,
+        description: editForm.description,
+        abstract: editForm.abstract,
+        category: editForm.category,
+        tags: editForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      });
+
+      alert('Document updated successfully!');
+      setShowEditModal(false);
+      setEditingDocument(null);
+    } catch (error) {
+      console.error('Error updating document:', error);
+      alert('Failed to update document. Please try again.');
     }
   };
 
@@ -312,12 +357,20 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
                         <span>📥</span> View
                       </button>
                       {isAdmin && (
-                        <button
-                          onClick={() => handleDelete(doc.id)}
-                          className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleEdit(doc)}
+                            className="px-3 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(doc.id)}
+                            className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -330,7 +383,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
           <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
             <h3 className="text-2xl font-bold mb-2">Need Help Finding Documents?</h3>
             <p className="text-indigo-100 mb-4">
-              Can't find what you're looking for? Contact student services or use the search feature above.
+              Can't find what you're looking for? Contact IT or use the search feature above.
             </p>
             <div className="flex gap-3">
               <button className="px-6 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 transition-colors">
@@ -376,7 +429,7 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
                 onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="Student Handbook">Student Handbook</option>
+                <option value="Handbook">Handbook</option>
                 <option value="App Tutorials & Guides">App Tutorials & Guides</option>
                 <option value="Government Regulations">Government Regulations</option>
                 <option value="Academic Policies">Academic Policies</option>
@@ -581,7 +634,119 @@ const DocumentHandbook: React.FC<DocumentsProps> = ({
           </div>
         </div>
       )}
-      
+
+      {/* Edit Document Modal */}
+      {showEditModal && editingDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowEditModal(false)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-orange-500 to-orange-600">
+              <h2 className="text-2xl font-bold text-white">Edit Document</h2>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg text-white">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Document title"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="Student Handbook">Student Handbook</option>
+                  <option value="Staff Handbook">Staff Handbook</option>
+                  <option value="Faculty Handbook">Faculty Handbook</option>
+                  <option value="HSB Regulations">HSB Regulations</option>
+                  <option value="App Tutorials & Guides">App Tutorials & Guides</option>
+                  <option value="Government Regulations">Government Regulations</option>
+                  <option value="Academic Policies">Academic Policies</option>
+                  <option value="Campus Services">Campus Services</option>
+                </select>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Brief description of the document"
+                />
+              </div>
+
+              {/* Abstract */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Abstract
+                </label>
+                <textarea
+                  rows={4}
+                  value={editForm.abstract}
+                  onChange={(e) => setEditForm({ ...editForm, abstract: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Optional detailed abstract or summary"
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.tags}
+                  onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="e.g., handbook, policies, student"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateDocument}
+                  className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                >
+                  Update Document
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PDF Viewer */}
       {showPdfViewer && pdfToView && (
         <HandbookPdfViewer

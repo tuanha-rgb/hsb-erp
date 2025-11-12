@@ -14,10 +14,35 @@ import {
 import { projectService, Project } from "../firebase/project.service";
 import { patentService, Patent } from "../firebase/patent.service";
 import { sampleUsers } from "../useraccounts";
-import { citationService } from "../services/citation.service";
-import { checkPublication, PubCheckResult, PubCheckRequest } from "../services/pub-check.service";
+import { citationService } from "../firebase/citation.service";
+import { checkPublication, PubCheckResult, PubCheckRequest } from "../firebase/pub-check.service";
 import { checkPredatory, PredatoryCheckResult } from "../firebase/predatory.service";
 import { faculties } from "../acad/faculties";
+
+// Standard discipline categories (aligned with book categories)
+const DISCIPLINES = [
+  "Business",
+  "Management",
+  "Human Resource",
+  "Nontraditional Security",
+  "Technology",
+  "Finance",
+  "Marketing",
+  "Economics",
+  "Accounting",
+  "Entrepreneurship",
+  "Computer Science",
+  "Data Science",
+  "Cybersecurity",
+  "Engineering",
+  "Mathematics",
+  "Social Sciences",
+  "Humanities",
+  "Language",
+  "Medicine & Health",
+  "Arts & Design",
+  "Vietnam"
+];
 
 // Helper function to display shorter publication type labels
 const getShortTypeName = (type: string): string => {
@@ -111,7 +136,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
     quartile: 'N/A',
     wosranking: 'N/A',
     scopusIndexed: false,
-    discipline: 'Nontraditional Security',
+    discipline: 'Business',
     volume: '',
     issue: '',
     pages: ''
@@ -144,6 +169,8 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
   const [showEditProjectModal, setShowEditProjectModal] = useState(false);
   const [showEditPatentModal, setShowEditPatentModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [editCoInvestigatorsInput, setEditCoInvestigatorsInput] = useState('');
+  const [editInventorsInput, setEditInventorsInput] = useState('');
 
   // Add modal states for Projects and Patents
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
@@ -337,13 +364,13 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
     }
   };
 
-  // Handle author role change
-  const handleAuthorRoleChange = (authorName: string, newRole: 'first' | 'corresponding' | 'first+corresponding' | 'other') => {
+  // Handle author role change - using index for reliable identification
+  const handleAuthorRoleChange = (authorIndex: number, newRole: 'first' | 'corresponding' | 'first+corresponding' | 'other') => {
     setAuthorsWithRoles(prevAuthors => {
       // If setting to first+corresponding, clear any first or corresponding roles from others
       if (newRole === 'first+corresponding') {
-        return prevAuthors.map(author => {
-          if (author.name === authorName) {
+        return prevAuthors.map((author, idx) => {
+          if (idx === authorIndex) {
             return { ...author, role: newRole };
           } else if (author.role === 'first' || author.role === 'corresponding' || author.role === 'first+corresponding') {
             // Remove conflicting roles from other authors
@@ -354,8 +381,8 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
       }
       // If setting to first, ensure no other author has first or first+corresponding
       else if (newRole === 'first') {
-        return prevAuthors.map(author => {
-          if (author.name === authorName) {
+        return prevAuthors.map((author, idx) => {
+          if (idx === authorIndex) {
             return { ...author, role: newRole };
           } else if (author.role === 'first' || author.role === 'first+corresponding') {
             return { ...author, role: 'other' as const };
@@ -365,8 +392,8 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
       }
       // If setting to corresponding, ensure no other author has corresponding or first+corresponding
       else if (newRole === 'corresponding') {
-        return prevAuthors.map(author => {
-          if (author.name === authorName) {
+        return prevAuthors.map((author, idx) => {
+          if (idx === authorIndex) {
             return { ...author, role: newRole };
           } else if (author.role === 'corresponding' || author.role === 'first+corresponding') {
             return { ...author, role: 'other' as const };
@@ -376,8 +403,8 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
       }
       // Setting to 'other' - just update
       else {
-        return prevAuthors.map(author =>
-          author.name === authorName ? { ...author, role: newRole } : author
+        return prevAuthors.map((author, idx) =>
+          idx === authorIndex ? { ...author, role: newRole } : author
         );
       }
     });
@@ -745,7 +772,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                               <td className="px-3 py-2">
                                 <select
                                   value={author.role}
-                                  onChange={(e) => handleAuthorRoleChange(author.name, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
+                                  onChange={(e) => handleAuthorRoleChange(index, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
                                   className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                   <option value="other">Other</option>
@@ -854,25 +881,13 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                       Discipline
                     </label>
                     <select
-                      value={formData.discipline || 'Nontraditional Security'}
+                      value={formData.discipline || 'Business'}
                       onChange={(e) => setFormData({ ...formData, discipline: e.target.value })}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="Nontraditional Security">Nontraditional Security</option>
-                      <option value="Business">Business</option>
-                      <option value="Management Science">Management Science</option>
-                      <option value="Economics">Economics</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Communication">Communication</option>
-                      <option value="Psychology">Psychology</option>
-                      <option value="Law">Law</option>
-                      <option value="Cybersecurity">Cybersecurity</option>
-                      <option value="Water Security">Water Security</option>
-                      <option value="Data Science">Data Science</option>
-                      <option value="Mathematics">Mathematics</option>
-                      <option value="Human Resources">Human Resources</option>
-                      <option value="IT">IT</option>
-                      <option value="Technology Management">Technology Management</option>
+                      {DISCIPLINES.map(discipline => (
+                        <option key={discipline} value={discipline}>{discipline}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -1006,7 +1021,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                                 <td className="px-3 py-2">
                                   <select
                                     value={author.role}
-                                    onChange={(e) => handleAuthorRoleChange(author.name, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
+                                    onChange={(e) => handleAuthorRoleChange(index, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
                                     className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   >
                                     <option value="other">Other</option>
@@ -1144,25 +1159,13 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline</label>
                       <select
-                        value={manualFormData.discipline || 'Nontraditional Security'}
+                        value={manualFormData.discipline || 'Business'}
                         onChange={(e) => setManualFormData({...manualFormData, discipline: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="Nontraditional Security">Nontraditional Security</option>
-                        <option value="Business">Business</option>
-                        <option value="Management Science">Management Science</option>
-                        <option value="Economics">Economics</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Communication">Communication</option>
-                        <option value="Psychology">Psychology</option>
-                        <option value="Law">Law</option>
-                        <option value="Cybersecurity">Cybersecurity</option>
-                        <option value="Water Security">Water Security</option>
-                        <option value="Data Science">Data Science</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Human Resources">Human Resources</option>
-                        <option value="IT">IT</option>
-                        <option value="Technology Management">Technology Management</option>
+                        {DISCIPLINES.map(discipline => (
+                          <option key={discipline} value={discipline}>{discipline}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -2020,18 +2023,30 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Authors</h3>
           <div className="space-y-4">
             {(() => {
-              const authorStats: { [key: string]: { pubs: number, citations: number } } = {};
+              // Normalize author names to handle Vietnamese name variations
+              // "Thang Ngoc Nguyen" and "Nguyen Ngoc Thang" should be treated as the same
+              const normalizeAuthorName = (name: string): string => {
+                // Remove asterisk for corresponding authors
+                const cleaned = name.replace('*', '').trim().toLowerCase();
+                // Sort words alphabetically to create a canonical form
+                return cleaned.split(/\s+/).sort().join(' ');
+              };
+
+              const authorStats: { [key: string]: { pubs: number, citations: number, displayName: string } } = {};
               publications.forEach(pub => {
                 pub.authors?.forEach(author => {
-                  if (!authorStats[author]) {
-                    authorStats[author] = { pubs: 0, citations: 0 };
+                  const normalizedKey = normalizeAuthorName(author);
+                  const cleanAuthor = author.replace('*', '').trim();
+
+                  if (!authorStats[normalizedKey]) {
+                    authorStats[normalizedKey] = { pubs: 0, citations: 0, displayName: cleanAuthor };
                   }
-                  authorStats[author].pubs += 1;
-                  authorStats[author].citations += pub.citations || 0;
+                  authorStats[normalizedKey].pubs += 1;
+                  authorStats[normalizedKey].citations += pub.citations || 0;
                 });
               });
               const topAuthors = Object.entries(authorStats)
-                .map(([name, stats]) => ({ name, ...stats }))
+                .map(([key, stats]) => ({ name: stats.displayName, pubs: stats.pubs, citations: stats.citations }))
                 .sort((a, b) => b.pubs - a.pubs)
                 .slice(0, 5);
 
@@ -2259,6 +2274,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">PI</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Funding</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Progress</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Duration</th>
@@ -2269,14 +2285,14 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoadingProjects ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                     <Loader className="animate-spin mx-auto mb-2" size={24} />
                     <p className="text-sm">Loading projects...</p>
                   </td>
                 </tr>
               ) : projects.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                     <p className="text-lg font-semibold mb-2">No projects available</p>
                     <p className="text-sm">Click "New Project" to add your first project</p>
                   </td>
@@ -2303,6 +2319,17 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                           {project.department}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          project.level === 'International' ? 'bg-purple-100 text-purple-700' :
+                          project.level === 'National' ? 'bg-red-100 text-red-700' :
+                          project.level === 'Ministry' ? 'bg-yellow-100 text-yellow-700' :
+                          project.level === 'VNU' ? 'bg-green-100 text-green-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {project.level}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -2342,6 +2369,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                           <button
                             onClick={() => {
                               setEditingItem(project);
+                              setEditCoInvestigatorsInput(project.coInvestigators?.join(', ') || '');
                               setShowEditProjectModal(true);
                             }}
                             className="p-1 text-orange-600 hover:bg-orange-50 rounded"
@@ -2387,6 +2415,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
       coInvestigators: [],
       type: 'Applied Research',
       status: 'Pending',
+      level: 'HSB',
       startDate: '',
       endDate: '',
       funding: '',
@@ -2396,6 +2425,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
       department: '',
       description: ''
     });
+    const [coInvestigatorsInput, setCoInvestigatorsInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -2409,14 +2439,24 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
           pdfUrl = await projectService.uploadProjectPdf(projectPdfFile, `project-${timestamp}`);
         }
 
-        await projectService.addProject({
+        // Convert coInvestigatorsInput string to array by splitting on commas and cleaning up
+        const coInvestigatorsArray = coInvestigatorsInput
+          .split(',')
+          .map(i => i.trim())
+          .filter(i => i);
+
+        const cleanedProject = {
           ...newProject,
+          coInvestigators: coInvestigatorsArray,
           pdfUrl: pdfUrl || undefined
-        } as any);
+        };
+
+        await projectService.addProject(cleanedProject as any);
 
         alert('Project added successfully!');
         setShowAddProjectModal(false);
         setProjectPdfFile(null);
+        setCoInvestigatorsInput('');
         loadProjects();
       } catch (error) {
         console.error('Error adding project:', error);
@@ -2471,8 +2511,9 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
             {/* Co-Investigators */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Co-Investigators (comma-separated)</label>
-              <input type="text" value={newProject.coInvestigators?.join(', ') || ''}
-                onChange={(e) => setNewProject({...newProject, coInvestigators: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+              <input type="text" value={coInvestigatorsInput}
+                onChange={(e) => setCoInvestigatorsInput(e.target.value)}
+                placeholder="e.g., Dr. John Smith, Dr. Jane Doe"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
@@ -2495,6 +2536,19 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                   <option value="Pending">Pending</option>
                 </select>
               </div>
+            </div>
+
+            {/* Level */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Level *</label>
+              <select value={newProject.level || 'HSB'} onChange={(e) => setNewProject({...newProject, level: e.target.value as any})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="International">International</option>
+                <option value="National">National</option>
+                <option value="Ministry">Ministry</option>
+                <option value="VNU">VNU</option>
+                <option value="HSB">HSB</option>
+              </select>
             </div>
 
             {/* Start and End Date */}
@@ -2587,6 +2641,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
       country: '',
       ipOffice: ''
     });
+    const [inventorsInput, setInventorsInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -2600,8 +2655,15 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
           pdfUrl = await patentService.uploadPatentPdf(patentPdfFile, `patent-${timestamp}`);
         }
 
+        // Convert inventorsInput string to array by splitting on commas and cleaning up
+        const inventorsArray = inventorsInput
+          .split(',')
+          .map(i => i.trim())
+          .filter(i => i);
+
         const patentData = {
           ...newPatent,
+          inventors: inventorsArray,
           grantDate: newPatent.grantDate || null,
           patentNumber: newPatent.patentNumber || null,
           pdfUrl: pdfUrl || undefined
@@ -2612,6 +2674,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
         alert('Patent added successfully!');
         setShowAddPatentModal(false);
         setPatentPdfFile(null);
+        setInventorsInput('');
         loadPatents();
       } catch (error) {
         console.error('Error adding patent:', error);
@@ -2647,8 +2710,9 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
             {/* Inventors */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Inventors (comma-separated) *</label>
-              <input type="text" required value={newPatent.inventors?.join(', ') || ''}
-                onChange={(e) => setNewPatent({...newPatent, inventors: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+              <input type="text" required value={inventorsInput}
+                onChange={(e) => setInventorsInput(e.target.value)}
+                placeholder="e.g., Dr. John Smith, Dr. Jane Doe"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
             </div>
 
@@ -2719,23 +2783,11 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline *</label>
-                <select required value={newPatent.discipline || 'Nontraditional Security'} onChange={(e) => setNewPatent({...newPatent, discipline: e.target.value})}
+                <select required value={newPatent.discipline || 'Business'} onChange={(e) => setNewPatent({...newPatent, discipline: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                  <option value="Nontraditional Security">Nontraditional Security</option>
-                  <option value="Business">Business</option>
-                  <option value="Management Science">Management Science</option>
-                  <option value="Economics">Economics</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Communication">Communication</option>
-                  <option value="Psychology">Psychology</option>
-                  <option value="Law">Law</option>
-                  <option value="Cybersecurity">Cybersecurity</option>
-                  <option value="Water Security">Water Security</option>
-                  <option value="Data Science">Data Science</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Human Resources">Human Resources</option>
-                  <option value="IT">IT</option>
-                  <option value="Technology Management">Technology Management</option>
+                  {DISCIPLINES.map(discipline => (
+                    <option key={discipline} value={discipline}>{discipline}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -3554,6 +3606,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                           <button
                             onClick={() => {
                               setEditingItem(patent);
+                              setEditInventorsInput(patent.inventors?.join(', ') || '');
                               setShowEditPatentModal(true);
                             }}
                             className="p-1 text-orange-600 hover:bg-orange-50 rounded"
@@ -4355,7 +4408,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                               <td className="px-3 py-2">
                                 <select
                                   value={author.role}
-                                  onChange={(e) => handleAuthorRoleChange(author.name, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
+                                  onChange={(e) => handleAuthorRoleChange(index, e.target.value as 'first' | 'corresponding' | 'first+corresponding' | 'other')}
                                   className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
                                 >
                                   <option value="other">Other</option>
@@ -4494,23 +4547,11 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline</label>
-                    <select value={editingItem.discipline || 'Nontraditional Security'} onChange={(e) => setEditingItem({...editingItem, discipline: e.target.value})}
+                    <select value={editingItem.discipline || 'Business'} onChange={(e) => setEditingItem({...editingItem, discipline: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                      <option value="Nontraditional Security">Nontraditional Security</option>
-                      <option value="Business">Business</option>
-                      <option value="Management Science">Management Science</option>
-                      <option value="Economics">Economics</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Communication">Communication</option>
-                      <option value="Psychology">Psychology</option>
-                      <option value="Law">Law</option>
-                      <option value="Cybersecurity">Cybersecurity</option>
-                      <option value="Water Security">Water Security</option>
-                      <option value="Data Science">Data Science</option>
-                      <option value="Mathematics">Mathematics</option>
-                      <option value="Human Resources">Human Resources</option>
-                      <option value="IT">IT</option>
-                      <option value="Technology Management">Technology Management</option>
+                      {DISCIPLINES.map(discipline => (
+                        <option key={discipline} value={discipline}>{discipline}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -4665,8 +4706,9 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                 {/* Co-Investigators */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Co-Investigators (comma-separated)</label>
-                  <input type="text" value={editingItem.coInvestigators?.join(', ') || ''}
-                    onChange={(e) => setEditingItem({...editingItem, coInvestigators: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+                  <input type="text" value={editCoInvestigatorsInput}
+                    onChange={(e) => setEditCoInvestigatorsInput(e.target.value)}
+                    placeholder="e.g., Dr. John Smith, Dr. Jane Doe"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
 
@@ -4689,6 +4731,19 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                       <option value="Pending">Pending</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Level */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Level *</label>
+                  <select value={editingItem.level || 'HSB'} onChange={(e) => setEditingItem({...editingItem, level: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="International">International</option>
+                    <option value="National">National</option>
+                    <option value="Ministry">Ministry</option>
+                    <option value="VNU">VNU</option>
+                    <option value="HSB">HSB</option>
+                  </select>
                 </div>
 
                 {/* Start and End Date */}
@@ -4757,14 +4812,26 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                   </button>
                   <button onClick={async () => {
                     try {
+                      // Convert editCoInvestigatorsInput to array and clean up
+                      const coInvestigatorsArray = editCoInvestigatorsInput
+                        .split(',')
+                        .map(i => i.trim())
+                        .filter(i => i);
+
+                      const cleanedProject = {
+                        ...editingItem,
+                        coInvestigators: coInvestigatorsArray
+                      };
+
                       if (projectPdfFile) {
                         const pdfUrl = await projectService.uploadProjectPdf(projectPdfFile, editingItem.id);
-                        await projectService.updateProject(editingItem.id, { ...editingItem, pdfUrl });
+                        await projectService.updateProject(editingItem.id, { ...cleanedProject, pdfUrl });
                       } else {
-                        await projectService.updateProject(editingItem.id, editingItem);
+                        await projectService.updateProject(editingItem.id, cleanedProject);
                       }
                       setShowEditProjectModal(false);
                       setProjectPdfFile(null);
+                      setEditCoInvestigatorsInput('');
                       loadProjects();
                       alert('Project updated successfully!');
                     } catch (err) {
@@ -4804,8 +4871,9 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                 {/* Inventors */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Inventors (comma-separated) *</label>
-                  <input type="text" required value={editingItem.inventors?.join(', ') || ''}
-                    onChange={(e) => setEditingItem({...editingItem, inventors: e.target.value.split(',').map(i => i.trim()).filter(i => i)})}
+                  <input type="text" required value={editInventorsInput}
+                    onChange={(e) => setEditInventorsInput(e.target.value)}
+                    placeholder="e.g., Dr. John Smith, Dr. Jane Doe"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
 
@@ -4876,23 +4944,11 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Discipline *</label>
-                    <select required value={editingItem.discipline || 'Nontraditional Security'} onChange={(e) => setEditingItem({...editingItem, discipline: e.target.value})}
+                    <select required value={editingItem.discipline || 'Business'} onChange={(e) => setEditingItem({...editingItem, discipline: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                      <option value="Nontraditional Security">Nontraditional Security</option>
-                      <option value="Business">Business</option>
-                      <option value="Management Science">Management Science</option>
-                      <option value="Economics">Economics</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Communication">Communication</option>
-                      <option value="Psychology">Psychology</option>
-                      <option value="Law">Law</option>
-                      <option value="Cybersecurity">Cybersecurity</option>
-                      <option value="Water Security">Water Security</option>
-                      <option value="Data Science">Data Science</option>
-                      <option value="Mathematics">Mathematics</option>
-                      <option value="Human Resources">Human Resources</option>
-                      <option value="IT">IT</option>
-                      <option value="Technology Management">Technology Management</option>
+                      {DISCIPLINES.map(discipline => (
+                        <option key={discipline} value={discipline}>{discipline}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -4935,14 +4991,26 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
                   </button>
                   <button onClick={async () => {
                     try {
+                      // Convert editInventorsInput to array and clean up
+                      const inventorsArray = editInventorsInput
+                        .split(',')
+                        .map(i => i.trim())
+                        .filter(i => i);
+
+                      const cleanedPatent = {
+                        ...editingItem,
+                        inventors: inventorsArray
+                      };
+
                       if (patentPdfFile) {
                         const pdfUrl = await patentService.uploadPatentPdf(patentPdfFile, editingItem.id);
-                        await patentService.updatePatent(editingItem.id, { ...editingItem, pdfUrl });
+                        await patentService.updatePatent(editingItem.id, { ...cleanedPatent, pdfUrl });
                       } else {
-                        await patentService.updatePatent(editingItem.id, editingItem);
+                        await patentService.updatePatent(editingItem.id, cleanedPatent);
                       }
                       setShowEditPatentModal(false);
                       setPatentPdfFile(null);
+                      setEditInventorsInput('');
                       loadPatents();
                       alert('Patent updated successfully!');
                     } catch (err) {
