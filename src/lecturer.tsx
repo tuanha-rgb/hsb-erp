@@ -11,7 +11,7 @@ import {
   BookPlus, Vote
 } from 'lucide-react';
 import * as QRCode from "qrcode";
-import DocumentHandbooks from "./documents/documenthandbook";
+import DocumentHandbook from "./documents/documenthandbook";
 import LibraryViewer from "./library/libraryviewer";
 import PollSystem from './PollSystem';
 import ResearchManagement from './research/ResearchManagement';
@@ -2255,7 +2255,7 @@ const LecturerApp = () => {
       case 'Schedule':
         return <ScheduleView />;
       case 'Documents':
-        return <DocumentHandbooks />;  
+        return <DocumentHandbook userRole="staff" userId="lecturer-001" userName="Dr. Nguyen Van A" />;  
       case 'Research':
         return <ResearchManagement />;
       case 'Projects':

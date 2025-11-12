@@ -37,6 +37,7 @@ import DocumentList from './documents/DocumentList';
 import DocumentUpload from './documents/DocumentUpload';
 import DocumentDashboard from './documents/DocumentDashboard';
 import CategoryManager from './documents/CategoryManager';
+import DocumentHandbook from './documents/documenthandbook';
 
 // ✅ Types (match your file name exactly)
 import {
@@ -11818,9 +11819,12 @@ const availableTabs = [
           onClose={() => setActiveTab('my-documents')}
         />
       );
+    }
     if (activeTab == 'category-manager'){
       return <CategoryManager />;
     }
+    if (activeTab == 'handbook'){
+      return <DocumentHandbook userRole="admin" userId={mockUser.id} userName={mockUser.name} />;
     }
     if (activeTab == 'projects'){
       return <ProjectsTab userId={mockUser.id} userName={mockUser.name} />;

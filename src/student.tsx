@@ -9,7 +9,7 @@ import { Home, User, BookOpen, DollarSign, Activity, Calendar, Bell, Search,
 FileQuestion, FileDown, PieChart, Filter, XCircle, Pencil, Users, FileText, Gem, Notebook, Book, Building,
 Star, Send, MessageSquare, Vote} 
 from 'lucide-react';
-import Documents from "./documents/documenthandbook";
+import DocumentHandbook from "./documents/documenthandbook";
 import LibraryViewer from "./library/libraryviewer";
 import PollSystem from './PollSystem';
 import ProjectsTab from './projects/ProjectsTab';
@@ -6627,7 +6627,7 @@ return (
             />
           )}
           {activePage === 'onestop' && <OneStop />}
-          {activePage === 'documents' && <Documents />}
+          {activePage === 'documents' && <DocumentHandbook userRole="student" userId={mockStudent.id} userName="Student User" />}
           {activePage === 'projects' && <ProjectsTab userId={mockStudent.id} userName="Student User" />}
           {activePage === 'polling' && (
             <PollSystem
