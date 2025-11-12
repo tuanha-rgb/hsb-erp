@@ -13,7 +13,9 @@
       "Bash(findstr:*)",
       "Bash(unzip:*)",
       "Bash(npx ts-node:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(firebase functions:log:*)",
+      "Bash(/dev/null)"
     ],
     "deny": [],
     "ask": []

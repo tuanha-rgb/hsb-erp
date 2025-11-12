@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Attendance Loader</title>
+</head>
+<body>
+    <h1>Testing Attendance Loader Access</h1>
+    <p>Click the link below to access the attendance loader:</p>
+    <a href="/?tab=load-attendance" style="font-size: 20px; color: blue;">
+        → Open Attendance Loader
+    </a>
+
+    <hr>
+    <h2>Alternative Methods:</h2>
+    <button onclick="window.location.href='/?tab=load-attendance'">
+        Open Attendance Loader (Button)
+    </button>
+
+    <h2>Debug Info:</h2>
+    <pre id="info"></pre>
+
+    <script>
+        document.getElementById('info').textContent =
+            'Current URL: ' + window.location.href + '\n' +
+            'Tab parameter: ' + new URLSearchParams(window.location.search).get('tab');
+    </script>
+</body>
+</html>

@@ -1,16 +1,23 @@
 {
-  "name": "scimago-proxy-server",
+  "name": "hsb-backend-servers",
   "version": "1.0.0",
-  "description": "Proxy server for scraping SCImago journal quartile data",
+  "description": "Backend proxy servers for HSB-ERP (SCImago, WOS, Attendance Webhooks)",
   "main": "scimago-proxy.js",
   "scripts": {
-    "start": "node scimago-proxy.js"
+    "start": "node scimago-proxy.js",
+    "scimago": "node scimago-proxy.js",
+    "attendance": "node attendance-webhook.js",
+    "dev": "concurrently \"npm run scimago\" \"npm run attendance\""
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
     "node-fetch": "^2.6.7",
     "puppeteer": "^24.29.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

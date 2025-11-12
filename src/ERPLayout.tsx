@@ -19,6 +19,7 @@ import ResearchManagement from "./research/ResearchManagement";
 
 import { AttendanceRecord, StudentAttendanceStats, CourseAttendance, AttendanceAlert, AICamera, initializeAttendanceData } from "./attendance/attendancemodel";
 import AttendanceLive from "./attendance/attendanceLive";
+import AttendanceLoader from "./attendance/AttendanceLoader";
 
 import LibraryViewer from "./library/libraryviewer";
 import ThesisStorage from "./library/ThesisStorage";
@@ -116,6 +117,16 @@ const ERPLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [sidebarLocked, setSidebarLocked] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  // Read URL parameters and set activeTab on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      console.log('Setting activeTab from URL:', tabParam);
+      setActiveTab(tabParam);
+    }
+  }, []);
 // At the top of ERPLayout.tsx, add mock user
 const mockUser = {
   id: 'test-user-001',
@@ -11747,7 +11758,13 @@ const availableTabs = [
       return <Scholarship />;
     }
     if (activeTab === 'attendance') {
+      return <AttendanceLoader />;
+    }
+    if (activeTab === 'attendance-live') {
       return <AttendanceLive />;
+    }
+    if (activeTab === 'attendance-loader' || activeTab === 'load-attendance') {
+      return <AttendanceLoader />;
     }
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;
