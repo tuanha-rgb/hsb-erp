@@ -2,10 +2,11 @@
 // Simple component to load and display ALL attendance records from Firebase
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebase.config';
 import { Users, Calendar, Camera, Download, RefreshCw, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { verifyAttendanceData, exportUnmatchedStudents } from './verify-attendance';
+import { getBlockInfoFromTimestamp } from './blockUtils';
 
 interface AttendanceRecord {
   id: string;
@@ -43,6 +44,12 @@ export default function AttendanceLoader() {
   const [showBlockForm, setShowBlockForm] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState<'spring' | 'summer' | 'fall' | ''>('');
   const [blockDates, setBlockDates] = useState<{[key: number]: {start: string, end: string}}>({});
+  const [savedBlockConfigs, setSavedBlockConfigs] = useState<{
+    [semester: string]: {[key: number]: {start: string, end: string}}
+  }>({});
+  const [currentPageAll, setCurrentPageAll] = useState(1);
+  const [currentPageStudents, setCurrentPageStudents] = useState(1);
+  const recordsPerPage = 50;
 
   const loadAttendance = async () => {
     setLoading(true);
@@ -196,31 +203,108 @@ export default function AttendanceLoader() {
     return 0;
   };
 
-  // Handle semester change
-  const handleSemesterChange = (semester: 'spring' | 'summer' | 'fall' | '') => {
-    setSelectedSemester(semester);
-    setBlockDates({});
-
-    // Initialize empty date ranges for each block
-    if (semester) {
-      const count = getBlockCount(semester);
-      const initial: {[key: number]: {start: string, end: string}} = {};
-      for (let i = 1; i <= count; i++) {
-        initial[i] = { start: '', end: '' };
+  // Load saved block configurations from localStorage
+  const loadSavedConfigs = () => {
+    try {
+      const saved = localStorage.getItem('attendance_block_configs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setSavedBlockConfigs(parsed);
+        return parsed;
       }
-      setBlockDates(initial);
+    } catch (err) {
+      console.error('Failed to load saved configs:', err);
+    }
+    return {};
+  };
+
+  // Save block configuration to localStorage
+  const saveBlockConfig = (semester: string, dates: {[key: number]: {start: string, end: string}}) => {
+    try {
+      const updated = {
+        ...savedBlockConfigs,
+        [semester]: dates
+      };
+      localStorage.setItem('attendance_block_configs', JSON.stringify(updated));
+      setSavedBlockConfigs(updated);
+    } catch (err) {
+      console.error('Failed to save config:', err);
     }
   };
 
-  // Update block date
+  // Handle semester change
+  const handleSemesterChange = (semester: 'spring' | 'summer' | 'fall' | '') => {
+    setSelectedSemester(semester);
+
+    // Load saved configuration if exists, otherwise initialize empty
+    if (semester) {
+      const count = getBlockCount(semester);
+
+      // Check if we have saved configuration for this semester
+      if (savedBlockConfigs[semester]) {
+        setBlockDates(savedBlockConfigs[semester]);
+      } else {
+        // Initialize empty date ranges for each block
+        const initial: {[key: number]: {start: string, end: string}} = {};
+        for (let i = 1; i <= count; i++) {
+          initial[i] = { start: '', end: '' };
+        }
+        setBlockDates(initial);
+      }
+    } else {
+      setBlockDates({});
+    }
+  };
+
+  // Update block date and auto-save
   const updateBlockDate = (blockNum: number, field: 'start' | 'end', value: string) => {
-    setBlockDates(prev => ({
-      ...prev,
+    const updated = {
+      ...blockDates,
       [blockNum]: {
-        ...prev[blockNum],
+        ...blockDates[blockNum],
         [field]: value
       }
-    }));
+    };
+    setBlockDates(updated);
+
+    // Auto-save to localStorage
+    if (selectedSemester) {
+      saveBlockConfig(selectedSemester, updated);
+    }
+  };
+
+  // Get session from timestamp hour
+  const getSession = (timestamp: Date): 'M' | 'A' | 'E' => {
+    const hour = timestamp.getHours();
+
+    if (hour >= 7 && hour < 13) {
+      return 'M'; // Morning: 7:00 AM - 1:00 PM
+    } else if (hour >= 13 && hour < 18) {
+      return 'A'; // Afternoon: 1:00 PM - 6:00 PM
+    } else {
+      return 'E'; // Evening: 6:00 PM - 9:00 PM
+    }
+  };
+
+  // Log block configuration update to Firebase
+  const logBlockUpdate = async (semester: string, blockConfig: any, updateStats: any) => {
+    try {
+      await addDoc(collection(db, 'attendance_block_logs'), {
+        timestamp: serverTimestamp(),
+        semester: semester,
+        blockConfiguration: blockConfig,
+        updateStats: updateStats,
+        action: 'block_update',
+        sessionRanges: {
+          morning: '7:00 AM - 1:00 PM',
+          afternoon: '1:00 PM - 6:00 PM',
+          evening: '6:00 PM - 9:00 PM'
+        }
+      });
+      console.log('Block update logged to Firebase');
+    } catch (err) {
+      console.error('Failed to log block update:', err);
+    }
   };
 
   // Update course codes based on block configuration
@@ -247,6 +331,9 @@ export default function AttendanceLoader() {
       setLoading(true);
       const batch = writeBatch(db);
       let updated = 0;
+      let skipped = 0;
+      const sessionCounts = { M: 0, A: 0, E: 0 };
+      const blockCounts: {[key: number]: number} = {};
 
       for (const record of records) {
         const recordDate = record.timestamp.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -264,18 +351,39 @@ export default function AttendanceLoader() {
         }
 
         if (matchedBlock) {
+          // Get session from timestamp
+          const session = getSession(record.timestamp);
+          const courseCode = `Blk${matchedBlock}_${session}`;
+
           const docRef = doc(db, 'attendance_records', record.id);
           batch.update(docRef, {
-            courseId: `Blk${matchedBlock}`,
+            courseId: courseCode,
             semester: selectedSemester,
-            block: matchedBlock
+            block: matchedBlock,
+            session: session
           });
           updated++;
+
+          // Track statistics
+          sessionCounts[session]++;
+          blockCounts[matchedBlock] = (blockCounts[matchedBlock] || 0) + 1;
+        } else {
+          skipped++;
         }
       }
 
       await batch.commit();
-      alert(`Successfully updated ${updated} records with block information!`);
+
+      // Log to Firebase
+      await logBlockUpdate(selectedSemester, blockDates, {
+        totalRecords: records.length,
+        updated: updated,
+        skipped: skipped,
+        sessionBreakdown: sessionCounts,
+        blockBreakdown: blockCounts
+      });
+
+      alert(`Successfully updated ${updated} records with block and session information!\n\nBreakdown:\n- Morning (M): ${sessionCounts.M}\n- Afternoon (A): ${sessionCounts.A}\n- Evening (E): ${sessionCounts.E}\n- Skipped: ${skipped}`);
 
       // Reload attendance to show updated data
       await loadAttendance();
@@ -287,13 +395,121 @@ export default function AttendanceLoader() {
     }
   };
 
+  // Load saved configurations on mount
+  useEffect(() => {
+    loadSavedConfigs();
+  }, []);
+
   useEffect(() => {
     loadAttendance();
   }, []);
 
+  // Reset pagination when view changes
+  useEffect(() => {
+    setCurrentPageAll(1);
+    setCurrentPageStudents(1);
+  }, [view]);
+
+  // Reset pagination when data is reloaded
+  useEffect(() => {
+    setCurrentPageAll(1);
+    setCurrentPageStudents(1);
+  }, [records.length, students.size]);
+
   const sortedStudents = Array.from(students.values()).sort((a, b) =>
     b.totalRecords - a.totalRecords
   );
+
+  // Pagination calculations for All Records
+  const totalPagesAll = Math.ceil(records.length / recordsPerPage);
+  const indexOfLastRecordAll = currentPageAll * recordsPerPage;
+  const indexOfFirstRecordAll = indexOfLastRecordAll - recordsPerPage;
+  const currentRecordsAll = records.slice(indexOfFirstRecordAll, indexOfLastRecordAll);
+
+  // Pagination calculations for By Students
+  const totalPagesStudents = Math.ceil(sortedStudents.length / recordsPerPage);
+  const indexOfLastStudentAll = currentPageStudents * recordsPerPage;
+  const indexOfFirstStudentAll = indexOfLastStudentAll - recordsPerPage;
+  const currentStudents = sortedStudents.slice(indexOfFirstStudentAll, indexOfLastStudentAll);
+
+  // Pagination component
+  const PaginationControls = ({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex items-center justify-center gap-2 mt-4">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+        >
+          Previous
+        </button>
+
+        {startPage > 1 && (
+          <>
+            <button
+              onClick={() => onPageChange(1)}
+              className="px-3 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="px-2">...</span>}
+          </>
+        )}
+
+        {pageNumbers.map(number => (
+          <button
+            key={number}
+            onClick={() => onPageChange(number)}
+            className={`px-3 py-2 border rounded-lg font-medium ${
+              currentPage === number
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'hover:bg-gray-50'
+            }`}
+          >
+            {number}
+          </button>
+        ))}
+
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="px-2">...</span>}
+            <button
+              onClick={() => onPageChange(totalPages)}
+              className="px-3 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+        >
+          Next
+        </button>
+
+        <span className="ml-4 text-sm text-gray-600">
+          Page {currentPage} of {totalPages}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -352,16 +568,57 @@ export default function AttendanceLoader() {
             </div>
           </div>
 
-          {/* Add Block & Semester Button */}
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => setShowBlockForm(!showBlockForm)}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 shadow-lg font-semibold"
-            >
-              <Settings className="w-5 h-5" />
-              {showBlockForm ? 'Hide Block Configuration' : 'Add Block & Semester Info'}
-            </button>
-          </div>
+          {/* Current Block Status */}
+          {(() => {
+            const now = new Date();
+            const currentBlock = getBlockInfoFromTimestamp(now);
+            const hasConfigs = Object.keys(savedBlockConfigs).length > 0;
+
+            return (
+              <div className={`mt-4 p-4 rounded-lg border-2 ${
+                currentBlock
+                  ? 'bg-green-50 border-green-300'
+                  : 'bg-yellow-50 border-yellow-300'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${currentBlock ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></div>
+                    <div>
+                      {currentBlock ? (
+                        <>
+                          <p className="font-semibold text-green-900">
+                            ✓ Auto-Assignment Active: <span className="font-mono bg-green-200 px-2 py-1 rounded">{currentBlock.courseCode}</span>
+                          </p>
+                          <p className="text-sm text-green-700">
+                            Today ({now.toLocaleDateString()}) is in {currentBlock.semester.charAt(0).toUpperCase() + currentBlock.semester.slice(1)} Semester, Block {currentBlock.block}, {currentBlock.session === 'M' ? 'Morning' : currentBlock.session === 'A' ? 'Afternoon' : 'Evening'} session
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-semibold text-yellow-900">
+                            ⚠ Auto-Assignment Inactive
+                          </p>
+                          <p className="text-sm text-yellow-700">
+                            {hasConfigs
+                              ? `Today (${now.toLocaleDateString()}) is not within any configured block dates. New records will use DEFAULT_COURSE.`
+                              : 'No block configurations found. Click "Add Block & Semester Info" to configure.'
+                            }
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowBlockForm(!showBlockForm)}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 shadow-lg font-semibold"
+                  >
+                    <Settings className="w-5 h-5" />
+                    {showBlockForm ? 'Hide Block Configuration' : 'Configure Blocks'}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Block & Semester Configuration Form */}
           {showBlockForm && (
@@ -380,10 +637,23 @@ export default function AttendanceLoader() {
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                   >
                     <option value="">-- Choose Semester --</option>
-                    <option value="spring">🌸 Spring Semester (3 blocks)</option>
-                    <option value="summer">☀️ Summer Semester (1 block)</option>
-                    <option value="fall">🍂 Fall Semester (3 blocks)</option>
+                    <option value="spring">
+                      🌸 Spring Semester (3 blocks) {savedBlockConfigs['spring'] ? '✓ Saved' : ''}
+                    </option>
+                    <option value="summer">
+                      ☀️ Summer Semester (1 block) {savedBlockConfigs['summer'] ? '✓ Saved' : ''}
+                    </option>
+                    <option value="fall">
+                      🍂 Fall Semester (3 blocks) {savedBlockConfigs['fall'] ? '✓ Saved' : ''}
+                    </option>
                   </select>
+
+                  {/* Show saved indicator */}
+                  {selectedSemester && savedBlockConfigs[selectedSemester] && (
+                    <p className="mt-2 text-sm text-green-600 font-medium">
+                      ✓ This semester has saved block configurations
+                    </p>
+                  )}
                 </div>
 
                 {/* Block Date Configuration Table */}
@@ -462,6 +732,12 @@ export default function AttendanceLoader() {
                   <li>2. Enter start and end dates for each block</li>
                   <li>3. Click "Update All Course Codes" to automatically update all attendance records</li>
                   <li>4. The system will check each record's timestamp and assign it to the correct block</li>
+                  <li>5. Session codes are automatically added based on time:</li>
+                  <li className="ml-6">• <strong>M</strong> (Morning): 7:00 AM - 1:00 PM</li>
+                  <li className="ml-6">• <strong>A</strong> (Afternoon): 1:00 PM - 6:00 PM</li>
+                  <li className="ml-6">• <strong>E</strong> (Evening): 6:00 PM - 9:00 PM</li>
+                  <li>6. Result example: <code className="bg-white px-2 py-1 rounded font-mono">Blk2_M</code> = Block 2, Morning session</li>
+                  <li>7. All updates are logged to Firebase for tracking</li>
                 </ul>
               </div>
             </div>
@@ -607,7 +883,7 @@ export default function AttendanceLoader() {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {records.slice(0, 100).map(record => (
+                    {currentRecordsAll.map(record => (
                       <tr key={record.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2 whitespace-nowrap">
                           {record.timestamp.toLocaleString()}
@@ -631,49 +907,74 @@ export default function AttendanceLoader() {
                     ))}
                   </tbody>
                 </table>
-                {records.length > 100 && (
-                  <p className="text-center text-gray-500 mt-4">
-                    Showing first 100 of {records.length} records. Export for full data.
-                  </p>
+
+                {/* Pagination for All Records */}
+                {records.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-center text-gray-600 text-sm mb-2">
+                      Showing {indexOfFirstRecordAll + 1} to {Math.min(indexOfLastRecordAll, records.length)} of {records.length} records
+                    </p>
+                    <PaginationControls
+                      currentPage={currentPageAll}
+                      totalPages={totalPagesAll}
+                      onPageChange={setCurrentPageAll}
+                    />
+                  </div>
                 )}
               </div>
             ) : (
-              <div className="space-y-3">
-                {sortedStudents.map(student => (
-                  <div key={student.studentId} className="border rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-lg">{student.studentName}</h3>
-                        <p className="text-sm text-gray-600">ID: {student.studentId}</p>
+              <div>
+                <div className="space-y-3">
+                  {currentStudents.map(student => (
+                    <div key={student.studentId} className="border rounded-lg p-4 hover:shadow-md transition">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-semibold text-lg">{student.studentName}</h3>
+                          <p className="text-sm text-gray-600">ID: {student.studentId}</p>
+                        </div>
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
+                          {student.totalRecords} records
+                        </span>
                       </div>
-                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
-                        {student.totalRecords} records
-                      </span>
+                      <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">First Seen</p>
+                          <p className="font-medium">{student.firstSeen.toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-500">{student.firstSeen.toLocaleTimeString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Last Seen</p>
+                          <p className="font-medium">{student.lastSeen.toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-500">{student.lastSeen.toLocaleTimeString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Cameras</p>
+                          <p className="font-medium">{student.cameras.size} camera(s)</p>
+                          <p className="text-xs text-gray-500">{Array.from(student.cameras).join(', ')}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Courses</p>
+                          <p className="font-medium">{student.courses.size} course(s)</p>
+                          <p className="text-xs text-gray-500">{Array.from(student.courses).join(', ')}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-600">First Seen</p>
-                        <p className="font-medium">{student.firstSeen.toLocaleDateString()}</p>
-                        <p className="text-xs text-gray-500">{student.firstSeen.toLocaleTimeString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Last Seen</p>
-                        <p className="font-medium">{student.lastSeen.toLocaleDateString()}</p>
-                        <p className="text-xs text-gray-500">{student.lastSeen.toLocaleTimeString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Cameras</p>
-                        <p className="font-medium">{student.cameras.size} camera(s)</p>
-                        <p className="text-xs text-gray-500">{Array.from(student.cameras).join(', ')}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Courses</p>
-                        <p className="font-medium">{student.courses.size} course(s)</p>
-                        <p className="text-xs text-gray-500">{Array.from(student.courses).join(', ')}</p>
-                      </div>
-                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination for By Student */}
+                {sortedStudents.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-center text-gray-600 text-sm mb-2">
+                      Showing {indexOfFirstStudentAll + 1} to {Math.min(indexOfLastStudentAll, sortedStudents.length)} of {sortedStudents.length} students
+                    </p>
+                    <PaginationControls
+                      currentPage={currentPageStudents}
+                      totalPages={totalPagesStudents}
+                      onPageChange={setCurrentPageStudents}
+                    />
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

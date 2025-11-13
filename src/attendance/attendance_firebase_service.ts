@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/firebase.config'; // Uses your existing firebase_config.ts
 import type { AttendanceRecord, StudentAttendanceStats, CourseAttendance, AttendanceAlert, AICamera } from './attendancemodel';
+import { getBlockInfoFromTimestamp, getCourseCodeFromTimestamp } from './blockUtils';
 
 // Firebase Collections
 const COLLECTIONS = {
@@ -51,6 +52,9 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
   const batch = writeBatch(db);
   const timestamp = new Date(payload.timestamp);
 
+  // Get block and session info from timestamp
+  const blockInfo = getBlockInfoFromTimestamp(timestamp);
+
   // Process each detected face
   for (const face of payload.detected_faces) {
     if (face.confidence < 0.75) continue; // Skip low-confidence detections
@@ -61,7 +65,7 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
     const record: Partial<AttendanceRecord> = {
       id: attendanceId,
       studentId: face.student_id,
-      courseId: payload.session_info.course_id,
+      courseId: blockInfo ? blockInfo.courseCode : payload.session_info.course_id,
       date: timestamp,
       status: 'present',
       source: 'ai-camera',
@@ -69,7 +73,13 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
       timestamp,
       cameraId: payload.camera_id,
       lecturerVerified: false,
-      notes: `AI Detection - Confidence: ${(face.confidence * 100).toFixed(1)}%`
+      notes: `AI Detection - Confidence: ${(face.confidence * 100).toFixed(1)}%`,
+      // Add block and session info if available
+      ...(blockInfo && {
+        semester: blockInfo.semester,
+        block: blockInfo.block,
+        session: blockInfo.session
+      })
     };
 
     batch.set(attendanceRef, {
@@ -96,10 +106,23 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
 // ============= ATTENDANCE RECORDING =============
 export async function recordAttendance(record: AttendanceRecord): Promise<void> {
   const docRef = doc(db, COLLECTIONS.attendance, record.id);
+
+  // Get block and session info from timestamp if not already provided
+  const timestamp = record.timestamp || new Date();
+  const blockInfo = getBlockInfoFromTimestamp(timestamp);
+
   await setDoc(docRef, {
     ...record,
+    // Override courseId with block code if available
+    courseId: blockInfo ? blockInfo.courseCode : record.courseId,
     date: Timestamp.fromDate(record.date),
     timestamp: record.timestamp ? Timestamp.fromDate(record.timestamp) : Timestamp.now(),
+    // Add block and session info if available
+    ...(blockInfo && {
+      semester: blockInfo.semester,
+      block: blockInfo.block,
+      session: blockInfo.session
+    }),
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now()
   });
@@ -107,13 +130,26 @@ export async function recordAttendance(record: AttendanceRecord): Promise<void> 
 
 export async function bulkRecordAttendance(records: AttendanceRecord[]): Promise<void> {
   const batch = writeBatch(db);
-  
+
   records.forEach(record => {
     const docRef = doc(db, COLLECTIONS.attendance, record.id);
+
+    // Get block and session info from timestamp if not already provided
+    const timestamp = record.timestamp || new Date();
+    const blockInfo = getBlockInfoFromTimestamp(timestamp);
+
     batch.set(docRef, {
       ...record,
+      // Override courseId with block code if available
+      courseId: blockInfo ? blockInfo.courseCode : record.courseId,
       date: Timestamp.fromDate(record.date),
       timestamp: record.timestamp ? Timestamp.fromDate(record.timestamp) : Timestamp.now(),
+      // Add block and session info if available
+      ...(blockInfo && {
+        semester: blockInfo.semester,
+        block: blockInfo.block,
+        session: blockInfo.session
+      }),
       createdAt: Timestamp.now()
     });
   });
