@@ -2,9 +2,9 @@
 // Simple component to load and display ALL attendance records from Firebase
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase/firebase.config';
-import { Users, Calendar, Camera, Download, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, Calendar, Camera, Download, RefreshCw, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { verifyAttendanceData, exportUnmatchedStudents } from './verify-attendance';
 
 interface AttendanceRecord {
@@ -40,6 +40,9 @@ export default function AttendanceLoader() {
   const [maxRecords, setMaxRecords] = useState(1000);
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [verifying, setVerifying] = useState(false);
+  const [showBlockForm, setShowBlockForm] = useState(false);
+  const [selectedSemester, setSelectedSemester] = useState<'spring' | 'summer' | 'fall' | ''>('');
+  const [blockDates, setBlockDates] = useState<{[key: number]: {start: string, end: string}}>({});
 
   const loadAttendance = async () => {
     setLoading(true);
@@ -186,6 +189,104 @@ export default function AttendanceLoader() {
     }
   };
 
+  // Get number of blocks for each semester
+  const getBlockCount = (semester: string) => {
+    if (semester === 'summer') return 1;
+    if (semester === 'spring' || semester === 'fall') return 3;
+    return 0;
+  };
+
+  // Handle semester change
+  const handleSemesterChange = (semester: 'spring' | 'summer' | 'fall' | '') => {
+    setSelectedSemester(semester);
+    setBlockDates({});
+
+    // Initialize empty date ranges for each block
+    if (semester) {
+      const count = getBlockCount(semester);
+      const initial: {[key: number]: {start: string, end: string}} = {};
+      for (let i = 1; i <= count; i++) {
+        initial[i] = { start: '', end: '' };
+      }
+      setBlockDates(initial);
+    }
+  };
+
+  // Update block date
+  const updateBlockDate = (blockNum: number, field: 'start' | 'end', value: string) => {
+    setBlockDates(prev => ({
+      ...prev,
+      [blockNum]: {
+        ...prev[blockNum],
+        [field]: value
+      }
+    }));
+  };
+
+  // Update course codes based on block configuration
+  const updateCourseCodes = async () => {
+    if (!selectedSemester) {
+      alert('Please select a semester first');
+      return;
+    }
+
+    // Validate all blocks have dates
+    const blockCount = getBlockCount(selectedSemester);
+    for (let i = 1; i <= blockCount; i++) {
+      if (!blockDates[i]?.start || !blockDates[i]?.end) {
+        alert(`Please fill in start and end dates for Block ${i}`);
+        return;
+      }
+    }
+
+    if (!confirm(`Update all ${records.length} attendance records with block information?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const batch = writeBatch(db);
+      let updated = 0;
+
+      for (const record of records) {
+        const recordDate = record.timestamp.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        // Find which block this record belongs to
+        let matchedBlock = null;
+        for (let blockNum = 1; blockNum <= blockCount; blockNum++) {
+          const blockStart = blockDates[blockNum].start;
+          const blockEnd = blockDates[blockNum].end;
+
+          if (recordDate >= blockStart && recordDate <= blockEnd) {
+            matchedBlock = blockNum;
+            break;
+          }
+        }
+
+        if (matchedBlock) {
+          const docRef = doc(db, 'attendance_records', record.id);
+          batch.update(docRef, {
+            courseId: `Blk${matchedBlock}`,
+            semester: selectedSemester,
+            block: matchedBlock
+          });
+          updated++;
+        }
+      }
+
+      await batch.commit();
+      alert(`Successfully updated ${updated} records with block information!`);
+
+      // Reload attendance to show updated data
+      await loadAttendance();
+    } catch (err) {
+      console.error('Update failed:', err);
+      alert('Failed to update course codes. Check console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadAttendance();
   }, []);
@@ -251,53 +352,170 @@ export default function AttendanceLoader() {
             </div>
           </div>
 
-          {/* Verification Results */}
-          {verificationResult && (
-            <div className="mt-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-purple-900">Database Match Results</h3>
-                {verificationResult.unmatchedIds.length > 0 && (
-                  <button
-                    onClick={() => exportUnmatchedStudents(verificationResult.unmatchedIds)}
-                    className="text-sm px-3 py-1 bg-white border border-purple-300 rounded hover:bg-purple-50"
+          {/* Add Block & Semester Button */}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setShowBlockForm(!showBlockForm)}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2 shadow-lg font-semibold"
+            >
+              <Settings className="w-5 h-5" />
+              {showBlockForm ? 'Hide Block Configuration' : 'Add Block & Semester Info'}
+            </button>
+          </div>
+
+          {/* Block & Semester Configuration Form */}
+          {showBlockForm && (
+            <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Configure Block & Semester Time Periods</h3>
+
+              <div className="bg-white rounded-lg p-6 mb-4">
+                {/* Semester Selection */}
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Step 1: Select Semester
+                  </label>
+                  <select
+                    value={selectedSemester}
+                    onChange={(e) => handleSemesterChange(e.target.value as any)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                   >
-                    Export Unmatched
-                  </button>
+                    <option value="">-- Choose Semester --</option>
+                    <option value="spring">🌸 Spring Semester (3 blocks)</option>
+                    <option value="summer">☀️ Summer Semester (1 block)</option>
+                    <option value="fall">🍂 Fall Semester (3 blocks)</option>
+                  </select>
+                </div>
+
+                {/* Block Date Configuration Table */}
+                {selectedSemester && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-gray-700 mb-3">
+                      Step 2: Set Time Period for Each Block
+                    </label>
+                    <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Block</th>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Start Date</th>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">End Date</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {Array.from({ length: getBlockCount(selectedSemester) }, (_, i) => i + 1).map(blockNum => (
+                            <tr key={blockNum} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 font-semibold text-blue-600">
+                                Block {blockNum}
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="date"
+                                  value={blockDates[blockNum]?.start || ''}
+                                  onChange={(e) => updateBlockDate(blockNum, 'start', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="date"
+                                  value={blockDates[blockNum]?.end || ''}
+                                  onChange={(e) => updateBlockDate(blockNum, 'end', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 )}
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setShowBlockForm(false);
+                      setSelectedSemester('');
+                      setBlockDates({});
+                    }}
+                    className="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={updateCourseCodes}
+                    disabled={!selectedSemester || loading}
+                    className="px-6 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 disabled:bg-gray-400 font-semibold flex items-center gap-2"
+                  >
+                    {loading ? 'Updating...' : '✓ Update All Course Codes'}
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600">Match Rate</p>
-                  <p className={`text-2xl font-bold ${
-                    verificationResult.matchRate > 80 ? 'text-green-600' :
-                    verificationResult.matchRate > 50 ? 'text-yellow-600' :
-                    'text-red-600'
-                  }`}>
-                    {verificationResult.matchRate.toFixed(1)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Matched Students</p>
-                  <p className="text-2xl font-bold text-green-600">{verificationResult.matched}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Unmatched</p>
-                  <p className="text-2xl font-bold text-red-600">{verificationResult.unmatched}</p>
-                </div>
+
+              {/* Information Box */}
+              <div className="bg-blue-100 border border-blue-300 rounded-lg p-4">
+                <p className="text-sm text-blue-900 font-semibold mb-2">
+                  📖 How it works:
+                </p>
+                <ul className="space-y-1 text-sm text-blue-800">
+                  <li>1. Select a semester (Spring, Summer, or Fall)</li>
+                  <li>2. Enter start and end dates for each block</li>
+                  <li>3. Click "Update All Course Codes" to automatically update all attendance records</li>
+                  <li>4. The system will check each record's timestamp and assign it to the correct block</li>
+                </ul>
               </div>
-              {verificationResult.unmatched > 0 && (
-                <div className="mt-3 p-3 bg-yellow-50 rounded text-sm">
-                  <p className="font-medium text-yellow-900">⚠️ Action Required:</p>
-                  <p className="text-yellow-800 mt-1">
-                    {verificationResult.unmatched} student(s) in attendance are not in your student database.
-                    Click "Export Unmatched" to get a list.
-                  </p>
-                </div>
-              )}
             </div>
           )}
+        </div>
 
-          {/* Stats */}
+        {/* Verification Results */}
+        {verificationResult && (
+          <div className="mt-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-purple-900">Database Match Results</h3>
+              {verificationResult.unmatchedIds.length > 0 && (
+                <button
+                  onClick={() => exportUnmatchedStudents(verificationResult.unmatchedIds)}
+                  className="text-sm px-3 py-1 bg-white border border-purple-300 rounded hover:bg-purple-50"
+                >
+                  Export Unmatched
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div>
+                <p className="text-gray-600">Match Rate</p>
+                <p className={`text-2xl font-bold ${
+                  verificationResult.matchRate > 80 ? 'text-green-600' :
+                  verificationResult.matchRate > 50 ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {verificationResult.matchRate.toFixed(1)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-600">Matched Students</p>
+                <p className="text-2xl font-bold text-green-600">{verificationResult.matched}</p>
+              </div>
+              <div>
+                <p className="text-gray-600">Unmatched</p>
+                <p className="text-2xl font-bold text-red-600">{verificationResult.unmatched}</p>
+              </div>
+            </div>
+            {verificationResult.unmatched > 0 && (
+              <div className="mt-3 p-3 bg-yellow-50 rounded text-sm">
+                <p className="font-medium text-yellow-900">⚠️ Action Required:</p>
+                <p className="text-yellow-800 mt-1">
+                  {verificationResult.unmatched} student(s) in attendance are not in your student database.
+                  Click "Export Unmatched" to get a list.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="grid grid-cols-4 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 text-blue-600 mb-2">
