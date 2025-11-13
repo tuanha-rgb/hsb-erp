@@ -2,11 +2,11 @@
 // Simple component to load and display ALL attendance records from Firebase
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch, addDoc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebase.config';
 import { Users, Calendar, Camera, Download, RefreshCw, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { verifyAttendanceData, exportUnmatchedStudents } from './verify-attendance';
-import { getBlockInfoFromTimestamp } from './blockUtils';
+import { getBlockInfoFromTimestamp, saveBlockConfigToLocalStorage, updateBlockConfigCache } from './blockUtils';
 
 interface AttendanceRecord {
   id: string;
@@ -75,6 +75,13 @@ export default function AttendanceLoader() {
 
       snapshot.docs.forEach(doc => {
         const data = doc.data();
+
+        // Debug: Show what fields are in Firebase
+        console.log(`[DEBUG] Record ${doc.id}:`, {
+          courseId: data.courseId,
+          courseName: data.courseName,
+          timestamp: data.timestamp?.toDate()
+        });
 
         const record: AttendanceRecord = {
           id: doc.id,
@@ -203,14 +210,36 @@ export default function AttendanceLoader() {
     return 0;
   };
 
-  // Load saved block configurations from localStorage
-  const loadSavedConfigs = () => {
+  // Load saved block configurations from Firebase (primary) and localStorage (cache)
+  const loadSavedConfigs = async () => {
     try {
-      const saved = localStorage.getItem('attendance_block_configs');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setSavedBlockConfigs(parsed);
-        return parsed;
+      // Try Firebase first (primary source - syncs across devices)
+      const configRef = doc(db, 'system_config', 'attendance_blocks');
+      const configDoc = await getDoc(configRef);
+
+      if (configDoc.exists()) {
+        const firebaseConfig = configDoc.data().blockConfigs || {};
+        console.log('[AttendanceLoader] Loaded config from Firebase:', firebaseConfig);
+        setSavedBlockConfigs(firebaseConfig);
+        // Update memory cache (for webhook auto-assignment)
+        updateBlockConfigCache(firebaseConfig);
+        // Cache to localStorage for faster subsequent loads
+        saveBlockConfigToLocalStorage(firebaseConfig);
+        return firebaseConfig;
+      } else {
+        console.log('[AttendanceLoader] No Firebase config found, checking localStorage...');
+        // Fallback to localStorage (legacy data)
+        const saved = localStorage.getItem('attendance_block_configs');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          console.log('[AttendanceLoader] Found localStorage config, migrating to Firebase:', parsed);
+          setSavedBlockConfigs(parsed);
+          // Update memory cache
+          updateBlockConfigCache(parsed);
+          // Migrate localStorage data to Firebase for future syncing
+          await setDoc(configRef, { blockConfigs: parsed, updatedAt: serverTimestamp() });
+          return parsed;
+        }
       }
     } catch (err) {
       console.error('Failed to load saved configs:', err);
@@ -218,17 +247,33 @@ export default function AttendanceLoader() {
     return {};
   };
 
-  // Save block configuration to localStorage
-  const saveBlockConfig = (semester: string, dates: {[key: number]: {start: string, end: string}}) => {
+  // Save block configuration to Firebase (primary) and localStorage (cache)
+  const saveBlockConfig = async (semester: string, dates: {[key: number]: {start: string, end: string}}) => {
     try {
       const updated = {
         ...savedBlockConfigs,
         [semester]: dates
       };
-      localStorage.setItem('attendance_block_configs', JSON.stringify(updated));
+
+      // Save to Firebase (primary - syncs across devices)
+      const configRef = doc(db, 'system_config', 'attendance_blocks');
+      await setDoc(configRef, {
+        blockConfigs: updated,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      console.log('[AttendanceLoader] Saved config to Firebase:', updated);
+
+      // Update memory cache (for webhook auto-assignment)
+      updateBlockConfigCache(updated);
+
+      // Cache to localStorage for faster subsequent loads
+      saveBlockConfigToLocalStorage(updated);
+
       setSavedBlockConfigs(updated);
     } catch (err) {
       console.error('Failed to save config:', err);
+      alert('Failed to save block configuration.');
     }
   };
 
@@ -366,6 +411,13 @@ export default function AttendanceLoader() {
       const blockCounts: {[key: number]: number} = {};
 
       for (const record of records) {
+        // SKIP records that already have correct block assignments (from webhook)
+        if (record.courseId && record.courseId.startsWith('Blk') && record.courseId.includes('_')) {
+          console.log(`[Batch Update] Skipping ${record.id} - already has block assignment: ${record.courseId}`);
+          skipped++;
+          continue;
+        }
+
         const recordDate = record.timestamp.toISOString().split('T')[0]; // YYYY-MM-DD
 
         // Find which block this record belongs to
@@ -444,7 +496,9 @@ export default function AttendanceLoader() {
 
   // Load saved configurations on mount
   useEffect(() => {
-    loadSavedConfigs();
+    loadSavedConfigs().catch(err => {
+      console.error('Failed to load block configurations:', err);
+    });
   }, []);
 
   useEffect(() => {
@@ -1004,7 +1058,7 @@ export default function AttendanceLoader() {
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Time</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Student ID</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Name</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Course</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Course ID</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Status</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Source</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Camera</th>
