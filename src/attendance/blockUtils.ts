@@ -15,19 +15,35 @@ export interface BlockConfig {
 
 /**
  * Get session from timestamp hour
- * M (Morning): 7:00 AM - 1:00 PM
- * A (Afternoon): 1:00 PM - 6:00 PM
+ * M (Morning): 7:00 AM - 11:45 AM
+ * NOON BREAK: 11:46 AM - 1:15 PM (DEFAULT_COURSE)
+ * A (Afternoon): 1:16 PM - 6:00 PM
  * E (Evening): 6:00 PM - 9:00 PM
+ * Returns null for times outside defined ranges
  */
-export function getSessionFromTimestamp(timestamp: Date): SessionType {
+export function getSessionFromTimestamp(timestamp: Date): SessionType | null {
   const hour = timestamp.getHours();
+  const minute = timestamp.getMinutes();
 
-  if (hour >= 7 && hour < 13) {
-    return 'M'; // Morning: 7:00 AM - 1:00 PM
-  } else if (hour >= 13 && hour < 18) {
-    return 'A'; // Afternoon: 1:00 PM - 6:00 PM
-  } else {
-    return 'E'; // Evening: 6:00 PM - 9:00 PM
+  // Morning: 7:00 AM - 11:45 AM
+  if (hour >= 7 && (hour < 11 || (hour === 11 && minute <= 45))) {
+    return 'M';
+  }
+  // Noon break: 11:46 AM - 1:15 PM (returns null for DEFAULT_COURSE)
+  else if ((hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute <= 15)) {
+    return null;
+  }
+  // Afternoon: 1:16 PM - 6:00 PM
+  else if ((hour === 13 && minute >= 16) || (hour > 13 && hour < 18)) {
+    return 'A';
+  }
+  // Evening: 6:00 PM - 9:00 PM (hour 18-20)
+  else if (hour >= 18 && hour < 21) {
+    return 'E';
+  }
+  // Outside defined session times - no registration
+  else {
+    return null;
   }
 }
 
@@ -81,6 +97,13 @@ export function getBlockInfoFromTimestamp(timestamp: Date): {
 
       if (dateStr >= blockDates.start && dateStr <= blockDates.end) {
         const session = getSessionFromTimestamp(timestamp);
+
+        // If time is outside defined session ranges, don't assign a block
+        if (!session) {
+          console.log(`[BlockUtils] ✗ Time outside session ranges (${timestamp.getHours()}:${timestamp.getMinutes()})`);
+          return null;
+        }
+
         const courseCode = `Blk${blockNum}_${session}`;
 
         console.log(`[BlockUtils] ✓ MATCH! Returning:`, { semester, block: blockNum, session, courseCode });

@@ -1,7 +1,7 @@
 // AttendanceLoader.tsx
 // Simple component to load and display ALL attendance records from Firebase
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebase.config';
 import { Users, Calendar, Camera, Download, RefreshCw, AlertCircle, CheckCircle, Settings } from 'lucide-react';
@@ -37,8 +37,8 @@ export default function AttendanceLoader() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [students, setStudents] = useState<Map<string, StudentSummary>>(new Map());
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'all' | 'by-student'>('all');
-  const [maxRecords, setMaxRecords] = useState(1000);
+  const [view, setView] = useState<'all' | 'by-student' | 'eligible'>('all');
+  const [maxRecords, setMaxRecords] = useState(5000);
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [verifying, setVerifying] = useState(false);
   const [showBlockForm, setShowBlockForm] = useState(false);
@@ -273,16 +273,43 @@ export default function AttendanceLoader() {
     }
   };
 
-  // Get session from timestamp hour
-  const getSession = (timestamp: Date): 'M' | 'A' | 'E' => {
-    const hour = timestamp.getHours();
+  // Quick setup for Fall 2025 (includes November 13, 2025)
+  const quickSetupFall2025 = () => {
+    const fallDates = {
+      1: { start: '2025-09-01', end: '2025-10-15' },
+      2: { start: '2025-10-16', end: '2025-11-30' },
+      3: { start: '2025-12-01', end: '2025-12-31' }
+    };
+    setSelectedSemester('fall');
+    setBlockDates(fallDates);
+    saveBlockConfig('fall', fallDates);
+    alert('✓ Fall 2025 blocks configured!\n\nBlock 1: Sep 1 - Oct 15\nBlock 2: Oct 16 - Nov 30 (includes TODAY)\nBlock 3: Dec 1 - Dec 31\n\nNew attendance records will now be auto-assigned!');
+  };
 
-    if (hour >= 7 && hour < 13) {
-      return 'M'; // Morning: 7:00 AM - 1:00 PM
-    } else if (hour >= 13 && hour < 18) {
-      return 'A'; // Afternoon: 1:00 PM - 6:00 PM
-    } else {
-      return 'E'; // Evening: 6:00 PM - 9:00 PM
+  // Get session from timestamp hour
+  const getSession = (timestamp: Date): 'M' | 'A' | 'E' | null => {
+    const hour = timestamp.getHours();
+    const minute = timestamp.getMinutes();
+
+    // Morning: 7:00 AM - 11:45 AM
+    if (hour >= 7 && (hour < 11 || (hour === 11 && minute <= 45))) {
+      return 'M';
+    }
+    // Noon break: 11:46 AM - 1:15 PM (returns null for DEFAULT_COURSE)
+    else if ((hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute <= 15)) {
+      return null;
+    }
+    // Afternoon: 1:16 PM - 6:00 PM
+    else if ((hour === 13 && minute >= 16) || (hour > 13 && hour < 18)) {
+      return 'A';
+    }
+    // Evening: 6:00 PM - 9:00 PM
+    else if (hour >= 18 && hour < 21) {
+      return 'E';
+    }
+    // Outside defined session times
+    else {
+      return null;
     }
   };
 
@@ -296,9 +323,11 @@ export default function AttendanceLoader() {
         updateStats: updateStats,
         action: 'block_update',
         sessionRanges: {
-          morning: '7:00 AM - 1:00 PM',
-          afternoon: '1:00 PM - 6:00 PM',
-          evening: '6:00 PM - 9:00 PM'
+          morning: '7:00 AM - 11:45 AM',
+          noonBreak: '11:46 AM - 1:15 PM (DEFAULT_COURSE)',
+          afternoon: '1:16 PM - 6:00 PM',
+          evening: '6:00 PM - 9:00 PM',
+          note: 'Times outside these ranges will use DEFAULT_COURSE'
         }
       });
       console.log('Block update logged to Firebase');
@@ -332,6 +361,7 @@ export default function AttendanceLoader() {
       const batch = writeBatch(db);
       let updated = 0;
       let skipped = 0;
+      let defaultCourseCount = 0;
       const sessionCounts = { M: 0, A: 0, E: 0 };
       const blockCounts: {[key: number]: number} = {};
 
@@ -353,20 +383,36 @@ export default function AttendanceLoader() {
         if (matchedBlock) {
           // Get session from timestamp
           const session = getSession(record.timestamp);
-          const courseCode = `Blk${matchedBlock}_${session}`;
 
           const docRef = doc(db, 'attendance_records', record.id);
-          batch.update(docRef, {
-            courseId: courseCode,
-            semester: selectedSemester,
-            block: matchedBlock,
-            session: session
-          });
-          updated++;
 
-          // Track statistics
-          sessionCounts[session]++;
-          blockCounts[matchedBlock] = (blockCounts[matchedBlock] || 0) + 1;
+          // If time is outside defined session ranges (e.g., noon break)
+          if (!session) {
+            // Update to DEFAULT_COURSE and clear block/session info
+            batch.update(docRef, {
+              courseId: 'DEFAULT_COURSE',
+              semester: selectedSemester,
+              block: null,
+              session: null
+            });
+            updated++;
+            defaultCourseCount++;
+          } else {
+            // Normal block assignment
+            const courseCode = `Blk${matchedBlock}_${session}`;
+
+            batch.update(docRef, {
+              courseId: courseCode,
+              semester: selectedSemester,
+              block: matchedBlock,
+              session: session
+            });
+            updated++;
+
+            // Track statistics
+            sessionCounts[session]++;
+            blockCounts[matchedBlock] = (blockCounts[matchedBlock] || 0) + 1;
+          }
         } else {
           skipped++;
         }
@@ -379,11 +425,12 @@ export default function AttendanceLoader() {
         totalRecords: records.length,
         updated: updated,
         skipped: skipped,
+        defaultCourseCount: defaultCourseCount,
         sessionBreakdown: sessionCounts,
         blockBreakdown: blockCounts
       });
 
-      alert(`Successfully updated ${updated} records with block and session information!\n\nBreakdown:\n- Morning (M): ${sessionCounts.M}\n- Afternoon (A): ${sessionCounts.A}\n- Evening (E): ${sessionCounts.E}\n- Skipped: ${skipped}`);
+      alert(`Successfully updated ${updated} records with block and session information!\n\nBreakdown:\n- Morning (M): ${sessionCounts.M}\n- Afternoon (A): ${sessionCounts.A}\n- Evening (E): ${sessionCounts.E}\n- DEFAULT_COURSE (noon break, etc.): ${defaultCourseCount}\n- Skipped (outside date range): ${skipped}`);
 
       // Reload attendance to show updated data
       await loadAttendance();
@@ -419,6 +466,68 @@ export default function AttendanceLoader() {
   const sortedStudents = Array.from(students.values()).sort((a, b) =>
     b.totalRecords - a.totalRecords
   );
+
+  // Check if a record is eligible based on official attendance cutoff times
+  const isEligibleRecord = (record: AttendanceRecord): boolean => {
+    const hour = record.timestamp.getHours();
+    const minute = record.timestamp.getMinutes();
+    const session = getSession(record.timestamp);
+
+    // Morning session: must check in before/at 8:05 AM
+    if (session === 'M') {
+      return hour < 8 || (hour === 8 && minute <= 5);
+    }
+    // Afternoon session: must check in before/at 1:40 PM (13:40)
+    else if (session === 'A') {
+      return hour < 13 || (hour === 13 && minute <= 40);
+    }
+    // Evening session: waived (all eligible)
+    else if (session === 'E') {
+      return true;
+    }
+    // Records with no session (noon break, etc.) are not eligible
+    else {
+      return false;
+    }
+  };
+
+  // Calculate eligible students by course
+  const eligibleStudentsByCourse = useMemo(() => {
+    const courseMap = new Map<string, {
+      courseCode: string;
+      uniqueStudents: Set<string>;
+      totalRecords: number;
+      eligibleRecords: number;
+      semester?: string;
+      block?: number;
+      session?: string;
+    }>();
+
+    records.forEach(record => {
+      const courseCode = record.courseId;
+
+      if (!courseMap.has(courseCode)) {
+        courseMap.set(courseCode, {
+          courseCode,
+          uniqueStudents: new Set(),
+          totalRecords: 0,
+          eligibleRecords: 0
+        });
+      }
+
+      const courseData = courseMap.get(courseCode)!;
+      courseData.totalRecords++;
+
+      if (isEligibleRecord(record)) {
+        courseData.uniqueStudents.add(record.studentId);
+        courseData.eligibleRecords++;
+      }
+    });
+
+    return Array.from(courseMap.values()).sort((a, b) =>
+      b.uniqueStudents.size - a.uniqueStudents.size
+    );
+  }, [records]);
 
   // Pagination calculations for All Records
   const totalPagesAll = Math.ceil(records.length / recordsPerPage);
@@ -601,9 +710,17 @@ export default function AttendanceLoader() {
                           <p className="text-sm text-yellow-700">
                             {hasConfigs
                               ? `Today (${now.toLocaleDateString()}) is not within any configured block dates. New records will use DEFAULT_COURSE.`
-                              : 'No block configurations found. Click "Add Block & Semester Info" to configure.'
+                              : 'No block configurations found. New records will use DEFAULT_COURSE.'
                             }
                           </p>
+                          {!hasConfigs && (
+                            <button
+                              onClick={quickSetupFall2025}
+                              className="mt-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold text-sm flex items-center gap-2"
+                            >
+                              ⚡ Quick Setup Fall 2025 (for today)
+                            </button>
+                          )}
                         </>
                       )}
                     </div>
@@ -733,9 +850,11 @@ export default function AttendanceLoader() {
                   <li>3. Click "Update All Course Codes" to automatically update all attendance records</li>
                   <li>4. The system will check each record's timestamp and assign it to the correct block</li>
                   <li>5. Session codes are automatically added based on time:</li>
-                  <li className="ml-6">• <strong>M</strong> (Morning): 7:00 AM - 1:00 PM</li>
-                  <li className="ml-6">• <strong>A</strong> (Afternoon): 1:00 PM - 6:00 PM</li>
+                  <li className="ml-6">• <strong>M</strong> (Morning): 7:00 AM - 11:45 AM</li>
+                  <li className="ml-6 text-orange-700">• <strong>NOON BREAK</strong>: 11:46 AM - 1:15 PM → DEFAULT_COURSE</li>
+                  <li className="ml-6">• <strong>A</strong> (Afternoon): 1:16 PM - 6:00 PM</li>
                   <li className="ml-6">• <strong>E</strong> (Evening): 6:00 PM - 9:00 PM</li>
+                  <li className="ml-6 text-orange-700">• <strong>Other times will use DEFAULT_COURSE</strong> (before 7 AM, after 9 PM)</li>
                   <li>6. Result example: <code className="bg-white px-2 py-1 rounded font-mono">Blk2_M</code> = Block 2, Morning session</li>
                   <li>7. All updates are logged to Firebase for tracking</li>
                 </ul>
@@ -864,6 +983,16 @@ export default function AttendanceLoader() {
             >
               By Student ({students.size})
             </button>
+            <button
+              onClick={() => setView('eligible')}
+              className={`px-6 py-3 font-medium ${
+                view === 'eligible'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Eligible Students ({eligibleStudentsByCourse.reduce((sum, c) => sum + c.uniqueStudents.size, 0)})
+            </button>
           </div>
 
           <div className="p-6">
@@ -922,7 +1051,7 @@ export default function AttendanceLoader() {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : view === 'by-student' ? (
               <div>
                 <div className="space-y-3">
                   {currentStudents.map(student => (
@@ -976,7 +1105,77 @@ export default function AttendanceLoader() {
                   </div>
                 )}
               </div>
-            )}
+            ) : view === 'eligible' ? (
+              <div>
+                {/* Information banner */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg p-4 mb-6">
+                  <h3 className="text-lg font-bold text-green-900 mb-2">📊 Official Attendance Cutoff Times</h3>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="bg-white rounded-lg p-3 border border-green-200">
+                      <p className="font-semibold text-gray-700">Morning Session</p>
+                      <p className="text-green-600 font-bold text-lg">≤ 8:05 AM</p>
+                      <p className="text-xs text-gray-500">Must check in by 8:05 AM</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <p className="font-semibold text-gray-700">Afternoon Session</p>
+                      <p className="text-blue-600 font-bold text-lg">≤ 1:40 PM</p>
+                      <p className="text-xs text-gray-500">Must check in by 1:40 PM</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-purple-200">
+                      <p className="font-semibold text-gray-700">Evening Session</p>
+                      <p className="text-purple-600 font-bold text-lg">Waived ✓</p>
+                      <p className="text-xs text-gray-500">All students eligible</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Eligible students by course */}
+                <div className="space-y-3">
+                  {eligibleStudentsByCourse.map(course => (
+                    <div key={course.courseCode} className="border-2 border-gray-200 rounded-lg p-5 hover:shadow-lg transition bg-white">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{course.courseCode}</h3>
+                          <p className="text-sm text-gray-600 mt-1">Official Attendance Report</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-3xl font-bold text-green-600">{course.uniqueStudents.size}</p>
+                          <p className="text-sm text-gray-600">Eligible Students</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200">
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-600 mb-1">Total Records</p>
+                          <p className="text-xl font-bold text-gray-900">{course.totalRecords}</p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3">
+                          <p className="text-xs text-green-700 mb-1">Eligible Records</p>
+                          <p className="text-xl font-bold text-green-600">{course.eligibleRecords}</p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-3">
+                          <p className="text-xs text-blue-700 mb-1">Unique Students</p>
+                          <p className="text-xl font-bold text-blue-600">{course.uniqueStudents.size}</p>
+                        </div>
+                        <div className="bg-purple-50 rounded-lg p-3">
+                          <p className="text-xs text-purple-700 mb-1">Eligibility Rate</p>
+                          <p className="text-xl font-bold text-purple-600">
+                            {course.totalRecords > 0 ? ((course.eligibleRecords / course.totalRecords) * 100).toFixed(1) : 0}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {eligibleStudentsByCourse.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="text-lg">No eligible students found</p>
+                    <p className="text-sm mt-2">Load attendance records and ensure block information is configured</p>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -55,6 +55,11 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
   // Get block and session info from timestamp
   const blockInfo = getBlockInfoFromTimestamp(timestamp);
 
+  console.log('[WEBHOOK] Incoming payload timestamp:', payload.timestamp);
+  console.log('[WEBHOOK] Payload course_id:', payload.session_info?.course_id);
+  console.log('[WEBHOOK] BlockInfo result:', blockInfo);
+  console.log('[WEBHOOK] Will use courseId:', blockInfo ? blockInfo.courseCode : payload.session_info?.course_id || 'DEFAULT_COURSE');
+
   // Process each detected face
   for (const face of payload.detected_faces) {
     if (face.confidence < 0.75) continue; // Skip low-confidence detections
@@ -62,10 +67,14 @@ export async function handleANSVISWebhook(payload: ANSVISWebhookPayload): Promis
     const attendanceId = `ATT-${timestamp.getTime()}-${face.student_id}`;
     const attendanceRef = doc(db, COLLECTIONS.attendance, attendanceId);
 
+    const courseId = blockInfo ? blockInfo.courseCode : (payload.session_info?.course_id || 'DEFAULT_COURSE');
+
+    console.log(`[WEBHOOK] Creating record for student ${face.student_id} with courseId: ${courseId}`);
+
     const record: Partial<AttendanceRecord> = {
       id: attendanceId,
       studentId: face.student_id,
-      courseId: blockInfo ? blockInfo.courseCode : payload.session_info.course_id,
+      courseId: courseId,
       date: timestamp,
       status: 'present',
       source: 'ai-camera',
