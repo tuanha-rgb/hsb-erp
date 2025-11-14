@@ -5,7 +5,7 @@ import {
   collection, addDoc, doc, getDoc, updateDoc, setDoc, getDocs,
   onSnapshot, increment, serverTimestamp, query, where, orderBy, deleteDoc
 } from 'firebase/firestore';
-import { X, Plus, Trash2, BarChart3, Wifi, WifiOff, Users, TrendingUp, CheckCircle, XCircle, AlertCircle, Link } from 'lucide-react';
+import { X, Plus, Trash2, BarChart3, Wifi, WifiOff, Users, TrendingUp, CheckCircle, XCircle, AlertCircle, Link, Calendar } from 'lucide-react';
 
 type UserLevel = 'student' | 'staff' | 'management' | 'all';
 type PollType = 'course' | 'meeting' | 'event' | 'session';
@@ -74,6 +74,7 @@ export default function PollSystem({
     const [isConnected, setIsConnected] = useState(true);
     const [loading, setLoading] = useState(true);
     const [showAnalytics, setShowAnalytics] = useState<string | null>(null);
+    const [selectedPollForDashboard, setSelectedPollForDashboard] = useState<Poll | null>(null);
 
     // Toast notification helper
     const showToast = (message: string, type: ToastType = 'info') => {
@@ -179,14 +180,18 @@ export default function PollSystem({
       const viewSnap = await getDoc(viewRef);
 
       if (!viewSnap.exists()) {
-        await setDoc(viewRef, {
+        // Build view data object, excluding undefined values
+        const viewData: any = {
           userId,
-          userLevel,
-          userCohort,
-          userDepartment,
-          userProgram,
           viewedAt: serverTimestamp()
-        });
+        };
+
+        if (userLevel) viewData.userLevel = userLevel;
+        if (userCohort) viewData.userCohort = userCohort;
+        if (userDepartment) viewData.userDepartment = userDepartment;
+        if (userProgram) viewData.userProgram = userProgram;
+
+        await setDoc(viewRef, viewData);
 
         // Increment view count
         const pollRef = doc(db, 'polls', pollId);
@@ -261,12 +266,24 @@ export default function PollSystem({
     return unsub;
   }, [userLevel, filter]);
 
+  // Show dashboard if a poll is selected
+  if (selectedPollForDashboard) {
+    return (
+      <PollDashboard
+        poll={selectedPollForDashboard}
+        onClose={() => setSelectedPollForDashboard(null)}
+        userId={userId}
+        showToast={showToast}
+      />
+    );
+  }
+
   return (
-    <div className="p-6 max-w mx-auto">
+    <div className="p-3 max-w mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-3xl font-bold">HSB Polls & Voting</h2>
+            <h2 className="px-3 text-3xl font-bold">HSB Polls & Voting</h2>
             {isConnected ? (
               <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
                 <Wifi size={12} />
@@ -279,7 +296,7 @@ export default function PollSystem({
               </span>
             )}
           </div>
-          <p className="text-gray-600 mt-1">Create and participate in polls</p>
+          <p className="text-gray-600 mt-1 px-3">Create and participate in polls</p>
         </div>
         <button
           onClick={() => setCreating(true)}
@@ -335,6 +352,7 @@ export default function PollSystem({
               onDelete={deletePoll}
               onTrackView={trackView}
               onViewAnalytics={() => setShowAnalytics(poll.id)}
+              onViewDashboard={() => setSelectedPollForDashboard(poll)}
               userId={userId}
               showToast={showToast}
               filter={filter}
@@ -385,6 +403,7 @@ function PollCard({
   onDelete,
   onTrackView,
   onViewAnalytics,
+  onViewDashboard,
   userId,
   showToast,
   filter
@@ -396,6 +415,7 @@ function PollCard({
   onDelete: (id: string) => void;
   onTrackView: (id: string) => void;
   onViewAnalytics: () => void;
+  onViewDashboard: () => void;
   userId: string;
   showToast: (message: string, type: ToastType) => void;
   filter: 'all' | 'draft' | 'active' | 'closed';
@@ -455,6 +475,32 @@ function PollCard({
     }
   };
 
+  // Simplified view for active polls
+  if (filter === 'active' && isActive) {
+    return (
+      <div
+        onClick={onViewDashboard}
+        className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer"
+      >
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{poll.title}</h3>
+            <div className="flex items-center gap-3">
+              <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+                Target: {poll.targetLevel === 'student' ? 'Student' : poll.targetLevel === 'staff' ? 'Staff' : 'Staff + Student'}
+              </span>
+              <span className="text-sm text-gray-600">{totalVotes} votes</span>
+            </div>
+          </div>
+          <div className="text-blue-600">
+            <BarChart3 size={32} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Full view for draft/all/other polls
   return (
     <div className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-4">
@@ -700,7 +746,7 @@ function CreatePollModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
           <h3 className="text-2xl font-bold">{isEditing ? 'Edit Poll' : 'Create New Poll'}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -927,6 +973,146 @@ function ToastContainer({ toasts }: { toasts: Toast[] }) {
           <span className="font-medium">{toast.message}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+// Poll Dashboard Component
+function PollDashboard({
+  poll,
+  onClose,
+  userId,
+  showToast
+}: {
+  poll: Poll;
+  onClose: () => void;
+  userId: string;
+  showToast: (message: string, type: ToastType) => void;
+}) {
+  const [hasVoted, setHasVoted] = useState(false);
+
+  useEffect(() => {
+    getDoc(doc(db, `polls/${poll.id}/votes`, userId))
+      .then(snap => setHasVoted(snap.exists()));
+  }, [poll.id, userId]);
+
+  const totalVotes = Object.values(poll.options).reduce((sum, opt) => sum + opt.voteCount, 0);
+  const maxVotes = Math.max(...Object.values(poll.options).map(opt => opt.voteCount));
+  const topOption = Object.entries(poll.options).find(([_, opt]) => opt.voteCount === maxVotes)?.[1];
+
+  const endTime = poll.endTime?.toDate?.() || new Date(poll.endTime);
+  const startTime = poll.startTime?.toDate?.() || new Date(poll.startTime);
+  const now = new Date();
+  const hasEnded = endTime < now;
+  const duration = hasEnded
+    ? Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60 * 24))
+    : Math.round((now.getTime() - startTime.getTime()) / (1000 * 60 * 60 * 24));
+
+  return (
+    <div className="max-w mx-auto p-3">
+      {/* Header */}
+      <div className="mb-3">
+        <button
+          onClick={onClose}
+          className="text-blue-600 hover:text-blue-700 mb-4 flex items-center gap-2"
+        >
+          ← Back to polls
+        </button>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{poll.title}</h1>
+            <p className="text-gray-600 mb-4">{poll.description}</p>
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                {poll.type}
+              </span>
+              <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                Target: {poll.targetLevel === 'student' ? 'Student' : poll.targetLevel === 'staff' ? 'Staff' : 'Staff + Student'}
+              </span>
+              {hasVoted && (
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium flex items-center gap-1">
+                  <CheckCircle size={16} />
+                  You voted
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Insights Cards */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border-2 border-blue-200">
+          <div className="flex items-center gap-3 mb-2">
+            <Users className="w-6 h-6 text-blue-600" />
+            <h3 className="text-sm font-medium text-blue-900">Total Votes</h3>
+          </div>
+          <p className="text-4xl font-bold text-blue-600">{totalVotes}</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border-2 border-green-200">
+          <div className="flex items-center gap-3 mb-2">
+            <TrendingUp className="w-6 h-6 text-green-600" />
+            <h3 className="text-sm font-medium text-green-900">Top Choice</h3>
+          </div>
+          <p className="text-2xl font-bold text-green-600 truncate">{topOption?.text || 'N/A'}</p>
+          <p className="text-sm text-green-700 mt-1">{maxVotes} votes</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border-2 border-purple-200">
+          <div className="flex items-center gap-3 mb-2">
+            <Calendar className="w-6 h-6 text-purple-600" />
+            <h3 className="text-sm font-medium text-purple-900">Duration</h3>
+          </div>
+          <p className="text-4xl font-bold text-purple-600">{duration}</p>
+          <p className="text-sm text-purple-700 mt-1">{duration === 1 ? 'day' : 'days'}</p>
+        </div>
+      </div>
+
+      {/* Vertical Bar Chart */}
+      <div className="bg-white rounded-lg border-2 border-gray-200 p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Results</h2>
+        <div className="flex items-end justify-around gap-4 h-96">
+          {Object.entries(poll.options).map(([id, option]) => {
+            const percentage = totalVotes > 0 ? (option.voteCount / totalVotes) * 100 : 0;
+            const heightPercentage = totalVotes > 0 ? (option.voteCount / maxVotes) * 100 : 0;
+
+            return (
+              <div key={id} className="flex flex-col items-center flex-1">
+                <div className="relative w-full flex flex-col justify-end items-center" style={{ height: '100%' }}>
+                  {/* Vote count label */}
+                  <div className="mb-2 text-center">
+                    <p className="text-2xl font-bold text-gray-900">{option.voteCount}</p>
+                    <p className="text-sm text-gray-600">{percentage.toFixed(1)}%</p>
+                  </div>
+
+                  {/* Bar */}
+                  <div
+                    className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-blue-500 shadow-lg"
+                    style={{ height: `${heightPercentage}%`, minHeight: option.voteCount > 0 ? '40px' : '0px' }}
+                  />
+                </div>
+
+                {/* Option label */}
+                <p className="mt-4 text-sm font-medium text-gray-700 text-center px-2">
+                  {option.text}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Time Info */}
+      <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="flex justify-between items-center text-sm text-gray-600">
+          <span>Started: {startTime.toLocaleString()}</span>
+          <span>Ends: {endTime.toLocaleString()}</span>
+          {hasEnded && (
+            <span className="text-red-600 font-medium">🔒 Poll has ended</span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
