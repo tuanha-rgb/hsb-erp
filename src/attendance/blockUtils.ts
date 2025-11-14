@@ -23,30 +23,38 @@ const CACHE_TTL = 60000; // Cache for 1 minute
 
 /**
  * Get session from timestamp hour
- * M (Morning): 7:00 AM - 11:45 AM
- * NOON BREAK: 11:46 AM - 1:15 PM (DEFAULT_COURSE)
- * A (Afternoon): 1:16 PM - 6:00 PM
- * E (Evening): 6:00 PM - 9:00 PM
+ * M (Morning): 7:00 AM - 11:45 AM (cutoff 8:10 AM)
+ * NOON BREAK: 11:46 AM - 1:00 PM (AUTO DELETE)
+ * A (Afternoon): 1:16 PM - 5:00 PM (cutoff 1:40 PM)
+ * E (Evening): 5:30 PM - 8:30 PM (cutoff 6:10 PM)
  * Returns null for times outside defined ranges
  */
 export function getSessionFromTimestamp(timestamp: Date): SessionType | null {
   const hour = timestamp.getHours();
   const minute = timestamp.getMinutes();
 
-  // Morning: 7:00 AM - 11:45 AM
+  // Morning: 7:00 AM - 11:45 AM (cutoff 8:10 AM)
   if (hour >= 7 && (hour < 11 || (hour === 11 && minute <= 45))) {
     return 'M';
   }
-  // Noon break: 11:46 AM - 1:15 PM (returns null for DEFAULT_COURSE)
-  else if ((hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute <= 15)) {
+  // Noon break: 11:46 AM - 1:00 PM (13:00) - AUTO DELETE
+  else if ((hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute === 0)) {
     return null;
   }
-  // Afternoon: 1:16 PM - 6:00 PM
-  else if ((hour === 13 && minute >= 16) || (hour > 13 && hour < 18)) {
+  // Gap: 1:01 PM - 1:15 PM (no registration)
+  else if (hour === 13 && minute >= 1 && minute <= 15) {
+    return null;
+  }
+  // Afternoon: 1:16 PM - 5:00 PM (13:16 - 17:00) (cutoff 1:40 PM)
+  else if ((hour === 13 && minute >= 16) || (hour > 13 && hour < 17)) {
     return 'A';
   }
-  // Evening: 6:00 PM - 9:00 PM (hour 18-20)
-  else if (hour >= 18 && hour < 21) {
+  // Gap: 5:00 PM - 5:29 PM (no registration)
+  else if (hour === 17 && minute < 30) {
+    return null;
+  }
+  // Evening: 5:30 PM - 8:30 PM (17:30 - 20:30) (cutoff 6:10 PM)
+  else if ((hour === 17 && minute >= 30) || (hour === 18) || (hour === 19) || (hour === 20 && minute <= 30)) {
     return 'E';
   }
   // Outside defined session times - no registration

@@ -2,7 +2,7 @@
 // Simple component to load and display ALL attendance records from Firebase
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch, addDoc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc, writeBatch, addDoc, serverTimestamp, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebase.config';
 import { Users, Calendar, Camera, Download, RefreshCw, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { verifyAttendanceData, exportUnmatchedStudents } from './verify-attendance';
@@ -12,6 +12,7 @@ interface AttendanceRecord {
   id: string;
   studentId: string;
   studentName?: string;
+  class?: string;
   courseId: string;
   date: Date;
   timestamp: Date;
@@ -50,6 +51,35 @@ export default function AttendanceLoader() {
   const [currentPageAll, setCurrentPageAll] = useState(1);
   const [currentPageStudents, setCurrentPageStudents] = useState(1);
   const recordsPerPage = 50;
+  const [processingDuplicates, setProcessingDuplicates] = useState(false);
+  const [uploadingStudents, setUploadingStudents] = useState(false);
+  const [studentNameMap, setStudentNameMap] = useState<Map<string, {name: string, class: string}>>(new Map());
+
+  // Load student names and classes from Firebase
+  const loadStudentNames = async () => {
+    try {
+      const studentsRef = collection(db, 'students');
+      const snapshot = await getDocs(studentsRef);
+
+      const nameMap = new Map<string, {name: string, class: string}>();
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.studentId && data.studentName) {
+          nameMap.set(data.studentId, {
+            name: data.studentName,
+            class: data.class || ''
+          });
+        }
+      });
+
+      setStudentNameMap(nameMap);
+      console.log(`[Student Names] Loaded ${nameMap.size} student names from Firebase`);
+      return nameMap;
+    } catch (err) {
+      console.error('Failed to load student names:', err);
+      return new Map<string, {name: string, class: string}>();
+    }
+  };
 
   const loadAttendance = async () => {
     setLoading(true);
@@ -57,6 +87,12 @@ export default function AttendanceLoader() {
 
     try {
       console.log(`Loading up to ${maxRecords} attendance records...`);
+
+      // Load student names first if not already loaded
+      let nameMap = studentNameMap;
+      if (nameMap.size === 0) {
+        nameMap = await loadStudentNames();
+      }
 
       // Query attendance_records collection
       const recordsRef = collection(db, 'attendance_records');
@@ -76,17 +112,21 @@ export default function AttendanceLoader() {
       snapshot.docs.forEach(doc => {
         const data = doc.data();
 
-        // Debug: Show what fields are in Firebase
-        console.log(`[DEBUG] Record ${doc.id}:`, {
-          courseId: data.courseId,
-          courseName: data.courseName,
-          timestamp: data.timestamp?.toDate()
-        });
+        // Look up student name and class from the map
+        const studentData = nameMap.get(data.studentId);
+        const studentName = studentData?.name || data.studentName || data.studentId || 'UNKNOWN';
+        const studentClass = studentData?.class || data.class || '';
+
+        // Debug: Log first few mismatches
+        if (!studentData && nameMap.size > 0) {
+          console.log(`[Name Lookup] No name found for studentId: "${data.studentId}"`);
+        }
 
         const record: AttendanceRecord = {
           id: doc.id,
           studentId: data.studentId || 'UNKNOWN',
-          studentName: data.studentName || data.studentId || 'UNKNOWN',
+          studentName: studentName,
+          class: studentClass,
           courseId: data.courseId || 'UNKNOWN',
           date: data.date?.toDate() || new Date(),
           timestamp: data.timestamp?.toDate() || data.date?.toDate() || new Date(),
@@ -165,7 +205,7 @@ export default function AttendanceLoader() {
   };
 
   const exportToCSV = () => {
-    const headers = ['Record ID', 'Student ID', 'Student Name', 'Course ID', 'Date', 'Time', 'Status', 'Source', 'Camera', 'Confidence'];
+    const headers = ['Record ID', 'Student ID', 'Student Name', 'Course ID', 'Date', 'Time', 'Status', 'Camera', 'Confidence'];
     const rows = records.map(r => [
       r.id,
       r.studentId,
@@ -174,7 +214,6 @@ export default function AttendanceLoader() {
       r.date.toLocaleDateString(),
       r.timestamp.toLocaleTimeString(),
       r.status,
-      r.source,
       r.cameraId || '',
       r.confidence?.toFixed(2) || ''
     ]);
@@ -185,6 +224,71 @@ export default function AttendanceLoader() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `attendance_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportEligibleStudentsToCSV = () => {
+    const headers = ['Course Code', 'Unique Eligible Students', 'Total Records', 'Eligible Records', 'Eligibility Rate'];
+    const rows = eligibleStudentsByCourse.map(course => [
+      course.courseCode,
+      course.uniqueStudents.size,
+      course.totalRecords,
+      course.eligibleRecords,
+      ((course.eligibleRecords / course.totalRecords) * 100).toFixed(1) + '%'
+    ]);
+
+    // Add summary row
+    const totalUniqueStudents = eligibleStudentsByCourse.reduce((sum, c) => sum + c.uniqueStudents.size, 0);
+    const totalRecords = eligibleStudentsByCourse.reduce((sum, c) => sum + c.totalRecords, 0);
+    const totalEligibleRecords = eligibleStudentsByCourse.reduce((sum, c) => sum + c.eligibleRecords, 0);
+
+    rows.push(['']); // Empty row
+    rows.push(['TOTAL', totalUniqueStudents, totalRecords, totalEligibleRecords, ((totalEligibleRecords / totalRecords) * 100).toFixed(1) + '%']);
+
+    // Add student details section
+    rows.push(['']); // Empty row
+    rows.push(['STUDENT DETAILS BY COURSE']);
+    rows.push(['Course Code', 'Student ID', 'Student Name', 'Class', 'Check-in Time', 'Eligible']);
+
+    // Add individual student records for eligible students
+    eligibleStudentsByCourse.forEach(course => {
+      const eligibleRecordsForCourse = records.filter(record => {
+        return record.courseId === course.courseCode && isEligibleRecord(record);
+      });
+
+      // Group by student and get earliest time
+      const studentMap = new Map<string, AttendanceRecord>();
+      eligibleRecordsForCourse.forEach(record => {
+        const existing = studentMap.get(record.studentId);
+        if (!existing || record.timestamp < existing.timestamp) {
+          studentMap.set(record.studentId, record);
+        }
+      });
+
+      // Sort by student ID
+      const sortedStudents = Array.from(studentMap.values()).sort((a, b) =>
+        a.studentId.localeCompare(b.studentId)
+      );
+
+      sortedStudents.forEach(record => {
+        rows.push([
+          course.courseCode,
+          record.studentId,
+          record.studentName,
+          record.class || '',
+          record.timestamp.toLocaleTimeString(),
+          'YES'
+        ]);
+      });
+    });
+
+    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eligible-students-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -336,25 +440,295 @@ export default function AttendanceLoader() {
     const hour = timestamp.getHours();
     const minute = timestamp.getMinutes();
 
-    // Morning: 7:00 AM - 11:45 AM
+    // Morning: 7:00 AM - 11:45 AM (cutoff 8:10)
     if (hour >= 7 && (hour < 11 || (hour === 11 && minute <= 45))) {
       return 'M';
     }
-    // Noon break: 11:46 AM - 1:15 PM (returns null for DEFAULT_COURSE)
-    else if ((hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute <= 15)) {
+    // Noon break: 11:46 AM - 1:00 PM (13:00) - AUTO DELETE
+    else if ((hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute === 0)) {
       return null;
     }
-    // Afternoon: 1:16 PM - 6:00 PM
-    else if ((hour === 13 && minute >= 16) || (hour > 13 && hour < 18)) {
+    // Gap: 1:01 PM - 1:15 PM (no registration)
+    else if (hour === 13 && minute >= 1 && minute <= 15) {
+      return null;
+    }
+    // Afternoon: 1:16 PM - 5:00 PM (13:16 - 17:00) (cutoff 13:40)
+    else if ((hour === 13 && minute >= 16) || (hour > 13 && hour < 17)) {
       return 'A';
     }
-    // Evening: 6:00 PM - 9:00 PM
-    else if (hour >= 18 && hour < 21) {
+    // Gap: 5:00 PM - 5:29 PM (no registration)
+    else if (hour === 17 && minute < 30) {
+      return null;
+    }
+    // Evening: 5:30 PM - 8:30 PM (17:30 - 20:30) (cutoff 18:10)
+    else if ((hour === 17 && minute >= 30) || (hour === 18) || (hour === 19) || (hour === 20 && minute <= 30)) {
       return 'E';
     }
     // Outside defined session times
     else {
       return null;
+    }
+  };
+
+  // Check if current time is past the cutoff for a given session
+  const isPastCutoff = (session: 'M' | 'A' | 'E' | null): boolean => {
+    if (!session) return false;
+
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    if (session === 'M') {
+      // Morning cutoff: 8:10 AM
+      return hour > 8 || (hour === 8 && minute >= 10);
+    } else if (session === 'A') {
+      // Afternoon cutoff: 13:40 (1:40 PM)
+      return hour > 13 || (hour === 13 && minute >= 40);
+    } else if (session === 'E') {
+      // Evening cutoff: 18:10 (6:10 PM)
+      return hour > 18 || (hour === 18 && minute >= 10);
+    }
+    return false;
+  };
+
+  // Process and delete duplicate records after cutoff times
+  const processDuplicates = async () => {
+    if (!confirm('This will delete duplicate attendance records for each student in sessions that are past their cutoff time.\n\nMorning cutoff: 8:10 AM\nAfternoon cutoff: 1:40 PM (13:40)\nEvening cutoff: 6:10 PM (18:10)\n\nOnly the EARLIEST record for each student in each session will be kept.\n\nContinue?')) {
+      return;
+    }
+
+    try {
+      setProcessingDuplicates(true);
+      const batch = writeBatch(db);
+      let deletedCount = 0;
+
+      // Get today's date string
+      const today = new Date().toISOString().split('T')[0];
+
+      // Group records by date, courseId, and studentId
+      const recordGroups = new Map<string, AttendanceRecord[]>();
+
+      records.forEach(record => {
+        const recordDate = record.timestamp.toISOString().split('T')[0];
+
+        // Only process today's records
+        if (recordDate !== today) return;
+
+        const session = getSession(record.timestamp);
+
+        // Skip records with no session or not past cutoff
+        if (!session || !isPastCutoff(session)) return;
+
+        const key = `${recordDate}_${record.courseId}_${record.studentId}`;
+
+        if (!recordGroups.has(key)) {
+          recordGroups.set(key, []);
+        }
+        recordGroups.get(key)!.push(record);
+      });
+
+      console.log(`[Duplicate Processing] Found ${recordGroups.size} unique student-course combinations`);
+
+      // For each group, keep earliest and delete the rest
+      recordGroups.forEach((group, key) => {
+        if (group.length > 1) {
+          // Sort by timestamp (earliest first)
+          group.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+          const keepRecord = group[0];
+          const deleteRecords = group.slice(1);
+
+          console.log(`[Duplicate Processing] ${key}: Keeping ${keepRecord.id} (${keepRecord.timestamp.toLocaleTimeString()}), deleting ${deleteRecords.length} duplicates`);
+
+          deleteRecords.forEach(record => {
+            const docRef = doc(db, 'attendance_records', record.id);
+            batch.delete(docRef);
+            deletedCount++;
+          });
+        }
+      });
+
+      if (deletedCount > 0) {
+        await batch.commit();
+        alert(`✓ Successfully deleted ${deletedCount} duplicate records!\n\nKept the earliest record for each student in each session.`);
+
+        // Reload attendance data
+        await loadAttendance();
+      } else {
+        alert('No duplicate records found that are past their cutoff times.');
+      }
+
+    } catch (err) {
+      console.error('Error processing duplicates:', err);
+      alert('Failed to process duplicate records.');
+    } finally {
+      setProcessingDuplicates(false);
+    }
+  };
+
+  // Upload students from JSON file to Firebase
+  const uploadStudentsFromJSON = async () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+
+    fileInput.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        setUploadingStudents(true);
+
+        const text = await file.text();
+        const students = JSON.parse(text);
+
+        if (!Array.isArray(students)) {
+          throw new Error('JSON file must contain an array of students');
+        }
+
+        console.log(`[Upload Students] Processing ${students.length} students...`);
+
+        const batch = writeBatch(db);
+        let uploadedCount = 0;
+
+        students.forEach((student: any) => {
+          if (student.studentId && student.studentName) {
+            const docRef = doc(db, 'students', student.studentId);
+            batch.set(docRef, {
+              studentId: student.studentId,
+              studentName: student.studentName,
+              class: student.class || '',
+              uploadedAt: serverTimestamp()
+            });
+            uploadedCount++;
+          }
+        });
+
+        await batch.commit();
+
+        // Reload student names
+        await loadStudentNames();
+
+        // Reload attendance to show updated names
+        await loadAttendance();
+
+        alert(`✓ Successfully uploaded ${uploadedCount} students to Firebase!\n\nStudent names will now appear in the attendance records.`);
+
+      } catch (err) {
+        console.error('Error uploading students:', err);
+        alert(`Failed to upload students: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      } finally {
+        setUploadingStudents(false);
+      }
+    };
+
+    fileInput.click();
+  };
+
+  // Delete all noon break recordings (11:46 AM - 1:00 PM)
+  const deleteNoonBreakRecordings = async () => {
+    if (!confirm('⚠️ This will delete ALL recordings during noon break (11:46 AM - 1:00 PM).\n\nThese are non-class times and should not have attendance records.\n\nContinue?')) {
+      return;
+    }
+
+    try {
+      setProcessingDuplicates(true);
+      const batch = writeBatch(db);
+      let deletedCount = 0;
+
+      records.forEach(record => {
+        const hour = record.timestamp.getHours();
+        const minute = record.timestamp.getMinutes();
+
+        // Check if time is in noon break: 11:46 AM - 1:00 PM (13:00)
+        const isNoonBreak = (hour === 11 && minute >= 46) || hour === 12 || (hour === 13 && minute === 0);
+
+        if (isNoonBreak) {
+          const docRef = doc(db, 'attendance_records', record.id);
+          batch.delete(docRef);
+          deletedCount++;
+          console.log(`[Delete Noon Break] Deleting ${record.id} at ${record.timestamp.toLocaleString()}`);
+        }
+      });
+
+      if (deletedCount > 0) {
+        await batch.commit();
+        alert(`✓ Successfully deleted ${deletedCount} noon break recordings!\n\nAll records between 11:46 AM - 1:00 PM have been removed.`);
+
+        // Reload attendance data
+        await loadAttendance();
+      } else {
+        alert('No noon break recordings found.');
+      }
+
+    } catch (err) {
+      console.error('Error deleting noon break recordings:', err);
+      alert('Failed to delete noon break recordings.');
+    } finally {
+      setProcessingDuplicates(false);
+    }
+  };
+
+  // Delete ALL duplicates since inception (regardless of date or cutoff)
+  const deleteAllDuplicates = async () => {
+    if (!confirm('⚠️ WARNING: This will delete ALL duplicate records in the entire database history!\n\nFor each student-course-date combination, only the EARLIEST record will be kept.\n\nThis action cannot be undone.\n\nAre you sure you want to continue?')) {
+      return;
+    }
+
+    try {
+      setProcessingDuplicates(true);
+      const batch = writeBatch(db);
+      let deletedCount = 0;
+
+      // Group ALL records by date, courseId, and studentId
+      const recordGroups = new Map<string, AttendanceRecord[]>();
+
+      records.forEach(record => {
+        const recordDate = record.timestamp.toISOString().split('T')[0];
+        const key = `${recordDate}_${record.courseId}_${record.studentId}`;
+
+        if (!recordGroups.has(key)) {
+          recordGroups.set(key, []);
+        }
+        recordGroups.get(key)!.push(record);
+      });
+
+      console.log(`[Delete All Duplicates] Processing ${recordGroups.size} unique student-course-date combinations`);
+
+      // For each group, keep earliest and delete the rest
+      recordGroups.forEach((group, key) => {
+        if (group.length > 1) {
+          // Sort by timestamp (earliest first)
+          group.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+          const keepRecord = group[0];
+          const deleteRecords = group.slice(1);
+
+          console.log(`[Delete All Duplicates] ${key}: Keeping ${keepRecord.id} (${keepRecord.timestamp.toLocaleString()}), deleting ${deleteRecords.length} duplicates`);
+
+          deleteRecords.forEach(record => {
+            const docRef = doc(db, 'attendance_records', record.id);
+            batch.delete(docRef);
+            deletedCount++;
+          });
+        }
+      });
+
+      if (deletedCount > 0) {
+        await batch.commit();
+        alert(`✓ Successfully deleted ${deletedCount} duplicate records from entire database history!\n\nKept the earliest record for each student-course-date combination.`);
+
+        // Reload attendance data
+        await loadAttendance();
+      } else {
+        alert('No duplicate records found in the database.');
+      }
+
+    } catch (err) {
+      console.error('Error deleting all duplicates:', err);
+      alert('Failed to delete duplicate records.');
+    } finally {
+      setProcessingDuplicates(false);
     }
   };
 
@@ -529,15 +903,16 @@ export default function AttendanceLoader() {
 
     // Morning session: must check in before/at 8:05 AM
     if (session === 'M') {
-      return hour < 8 || (hour === 8 && minute <= 5);
+      // Morning: must check in before/at 8:10 AM
+      return hour < 8 || (hour === 8 && minute <= 10);
     }
     // Afternoon session: must check in before/at 1:40 PM (13:40)
     else if (session === 'A') {
       return hour < 13 || (hour === 13 && minute <= 40);
     }
-    // Evening session: waived (all eligible)
+    // Evening session: must check in before/at 6:10 PM (18:10)
     else if (session === 'E') {
-      return true;
+      return hour < 18 || (hour === 18 && minute <= 10);
     }
     // Records with no session (noon break, etc.) are not eligible
     else {
@@ -675,20 +1050,27 @@ export default function AttendanceLoader() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w mx-auto space-y-3">
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">All Attendance Records</h1>
-              <p className="text-gray-600 mt-1">Loaded from Firebase attendance_records collection</p>
+              <p className="text-gray-600 mt-1">
+                Loaded from Firebase attendance_records collection
+                {studentNameMap.size > 0 && (
+                  <span className="ml-2 text-green-600 font-semibold">
+                    • {studentNameMap.size} student names loaded
+                  </span>
+                )}
+              </p>
             </div>
             <div className="flex gap-2">
               <select
                 value={maxRecords}
                 onChange={(e) => setMaxRecords(Number(e.target.value))}
-                className="px-3 py-2 border rounded-lg"
+                className="p-2 border rounded-lg"
               >
                 <option value={100}>100 records</option>
                 <option value={500}>500 records</option>
@@ -699,7 +1081,7 @@ export default function AttendanceLoader() {
               <button
                 onClick={loadAttendance}
                 disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2"
+                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 {loading ? 'Loading...' : 'Reload'}
@@ -707,7 +1089,7 @@ export default function AttendanceLoader() {
               <button
                 onClick={exportToJSON}
                 disabled={records.length === 0}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 flex items-center gap-2"
+                className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 JSON
@@ -715,7 +1097,7 @@ export default function AttendanceLoader() {
               <button
                 onClick={exportToCSV}
                 disabled={records.length === 0}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 flex items-center gap-2"
+                className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 CSV
@@ -723,10 +1105,42 @@ export default function AttendanceLoader() {
               <button
                 onClick={runVerification}
                 disabled={verifying || records.length === 0}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 flex items-center gap-2"
+                className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 flex items-center gap-2"
               >
                 <CheckCircle className={`w-4 h-4 ${verifying ? 'animate-spin' : ''}`} />
                 {verifying ? 'Verifying...' : 'Verify Match'}
+              </button>
+              <button
+                onClick={processDuplicates}
+                disabled={processingDuplicates || records.length === 0}
+                className="p-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-gray-400 flex items-center gap-2"
+              >
+                <AlertCircle className={`w-4 h-4 ${processingDuplicates ? 'animate-spin' : ''}`} />
+                {processingDuplicates ? 'Processing...' : 'Del. Dup. Today'}
+              </button>
+              <button
+                onClick={deleteAllDuplicates}
+                disabled={processingDuplicates || records.length === 0}
+                className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 flex items-center gap-2"
+              >
+                <AlertCircle className={`w-4 h-4 ${processingDuplicates ? 'animate-spin' : ''}`} />
+                {processingDuplicates ? 'Processing...' : 'Del. ALL Dup.'}
+              </button>
+              <button
+                onClick={uploadStudentsFromJSON}
+                disabled={uploadingStudents}
+                className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 flex items-center gap-2"
+              >
+                <Users className={`w-4 h-4 ${uploadingStudents ? 'animate-spin' : ''}`} />
+                {uploadingStudents ? 'Uploading...' : 'Upload Students'}
+              </button>
+              <button
+                onClick={deleteNoonBreakRecordings}
+                disabled={processingDuplicates || records.length === 0}
+                className="p-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-400 flex items-center gap-2"
+              >
+                <AlertCircle className={`w-4 h-4 ${processingDuplicates ? 'animate-spin' : ''}`} />
+                {processingDuplicates ? 'Processing...' : 'Del. Noon Break'}
               </button>
             </div>
           </div>
@@ -904,11 +1318,11 @@ export default function AttendanceLoader() {
                   <li>3. Click "Update All Course Codes" to automatically update all attendance records</li>
                   <li>4. The system will check each record's timestamp and assign it to the correct block</li>
                   <li>5. Session codes are automatically added based on time:</li>
-                  <li className="ml-6">• <strong>M</strong> (Morning): 7:00 AM - 11:45 AM</li>
-                  <li className="ml-6 text-orange-700">• <strong>NOON BREAK</strong>: 11:46 AM - 1:15 PM → DEFAULT_COURSE</li>
-                  <li className="ml-6">• <strong>A</strong> (Afternoon): 1:16 PM - 6:00 PM</li>
-                  <li className="ml-6">• <strong>E</strong> (Evening): 6:00 PM - 9:00 PM</li>
-                  <li className="ml-6 text-orange-700">• <strong>Other times will use DEFAULT_COURSE</strong> (before 7 AM, after 9 PM)</li>
+                  <li className="ml-6">• <strong>M</strong> (Morning): 7:00 AM - 11:45 AM (cutoff 8:10 AM)</li>
+                  <li className="ml-6 text-red-700">• <strong>NOON BREAK</strong>: 11:46 AM - 1:00 PM → AUTO DELETE</li>
+                  <li className="ml-6">• <strong>A</strong> (Afternoon): 1:16 PM - 5:00 PM (cutoff 1:40 PM)</li>
+                  <li className="ml-6">• <strong>E</strong> (Evening): 5:30 PM - 8:30 PM (cutoff 6:10 PM)</li>
+                  <li className="ml-6 text-orange-700">• <strong>Other times</strong>: No registration (gaps between sessions)</li>
                   <li>6. Result example: <code className="bg-white px-2 py-1 rounded font-mono">Blk2_M</code> = Block 2, Morning session</li>
                   <li>7. All updates are logged to Firebase for tracking</li>
                 </ul>
@@ -1058,9 +1472,9 @@ export default function AttendanceLoader() {
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Time</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Student ID</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Name</th>
+                      <th className="px-4 py-2 text-left font-medium text-gray-700">Class</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Course ID</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Status</th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">Source</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Camera</th>
                       <th className="px-4 py-2 text-left font-medium text-gray-700">Confidence</th>
                     </tr>
@@ -1073,6 +1487,7 @@ export default function AttendanceLoader() {
                         </td>
                         <td className="px-4 py-2 font-medium">{record.studentId}</td>
                         <td className="px-4 py-2">{record.studentName}</td>
+                        <td className="px-4 py-2">{record.class || '-'}</td>
                         <td className="px-4 py-2">{record.courseId}</td>
                         <td className="px-4 py-2">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1081,7 +1496,6 @@ export default function AttendanceLoader() {
                             {record.status}
                           </span>
                         </td>
-                        <td className="px-4 py-2">{record.source}</td>
                         <td className="px-4 py-2">{record.cameraId || '-'}</td>
                         <td className="px-4 py-2">
                           {record.confidence ? `${(record.confidence * 100).toFixed(0)}%` : '-'}
@@ -1167,8 +1581,8 @@ export default function AttendanceLoader() {
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div className="bg-white rounded-lg p-3 border border-green-200">
                       <p className="font-semibold text-gray-700">Morning Session</p>
-                      <p className="text-green-600 font-bold text-lg">≤ 8:05 AM</p>
-                      <p className="text-xs text-gray-500">Must check in by 8:05 AM</p>
+                      <p className="text-green-600 font-bold text-lg">≤ 8:10 AM</p>
+                      <p className="text-xs text-gray-500">Must check in by 8:10 AM</p>
                     </div>
                     <div className="bg-white rounded-lg p-3 border border-blue-200">
                       <p className="font-semibold text-gray-700">Afternoon Session</p>
@@ -1177,10 +1591,22 @@ export default function AttendanceLoader() {
                     </div>
                     <div className="bg-white rounded-lg p-3 border border-purple-200">
                       <p className="font-semibold text-gray-700">Evening Session</p>
-                      <p className="text-purple-600 font-bold text-lg">Waived ✓</p>
-                      <p className="text-xs text-gray-500">All students eligible</p>
+                      <p className="text-purple-600 font-bold text-lg">≤ 6:10 PM</p>
+                      <p className="text-xs text-gray-500">Must check in by 6:10 PM</p>
                     </div>
                   </div>
+                </div>
+
+                {/* Export button for eligible students */}
+                <div className="mb-4">
+                  <button
+                    onClick={exportEligibleStudentsToCSV}
+                    disabled={eligibleStudentsByCourse.length === 0}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg transition"
+                  >
+                    <Download className="w-5 h-5" />
+                    Export Eligible Students CSV
+                  </button>
                 </div>
 
                 {/* Eligible students by course */}
