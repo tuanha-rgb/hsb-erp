@@ -3,10 +3,19 @@ import ERPLayout from "./ERPLayout";
 import StudentView from "./student";
 import LecturerView from "./lecturer";
 import Login from "./Login";
+import PublicVote from "./PublicVote";
 import { LogOut } from 'lucide-react';
 
 export default function App() {
   const [userRole, setUserRole] = useState<'admin' | 'staff' | 'student' | null>(null);
+  const [isPublicVote, setIsPublicVote] = useState(false);
+
+  // Check if accessing public vote page
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isVotePage = urlParams.get('vote') !== null || window.location.pathname === '/vote';
+    setIsPublicVote(isVotePage);
+  }, []);
 
   // Load role from localStorage on mount
   useEffect(() => {
@@ -27,6 +36,11 @@ export default function App() {
     setUserRole(null);
     localStorage.removeItem('userRole');
   };
+
+  // Show public vote page if accessing vote URL
+  if (isPublicVote) {
+    return <PublicVote />;
+  }
 
   // Show login if no role
   if (!userRole) {

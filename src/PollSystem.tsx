@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { db } from './firebase/firebase.config';
 import {
   collection, addDoc, doc, getDoc, updateDoc, setDoc, getDocs,
-  onSnapshot, increment, serverTimestamp, query, where, orderBy
+  onSnapshot, increment, serverTimestamp, query, where, orderBy, deleteDoc
 } from 'firebase/firestore';
-import { X, Plus, Trash2, BarChart3, Wifi, WifiOff, Users, TrendingUp, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { X, Plus, Trash2, BarChart3, Wifi, WifiOff, Users, TrendingUp, CheckCircle, XCircle, AlertCircle, Link } from 'lucide-react';
 
 type UserLevel = 'student' | 'staff' | 'management' | 'all';
 type PollType = 'course' | 'meeting' | 'event' | 'session';
@@ -84,29 +84,21 @@ export default function PollSystem({
       }, 4000);
     };
 
-    const levelValue = (level: UserLevel) =>
+    const levelValue = (level: UserLevel | string | undefined) =>
     level === 'student' ? 1 :
     level === 'staff' ? 2 :
     level === 'management' ? 3 :
-    level === 'all' ? 4 : 0;
-   
-    const availableLevels: UserLevel[] = (() => {
-  const levels: UserLevel[] = ['student', 'staff', 'management', 'all']
-    .filter(level => {
-      if (level === 'all') return true; // Everyone can create "all" polls
-      return levelValue(level as UserLevel) <= levelValue(userLevel);
-    }) as UserLevel[];
-  return levels;
-})();
+    level === 'all' ? 4 :
+    level === 'admin' ? 999 : // Admin has highest level
+    999; // Default to highest level for unknown roles (allows admin access)
+
+    const availableLevels: UserLevel[] = ['student', 'staff', 'all'];
   // Create poll (as draft)
   const createPoll = async (data: Omit<Poll, 'id' | 'options'> & {
     optionTexts: string[]
   }) => {
     try {
-      if (levelValue(userLevel) < levelValue(data.targetLevel)) {
-        showToast('Cannot create poll for higher level', 'error');
-        return;
-      }
+      // No hierarchy checks - anyone can create polls for any level
 
       const options: Record<string, { text: string; voteCount: number }> = {};
       data.optionTexts.forEach((text, i) => {
@@ -161,6 +153,22 @@ export default function PollSystem({
     } catch (error) {
       console.error('Publish poll error:', error);
       showToast('Failed to publish poll.', 'error');
+    }
+  };
+
+  // Delete poll
+  const deletePoll = async (pollId: string) => {
+    if (!confirm('Are you sure you want to delete this poll? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const pollRef = doc(db, 'polls', pollId);
+      await deleteDoc(pollRef);
+      showToast('Poll deleted successfully!', 'success');
+    } catch (error) {
+      console.error('Delete poll error:', error);
+      showToast('Failed to delete poll.', 'error');
     }
   };
 
@@ -230,13 +238,9 @@ export default function PollSystem({
         const data = snapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Poll))
           .filter(poll => {
-            // If poll target is "all", everyone can see it
-            if (poll.targetLevel === 'all') return true;
-
-            // Otherwise use level hierarchy
-            const levelMatch = levelValue(userLevel) >= levelValue(poll.targetLevel);
+            // No hierarchy checks - everyone can see all polls
             const statusMatch = filter === 'all' || poll.status === filter;
-            return levelMatch && statusMatch;
+            return statusMatch;
           })
           .sort((a, b) => {
             const aTime = a.startTime?.toDate?.() || new Date(a.startTime);
@@ -328,10 +332,12 @@ export default function PollSystem({
               onVote={vote}
               onPublish={publishPoll}
               onEdit={() => setEditing(poll)}
+              onDelete={deletePoll}
               onTrackView={trackView}
               onViewAnalytics={() => setShowAnalytics(poll.id)}
               userId={userId}
               showToast={showToast}
+              filter={filter}
             />
           ))
         )}
@@ -376,19 +382,23 @@ function PollCard({
   onVote,
   onPublish,
   onEdit,
+  onDelete,
   onTrackView,
   onViewAnalytics,
   userId,
-  showToast
+  showToast,
+  filter
 }: {
   poll: Poll;
   onVote: (id: string, opts: string[]) => void;
   onPublish: (id: string) => void;
   onEdit: () => void;
+  onDelete: (id: string) => void;
   onTrackView: (id: string) => void;
   onViewAnalytics: () => void;
   userId: string;
   showToast: (message: string, type: ToastType) => void;
+  filter: 'all' | 'draft' | 'active' | 'closed';
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
@@ -398,6 +408,11 @@ function PollCard({
   const isCreator = poll.createdBy === userId;
   const isDraft = poll.status === 'draft';
   const canEdit = isCreator && !poll.isLocked && isDraft;
+
+  // Check if poll has ended
+  const endTime = poll.endTime?.toDate?.() || new Date(poll.endTime);
+  const hasEnded = poll.endTime && endTime < new Date();
+  const isActive = poll.status === 'active' && !hasEnded;
 
   // Track view when component mounts (only for active polls)
   useEffect(() => {
@@ -440,10 +455,6 @@ function PollCard({
     }
   };
 
-  const isActive = poll.status === 'active';
-  const endTime = poll.endTime?.toDate?.() || new Date(poll.endTime);
-  const hasEnded = endTime < new Date();
-
   return (
     <div className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-4">
@@ -452,11 +463,12 @@ function PollCard({
             <h3 className="text-xl font-semibold">{poll.title}</h3>
             <span className={`text-xs px-2 py-1 rounded ${
               isDraft ? 'bg-orange-100 text-orange-700' :
+              hasEnded ? 'bg-red-100 text-red-700' :
               isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
             }`}>
-              {poll.status}
+              {hasEnded ? 'locked' : poll.status}
             </span>
-            {poll.isLocked && <span className="text-xs bg-gray-200 px-2 py-1 rounded">🔒 Locked</span>}
+            {(poll.isLocked || hasEnded) && <span className="text-xs bg-gray-200 px-2 py-1 rounded">🔒 Locked</span>}
           </div>
           <p className="text-gray-600 text-sm">{poll.description}</p>
           {poll.relatedTo && (
@@ -474,10 +486,10 @@ function PollCard({
           </div>
           {isCreator && (
             <div className="flex gap-2">
-              {canEdit && (
+              {canEdit && filter === 'draft' && (
                 <button
                   onClick={onEdit}
-                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded flex items-center gap-1"
                 >
                   Edit
                 </button>
@@ -490,14 +502,36 @@ function PollCard({
                   Publish
                 </button>
               )}
-              {poll.status === 'active' && (
+              {(filter === 'all' || (filter === 'draft' && isDraft)) && (
                 <button
-                  onClick={onViewAnalytics}
-                  className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded flex items-center gap-1"
+                  onClick={() => onDelete(poll.id)}
+                  className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded flex items-center gap-1"
                 >
-                  <TrendingUp size={12} />
-                  Analytics
+                  <Trash2 size={12} />
+                  Delete
                 </button>
+              )}
+              {poll.status === 'active' && (
+                <>
+                  <button
+                    onClick={() => {
+                      const voteUrl = `${window.location.origin}/?vote`;
+                      navigator.clipboard.writeText(voteUrl);
+                      showToast('Vote link copied to clipboard!', 'success');
+                    }}
+                    className="text-xs bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 rounded flex items-center gap-1"
+                  >
+                    <Link size={12} />
+                    Copy Link
+                  </button>
+                  <button
+                    onClick={onViewAnalytics}
+                    className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded flex items-center gap-1"
+                  >
+                    <TrendingUp size={12} />
+                    Analytics
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -570,6 +604,12 @@ function PollCard({
         </div>
       )}
 
+      {hasEnded && !hasVoted && (
+        <div className="bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm text-center">
+          🔒 This poll has ended and is now locked.
+        </div>
+      )}
+
       <div className="flex justify-between items-center mt-4 pt-4 border-t text-xs text-gray-500">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -631,14 +671,8 @@ function CreatePollModal({
       : ['', '']
   );
 
-  const levelValue = (level: UserLevel) => 
-    level === 'student' ? 1 : 
-    level === 'staff' ? 2 : 
-    level === 'management' ? 3 :
-    level === 'all' ? 4 : 0;
-
-  const availableLevels: UserLevel[] = ['student', 'staff', 'management', 'all']
-    .filter(level => levelValue(level as UserLevel) <= levelValue(userLevel)) as UserLevel[];
+  // Only allow student, staff, and all (staff+student)
+  const availableLevels: UserLevel[] = ['student', 'staff', 'all'];
 
   const addOption = () => setOptions([...options, '']);
   const removeOption = (index: number) => {
@@ -725,7 +759,7 @@ function CreatePollModal({
 >
   {availableLevels.map(level => (
     <option key={level} value={level}>
-      {level === 'all' ? 'All (Everyone)' : level}
+      {level === 'student' ? 'Student' : level === 'staff' ? 'Staff' : 'Staff + Student'}
     </option>
   ))}
 </select>

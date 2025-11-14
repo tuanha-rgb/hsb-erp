@@ -53,6 +53,7 @@ export default function AttendanceLoader() {
   const recordsPerPage = 50;
   const [processingDuplicates, setProcessingDuplicates] = useState(false);
   const [uploadingStudents, setUploadingStudents] = useState(false);
+  const [uploadingStaff, setUploadingStaff] = useState(false);
   const [studentNameMap, setStudentNameMap] = useState<Map<string, {name: string, class: string}>>(new Map());
 
   // Load student names and classes from Firebase
@@ -625,6 +626,60 @@ export default function AttendanceLoader() {
     fileInput.click();
   };
 
+  // Upload staff from JSON file to Firebase
+  const uploadStaffFromJSON = async () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+
+    fileInput.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        setUploadingStaff(true);
+
+        const text = await file.text();
+        const staffMembers = JSON.parse(text);
+
+        if (!Array.isArray(staffMembers)) {
+          throw new Error('JSON file must contain an array of staff members');
+        }
+
+        console.log(`[Upload Staff] Processing ${staffMembers.length} staff members...`);
+
+        const batch = writeBatch(db);
+        let uploadedCount = 0;
+
+        staffMembers.forEach((staff: any) => {
+          if (staff.staffId && staff.staffName) {
+            const docRef = doc(db, 'staff', staff.staffId);
+            batch.set(docRef, {
+              staffId: staff.staffId,
+              staffName: staff.staffName,
+              department: staff.department || '',
+              position: staff.position || '',
+              uploadedAt: serverTimestamp()
+            });
+            uploadedCount++;
+          }
+        });
+
+        await batch.commit();
+
+        alert(`✓ Successfully uploaded ${uploadedCount} staff members to Firebase!`);
+
+      } catch (err) {
+        console.error('Error uploading staff:', err);
+        alert(`Failed to upload staff: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      } finally {
+        setUploadingStaff(false);
+      }
+    };
+
+    fileInput.click();
+  };
+
   // Delete all noon break recordings (11:46 AM - 1:00 PM)
   const deleteNoonBreakRecordings = async () => {
     if (!confirm('⚠️ This will delete ALL recordings during noon break (11:46 AM - 1:00 PM).\n\nThese are non-class times and should not have attendance records.\n\nContinue?')) {
@@ -1133,6 +1188,14 @@ export default function AttendanceLoader() {
               >
                 <Users className={`w-4 h-4 ${uploadingStudents ? 'animate-spin' : ''}`} />
                 {uploadingStudents ? 'Uploading...' : 'Upload Students'}
+              </button>
+              <button
+                onClick={uploadStaffFromJSON}
+                disabled={uploadingStaff}
+                className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 flex items-center gap-2"
+              >
+                <Users className={`w-4 h-4 ${uploadingStaff ? 'animate-spin' : ''}`} />
+                {uploadingStaff ? 'Uploading...' : 'Upload Staff'}
               </button>
               <button
                 onClick={deleteNoonBreakRecordings}
