@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Student from "./student";
 import Lecturer from "./lecturer";
-import './project.css';
-import './index.css';
 
 
 import {
@@ -58,6 +56,7 @@ import { studentGrades } from "./student/studentgrades";
 import {  Thesis,  ThesisStatus,  ThesisCategory,  ThesisLevel,  sampleTheses,} from "./acad/thesis";
 
 import { sampleStudents, studentdata } from "./student/studentdata";
+import PartyUnionClubs from "./student/PartyUnionClubsEnhanced";
 
 import { researchProjects } from "./research/researchProjects";
 import { publications } from "./research/publications";
@@ -11770,6 +11769,10 @@ const availableTabs = [
     if (activeTab === 'enrollment-importer' || activeTab === 'import-enrollment') {
       return <EnrollmentImporter />;
     }
+    if (activeTab === 'party-union-clubs') {
+      return <PartyUnionClubs />;
+    }
+    
     if (activeTab === 'view-rankings') { 
       return <ViewRankings />;
     } 

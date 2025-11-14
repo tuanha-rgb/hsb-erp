@@ -1901,7 +1901,7 @@ const ResearchManagement: React.FC<ResearchManagementProps> = ({ userRole = 'adm
 
               {/* Last 3 Years */}
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Last 3 Years</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Last 3 Years</h4> 
                 <div className="bg-gray-50 rounded-lg p-4">
                   {(() => {
                     const currentYear = new Date().getFullYear();

@@ -6540,10 +6540,9 @@ return (
       </div>
     </div>
     
-    {/* Navigation Links */}
-    <nav className="flex-1 p-4 space-y-1">
-      {[
-        { id: 'dashboard', icon: Home, label: 'Dashboard' },
+    {/* Navigation Links
+    
+    { id: 'dashboard', icon: Home, label: 'Dashboard' },
         { id: 'profile', icon: User, label: 'My Profile' },
         { id: 'library', icon: BookOpen, label: 'Online Library' },
         { id: 'academic', icon: BookOpen, label: 'Academic' },
@@ -6558,6 +6557,16 @@ return (
         {id: 'polling', icon: Vote, label: 'Poll/Vote'},
         { id: 'scholarship', icon: Gem, label: 'Scholarship' },
         { id: 'matriculation', icon: User, label: 'Identity' },
+         
+         */}
+    <nav className="flex-1 p-4 space-y-1">
+      {[
+        
+        { id: 'library', icon: BookOpen, label: 'Online Library' },
+      
+        { id: 'documents', icon: Notebook, label: 'Documents' },
+        {id: 'polling', icon: Vote, label: 'Poll/Vote'},
+       
       ].map(item => (
         <button
           key={item.id}
@@ -6604,8 +6613,8 @@ return (
   {/* Main Content Area */}
    <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 p-2 w-full space-y-6 overflow-visible min-h-screen">
-          {/* Content rendering based on activePage */}
-          {activePage === 'dashboard' && <Dashboard />}
+          {/* Content rendering based on activePage 
+           {activePage === 'dashboard' && <Dashboard />}
           {activePage === 'profile' && <Profile />}
           {activePage === 'library' && <LibraryViewer />}
           {activePage === 'academic' && <Academic />}
@@ -6636,6 +6645,18 @@ return (
             />
           )}
           {activePage === 'matriculation' && <Matriculation />}
+          
+          */}
+          {activePage === 'library' && <LibraryViewer />}
+
+          {activePage === 'documents' && <DocumentHandbook userRole="student" userId={mockStudent.id} userName="Student User" />}
+          {activePage === 'projects' && <ProjectsTab userId={mockStudent.id} userName="Student User" />}
+          {activePage === 'polling' && (
+            <PollSystem
+              userId={mockStudent.id}
+              userLevel={mockStudent.role}
+            />
+          )}
         </main>
       </div>
    

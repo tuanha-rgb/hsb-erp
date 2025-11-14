@@ -243,9 +243,18 @@ export default function PollSystem({
         const data = snapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Poll))
           .filter(poll => {
-            // No hierarchy checks - everyone can see all polls
+            // Status filter
             const statusMatch = filter === 'all' || poll.status === filter;
-            return statusMatch;
+
+            // Target level filter - users can only see polls targeted at their level or 'all'
+            // Exception: creators can always see their own polls (for managing drafts)
+            const isCreator = poll.createdBy === userId;
+            const canSeeBasedOnTarget =
+              poll.targetLevel === 'all' ||
+              poll.targetLevel === userLevel ||
+              isCreator;
+
+            return statusMatch && canSeeBasedOnTarget;
           })
           .sort((a, b) => {
             const aTime = a.startTime?.toDate?.() || new Date(a.startTime);
@@ -1046,7 +1055,7 @@ function PollDashboard({
       </div>
 
       {/* Insights Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border-2 border-blue-200">
           <div className="flex items-center gap-3 mb-2">
             <Users className="w-6 h-6 text-blue-600" />
@@ -1075,30 +1084,32 @@ function PollDashboard({
       </div>
 
       {/* Vertical Bar Chart */}
-      <div className="bg-white rounded-lg border-2 border-gray-200 p-8">
+      <div className="bg-white rounded-lg border-2 border-gray-200 p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Results</h2>
-        <div className="flex items-end justify-around gap-4 h-96">
+        <div className="flex items-end justify-center gap-16 h-[600px]">
           {Object.entries(poll.options).map(([id, option]) => {
             const percentage = totalVotes > 0 ? (option.voteCount / totalVotes) * 100 : 0;
+            // Calculate bar height relative to max votes for accurate visual ratio
+            const barHeightPercentage = maxVotes > 0 ? (option.voteCount / maxVotes) * 100 : 0;
 
             return (
-              <div key={id} className="flex flex-col items-center flex-1">
-                <div className="relative w-full flex flex-col justify-end items-center" style={{ height: '100%' }}>
+              <div key={id} className="flex flex-col items-center h-full" style={{ width: '150px' }}>
+                <div className="relative w-full flex flex-col justify-end items-center flex-1">
                   {/* Vote count label */}
                   <div className="mb-2 text-center">
                     <p className="text-2xl font-bold text-gray-900">{option.voteCount}</p>
                     <p className="text-sm text-gray-600">{percentage.toFixed(1)}%</p>
                   </div>
 
-                  {/* Bar - height relative to total votes */}
+                  {/* Bar - height relative to max votes for proper ratio */}
                   <div
                     className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-blue-500 shadow-lg"
-                    style={{ height: `${percentage}%`, minHeight: option.voteCount > 0 ? '40px' : '0px' }}
+                    style={{ height: `${barHeightPercentage}%`, minHeight: option.voteCount > 0 ? '40px' : '0px' }}
                   />
                 </div>
 
                 {/* Option label */}
-                <p className="mt-4 text-sm font-medium text-gray-700 text-center px-2">
+                <p className="mt-4 text-sm font-medium text-gray-700 text-center px-2 break-words">
                   {option.text}
                 </p>
               </div>
