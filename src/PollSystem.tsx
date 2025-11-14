@@ -475,16 +475,21 @@ function PollCard({
     }
   };
 
-  // Simplified view for active polls
-  if (filter === 'active' && isActive) {
+  // Simplified view for active polls (including locked polls)
+  if (filter === 'active' && (isActive || hasEnded)) {
     return (
       <div
         onClick={onViewDashboard}
-        className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer"
+        className={`border rounded-lg p-6 bg-white shadow-sm hover:shadow-lg transition-all cursor-pointer ${
+          hasEnded ? 'hover:border-red-400' : 'hover:border-blue-400'
+        }`}
       >
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{poll.title}</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-2xl font-bold text-gray-900">{poll.title}</h3>
+              {hasEnded && <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">🔒 Locked</span>}
+            </div>
             <div className="flex items-center gap-3">
               <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
                 Target: {poll.targetLevel === 'student' ? 'Student' : poll.targetLevel === 'staff' ? 'Staff' : 'Staff + Student'}
@@ -492,7 +497,7 @@ function PollCard({
               <span className="text-sm text-gray-600">{totalVotes} votes</span>
             </div>
           </div>
-          <div className="text-blue-600">
+          <div className={hasEnded ? 'text-red-600' : 'text-blue-600'}>
             <BarChart3 size={32} />
           </div>
         </div>
@@ -1075,7 +1080,6 @@ function PollDashboard({
         <div className="flex items-end justify-around gap-4 h-96">
           {Object.entries(poll.options).map(([id, option]) => {
             const percentage = totalVotes > 0 ? (option.voteCount / totalVotes) * 100 : 0;
-            const heightPercentage = totalVotes > 0 ? (option.voteCount / maxVotes) * 100 : 0;
 
             return (
               <div key={id} className="flex flex-col items-center flex-1">
@@ -1086,10 +1090,10 @@ function PollDashboard({
                     <p className="text-sm text-gray-600">{percentage.toFixed(1)}%</p>
                   </div>
 
-                  {/* Bar */}
+                  {/* Bar - height relative to total votes */}
                   <div
                     className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-blue-500 shadow-lg"
-                    style={{ height: `${heightPercentage}%`, minHeight: option.voteCount > 0 ? '40px' : '0px' }}
+                    style={{ height: `${percentage}%`, minHeight: option.voteCount > 0 ? '40px' : '0px' }}
                   />
                 </div>
 
